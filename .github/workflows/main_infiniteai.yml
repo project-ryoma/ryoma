@@ -22,11 +22,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: list files in root
-        run: ls -R
-
-      - name: Change directory to ./monorepo/dataapp
-        run: cd ./monorepo/dataapp
+      - name: Change directory to dataapp
+        run: cd ./dataapp
 
       - name: Create and start virtual environment
         run: |
