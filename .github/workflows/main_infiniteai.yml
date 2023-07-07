@@ -26,8 +26,7 @@ jobs:
         run: ls -R
 
       - name: Change directory to ./monorepo/dataapp
-        uses: actions/checkout@v2
-        working-directory: ./monorepo/dataapp
+        run: cd ./monorepo/dataapp
 
       - name: Create and start virtual environment
         run: |
