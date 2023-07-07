@@ -21,11 +21,12 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: '3.11'
-      
+
       - name: list files in root
         run: ls -R
 
       - name: Change directory to ./monorepo/dataapp
+        uses: actions/checkout@v2
         working-directory: ./monorepo/dataapp
 
       - name: Create and start virtual environment
