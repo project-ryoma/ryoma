@@ -45,6 +45,11 @@ jobs:
             !venv/
 
   deploy:
+    
+    defaults:
+      run:
+        working-directory: ./dataapp
+
     runs-on: ubuntu-latest
     needs: build
     environment:
