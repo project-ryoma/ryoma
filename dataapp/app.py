@@ -1,7 +1,7 @@
 import os
 from langchain import OpenAI, LLMChain
-from snowflake.connector import connect
 from langchain.prompts import PromptTemplate
+from snowflake.connector import connect
 
 
 from flask import (Flask, redirect, render_template, request,
@@ -9,12 +9,11 @@ from flask import (Flask, redirect, render_template, request,
 
 app = Flask(__name__)
 
-llm = OpenAI(temperature=0)
 
 conn = connect(
-    user='admin',
-    password='password',
-    account='langchain.us-east-1',
+    user='AITA',
+    password='Xh!0135259098',
+    account='mffjmcy-vx18742'
 )
 
 def run_query(query):
@@ -46,12 +45,13 @@ def hello():
    
 @app.route('/query', methods=['POST'])
 def query():
+    llm = OpenAI()
     raw_prompt = request.form.get('prompt')
     prompt = PromptTemplate.from_template("Create a sql query with the context: {context}")
     prompt.format(context=raw_prompt)
     chain = LLMChain(llm=llm, prompt=prompt)
     query = chain.run(prompt)
-    
+
     if query:
          print('Request for query page received with query=%s' % query)
          return render_template('query.html', query = query, results = run_query(query))
@@ -61,4 +61,4 @@ def query():
 
 
 if __name__ == '__main__':
-   app.run()
+  app.run()
