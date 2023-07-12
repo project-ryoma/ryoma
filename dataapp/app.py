@@ -9,11 +9,15 @@ from flask import (Flask, redirect, render_template, request,
 
 app = Flask(__name__)
 
+# get snowflake configs from environment variables
+snowflake_user = os.environ.get('SNOWFLAKE_USER')
+snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD')
+snowflake_account = os.environ.get('SNOWFLAKE_ACCOUNT')
 
 conn = connect(
-    user='AITA',
-    password='Xh!0135259098',
-    account='mffjmcy-vx18742'
+    user=snowflake_user,
+    password=snowflake_password,
+    account=snowflake_account
 )
 
 def run_query(query):
