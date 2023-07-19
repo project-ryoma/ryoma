@@ -1,29 +1,19 @@
 import os
 from langchain import OpenAI, LLMChain
 from langchain.prompts import PromptTemplate
-from snowflake.connector import connect
+from dataplatform.snowflake_client import SnowflakeClient
 
 
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
 
-app = Flask(__name__)
 
 # get snowflake configs from environment variables
-snowflake_user = os.environ.get('SNOWFLAKE_USER')
-snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD')
-snowflake_account = os.environ.get('SNOWFLAKE_ACCOUNT')
+snowflake_user = os.environ.get('SNOWFLAKE_USER', "")
+snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD', "")
+snowflake_account = os.environ.get('SNOWFLAKE_ACCOUNT', "")
 
-conn = connect(
-    user=snowflake_user,
-    password=snowflake_password,
-    account=snowflake_account
-)
-
-def run_query(query):
-    cursor = conn.cursor()
-    cursor.execute(query)
-    return cursor.fetchall()
+app = Flask(__name__)
 
 
 @app.route('/')
@@ -46,19 +36,21 @@ def hello():
    else:
        print('Request for hello page received with no name or blank name -- redirecting')
        return redirect(url_for('index'))
-   
+
 @app.route('/query', methods=['POST'])
 def query():
-    llm = OpenAI()
-    raw_prompt = request.form.get('prompt')
-    prompt = PromptTemplate.from_template("Create a sql query with the context: {context}")
-    prompt.format(context=raw_prompt)
-    chain = LLMChain(llm=llm, prompt=prompt)
+    llm = OpenAI(model="gpt-3.5-turbo")
+    prompt = request.form.get('prompt')
+    prompt_template = PromptTemplate.from_template("Create a sql query with the context: {context}")
+    prompt_template.format(context=prompt)
+    chain = LLMChain(llm=llm, prompt=prompt_template)
     query = chain.run(prompt)
+
+    snowflake_client = SnowflakeClient(snowflake_user, snowflake_password, snowflake_account)
 
     if query:
          print('Request for query page received with query=%s' % query)
-         return render_template('query.html', query = query, results = run_query(query))
+         return render_template('query.html', query = query, results = snowflake_client.run_query(query))
     else:
          print('Request for query page received with no query or blank query -- redirecting')
          return redirect(url_for('index'))
