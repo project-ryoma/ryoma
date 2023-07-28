@@ -18,3 +18,11 @@ class SnowflakeClient:
         cursor = conn.cursor()
         cursor.execute(query)
         return cursor.fetchall()
+
+
+# get snowflake configs from environment variables
+snowflake_user = os.environ.get('SNOWFLAKE_USER', "")
+snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD', "")
+snowflake_account = os.environ.get('SNOWFLAKE_ACCOUNT', "")
+
+snowflake_client = SnowflakeClient(snowflake_user, snowflake_password, snowflake_account)
