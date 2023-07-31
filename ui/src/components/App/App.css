@@ -1,0 +1,95 @@
+html, body, #root, .App {
+  height: 100%;
+}
+.App {
+  display: flex;
+  flex-direction: column;
+}
+/* Add background color to the body */
+body {
+  background-color: rgba(68, 70, 84, 1.0);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+}
+
+/* Remove border color from the response list container */
+#response-list {
+  border: none;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.chatgpt-response {
+  background-color: rgba(68, 70, 84, 1);
+}
+
+.my-question {
+  background-color: rgba(52, 53, 65, 1);
+}
+/* Change background color of the input container */
+#input-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: rgba(64, 65, 79, 1);
+  border-color: rgba(32,33,35,.5);
+  border-radius: 5px;
+  margin: 10px 200px;
+}
+
+
+/* Remove background color and add an SVG background for the submit button */
+#submit-button {
+  background: transparent url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='white' d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'/></svg>") no-repeat center center;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#regenerate-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+#regenerate-response-button {
+  color: white;
+  border: none;
+  background: #10A37F;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.loading {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+#model-select-container {
+  margin: 10px 200px;
+  color: white;
+}
+
+#model-select-container select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+}
+
+#model-select-container select option:not(:checked) {
+  background: rgba(32,33,35,.8);
+}
+
+#model-select-container select option {
+  background: rgba(32,33,35,.5);
+}

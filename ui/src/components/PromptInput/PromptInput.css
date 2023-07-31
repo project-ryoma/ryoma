@@ -1,0 +1,13 @@
+/* Style for the prompt input */
+#prompt-input {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 5px;
+    min-height: 20px;
+    color: white;
+    overflow: auto;
+}
+
+#prompt-input:focus {
+    outline: none !important;
+}

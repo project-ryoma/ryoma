@@ -1,0 +1,70 @@
+/* Style for each response element in the list */
+.response-container {
+    margin-bottom: 10px;
+    color: white;
+    padding: 15px 200px;
+    font-size: 1rem;
+    display: flex;
+}
+
+.response-container .avatar-image {
+    width: 30px;
+    height: 30px;
+    margin-right: 15px;
+}
+
+.response-container .response-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.response-container pre {
+    max-width: 100%;
+    margin: 0 !important;
+    white-space: break-spaces;
+}
+
+.response-container .prompt-content {
+    background: transparent !important;
+    color: white;
+    padding: 0 !important;
+    margin-top: 5px;
+}
+
+.response-container .prompt-content p:first-child {
+    margin-top: 0;
+}
+
+.ai-image {
+    width: 500px;
+    height: auto;
+}
+
+.error-response {
+    color: rgb(220, 0, 0) !important;
+}
+
+/* Override hljs to match for chatgpt */
+.hljs {
+    background: rgb(0,0,0) !important;
+    color: white !important;
+    display: block;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.hljs-section, .hljs-title {
+    color: #f22c3d !important;
+}
+
+.hljs-deletion, .hljs-number, .hljs-quote, .hljs-selector-class, .hljs-selector-id, .hljs-string, .hljs-template-tag, .hljs-type {
+    color: #df3079 !important;
+}
+
+.hljs-addition, .hljs-built_in, .hljs-bullet, .hljs-code {
+    color: #e9950c !important;
+}
+
+.hljs-link, .hljs-operator, .hljs-regexp, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-symbol, .hljs-template-variable, .hljs-variable {
+    color: white !important;
+}
