@@ -30,7 +30,6 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install
           npm run build --if-present
 
       - name: Zip artifact for deployment
@@ -66,9 +65,6 @@ jobs:
       - name: npm install
         run: |
           npm install
-
-      - name:
-        run: ls -la
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
