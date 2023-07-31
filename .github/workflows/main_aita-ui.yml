@@ -44,10 +44,6 @@ jobs:
 
   deploy:
 
-    defaults:
-      run:
-        working-directory: ui
-
     runs-on: ubuntu-latest
     needs: build
     environment:

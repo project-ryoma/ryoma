@@ -65,7 +65,10 @@ def run():
     llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
     agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
+    print('request', request)
+    # get the prompt from the request body
     prompt = request.form.get('prompt')
+
     print('prompt here', prompt)
     res = agent.run(prompt)
 
