@@ -46,7 +46,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: monorepo/ui
+        working-directory: ui
 
     runs-on: ubuntu-latest
     needs: build
