@@ -109,7 +109,7 @@ const App = () => {
 
     try {
       // Send a POST request to the API with the prompt in the request body
-      const response = await axios.post('get-prompt-result', {
+      const response = await axios.post('chat', {
         prompt: _prompt,
         model: modelValue
       });

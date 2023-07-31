@@ -70,4 +70,3 @@ jobs:
           app-name: 'aita-ui'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D33B764B2A694D5984D78FB16FC765CC }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

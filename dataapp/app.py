@@ -7,15 +7,15 @@ from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from dataplatform.snowflake_client import snowflake_client
 from dataplatform.tools import tools
-
+from flask_cors import CORS
 
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
 
 langchain.debug = True
 
-
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/')
@@ -59,7 +59,7 @@ def query():
          return redirect(url_for('index'))
 
 
-@app.route('/run', methods=['POST'])
+@app.route('/chat', methods=['POST'])
 def run():
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
     llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
