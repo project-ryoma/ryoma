@@ -67,7 +67,7 @@ def run():
 
     print('request', request)
     # get the prompt from the request body
-    prompt = request.form.get('prompt')
+    prompt = request.get_json()["prompt"]
 
     print('prompt here', prompt)
     res = agent.run(prompt)
