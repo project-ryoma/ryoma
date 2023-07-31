@@ -61,7 +61,7 @@ jobs:
           name: node-app
 
       - name: unzip artifact for deployment
-        run: unzip release.zip
+        run: unzip ui/release.zip
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
