@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: "./ui"
+  AZURE_WEBAPP_PACKAGE_PATH: "monorepo/ui"
 
 jobs:
   build:
