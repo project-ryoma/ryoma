@@ -3,8 +3,9 @@ import langchain
 import json
 from langchain import LLMChain, LLMMathChain
 from langchain.agents import initialize_agent, AgentType
-from langchain.prompts import PromptTemplate
+from langchain.prompts import PromptTemplate, MessagesPlaceholder
 from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
 from dataplatform.snowflake_client import snowflake_client
 from dataplatform.tools import tools
 from flask_cors import CORS
@@ -12,7 +13,23 @@ from flask_cors import CORS
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
 
+
+# setup llm agent
 langchain.debug = True
+llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
+llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
+agent_kwargs = {
+    "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+}
+memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
+agent = initialize_agent(
+    tools,
+    llm,
+    agent=AgentType.OPENAI_FUNCTIONS,
+    verbose=True,
+    agent_kwargs=agent_kwargs,
+    memory=memory
+)
 
 app = Flask(__name__)
 CORS(app)
@@ -61,16 +78,17 @@ def query():
 
 @app.route('/chat', methods=['POST'])
 def run():
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
-    llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
-    agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
-
-    print('request', request)
-    # get the prompt from the request body
     prompt = request.get_json()["prompt"]
-
-    print('prompt here', prompt)
-    res = agent.run(prompt)
+    try:
+        res = agent.run(prompt)
+    except Exception as e:
+        # get the exception message
+        res = agent.run(
+        f"""
+        Get the error message: {str(e)}
+        Can you please ask for clarification?
+        """
+        )
 
     return json.dumps(res)
 
