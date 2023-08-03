@@ -1,7 +1,9 @@
 import mysql.connector
 import os
+from dataplatform.datasource_client import DataSourceClient
 
-class MysqlClient:
+
+class MysqlClient(DataSourceClient):
     def __init__(self, host, user, password, database):
         self.host = host
         self.user = user
@@ -30,9 +32,23 @@ class MysqlClient:
         return cursor.fetchall()
     
     def preview_table(self, database, table):
+        if not database:
+            raise ValueError("we need to specify database name when previewing table")
+        if not table:
+            raise ValueError("we need to specify table name when previewing table")
         query = f"SELECT * FROM {database}.{table} LIMIT 10"
         return self.run_query(query)
     
+    def ingest_data(self, configs, data):
+        if not configs or not configs.get("database") or not configs.get("table"):
+            raise ValueError("we need to specify database and table name when ingesting data")
+        database, table = configs["database"], configs["table"]
+        conn = self.connect()
+        cursor = conn.cursor()
+        query = f"INSERT INTO {database}.{table} VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.executemany(query, data)
+        conn.commit()
+        return
 
 # get mysql configs from environment variables
 mysql_host = os.environ.get('MYSQL_HOST', "")

@@ -1,9 +1,8 @@
 import os
 import langchain
 import json
-from langchain import LLMChain, LLMMathChain
 from langchain.agents import initialize_agent, AgentType
-from langchain.prompts import PromptTemplate, MessagesPlaceholder
+from langchain.prompts import MessagesPlaceholder
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from dataplatform.snowflake_client import snowflake_client
@@ -17,7 +16,6 @@ from flask import (Flask, redirect, render_template, request,
 # setup llm agent
 langchain.debug = True
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
-llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
 agent_kwargs = {
     "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
 }
@@ -56,24 +54,6 @@ def hello():
    else:
        print('Request for hello page received with no name or blank name -- redirecting')
        return redirect(url_for('index'))
-
-
-@app.route('/query', methods=['POST'])
-def query():
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
-
-    prompt = request.form.get('prompt')
-    prompt_template = PromptTemplate.from_template("Create a sql query with the context: {context}")
-    prompt_template.format(context=prompt)
-    chain = LLMChain(llm=llm, prompt=prompt_template)
-    query = chain.run(prompt)
-
-    if query:
-         print('Request for query page received with query=%s' % query)
-         return render_template('query.html', query = query, results = snowflake_client.run_query(query))
-    else:
-         print('Request for query page received with no query or blank query -- redirecting')
-         return redirect(url_for('index'))
 
 
 @app.route('/chat', methods=['POST'])

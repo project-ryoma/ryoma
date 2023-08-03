@@ -1,13 +1,12 @@
 from dataplatform.mysql_client import mysql_client
 from dataplatform.snowflake_client import snowflake_client
-from langchain.agents import Tool
+from dataplatform.datasource_client import DataSourceClient
 from langchain.tools import tool
-from pydantic import BaseModel
 
 
 @tool
-def connect_to_datasource(datasource):
-    """connect to source database"""
+def connect_to_datasource(datasource) -> DataSourceClient:
+    """connect to datasource, either mysql or snowflake"""
     if datasource == "mysql":
         return mysql_client
     elif datasource == "snowflake":
@@ -15,51 +14,28 @@ def connect_to_datasource(datasource):
     else:
         raise ValueError("Unsupported datasource: %s" % datasource)
 
-
-def run_query_on_mysql(sql_query):
-    return mysql_client.run_query(sql_query)
-
-
-def preview_data_on_mysql(database, table):
-    return mysql_client.preview_table(database, table)
-
-
-def run_query_on_snowflake(sql_query):
-    return snowflake_client.run_query(sql_query)
+@tool
+def preview_data(datasource: str, database: str, table: str):
+    """preview data from source, currently support mysql and snowflake. need to specify database, and table name"""
+    
+    source_client = connect_to_datasource(datasource)
+    return source_client.preview_table(database, table)
 
 
 @tool
-def preview_data_on_snowflake(database, scheme, table):
-    """preview data on snowflake, need to specify database, schema and table/view name"""
-    return snowflake_client.preview_table(database, scheme, table)
-
-
-@tool
-def ingest_data_from_source_to_destination(source, destination):
-    """ingest data from source to destination"""
-
+def ingest_data(source: str, destination: str, source_config: dict, destination_config: dict):
+    """ingest, transport or migrate data from source to destination, currently support mysql and snowflake. need to specify database, and table name"""
+    
     source_client = connect_to_datasource(source)
     destination_client = connect_to_datasource(destination)
-    return
+
+    # ingest data from source to destination
+    source_data = source_client.preview_table(source_config)
+    destination_client.ingest_data(destination_config, source_data)
 
 
 tools = [
     connect_to_datasource,
-    Tool(
-        name="run_query_on_mysql",
-        func=run_query_on_mysql,
-        description="run query on mysql database"
-    ),
-    Tool(
-        name="run_query_on_snowflake",
-        func=run_query_on_snowflake,
-        description="run query on snowflake database"
-    ),
-    Tool(
-        name="preview_data_on_mysql",
-        func=preview_data_on_mysql,
-        description="preview data on mysql, need to specify database, and table name"
-    ),
-    preview_data_on_snowflake,
-    ingest_data_from_source_to_destination
+    preview_data,
+    ingest_data,
 ]
