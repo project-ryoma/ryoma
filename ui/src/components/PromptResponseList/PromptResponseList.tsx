@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useRef} from 'react';
-import ChatGptImg from '../../img/chatgpt.png';
+import ChatGptImg from '../../img/aitagreen.png';
 import MyImg from '../../img/me.png';
 import ReactMarkdown from 'react-markdown';
 import {ResponseInterface} from "./response-interface";

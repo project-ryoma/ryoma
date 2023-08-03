@@ -11,6 +11,7 @@
     width: 30px;
     height: 30px;
     margin-right: 15px;
+    border-radius: 5px;
 }
 
 .response-container .response-content {
