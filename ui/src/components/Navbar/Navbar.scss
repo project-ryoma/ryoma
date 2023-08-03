@@ -1,0 +1,161 @@
+
+
+@mixin breakpoint($point) {
+    @if $point == md {
+        // 768px
+        @media (min-width: 48em) {
+            @content;
+        }
+    }
+}
+        
+        .header {
+            background: rgb(32, 32, 32);
+            width: 100%;
+            height: 100px;
+            padding: 0 1.5rem;
+            @include breakpoint(md) {
+                padding: 0 3rem;
+            }
+            transition: 0.3s ease all;
+        
+            &__content {
+                overflow: hidden;
+                color: #fff;
+                margin: 0 auto;
+                max-width: 1920px;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: relative;
+                z-index: 100;
+        
+                &__logo {
+                    font-size: 2rem;
+                    font-weight: bold;
+                    text-decoration: none;
+                    color: #fff;
+                }
+        
+                &__nav {
+                    top: 0;
+                    right: 100%;
+                    bottom: 0;
+                    width: 100%;
+                    height: 100vh;
+                    position: fixed;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    background: rgba(rgb(32, 32, 32), 0.9);
+                    backdrop-filter: blur(2px);
+                    transform: translate(0);
+                    transition: 0.3s ease transform;
+                   
+        
+                    @include breakpoint(md) {
+                        transform: none;
+                        flex-direction: row;
+                        background: transparent;
+                        width: auto;
+                        height: 100%;
+                        position: static;
+                    }
+                    ul {
+                        list-style: none;
+                        padding: 0;
+                        display: flex;
+                        flex-direction: column;
+                        margin-bottom: 32px;
+                        @include breakpoint(md) {
+                            flex-direction: row;
+                            align-items: center;
+                            margin-bottom: 0;
+                            margin-right: calc(0.5rem + #{16px});
+                        }
+                        li {
+                            &:not(:last-child) {
+                                margin-bottom:32px;
+                                @include breakpoint(md) {
+                                    margin-bottom: 0;
+                                    margin-right: 16px;
+                                }
+                            }
+                            a {
+                                text-decoration: none;
+                                color: inherit;
+                                padding: 0.75rem 1.25rem;
+                                border-radius: 12px;
+                                transition: 0.3s ease all;
+        
+                                &:hover {
+                                    background: rgba(#fff, 0.1);
+                                }
+                                &:active {
+                                    border-radius: calc(#{12px} + 6px);
+                                    background: linear-gradient(rgba(#fff, 0.1), rgba(#fff, 0.2));
+                                }
+                            }
+                        }
+                    }
+                    .btn {
+                        cursor: pointer;
+                        outline: none;
+                        padding: 0.75rem 1.25rem;
+                        border-radius: 12px;
+                        font-size: 1rem;
+                        font-family: inherit;
+                        background: rgb(162, 162, 246);
+                        color: rgb(32, 32, 32);
+                        border: 1px solid transparent;
+                        transition: 0.3s ease all;
+                        margin:0.50em 0.50em;
+                       
+        
+                        &:hover {
+                            border-color: rgb(162, 162, 246);
+                            background: rgba(rgb(162, 162, 246), 0.1);
+                            color: rgb(162, 162, 246);
+                        }
+                        &:active {
+                            border-color: rgb(162, 162, 246);
+                            background: linear-gradient(rgba(rgb(162, 162, 246), 0.2), rgba(rgb(162, 162, 246), 0.3));
+                            color: rgb(162, 162, 246);
+                        }
+                        &__login{
+                            
+                            background-color: rgb(32, 32, 32);
+                            color:#fff;
+
+                        }
+                        
+                    }
+
+        
+                    &.isMenu {
+                        transform: translate(100%);
+                    }
+                }
+        
+                &__toggle {
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    font-size: 2rem;
+                    transition: 0.3s ease all;
+                    position: relative;
+        
+                    &:hover {
+                        color: rgb(162, 162, 246);
+                    }
+        
+                    @include breakpoint(md) {
+                        display: none;
+                    }
+                }
+            }
+        }
+        

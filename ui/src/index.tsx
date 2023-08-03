@@ -1,6 +1,7 @@
 import React from 'react';
+import "./index.css";
 import ReactDOM from 'react-dom/client';
-import App from './components/App/App';
+import { WrappedApp } from "./components/App";
 import reportWebVitals from './reportWebVitals';
 import axios from "axios";
 
@@ -11,7 +12,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <WrappedApp />
   </React.StrictMode>
 );
 
