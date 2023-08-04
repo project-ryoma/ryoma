@@ -1,5 +1,4 @@
 import "./App.css";
-import Navbar from "./Navbar";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import Log from "./Log";
 import Chat from "./Chat";
