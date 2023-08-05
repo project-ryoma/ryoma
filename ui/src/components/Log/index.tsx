@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "./log.scss";
 
 function Log() {
-  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [size, setSize] = useState({
     width: 0,
@@ -28,9 +27,6 @@ function Log() {
     }
   }, [size.width, menuOpen]);
 
-  const menuToggleHandler = () => {
-    setMenuOpen((p) => !p);
-  };
 
   return (
     <header className="header">
