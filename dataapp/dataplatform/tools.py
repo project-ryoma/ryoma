@@ -49,11 +49,12 @@ def create_etl(engine: str, job_type: str):
 
 @tool
 def describe_datasource(datasource: str, query):
-    """describe datasource, get information like databases, tables, schemas, etc.
+    """describe datasource, get information like databases, tables, schemas, columns etc.
     example action queries:
     - show databases
     - show tables in {database}.{schema}
     - show schemas in {database}
+    - show columns in {database}.{schema}.{table}
     Currently support mysql and snowflake
     """
     return snowflake_client.run_query(query)
