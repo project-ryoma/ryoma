@@ -32,13 +32,13 @@ class SnowflakeClient(DataSourceClient):
         cursor.execute(query, params)
         return cursor.fetchall()
 
-    def preview_table(self, database, table, schema: Optional[str] = None):        
+    def preview_table(self, database: str, table: str, schema: str):        
         if not database or database == "my_database":
             raise ValueError("we need to specify database name when previewing table")
         if not table or table == "my_table":
             raise ValueError("we need to specify table name when previewing table")
-        if not schema:
-            schema = "public"
+        if not schema or schema == "my_schema":
+            raise ValueError("we need to specify schema when previewing table")
         query = f"SELECT * FROM {database}.{schema}.{table} LIMIT 10"
         return self.run_query(query)
 

@@ -38,6 +38,16 @@ class MysqlClient(DataSourceClient):
             raise ValueError("we need to specify table name when previewing table")
         query = f"SELECT * FROM {database}.{table} LIMIT 10"
         return self.run_query(query)
+
+    def list_tables(self, database):
+        if not database:
+            raise ValueError("we need to specify database name when previewing table")
+        query = f"SELECT * FROM {database}.INFORMATION_SCHEMA.TABLES"
+        return self.run_query(query)
+    
+    def list_databases(self):
+        query = f"SHOW DATABASES"
+        return self.run_query(query)
     
     def ingest_data(self, data, database, table):
         conn = self.connect()

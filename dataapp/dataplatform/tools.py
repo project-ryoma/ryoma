@@ -2,6 +2,7 @@ from dataplatform.mysql_client import mysql_client
 from dataplatform.snowflake_client import snowflake_client
 from dataplatform.datasource_client import DataSourceClient
 from langchain.tools import tool
+from pydantic import Field
 
 
 @tool
@@ -15,11 +16,11 @@ def connect_to_datasource(datasource) -> DataSourceClient:
         raise ValueError("Unsupported datasource: %s" % datasource)
 
 @tool
-def preview_data(datasource: str, database: str, table: str):
+def preview_data(datasource: str, database: str, table: str, scheme: str):
     """preview data from source, currently support mysql and snowflake. need to specify database, and table name"""
     
     source_client = connect_to_datasource(datasource)
-    return source_client.preview_table(database, table)
+    return source_client.preview_table(database, table, scheme)
 
 
 @tool
@@ -43,11 +44,29 @@ def create_etl(engine: str, job_type: str):
         engine = "az-batch"
     if not job_type:
         job_type = "batch"
+    return
+
+
+@tool
+def describe_datasource(datasource: str):
+    """describe datasource, get information like databases, tables, schemas, etc.
+    example actions:
+    - list databases
+    - list tables
+    Currently support mysql and snowflake
+    """
+    source_client = connect_to_datasource(datasource)
+    databases = source_client.list_databases()
+    tables = []
+    for database in databases:
+        tables.append(source_client.list_tables(database))
+    return databases, tables
     
 
 tools = [
     connect_to_datasource,
     preview_data,
     ingest_data,
-    create_etl
+    create_etl,
+    describe_datasource
 ]
