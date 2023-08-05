@@ -37,7 +37,8 @@ def setup_llama_agent():
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,
         agent_kwargs=agent_kwargs,
-        memory=memory
+        memory=memory,
+        handle_parsing_errors=True
     )
     return agent
     

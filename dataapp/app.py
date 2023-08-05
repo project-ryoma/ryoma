@@ -69,11 +69,6 @@ def run():
         else:
             agent = gpt_agent
         res = agent.run(prompt)
-    except ValueError as e:
-        res = str(e)
-        print('here')
-        if res.startswith("Could not parse LLM output: `"):
-            res= res.removeprefix("Could not parse LLM output: `").removesuffix("`")
     except Exception as e:
         # get the exception message
         if model == "llama":
