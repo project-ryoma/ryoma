@@ -52,8 +52,15 @@ def describe_datasource(datasource: str, query):
     """describe datasource, get information like databases, tables, schemas, etc.
     example action queries:
     - show databases
-    - show tables
-    - show schemas
+    - show tables in {database}.{schema}
+    - show schemas in {database}
+    Currently support mysql and snowflake
+    """
+    return snowflake_client.run_query(query)
+
+@tool
+def query_datasource(datasource: str, query):
+    """query datasource, get the analytics result, etc.
     Currently support mysql and snowflake
     """
     return snowflake_client.run_query(query)
@@ -61,8 +68,9 @@ def describe_datasource(datasource: str, query):
 
 tools = [
     connect_to_datasource,
-    preview_data,
+    # preview_data,
     ingest_data,
     create_etl,
-    describe_datasource
+    describe_datasource,
+    query_datasource
 ]
