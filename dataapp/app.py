@@ -9,6 +9,7 @@ from dataplatform.snowflake_client import snowflake_client
 from dataplatform.tools import tools
 from flask_cors import CORS
 from langchain.memory import SQLChatMessageHistory
+from dataplatform.setup_agents import setup_llama_agent, setup_gpt_agent
 
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
@@ -16,10 +17,8 @@ from flask import (Flask, redirect, render_template, request,
 
 # setup llm agent
 langchain.debug = True
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
-agent_kwargs = {
-    "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-}
+llama_agent = setup_llama_agent()
+gpt_agent = setup_gpt_agent()
 
 # read configs from environment variables and connection_string to mysql database
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "")
@@ -29,28 +28,10 @@ MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
 MYSQL_MEMORY_DATABASE = os.environ.get("MYSQL_MEMORY_DATABASE", "memory")
 SSL_MODE = os.environ.get("SSL_MODE")
 
-connection_string = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_MEMORY_DATABASE}"
+connection_string = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}?{MYSQL_MEMORY_DATABASE}"
 
 if SSL_MODE:
     connection_string += f"?ssl={SSL_MODE}"
-
-message_history = SQLChatMessageHistory(
-    connection_string=connection_string,
-    session_id="session id that you sent from frontend or client side/ you can use string as well like test1 for testing"
-)
-memory = ConversationBufferMemory(
-    memory_key="memory",
-    return_messages=True,
-    message_history=message_history
-)
-agent = initialize_agent(
-    tools,
-    llm,
-    agent=AgentType.OPENAI_FUNCTIONS,
-    verbose=True,
-    agent_kwargs=agent_kwargs,
-    memory=memory
-)
 
 app = Flask(__name__)
 CORS(app)
@@ -82,16 +63,31 @@ def hello():
 @app.route('/chat', methods=['POST'])
 def run():
     prompt = request.get_json()["prompt"]
+    model = request.get_json()["model"]
     try:
+        if model == "llama":
+            agent = llama_agent
+        else:
+            agent = gpt_agent
         res = agent.run(prompt)
+    except ValueError as e:
+        res = str(e)
+        print('here')
+        if res.startswith("Could not parse LLM output: `"):
+            res= res.removeprefix("Could not parse LLM output: `").removesuffix("`")
     except Exception as e:
         # get the exception message
+        if model == "llama":
+            agent = llama_agent
+        else:
+            agent = gpt_agent
         res = agent.run(
         f"""
         Get the error message: {str(e)}
         Can you please ask for clarification?
         """
         )
+
 
     return json.dumps(res)
 

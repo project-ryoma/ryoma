@@ -6,7 +6,7 @@ import './chat.css';
 import {ResponseInterface} from "../PromptResponseList/response-interface";
 import PromptResponseList from "../PromptResponseList/PromptResponseList";
 
-type ModelValueType = 'gpt' | 'codex' | 'image';
+type ModelValueType = 'gpt' | 'llama' | 'fine-tuned-llama';
 const Chat = () => {
 
   const [responseList, setResponseList] = useState<ResponseInterface[]>([]);
@@ -114,16 +114,10 @@ const Chat = () => {
         prompt: _prompt,
         model: modelValue
       });
-      if (modelValue === 'image') {
-        // Show image for `Create image` model
-        updateResponse(uniqueId, {
-          image: response.data,
-        });
-      } else {
-        updateResponse(uniqueId, {
-          response: response.data.trim(),
-        });
-      }
+
+      updateResponse(uniqueId, {
+        response: response.data.trim(),
+      });
 
       setPromptToRetry(null);
       setUniqueIdToRetry(null);
@@ -160,9 +154,8 @@ const Chat = () => {
         <label htmlFor="model-select">Select model:</label>
         <select id="model-select" value={modelValue} onChange={(event) => setModelValue(event.target.value as ModelValueType)}>
           <option value="gpt">GPT-3 (Understand and generate natural language )</option>
-          <option value="codex">Codex (Understand and generate code, including translating natural language to code)
-          </option>
-          <option value="image">Create Image (Create AI image using DALL·E models)</option>
+          <option value="llama">llama (Understand and generate natural language)</option>
+          <option value="fine-tuned-llama">fine-tuned-llama (Understand and generate natural language)</option>
         </select>
       </div>
       <div id="input-container">
