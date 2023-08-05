@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Navbar";
-import { BiMenuAltRight } from "react-icons/bi";
-import { AiOutlineClose } from "react-icons/ai";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./log.scss";
 
 function Log() {

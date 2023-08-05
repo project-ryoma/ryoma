@@ -39,16 +39,19 @@ class MysqlClient(DataSourceClient):
         query = f"SELECT * FROM {database}.{table} LIMIT 10"
         return self.run_query(query)
     
-    def ingest_data(self, configs, data):
-        if not configs or not configs.get("database") or not configs.get("table"):
-            raise ValueError("we need to specify database and table name when ingesting data")
-        database, table = configs["database"], configs["table"]
+    def ingest_data(self, data, database, table):
         conn = self.connect()
         cursor = conn.cursor()
         query = f"INSERT INTO {database}.{table} VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         cursor.executemany(query, data)
         conn.commit()
         return
+
+    def read_table_to_pandas(self, database, table):
+        import pandas as pd
+        query = f"SELECT * FROM {database}.{table}"
+        return pd.read_sql(query, self.connect())
+
 
 # get mysql configs from environment variables
 mysql_host = os.environ.get('MYSQL_HOST', "")

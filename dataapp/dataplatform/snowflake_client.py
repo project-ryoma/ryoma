@@ -1,5 +1,6 @@
 
 from snowflake.connector import connect
+from snowflake.connector.pandas_tools import write_pandas
 import os
 from typing import Optional
 from dataplatform.datasource_client import DataSourceClient
@@ -40,19 +41,20 @@ class SnowflakeClient(DataSourceClient):
             schema = "public"
         query = f"SELECT * FROM {database}.{schema}.{table} LIMIT 10"
         return self.run_query(query)
-    
-    def ingest_data(self, configs, data):
-        if not configs or not configs.get("database") or not configs.get("schema") or not configs.get("table"):
-            raise ValueError("we need to specify database, schema and table name when ingesting data, got %s" % configs)
-        database, schema, table = configs["database"], configs["schema"], configs["table"]
+
+    def ingest_data(self, df, database, table, schema: Optional[str] = None):
+        if not schema:
+            schema = "public"
+
+        # format database, schema and table names to upper case
+        database = database.upper()
+        schema = schema.upper()
+        table = table.upper()
+
         conn = self.connect()
-        cursor = conn.cursor()
-        query = f"INSERT INTO {database}.{schema}.{table} VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.executemany(query, data)
-        conn.commit()
-        return
-
-
+        res = write_pandas(conn, df, table_name=table, database=database, schema=schema, overwrite=True)
+        return res
+    
 # get snowflake configs from environment variables
 snowflake_user = os.environ.get('SNOWFLAKE_USER', "")
 snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD', "")

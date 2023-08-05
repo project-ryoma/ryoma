@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.scss";
 
 function Navbar() {
-  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [size, setSize] = useState({
     width: 0,
