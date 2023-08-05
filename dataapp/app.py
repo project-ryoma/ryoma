@@ -8,7 +8,6 @@ from langchain.memory import ConversationBufferMemory
 from dataplatform.snowflake_client import snowflake_client
 from dataplatform.tools import tools
 from flask_cors import CORS
-from langchain.memory import SQLChatMessageHistory
 from dataplatform.setup_agents import setup_llama_agent, setup_gpt_agent
 
 from flask import (Flask, redirect, render_template, request,
