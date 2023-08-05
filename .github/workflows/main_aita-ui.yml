@@ -72,6 +72,7 @@ jobs:
       - name: npm install
         run: |
           npm install
+          npm rebuild node-sass
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
