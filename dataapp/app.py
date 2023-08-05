@@ -8,7 +8,7 @@ from langchain.memory import ConversationBufferMemory
 from dataplatform.snowflake_client import snowflake_client
 from dataplatform.tools import tools
 from flask_cors import CORS
-from langchain.memory import SQLChatMessageHistory
+# from langchain.memory import SQLChatMessageHistory
 
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
@@ -30,14 +30,14 @@ MYSQL_MEMORY_DATABASE = os.environ.get("MYSQL_MEMORY_DATABASE", "memory")
 
 connection_string = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_MEMORY_DATABASE}"
 
-message_history = SQLChatMessageHistory(
-    connection_string=connection_string,
-    session_id="session id that you sent from frontend or client side/ you can use string as well like test1 for testing"
-)
+# message_history = SQLChatMessageHistory(
+#     connection_string=connection_string,
+#     session_id="session id that you sent from frontend or client side/ you can use string as well like test1 for testing"
+# )
 memory = ConversationBufferMemory(
     memory_key="memory",
     return_messages=True,
-    message_history=message_history
+    # message_history=message_history
 )
 agent = initialize_agent(
     tools,
