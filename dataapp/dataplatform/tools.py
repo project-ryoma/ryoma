@@ -48,19 +48,15 @@ def create_etl(engine: str, job_type: str):
 
 
 @tool
-def describe_datasource(datasource: str):
+def describe_datasource(datasource: str, query):
     """describe datasource, get information like databases, tables, schemas, etc.
-    example actions:
-    - list databases
-    - list tables
+    example action queries:
+    - show databases
+    - show tables
+    - show schemas
     Currently support mysql and snowflake
     """
-    source_client = connect_to_datasource(datasource)
-    databases = source_client.list_databases()
-    tables = []
-    for database in databases:
-        tables.append(source_client.list_tables(database))
-    return databases, tables
+    return snowflake_client.run_query(query)
     
 
 tools = [
