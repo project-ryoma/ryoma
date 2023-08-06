@@ -1,12 +1,6 @@
 import os
 import langchain
 import json
-from langchain.agents import initialize_agent, AgentType
-from langchain.prompts import MessagesPlaceholder
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from dataplatform.snowflake_client import snowflake_client
-from dataplatform.tools import tools
 from flask_cors import CORS
 from dataplatform.setup_agents import setup_llama_agent, setup_gpt_agent
 
@@ -16,22 +10,10 @@ from flask import (Flask, redirect, render_template, request,
 
 # setup llm agent
 langchain.debug = True
-llama_agent = setup_llama_agent()
-gpt_agent = setup_gpt_agent()
+llama_agent_wrapper = setup_llama_agent()
+gpt_agent_wrapper = setup_gpt_agent()
 
-# read configs from environment variables and connection_string to mysql database
-MYSQL_HOST = os.environ.get("MYSQL_HOST", "")
-MYSQL_PORT = os.environ.get("MYSQL_PORT", "3306")
-MYSQL_USER = os.environ.get("MYSQL_USER", "root")
-MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
-MYSQL_MEMORY_DATABASE = os.environ.get("MYSQL_MEMORY_DATABASE", "memory")
-SSL_MODE = os.environ.get("SSL_MODE")
-
-connection_string = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}?{MYSQL_MEMORY_DATABASE}"
-
-if SSL_MODE:
-    connection_string += f"?ssl={SSL_MODE}"
-
+# setup
 app = Flask(__name__)
 CORS(app)
 
@@ -65,24 +47,30 @@ def run():
     model = request.get_json()["model"]
     try:
         if model == "llama":
-            agent = llama_agent
+            agent = llama_agent_wrapper["agent"]
+            message_history = llama_agent_wrapper["message_history"]
         else:
-            agent = gpt_agent
+            agent = gpt_agent_wrapper["agent"]
+            message_history = gpt_agent_wrapper["message_history"]
         res = agent.run(prompt)
+        message_history.add_user_message(prompt)
+        message_history.add_ai_message(res)
     except Exception as e:
         # get the exception message
         if model == "llama":
-            agent = llama_agent
+            agent = llama_agent_wrapper["agent"]
+            message_history = llama_agent_wrapper["message_history"]
         else:
-            agent = gpt_agent
+            agent = gpt_agent_wrapper["agent"]
+            message_history = gpt_agent_wrapper["message_history"]
         res = agent.run(
         f"""
         Get the error message: {str(e)}
         Can you please ask for clarification?
         """
         )
-
-
+        message_history.add_user_message(prompt)
+        message_history.add_ai_message(res)
     return json.dumps(res)
 
 if __name__ == '__main__':
