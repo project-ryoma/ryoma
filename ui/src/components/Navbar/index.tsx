@@ -48,6 +48,9 @@ function Navbar() {
               <Link to="/">Chat</Link>
             </li>
             <li>
+              <Link target="_blank" to="https://grizzly-whippet-554.notion.site/Project-Aita-0898a5aef3bc4b478bfbdbc703bf895e?pvs=4">Document</Link>
+            </li>
+            <li>
               <Link to="/log">Chat History</Link>
             </li>
             <li>

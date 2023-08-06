@@ -15,7 +15,7 @@ RUN npm run build
 EXPOSE 3000
 
 # set environment variables
-ENV NODE_ENV=production
+ENV REACT_APP_BACKEND_URL="https://infiniteai.azurewebsites.net/"
 
 # run app
 CMD [ "npx", "serve", "build" ]
