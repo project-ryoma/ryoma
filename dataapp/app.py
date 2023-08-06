@@ -3,6 +3,7 @@ import langchain
 import json
 from flask_cors import CORS
 from dataplatform.setup_agents import setup_llama_agent, setup_gpt_agent
+from langchain.schema.messages import messages_to_dict
 
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
@@ -75,3 +76,54 @@ def run():
 
 if __name__ == '__main__':
   app.run()
+
+
+@app.route('/chat_history', methods=['POST'])
+def chat_history():
+    model = request.get_json()["model"]
+    try:
+        if model == "llama":
+            message_history = llama_agent_wrapper["message_history"]
+        else:
+            message_history = gpt_agent_wrapper["message_history"]
+        res = messages_to_dict(message_history.messages)
+        print(res)
+    except Exception as e:
+        # get the exception message
+        if model == "llama":
+            message_history = llama_agent_wrapper["message_history"]
+        else:
+            message_history = gpt_agent_wrapper["message_history"]
+        res = messages_to_dict(message_history.messages)
+        print(res)
+    return json.dumps(res)
+
+
+@app.route('/get_job_history', methods=['GET'])
+def get_job_history():
+    return json.dumps([
+    {
+        "job_id": "1",
+        "job_name": "ingest_data_from_mysql_to_snowflake",
+        "job_type": "batch",
+        "job_status": "running",
+        "job_start_time": "2023-08-05 00:00:00", # today
+        "job_engine": "airflow"
+    },
+    {
+        "job_id": "2",
+        "job_name": "ingest_data_from_snowflake_to_mysql_on_spark",
+        "job_type": "batch",
+        "job_status": "running",
+        "job_start_time": "2023-08-05 03:00:00",
+        "job_engine": "spark"
+    },
+    {
+        "job_id": "3",
+        "job_name": "ingest_data_from_snowflake_to_mysql_on_airflow",
+        "job_type": "batch",
+        "job_status": "completed",
+        "job_start_time":"2023-08-05 10:00:00",
+        "job_engine": "airflow"
+    }
+    ])

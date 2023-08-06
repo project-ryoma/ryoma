@@ -48,7 +48,10 @@ function Navbar() {
               <Link to="/">Chat</Link>
             </li>
             <li>
-              <Link to="/log">Log</Link>
+              <Link to="/log">Chat History</Link>
+            </li>
+            <li>
+              <Link to="/job">Jobs</Link>
             </li>
           </ul>
         </nav>

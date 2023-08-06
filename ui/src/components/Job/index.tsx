@@ -8,37 +8,34 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import "./log.scss";
+import "./job.scss";
 
 function createData(
   id: number,
-  who: string,
-  content: string,
-  time: string,
+  job_name: string,
+  job_status: string,
+  job_start_time: string,
+  job_type: string,
+  job_engine: string
 ) {
-  return { id, who, content, time };
+  return { id, job_name, job_status, job_start_time, job_type, job_engine };
 }
 
-function Log() {
+function Job() {
 
   // set state for table data rows
   const [rows, setRows] = useState<any[]>([]);
 
-  const getChatHistory = async (): Promise<any[]> => {
+  const getJobHistory = async (): Promise<any[]> => {
   
     try {
       // Send a POST request to the API to retrieve the chat history
-      const response = await axios.post('chat_history', {
-        model: 'gpt',
-      });
+      const response = await axios.get('get_job_history');
   
       return response.data.map((row: any) => {
         // random generated id
-        var id = Math.floor(Math.random() * 1000000000);
-        var who = row.type;
-        var content = row.data.content;
-        var time = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
-        return createData(id, who, content, time)
+        console.log(row);
+        return createData(row.job_id, row.job_name, row.job_status, row.job_start_time, row.job_type, row.job_engine)
       });
     } catch (err) {
       console.error('Error fetching chat history:', err);
@@ -49,7 +46,7 @@ function Log() {
   // Use useEffect to refresh the state when the page loads
   useEffect(() => {
     const refreshState = async () => {
-      const newDataArray = await getChatHistory();
+      const newDataArray = await getJobHistory();
       setRows(newDataArray); // Update the state with the new data
     };
 
@@ -57,7 +54,7 @@ function Log() {
   }, []); // Empty dependency array to run the effect only once on mount
 
   
-  getChatHistory();
+  getJobHistory();
   console.log(rows);
 
   return (
@@ -70,9 +67,11 @@ function Log() {
         <TableHead>
           <TableRow>
             <TableCell>Id</TableCell>
-            <TableCell align="right">Who</TableCell>
-            <TableCell align="right">Content</TableCell>
-            <TableCell align="right">Time&nbsp;(PDT)</TableCell>
+            <TableCell align="right">Job Name</TableCell>
+            <TableCell align="right">Engine</TableCell>
+            <TableCell align="right">Type&nbsp;(PDT)</TableCell>
+            <TableCell align="right">Start Time</TableCell>
+            <TableCell align="right">Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -84,9 +83,11 @@ function Log() {
               <TableCell component="th" scope="row">
                 {row.id}
               </TableCell>
-              <TableCell align="right">{row.who}</TableCell>
-              <TableCell align="right">{row.content}</TableCell>
-              <TableCell align="right">{row.time}</TableCell>
+              <TableCell align="right">{row.job_name}</TableCell>
+              <TableCell align="right">{row.job_engine}</TableCell>
+              <TableCell align="right">{row.job_type}</TableCell>
+              <TableCell align="right">{row.job_start_time}</TableCell>
+              <TableCell align="right">{row.job_status}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -96,4 +97,4 @@ function Log() {
   );
 }
 
-export default Log;
+export default Job;
