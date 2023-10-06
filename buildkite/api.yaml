@@ -1,0 +1,6 @@
+steps:
+  - command: "git clone https://github.com/project-aita/monorepo.git"
+    label: "clone repo"
+
+  - command: "./buildkite/build_api.sh"
+    label: "build api"
