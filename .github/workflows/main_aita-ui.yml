@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - 'ui/**'
+      - '.github/workflows/main_aita-ui.yml'
   workflow_dispatch:
 
 env:
