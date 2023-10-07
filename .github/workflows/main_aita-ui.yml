@@ -11,6 +11,7 @@ on:
 
 env:
   AZURE_WEBAPP_PACKAGE_PATH: "monorepo/ui"
+  COMMIT_SHA: ${{ github.sha }}
 
 jobs:
   build:
@@ -37,8 +38,8 @@ jobs:
 
       - name: Set up Docker Build
         run: |
-          docker tag aita-ui aitaui.azurecr.io/aita-ui:
+          docker tag aita-ui aitaui.azurecr.io/aita-ui:${COMMIT_SHA}
 
       - name: Publish to Azure Container Registry
         run: |
-          docker push aitaui.azurecr.io/aita-ui:v2
+          docker push aitaui.azurecr.io/aita-ui:${COMMIT_SHA}
