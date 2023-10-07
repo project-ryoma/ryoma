@@ -23,9 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: docker login
-        run: |
-          docker login aitaui.azurecr.io -u aitaui -p ${{ secrets.AZURE_CR_PASSWORD }}
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: aitaui.azurecr.io
+          username: aitaui
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: docker build image
         run: |
