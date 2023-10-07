@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'dataapp/**'
   workflow_dispatch:
 
 env:
