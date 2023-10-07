@@ -44,10 +44,6 @@ jobs:
         run: |
           docker push aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA}}
 
-      - name: Tag latest image
-        run: |
-          docker tag aitaui.azurecr.io/aita-ui:latest aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
