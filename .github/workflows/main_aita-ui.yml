@@ -34,7 +34,10 @@ jobs:
 
       - name: docker build image
         run: |
-          docker build --platform linux/amd64 ./ -t aita-ui
+          docker build \
+          --platform linux/amd64 \
+          -t aita-ui \
+          --build-arg APP_ENV=production
 
       - name: Set up Docker Build
         run: |
