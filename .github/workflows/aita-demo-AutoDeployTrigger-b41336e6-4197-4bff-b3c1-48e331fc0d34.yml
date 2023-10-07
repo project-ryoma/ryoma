@@ -1,0 +1,42 @@
+name: Trigger auto deployment for aita-demo
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/aita-demo-AutoDeployTrigger-b41336e6-4197-4bff-b3c1-48e331fc0d34.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AITADEMO_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: aitaui.azurecr.io
+          registryUsername: ${{ secrets.AITADEMO_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.AITADEMO_REGISTRY_PASSWORD }}
+          containerAppName: aita-demo
+          resourceGroup: aita
+          imageToBuild: aitaui.azurecr.io/aita-ui:${{ github.sha }}
+          
+
+     
+
