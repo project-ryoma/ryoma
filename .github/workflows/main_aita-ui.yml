@@ -31,8 +31,8 @@ jobs:
       - name: Login to Azure Container Registry
         uses: docker/login-action@v1
         with:
-          registry: aitaregistry.azurecr.io
-          username: aitaregistry
+          registry: aitaui.azurecr.io
+          username: aitaui
           password: ${{ secrets.AZURE_CR_PASSWORD }}
 
       - name: docker build image
@@ -41,11 +41,11 @@ jobs:
 
       - name: Set up Docker Build
         run: |
-          docker tag aita-ui aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
+          docker tag aita-ui aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
 
       - name: Publish to Azure Container Registry
         run: |
-          docker push aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
+          docker push aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
       - name: deploy Container App
         uses: azure/container-apps-deploy-action@v1
         with:
-          acrName: aitaregistry
+          acrName: aitaui
           containerAppName: aita-demo 
           resourceGroup: aita
-          imageToDeploy: aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
+          imageToDeploy: aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
