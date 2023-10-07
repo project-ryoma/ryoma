@@ -38,8 +38,8 @@ jobs:
 
       - name: Set up Docker Build
         run: |
-          docker tag aita-ui aitaui.azurecr.io/aita-ui:${COMMIT_SHA}
+          docker tag aita-ui aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
 
       - name: Publish to Azure Container Registry
         run: |
-          docker push aitaui.azurecr.io/aita-ui:${COMMIT_SHA}
+          docker push aitaui.azurecr.io/aita-ui:${{ env.COMMIT_SHA}}
