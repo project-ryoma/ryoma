@@ -6,6 +6,13 @@ WORKDIR /app
 # copy app
 COPY . .
 
+# Default to development environment
+ARG APP_ENV
+ENV NODE_ENV=${APP_ENV:-dev}
+
+# Copy the appropriate environment variable file
+COPY .env.${NODE_ENV} .env
+
 # install dependencies
 RUN npm install
 
