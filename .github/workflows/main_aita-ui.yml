@@ -54,6 +54,13 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: aitaui.azurecr.io
+          username: aitaui
+          password: ${{ secrets.AZURE_CR_PASSWORD }}
             
       - name: deploy Container App
         uses: azure/container-apps-deploy-action@v1
