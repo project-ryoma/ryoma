@@ -65,7 +65,7 @@ jobs:
       - name: deploy Container App
         uses: azure/container-apps-deploy-action@v1
         with:
-          acrName: aitaui.azurecr.io
+          acrName: aitaui
           containerAppName: aita-demo 
           resourceGroup: aita
-          imageToDeploy: aita.azurecr.io/aita-ui:${{ github.sha }}
+          imageToDeploy: aitaui.azurecr.io/aita-ui:${{ github.sha }}
