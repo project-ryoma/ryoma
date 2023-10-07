@@ -28,7 +28,7 @@ jobs:
         with:
           registry: aitaui.azurecr.io
           username: aitaui
-          password: ${{ secrets.ACR_PASSWORD }}
+          password: ${{ secrets.AZURE_CR_PASSWORD }}
 
       - name: docker build image
         run: |
