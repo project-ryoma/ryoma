@@ -5,7 +5,7 @@ from flask_cors import CORS
 from dataplatform.setup_agents import setup_llama_agent, setup_gpt_agent
 from langchain.schema.messages import messages_to_dict
 
-from flask import (Flask, redirect, render_template, request,
+from flask import (Flask, redirect, render_template, request, jsonify,
                    send_from_directory, url_for)
 
 
@@ -18,12 +18,16 @@ gpt_agent_wrapper = setup_gpt_agent()
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route('/')
 def index():
    print('Request for index page received')
    return render_template('index.html')
 
+@app.route('/health')
+def health():
+    resp = jsonify(health="healthy")
+    resp.status_code = 200
+    return resp
 
 @app.route('/favicon.ico')
 def favicon():
