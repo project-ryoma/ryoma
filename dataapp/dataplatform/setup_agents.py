@@ -13,10 +13,10 @@ os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
 
 
 # read configs from environment variables and connection_string to mysql database
-MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost")
-MYSQL_PORT = os.environ.get("MYSQL_PORT", "3306")
-MYSQL_USER = os.environ.get("MYSQL_USER", "root")
-MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
+MYSQL_HOST = os.environ.get("AZURE_MYSQL_HOST", "localhost")
+MYSQL_PORT = os.environ.get("AZURE_MYSQL_PORT", "3306")
+MYSQL_USER = os.environ.get("AZURE_MYSQL_USER", "root")
+MYSQL_PASSWORD = os.environ.get("AZURE_MYSQL_PASSWORD", "")
 MYSQL_MEMORY_DATABASE = os.environ.get("MYSQL_MEMORY_DATABASE", "memory")
 SSL_MODE = os.environ.get("SSL_MODE")
 
