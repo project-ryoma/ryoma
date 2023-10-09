@@ -1,5 +1,5 @@
 # build flask app docker file
-FROM python:3.8-slim-buster
+FROM python:3.8-slim
 
 # sdt working directory
 WORKDIR /app
