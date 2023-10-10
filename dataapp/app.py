@@ -78,9 +78,6 @@ def run():
         message_history.add_ai_message(res)
     return json.dumps(res)
 
-if __name__ == '__main__':
-  app.run()
-
 
 @app.route('/chat_history', methods=['POST'])
 def chat_history():
@@ -131,3 +128,6 @@ def get_job_history():
         "job_engine": "airflow"
     }
     ])
+
+if __name__ == '__main__':
+  app.run()
