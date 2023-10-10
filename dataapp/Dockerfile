@@ -7,6 +7,8 @@ RUN apt-get update \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config curl \
     && rm -rf /var/lib/apt/lists/*
 
+RUN ls
+
 # install dependencies
 RUN pip install -r requirements.txt
 
