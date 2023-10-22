@@ -3,6 +3,10 @@ from dataplatform.snowflake_client import snowflake_client
 from dataplatform.datasource_client import DataSourceClient
 from langchain.tools import tool, Tool
 from pydantic import Field
+from services.pbiembedservice import PbiEmbedService
+
+from flask import current_app as app
+import json
 
 
 @tool
@@ -65,14 +69,24 @@ def query_datasource(datasource: str, query):
     Currently support mysql and snowflake
     """
     return snowflake_client.run_query(query)
-    
+
+
+@tool
+def create_report():
+    """create report, currently support powerbi, tableau, etc."""
+    try:
+        embed_info = PbiEmbedService().get_embed_params_for_single_report(app.config['WORKSPACE_ID'], app.config['REPORT_ID'])
+        return embed_info
+    except Exception as ex:
+        return json.dumps({'errorMsg': str(ex)}), 500
 
 tools = [
     connect_to_datasource,
     ingest_data,
     create_etl,
     describe_datasource,
-    query_datasource
+    query_datasource,
+    create_report
 ]
 
 string_tools = [

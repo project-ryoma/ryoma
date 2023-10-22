@@ -93,3 +93,11 @@ body {
 #model-select-container select option {
   background: rgba(32,33,35,.5);
 }
+
+#visual-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 500px;
+}

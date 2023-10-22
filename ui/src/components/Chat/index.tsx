@@ -5,6 +5,7 @@ import PromptInput from "../PromptInput/PromptInput";
 import './chat.css';
 import {ResponseInterface} from "../PromptResponseList/response-interface";
 import PromptResponseList from "../PromptResponseList/PromptResponseList";
+import Visuals from "../Visuals";
 
 type ModelValueType = 'gpt' | 'llama' | 'fine-tuned-llama';
 const Chat = () => {
@@ -15,6 +16,8 @@ const Chat = () => {
   const [uniqueIdToRetry, setUniqueIdToRetry] = useState<string | null>(null);
   const [modelValue, setModelValue] = useState<ModelValueType>('gpt');
   const [isLoading, setIsLoading] = useState(false);
+  const [reportCreated, setReportCreated] = useState(false);
+  const [reportConfig, setReportConfig] = useState(null);
   let loadInterval: number | undefined;
 
   const generateUniqueId = () => {
@@ -121,6 +124,15 @@ const Chat = () => {
 
       setPromptToRetry(null);
       setUniqueIdToRetry(null);
+
+      // Check if the response contains report information
+      if (response.data.indexOf("I have created a report for you") > -1) {
+
+        // Assuming response.data.report contains embedUrl and embedReportId
+        setReportConfig(response.data);
+        setReportCreated(true);
+      }
+
     } catch (err) {
       setPromptToRetry(_prompt);
       setUniqueIdToRetry(uniqueId);
@@ -141,6 +153,16 @@ const Chat = () => {
       <Navbar />
       <div id="response-list">
         <PromptResponseList responseList={responseList} key="response-list"/>
+        
+      {/* Visuals */}
+      {reportCreated && reportConfig &&
+        (
+          <div id="visual-container">
+            <Visuals />
+          </div>
+        )
+      }
+
       </div>
       { uniqueIdToRetry &&
         (<div id="regenerate-button-container">
@@ -150,6 +172,7 @@ const Chat = () => {
         </div>
         )
       }
+
       <div id="model-select-container">
         <label htmlFor="model-select">Select model:</label>
         <select id="model-select" value={modelValue} onChange={(event) => setModelValue(event.target.value as ModelValueType)}>
@@ -167,6 +190,7 @@ const Chat = () => {
         />
         <button id="submit-button" className={isLoading ? 'loading' : ''} onClick={() => getGPTResult()}></button>
       </div>
+
     </div>
   );
 }

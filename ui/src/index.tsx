@@ -5,7 +5,7 @@ import { WrappedApp } from "./components/App";
 import reportWebVitals from './reportWebVitals';
 import axios from "axios";
 
-axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
+axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL : 'http://localhost:3001';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

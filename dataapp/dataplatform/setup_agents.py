@@ -5,6 +5,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.prompts import MessagesPlaceholder
 from langchain.chat_models import ChatOpenAI
 from langchain.memory.chat_message_histories import SQLChatMessageHistory
+from enum import Enum
 
 HUGGINGFACEHUB_API_TOKEN = "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"
 
@@ -77,3 +78,38 @@ def setup_gpt_agent():
         "message_history": message_history,
         "memory": memory
     }
+
+
+class ModelType(Enum):
+    LLAMA = "llama"
+    GPT = "gpt"
+
+
+class AgentWrapper:
+    def __init__(self, agent, message_history):
+        self.agent = agent
+        self.message_history = message_history
+
+
+class AgentManager:
+    def __init__(self, llama_agent_wrapper, gpt_agent_wrapper):
+        self.wrappers = {
+            ModelType.LLAMA: llama_agent_wrapper,
+            ModelType.GPT: gpt_agent_wrapper
+        }
+        self.current_agent_wrapper = None
+
+    def set_agent(self, model_str):
+        try:
+            model_type = ModelType[model_str.upper()]
+            self.current_agent_wrapper = self.wrappers[model_type]
+        except KeyError:
+            raise ValueError(f"Invalid model type: {model_str}")
+
+    @property
+    def agent(self):
+        return self.current_agent_wrapper.agent if self.current_agent_wrapper else None
+
+    @property
+    def message_history(self):
+        return self.current_agent_wrapper.message_history if self.current_agent_wrapper else None

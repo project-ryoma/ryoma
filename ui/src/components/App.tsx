@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import Log from "./Log";
 import Chat from "./Chat";
 import Job from "./Job";
+import Visuals from "./Visuals";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Route path="log" element={<Log />} />
       <Route path="job" element={<Job />} />
       <Route path="/" element={<Chat />} />
+      <Route path="/visuals" element={<Visuals />} />
     </Routes>
   );
 }
