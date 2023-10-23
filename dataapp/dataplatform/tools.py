@@ -4,24 +4,29 @@ from dataplatform.datasource_client import DataSourceClient
 from langchain.tools import tool, Tool
 from pydantic import Field
 from services.pbiembedservice import PbiEmbedService
+import logging
 
 from flask import current_app as app
 import json
 
+log = logging.getLogger(__name__)
 
-@tool
-def connect_to_datasource(datasource) -> DataSourceClient:
+
+def connect_to_datasource(datasource: str) -> DataSourceClient:
     """connect to datasource, either mysql or snowflake"""
+    log.info("connect_to_datasource", datasource)
+    client = None
     if datasource == "mysql":
-        return mysql_client
+        client = mysql_client
+        return "Successfully connected to mysql"
     elif datasource == "snowflake":
-        return snowflake_client
+        client = snowflake_client
+        return "Successfully connected to snowflake"
     else:
         raise ValueError("Unsupported datasource: %s" % datasource)
 
 
-@tool
-def ingest_data(source: str, destination: str, source_database: str, source_table, destination_database: str, destination_table: str):
+def ingest_data(source: str, destination: str, source_database: str, source_table: str, destination_database: str, destination_table: str):
     """ingest, transport or migrate data from source to destination, currently support mysql and snowflake. need to specify database, and table name"""
     
     source_client = connect_to_datasource(source)
@@ -32,14 +37,6 @@ def ingest_data(source: str, destination: str, source_database: str, source_tabl
     destination_client.ingest_data(source_data, destination_database, destination_table)
 
 
-@tool
-def parsing_ingest_data(string):
-    """ingest, transport or migrate data from source to destination, currently support mysql and snowflake. need to specify database, and table name"""
-    source, destination, source_database, source_table, destination_database, destination_table = string.split(",")
-    return ingest_data(source, destination, source_database, source_table, destination_database, destination_table)
-
-
-@tool
 def create_etl(engine: str, job_type: str):
     """create etl job, there are two types of job, one is batch, another is streaming,
     for the engine, we support azure batch, airflow, spark, etc.
@@ -51,8 +48,7 @@ def create_etl(engine: str, job_type: str):
     return
 
 
-@tool
-def describe_datasource(datasource: str, query):
+def describe_datasource(datasource: str, query: str):
     """describe datasource, get information like databases, tables, schemas, columns etc.
     example action queries:
     - show databases
@@ -61,17 +57,19 @@ def describe_datasource(datasource: str, query):
     - show columns in {database}.{schema}.{table}
     Currently support mysql and snowflake
     """
+    log.info("describe_datasource", datasource, query)
     return snowflake_client.run_query(query)
 
-@tool
-def query_datasource(datasource: str, query):
+def query_datasource(datasource: str, query: str):
     """query datasource, get the analytics result, etc.
     Currently support mysql and snowflake
+    Requirement:
+    - For better performance, limit the number of rows returned by the query to 10 rows.
     """
+    log.info("query_datasource", datasource, query)
     return snowflake_client.run_query(query)
 
 
-@tool
 def create_report():
     """create report, currently support powerbi, tableau, etc."""
     try:
@@ -80,16 +78,3 @@ def create_report():
     except Exception as ex:
         return json.dumps({'errorMsg': str(ex)}), 500
 
-tools = [
-    connect_to_datasource,
-    ingest_data,
-    create_etl,
-    describe_datasource,
-    query_datasource,
-    create_report
-]
-
-string_tools = [
-    connect_to_datasource,
-    # parsing_ingest_data
-]
