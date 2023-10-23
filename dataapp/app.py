@@ -108,36 +108,41 @@ def chat_completion_request(messages, functions=None, max_tokens=1000, n=3, temp
 @app.route('/chatv2', methods=['POST'])
 def chat():
     prompt = request.json.get('prompt', '')
-    function_call = request.json.get('function_call', 'auto')
-    response_messages = []
+    message_history.add_user_message(prompt)
 
+    # create a list of messages to send to the chat API
+    # system messages
     messages = []
-    messages.append({"role": "system", "content": r"""Don't make assumptions about what values to plug into functions, before invoking a function, ask the user to confirm the values for parameters
-        """ + f"\nToday is {datetime.datetime.now().strftime('%Y-%m-%d')}"
+    messages.append({"role": "system", "content": """
+Don't make assumptions about what values to plug into functions, before invoking a function, ask the user to confirm the values for parameters
+""" + f"\nToday is {datetime.datetime.now().strftime('%Y-%m-%d')}"
     })
 
-    messages = [
-            {"role": "user", "content": message.content}
-            for message in message_history.messages if isinstance(message, HumanMessage)
-        ]
+    # history messages
+    message_hist = [
+        {"role": "user", "content": "(history chat) %s" % message.content}
+        for message in message_history.messages if isinstance(message, HumanMessage)
+    ]
     
     # TODO: How do we decide which messages to use as history?
-    messages = messages[-5:]
-    messages.append({"role": "user", "content": prompt})
+    message_hist = message_hist[-5:]
+    messages = messages + message_hist + [{"role": "user", "content": "(current request) %s" % prompt}]
 
     chat_response = chat_completion_request(messages, functions=functions_metadata, n=1)
     if isinstance(chat_response, Exception):
         return jsonify(error=str(chat_response)), 500
     
     # initial message
-    response_messages = [chat_response["choices"][0]["message"]]
+    response_message = chat_response["choices"][0]["message"]
+    response_messages = [response_message]
 
     while len(response_messages) > 0:
         response_message = response_messages.pop(0)
         function_call = response_message.get('function_call')
+        if response_message['content']:
+            message_history.add_ai_message(response_message['content'])
 
         if function_call is not None:
-            # messages.append(response_message)
             function_name, function_arguments = function_call["name"], json.loads(function_call["arguments"])
             function_to_call = fn_map.get(function_name)
             if function_to_call is None:
