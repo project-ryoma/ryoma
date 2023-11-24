@@ -1,7 +1,6 @@
-from dataplatform.mysql_client import mysql_client
-from dataplatform.snowflake_client import snowflake_client
-from dataplatform.datasource_client import DataSourceClient
-from langchain.tools import tool, Tool
+from dataplatform.datasource.mysql_client import mysql_client
+from dataplatform.datasource.snowflake_client import snowflake_client
+from dataplatform.datasource.datasource_client import DataSourceClient
 from pydantic import Field
 from services.pbiembedservice import PbiEmbedService
 import logging
@@ -12,18 +11,28 @@ import json
 log = logging.getLogger(__name__)
 
 
+client_map = {
+    "mysql": (mysql_client, "Successfully connected to mysql"),
+    "snowflake": (snowflake_client, "Successfully connected to snowflake"),
+}
+
+class DataSource:
+    def __init__(self, source_client=None) -> None:
+        self.source_client = source_client
+
+
+data_source = DataSource()
+
+
 def connect_to_datasource(datasource: str) -> DataSourceClient:
     """connect to datasource, either mysql or snowflake"""
     log.info("connect_to_datasource", datasource)
-    client = None
-    if datasource == "mysql":
-        client = mysql_client
-        return "Successfully connected to mysql"
-    elif datasource == "snowflake":
-        client = snowflake_client
-        return "Successfully connected to snowflake"
-    else:
-        raise ValueError("Unsupported datasource: %s" % datasource)
+    try:
+        client, message = client_map[datasource]
+        data_source.client = client
+        return message
+    except KeyError:
+        raise ValueError(f"Unsupported datasource: {datasource}")
 
 
 def ingest_data(source: str, destination: str, source_database: str, source_table: str, destination_database: str, destination_table: str):
@@ -58,7 +67,8 @@ def describe_datasource(datasource: str, query: str):
     Currently support mysql and snowflake
     """
     log.info("describe_datasource", datasource, query)
-    return snowflake_client.run_query(query)
+    return data_source.source_client.run_query(query)
+
 
 def query_datasource(datasource: str, query: str):
     """query datasource, get the analytics result, etc.
@@ -67,7 +77,7 @@ def query_datasource(datasource: str, query: str):
     - For better performance, limit the number of rows returned by the query to 10 rows.
     """
     log.info("query_datasource", datasource, query)
-    return snowflake_client.run_query(query)
+    return data_source.source_client.run_query(query)
 
 
 def create_report():

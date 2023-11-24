@@ -11,7 +11,7 @@ from flask_cors import CORS
 from flask import (Flask, redirect, render_template, request, jsonify,
                    send_from_directory, url_for)
 from utils import Utils, pretty_print_conversation
-from dataplatform.memory_manager import memory, message_history
+from dataplatform.memory_manager import message_history
 from langchain.schema.messages import HumanMessage
 from services.pbiembedservice import PbiEmbedService
 import importlib

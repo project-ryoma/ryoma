@@ -1,4 +1,3 @@
-from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories import SQLChatMessageHistory
 import os
 
@@ -21,10 +20,4 @@ if SSL_MODE:
 message_history = SQLChatMessageHistory(
     connection_string=connection_string,
     session_id="aita"
-)
-
-memory = ConversationBufferMemory(
-    memory_key="memory",
-    return_messages=True,
-    message_history=message_history
 )

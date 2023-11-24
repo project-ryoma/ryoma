@@ -1,6 +1,6 @@
 import mysql.connector
 import os
-from dataplatform.datasource_client import DataSourceClient
+from dataplatform.datasource.datasource_client import DataSourceClient
 
 
 class MysqlClient(DataSourceClient):

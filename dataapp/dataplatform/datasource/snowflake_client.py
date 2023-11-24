@@ -3,7 +3,7 @@ from snowflake.connector import connect
 from snowflake.connector.pandas_tools import write_pandas
 import os
 from typing import Optional
-from dataplatform.datasource_client import DataSourceClient
+from dataplatform.datasource.datasource_client import DataSourceClient
 
 
 class SnowflakeClient(DataSourceClient):

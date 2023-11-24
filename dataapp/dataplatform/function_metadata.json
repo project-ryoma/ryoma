@@ -94,7 +94,7 @@
     {
         "name": "query_datasource",
         "module": "dataplatform.tools",
-        "description": "query datasource, get the analytics result, etc.\nCurrently support mysql and snowflake\nRequirement:\n- For better performance, limit the number of rows returned by the query to 10 rows.\n- Return the result in a tabular format.",
+        "description": "query datasource, get the analytics result, etc.\nCurrently support mysql and snowflake\nRequirement:\n- For better performance, limit the number of rows returned by the query to 10 rows.",
         "parameters": {
             "type": "object",
             "properties": {
