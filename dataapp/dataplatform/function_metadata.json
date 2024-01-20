@@ -52,49 +52,9 @@
         }
     },
     {
-        "name": "create_etl",
-        "module": "dataplatform.tools",
-        "description": "create etl job, there are two types of job, one is batch, another is streaming,\nfor the engine, we support azure batch, airflow, spark, etc.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "engine": {
-                    "type": "string"
-                },
-                "job_type": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "engine",
-                "job_type"
-            ]
-        }
-    },
-    {
-        "name": "describe_datasource",
-        "module": "dataplatform.tools",
-        "description": "describe datasource, get information like databases, tables, schemas, columns etc.\nexample action queries:\n- show databases\n- show tables in {database}.{schema}\n- show schemas in {database}\n- show columns in {database}.{schema}.{table}\nCurrently support mysql and snowflake",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "datasource": {
-                    "type": "string"
-                },
-                "query": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "datasource",
-                "query"
-            ]
-        }
-    },
-    {
         "name": "query_datasource",
         "module": "dataplatform.tools",
-        "description": "query datasource, get the analytics result, etc.\nCurrently support mysql and snowflake\nRequirement:\n- For better performance, limit the number of rows returned by the query to 10 rows.",
+        "description": "query datasource, get the analytics result, etc.\nCurrently, support mysql and snowflake\nRequirement:\n- For better performance, limit the number of rows returned by the query to 10 rows.",
         "parameters": {
             "type": "object",
             "properties": {

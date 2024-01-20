@@ -1,9 +1,8 @@
 import mysql.connector
-import os
-from dataplatform.datasource.datasource_client import DataSourceClient
+from dataplatform.datasource.source import DataSource
 
 
-class MysqlClient(DataSourceClient):
+class MysqlClient(DataSource):
     def __init__(self, host, user, password, database):
         self.host = host
         self.user = user
@@ -61,12 +60,3 @@ class MysqlClient(DataSourceClient):
         import pandas as pd
         query = f"SELECT * FROM {database}.{table}"
         return pd.read_sql(query, self.connect())
-
-
-# get mysql configs from environment variables
-mysql_host = os.environ.get('MYSQL_HOST', "")
-mysql_user = os.environ.get('MYSQL_USER', "")
-mysql_password = os.environ.get('MYSQL_PASSWORD', "")
-mysql_database = os.environ.get('MYSQL_DATABASE', "")
-
-mysql_client = MysqlClient(mysql_host, mysql_user, mysql_password, mysql_database)

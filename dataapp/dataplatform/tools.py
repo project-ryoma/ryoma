@@ -1,7 +1,4 @@
-from dataplatform.datasource.mysql_client import mysql_client
-from dataplatform.datasource.snowflake_client import snowflake_client
-from dataplatform.datasource.datasource_client import DataSourceClient
-from pydantic import Field
+from sqlalchemy import create_engine, Connection
 from services.pbiembedservice import PbiEmbedService
 import logging
 
@@ -10,34 +7,33 @@ import json
 
 log = logging.getLogger(__name__)
 
-
-client_map = {
-    "mysql": (mysql_client, "Successfully connected to mysql"),
-    "snowflake": (snowflake_client, "Successfully connected to snowflake"),
-}
-
-class DataSource:
-    def __init__(self, source_client=None) -> None:
-        self.source_client = source_client
+states_store = {}
 
 
-data_source = DataSource()
-
-
-def connect_to_datasource(datasource: str) -> DataSourceClient:
+def connect_to_datasource(datasource: str, **configs) -> Connection:
     """connect to datasource, either mysql or snowflake"""
     log.info("connect_to_datasource", datasource)
     try:
-        client, message = client_map[datasource]
-        data_source.client = client
-        return message
+        user = configs.get("user")
+        password = configs.get("password")
+        account = configs.get("account")
+        warehouse = configs.get("warehouse")
+        role = configs.get("role")
+        connection_string = f"{datasource}://{user}:{password}@{account}?warehouse={warehouse}&role={role}"
+        engine = create_engine(connection_string)
+        conn = engine.connect()
+
+        states_store['db'] = conn
+
+        return conn
     except KeyError:
         raise ValueError(f"Unsupported datasource: {datasource}")
 
 
-def ingest_data(source: str, destination: str, source_database: str, source_table: str, destination_database: str, destination_table: str):
+def ingest_data(source: str, destination: str, source_database: str, source_table: str, destination_database: str,
+                destination_table: str):
     """ingest, transport or migrate data from source to destination, currently support mysql and snowflake. need to specify database, and table name"""
-    
+
     source_client = connect_to_datasource(source)
     destination_client = connect_to_datasource(destination)
 
@@ -46,45 +42,24 @@ def ingest_data(source: str, destination: str, source_database: str, source_tabl
     destination_client.ingest_data(source_data, destination_database, destination_table)
 
 
-def create_etl(engine: str, job_type: str):
-    """create etl job, there are two types of job, one is batch, another is streaming,
-    for the engine, we support azure batch, airflow, spark, etc.
-    """
-    if not engine:
-        engine = "az-batch"
-    if not job_type:
-        job_type = "batch"
-    return
-
-
-def describe_datasource(datasource: str, query: str):
-    """describe datasource, get information like databases, tables, schemas, columns etc.
-    example action queries:
-    - show databases
-    - show tables in {database}.{schema}
-    - show schemas in {database}
-    - show columns in {database}.{schema}.{table}
-    Currently support mysql and snowflake
-    """
-    log.info("describe_datasource", datasource, query)
-    return data_source.source_client.run_query(query)
-
-
 def query_datasource(datasource: str, query: str):
     """query datasource, get the analytics result, etc.
-    Currently support mysql and snowflake
+    Currently, support mysql and snowflake
     Requirement:
     - For better performance, limit the number of rows returned by the query to 10 rows.
     """
     log.info("query_datasource", datasource, query)
-    return data_source.source_client.run_query(query)
+    conn = states_store['db']
+    res = conn.execute(query).fetchall()
+    json_result = [dict(r) for r in res]
+    return json_result
 
 
 def create_report():
     """create report, currently support powerbi, tableau, etc."""
     try:
-        embed_info = PbiEmbedService().get_embed_params_for_single_report(app.config['WORKSPACE_ID'], app.config['REPORT_ID'])
+        embed_info = PbiEmbedService().get_embed_params_for_single_report(app.config['WORKSPACE_ID'],
+                                                                          app.config['REPORT_ID'])
         return embed_info
     except Exception as ex:
         return json.dumps({'errorMsg': str(ex)}), 500
-

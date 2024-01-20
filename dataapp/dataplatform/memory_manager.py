@@ -6,7 +6,7 @@ import os
 MYSQL_HOST = os.environ.get("AZURE_MYSQL_HOST", "localhost")
 MYSQL_PORT = os.environ.get("AZURE_MYSQL_PORT", "3306")
 MYSQL_USER = os.environ.get("AZURE_MYSQL_USER", "root")
-MYSQL_PASSWORD = os.environ.get("AZURE_MYSQL_PASSWORD", "")
+MYSQL_PASSWORD = os.environ.get("AZURE_MYSQL_PASSWORD", "123456")
 MYSQL_MEMORY_DATABASE = os.environ.get("MYSQL_MEMORY_DATABASE", "memory")
 SSL_MODE = os.environ.get("SSL_MODE")
 

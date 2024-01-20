@@ -1,10 +1,10 @@
 import psycopg2
 import os
 from abc import ABC, abstractmethod
-from dataplatform.datasource.datasource_client import DataSourceClient
+from dataplatform.datasource.source import DataSource
 
 
-class PostgresClient(DataSourceClient):
+class PostgresClient(DataSource):
     def __init__(self, host, port, user, password, database):
         self.host = host
         self.port = port

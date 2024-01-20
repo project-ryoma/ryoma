@@ -1,16 +1,15 @@
 
 from snowflake.connector import connect
 from snowflake.connector.pandas_tools import write_pandas
-import os
 from typing import Optional
-from dataplatform.datasource.datasource_client import DataSourceClient
+from dataplatform.datasource.source import DataSource
 
 
-class SnowflakeClient(DataSourceClient):
-    def __init__(self, user, password, account):
-        self.user = user
-        self.password = password
-        self.account = account
+class SnowflakeClient(DataSource):
+    def __init__(self, **configs):
+        self.user = configs.get('user')
+        self.password = configs.get('password')
+        self.account = configs.get('account')
     
     def connect(self):
         conn = connect(
@@ -66,10 +65,3 @@ class SnowflakeClient(DataSourceClient):
         conn = self.connect()
         res = write_pandas(conn, df, table_name=table, database=database, schema=schema, overwrite=True)
         return res
-    
-# get snowflake configs from environment variables
-snowflake_user = os.environ.get('SNOWFLAKE_USER', "")
-snowflake_password = os.environ.get('SNOWFLAKE_PASSWORD', "")
-snowflake_account = os.environ.get('SNOWFLAKE_ACCOUNT', "")
-
-snowflake_client = SnowflakeClient(snowflake_user, snowflake_password, snowflake_account)
