@@ -31,6 +31,7 @@ langchain-core==0.1.13
 langsmith==0.0.83
 MarkupSafe==2.1.4
 marshmallow==3.20.2
+msal==1.26.0
 multidict==6.0.4
 mypy-extensions==1.0.0
 numpy==1.26.3

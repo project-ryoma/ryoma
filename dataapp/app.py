@@ -9,8 +9,6 @@ from flask_cors import CORS
 from flask import (Flask, redirect, render_template, request, jsonify,
                    send_from_directory, url_for)
 from utils import Utils, pretty_print_conversation
-from dataplatform.memory_manager import message_history
-from langchain.schema.messages import HumanMessage
 from services.pbiembedservice import PbiEmbedService
 import importlib
 import logging
@@ -196,19 +194,13 @@ def autocomplete():
         if not text:
             return jsonify({"error": "Missing text input"}), 400
         
-        messages = [
-            {"role": "user", "content": message.content}
-            for message in message_history.messages if isinstance(message, HumanMessage)
-        ]
-        messages = messages[-5:]
-        
         prompt = f"""
 Using the chat history, complete the sentence: {text}.
 Please finish the sentence beginning with the input text as it is.
 Please ensure that the completed sentence starts with the exact input text.
 """
         
-        messages += [{"role": "user", "content": prompt}]
+        messages = [{"role": "user", "content": prompt}]
 
         # Send a request to the GPT-3 API with the text input
         response = chat_completion_request(messages=messages)
