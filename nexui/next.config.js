@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: "/api/py/:path*",
-        destination: process.env.NEXT_PUBLIC_APP_API_ENDPOINT + "/:path*", // Proxy to Backend
+        destination: process.env.PYTHON_BACKEND_URL + "/:path*", // Proxy to Backend
       },
     ];
   },
