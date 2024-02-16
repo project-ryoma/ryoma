@@ -22,7 +22,7 @@ RUN apt-get update \
 # install dependencies
 RUN pip install -r requirements.txt
 
-EXPOSE 5000
+EXPOSE 3001
 
 # run app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["uvicorn", "--port", "3001", "main:app"]
