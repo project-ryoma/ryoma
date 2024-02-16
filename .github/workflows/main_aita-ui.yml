@@ -23,7 +23,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./nextui
+        working-directory: ./nexui
 
     steps:
       - uses: actions/checkout@v2
