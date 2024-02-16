@@ -15,6 +15,7 @@ on:
 env:
   AZURE_WEBAPP_PACKAGE_PATH: "monorepo/ui"
   COMMIT_SHA: ${{ github.sha }}
+  PYTHON_BACKEND_URL: ${{ vars.PYTHON_BACKEND_URL }}
 
 jobs:
   build:
@@ -37,7 +38,7 @@ jobs:
 
       - name: docker build image
         run: |
-          docker build --platform linux/amd64 ./ -t aita-ui --build-arg APP_ENV=production
+          docker build --platform linux/amd64 ./ -t aita-ui --build-arg PYTHON_BACKEND_URL=${{ env.PYTHON_BACKEND_URL }} 
 
       - name: Set up Docker Build
         run: |
