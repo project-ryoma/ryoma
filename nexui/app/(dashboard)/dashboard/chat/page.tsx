@@ -7,7 +7,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CodeViewer } from "./components/code-viewer"
-import { Icons } from "./components/icons"
+import { Icons } from "@/components/icons"
 import { MaxLengthSelector } from "./components/maxlength-selector"
 import { ModelSelector } from "./components/model-selector"
 import { PresetActions } from "./components/preset-actions"
