@@ -1,17 +1,24 @@
 import os
 import json
 import msal
-import openai
+from openai import OpenAI, OpenAIError, ChatCompletion
 import sys
 
 from flask_cors import CORS
+from flask_session import Session
 
 from flask import (Flask, redirect, render_template, request, jsonify,
-                   send_from_directory, url_for)
-from utils import Utils, pretty_print_conversation
+                   send_from_directory, url_for, session)
+from utils import Utils
 from services.pbiembedservice import PbiEmbedService
 import importlib
 import logging
+
+
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key=os.environ.get("OPENAI_API_KEY"),
+)
 
 
 with open('./dataplatform/function_metadata.json', 'r') as f:
@@ -48,6 +55,10 @@ app.config.from_object('config.BaseConfig')
 
 CORS(app)
 
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 # logging
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter(
@@ -81,8 +92,7 @@ def hello():
        print('Request for hello page received with no name or blank name -- redirecting')
        return redirect(url_for('index'))
 
-
-def chat_completion_request(messages, functions=None, max_tokens=1000, n=3, temperature=0.7):
+def chat_completion_request(messages, functions=None, max_tokens=1000, n=3, temperature=0.7) -> ChatCompletion:
     try:
         api_args = {
             "model": "gpt-3.5-turbo-0613",
@@ -95,72 +105,93 @@ def chat_completion_request(messages, functions=None, max_tokens=1000, n=3, temp
         if functions is not None:
             api_args["functions"] = functions
 
-        response = openai.ChatCompletion.create(**api_args) 
+        response = client.chat.completions.create(**api_args)
+        print('chat_response', response)
         return response
-    except openai.error.OpenAIError as e:
+    except OpenAIError as e:
         return e
+
+
+@app.route('/execute_function', methods=['POST'])
+def execute_function(function_name, function_arguments):
+    function_to_call = fn_map.get(function_name)
+    try:
+        fn_result = function_to_call(**function_arguments)
+        chat_response = chat_completion_request(messages=[{"role": "user", "content": fn_result}], n=1)
+        return jsonify(
+            {
+                "status": "Success",
+                "message": chat_response
+            }
+    )
+    except Exception as err:
+        error_template = f"""
+Failed to execute function: {function_name} with function arguments: {function_arguments}
+Error: {err}.
+Can you please figure out what went wrong, and maybe ask user for more information?
+"""
+        chat_response = chat_completion_request(messages=[{"role": "user", "content": error_template}], n=1)
+        return jsonify(
+            {
+                "status": "Error",
+                "message": chat_response.choices[0].message.content
+            }
+        )
 
 
 @app.route('/chatv2', methods=['POST'])
 def chat():
     prompt = request.json.get('prompt', '')
 
-    # create a list of messages to send to the chat API
-    # system messages
-#     messages = []
-#     messages.append({"role": "system", "content": """
-# Don't make assumptions about what values to plug into functions, before invoking a function, ask the user to confirm the values for parameters
-# """ + f"\nToday is {datetime.datetime.now().strftime('%Y-%m-%d')}"
-#     })
-
-    # history messages
-    # message_hist = [
-    #     {"role": "user", "content": "(history chat) %s" % message.content}
-    #     for message in message_history.messages if isinstance(message, HumanMessage)
-    # ]
-    
-    # TODO: How do we decide which messages to use as history?
-    # message_hist = message_hist[-5:]
-    # messages = messages + message_hist + [{"role": "user", "content": "(current request) %s" % prompt}]
     messages = [{"role": "user", "content": "(current request) %s" % prompt}]
 
     chat_response = chat_completion_request(messages, functions=functions_metadata, n=1)
     if isinstance(chat_response, Exception):
-        return jsonify(error=str(chat_response)), 500
-    
+        return jsonify(
+            {
+                "status": "Error",
+                "message": "Failed to get chat response with err: \n{}".format(chat_response)
+            }
+        )
+
     # initial message
-    response_message = chat_response["choices"][0]["message"]
-    # response_messages = [response_message]
-    function_call = response_message.get('function_call')
-    print('here', response_message)
+    response_choice = chat_response.choices[0]
 
-    # add the response message to the history
-    # if response_message['content']:
-    #     message_history.add_ai_message(response_message['content'])
-    
     # if the response message contains a function call, ask the user to confirm the execution of the function
-    if function_call is not None:
-        function_name, function_arguments = function_call["name"], json.loads(function_call["arguments"])
-        function_to_call = fn_map.get(function_name)
-        if function_to_call is None:
-            return jsonify(error=f"Function not found: {function_name}"), 404
-        try:
-            fn_result = function_to_call(**function_arguments)
-            fn_response_message = {"role": "function", "name": function_name, "content": str(fn_result)}
-        except Exception as e:
-            error_template = """
-Error calling function: %s\n%s.
-Can you please figure out what went wrong, and maybe ask user for more information?
-            """.format(function_name, str(e))
-            fn_response_message = {"role": "function", "name": function_name, "content": error_template}
-        messages.append(fn_response_message)
+    if response_choice.finish_reason == 'function_call':
+        function_call = response_choice.message.function_call
+        function_name = function_call.name
+        function_arguments = json.loads(function_call.arguments)
 
-        fn_chat_response = chat_completion_request(messages[-5:])
-        fn_chat_choice = fn_chat_response["choices"][0]
-        messages.append(fn_chat_choice["message"])
+        # ask user to confirm the execution of the function, and show the function arguments,
+        # check if the function arguments are correct
+        prompt = f"""
+The response contains a function call: {function_name} with function arguments: {function_arguments}.
+Ask the user to confirm the execution of the function and required missing arguments.
+"""
+        messages = [{"role": "system", "content": prompt}]
+        chat_response = chat_completion_request(messages, functions=functions_metadata, n=1)
+        response_choice = chat_response.choices[0]
 
-    pretty_print_conversation(messages)
-    return jsonify(response_message['content'])
+        return jsonify(
+            {
+                "status": "Success",
+                "message": response_choice.message.content,
+                "template": {
+                    "type": "function_call",
+                    "function_name": function_name,
+                    "function_arguments": function_arguments
+                }
+            }
+        )
+        
+    else:
+        return jsonify(
+            {
+                "status": "Success",
+                "message": response_choice.message.content
+            }
+        )
 
 @app.route('/authenticate', methods=['POST'])
 def authenticate():
@@ -205,7 +236,7 @@ Please ensure that the completed sentence starts with the exact input text.
         # Send a request to the GPT-3 API with the text input
         response = chat_completion_request(messages=messages)
         # Extract suggestions from the GPT-3 response
-        suggestions = [choice['message']['content'].strip() for choice in response['choices']]
+        suggestions = [choice.message.content.strip() for choice in response.choices]
         suggestions = list(dict.fromkeys(suggestions))
 
         # Return suggestions as a JSON response

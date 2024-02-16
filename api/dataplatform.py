@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
+from snowflake.sqlalchemy import URL as SNOW_URL
 
 
 class DataSource(ABC):
@@ -20,18 +21,24 @@ class SQLDataSource(DataSource):
 
 
 class SnowflakeDataSource(SQLDataSource):
-    def __init__(self, user: str, password: str, account: str, warehouse: str = "COMPUTE_WH", role: str = None, **kwargs):
+    def __init__(self, user: str, password: str, host: str, warehouse: str = "COMPUTE_WH", role: str = None, **kwargs):
         self.user = user
         self.password = password
-        self.account = account
+        self.host = host
         self.warehouse = warehouse
         self.role = role
         super().__init__(self.build_connection_string())
 
     def build_connection_string(self) -> str:
-        url = URL.create("snowflake", username=self.user, password=self.password, host=self.account, 
-                         query={"warehouse": self.warehouse, "role": self.role})
-        return str(url)
+        url = SNOW_URL(
+            account=self.host,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            warehouse=self.warehouse,
+            role=self.role
+        )
+        return url
 
 
 # Implementations for various SQL databases

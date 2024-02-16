@@ -70,15 +70,5 @@
                 "query"
             ]
         }
-    },
-    {
-        "name": "create_report",
-        "module": "dataplatform.tools",
-        "description": "create report, currently support powerbi, tableau, etc.",
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "required": []
-        }
     }
 ]

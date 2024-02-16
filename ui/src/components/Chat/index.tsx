@@ -118,15 +118,17 @@ const Chat = () => {
         model: modelValue
       });
 
+      console.log('response', response);
+      console.log(response.data);
       updateResponse(uniqueId, {
-        response: response.data.trim(),
+        response: response.data.message.trim(),
       });
 
       setPromptToRetry(null);
       setUniqueIdToRetry(null);
 
       // Check if the response contains report information
-      if (response.data.indexOf("I have created a report for you") > -1) {
+      if (response.data.message.indexOf("I have created a report for you") > -1) {
 
         // Assuming response.data.report contains embedUrl and embedReportId
         setReportConfig(response.data);

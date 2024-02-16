@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, Connection
+from sqlalchemy import create_engine
 from services.pbiembedservice import PbiEmbedService
+from dataplatform import DataSourceFactory
 import logging
 
 from flask import current_app as app
@@ -10,22 +11,14 @@ log = logging.getLogger(__name__)
 states_store = {}
 
 
-def connect_to_datasource(datasource: str, **configs) -> Connection:
+def connect_to_datasource(datasource: str, **configs):
     """connect to datasource, either mysql or snowflake"""
     log.info("connect_to_datasource", datasource)
     try:
-        user = configs.get("user")
-        password = configs.get("password")
-        account = configs.get("account")
-        warehouse = configs.get("warehouse")
-        role = configs.get("role")
-        connection_string = f"{datasource}://{user}:{password}@{account}?warehouse={warehouse}&role={role}"
-        engine = create_engine(connection_string)
-        conn = engine.connect()
+        datasource = DataSourceFactory.create_datasource(datasource=datasource, **configs)
+        states_store['db'] = datasource
 
-        states_store['db'] = conn
-
-        return conn
+        return datasource
     except KeyError:
         raise ValueError(f"Unsupported datasource: {datasource}")
 
