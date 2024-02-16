@@ -22,7 +22,7 @@ RUN apt-get update \
 # install dependencies
 RUN pip install -r requirements.txt
 
-EXPOSE 3001
+EXPOSE 5000
 
 # run app
-CMD ["uvicorn", "--port", "3001", "main:app"]
+CMD ["uvicorn", "--port", "5000", "main:app"]

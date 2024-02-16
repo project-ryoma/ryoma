@@ -202,4 +202,4 @@ Please ensure that the completed sentence starts with the exact input text.
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=3001)
+    uvicorn.run(app, port=5000)
