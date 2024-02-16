@@ -2,7 +2,6 @@ import React from "react";
 import { Icons } from "@/components/icons";
 import { MessageInterface } from "./message-interface";
 
-
 interface ChatMessageProps {
   message: MessageInterface;
 }
