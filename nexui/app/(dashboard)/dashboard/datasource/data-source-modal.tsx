@@ -1,18 +1,12 @@
-
 "use client";
 import { DataSource } from "@/types/index";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-// the form should be able to handle the following fields
-// user, password, host, port, database, schema, and type
 
 const formSchema = z.object({
   user: z.string(),
@@ -39,6 +33,7 @@ export function DataSourceModal({ dataSource, isOpen, onClose, onSubmit }: DataS
     resolver: zodResolver(formSchema),
   });
 
+
   return (
     <Modal
       title={dataSource.name}
@@ -50,11 +45,12 @@ export function DataSourceModal({ dataSource, isOpen, onClose, onSubmit }: DataS
         <form className="space-y-4">
           {Object.keys(formSchema.shape).map((key) => {
             // get the key as the name of the field
+            const k = key as keyof DataSourceFormValues;
             return (
               <FormField
                 key={key}
                 control={form.control}
-                name={key}
+                name={k}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{key}</FormLabel>
