@@ -1,0 +1,16 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  rewrites: async () => {
+    return [
+      {
+        source: "/api/py/:path*",
+        destination: process.env.PYTHON_BACKEND_URL + "/:path*", // Proxy to Backend
+      },
+    ];
+  },
+  images: {
+    domains: ["utfs.io"],
+  },
+};
+
+module.exports = nextConfig;

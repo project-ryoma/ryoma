@@ -1,19 +1,19 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and publish ui image 
+name: Build and deploy aita ui
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'nextui/**'
+      - 'ui/**'
       - '.github/workflows/main_aita-ui.yml'
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: "monorepo/ui"
+  AZURE_WEBAPP_PACKAGE_PATH: "./ui"
   COMMIT_SHA: ${{ github.sha }}
   PYTHON_BACKEND_URL: ${{ vars.PYTHON_BACKEND_URL }}
 
@@ -24,7 +24,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./nexui
+        working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     steps:
       - uses: actions/checkout@v2
