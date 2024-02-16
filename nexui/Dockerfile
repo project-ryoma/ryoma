@@ -9,6 +9,7 @@ COPY . .
 # Default to development environment
 ARG APP_ENV
 ENV NODE_ENV=${APP_ENV:-dev}
+ENV PYTHON_BACKEND_URL=${PYTHON_BACKEND_URL:-http://localhost:3001}
 
 # Copy the appropriate environment variable file
 COPY .env.${NODE_ENV} .env
