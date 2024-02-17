@@ -13,8 +13,6 @@ COPY . .
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-ENV OPENAI_API_KEY=""
-
 # install mariadb connector
 RUN apt-get update \
     && apt-get upgrade -y \
