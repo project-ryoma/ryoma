@@ -9,12 +9,12 @@ on:
     branches:
       - main
     paths:
-      - 'api/**'
+      - 'python/**'
       - '.github/workflows/main_aita-api.yml'
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: "./api"
+  AZURE_WEBAPP_PACKAGE_PATH: "./python"
   COMMIT_SHA: ${{ github.sha }}
 
 jobs:
