@@ -23,7 +23,7 @@ msal==1.26.0
 openai==1.8.0
 packaging==23.2
 pycparser==2.21
-pydantic==2.5.3
+pydantic==2.6.1
 pydantic_core==2.14.6
 PyJWT==2.8.0
 requests==2.31.0
