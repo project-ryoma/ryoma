@@ -12,7 +12,7 @@ Flask==3.0.1
 Flask-Cors==4.0.0
 gunicorn==21.2.0
 h11==0.14.0
-httpcore==1.0.2
+httpcore==1.0.3
 httpx==0.26.0
 idna==3.6
 importlib-metadata==7.0.1
