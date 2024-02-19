@@ -8,7 +8,7 @@ click==8.1.7
 cryptography==41.0.7
 distro==1.9.0
 exceptiongroup==1.2.0
-Flask==3.0.1
+Flask==3.0.2
 Flask-Cors==4.0.0
 gunicorn==21.2.0
 h11==0.14.0
