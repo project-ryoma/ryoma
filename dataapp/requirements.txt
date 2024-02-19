@@ -24,7 +24,7 @@ openai==1.8.0
 packaging==23.2
 pycparser==2.21
 pydantic==2.5.3
-pydantic_core==2.14.6
+pydantic_core==2.16.2
 PyJWT==2.8.0
 requests==2.31.0
 sniffio==1.3.0
