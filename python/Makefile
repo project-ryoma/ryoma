@@ -7,8 +7,8 @@ PYTHONPATH := `pwd`
 IMAGE := aita
 VERSION := latest
 
-.PHONY: download-poetry
-download-poetry:
+.PHONY: poetry-download
+poetry-download:
 	curl -sSL https://install.python-poetry.org | $(PYTHON) -
 
 #* Installation

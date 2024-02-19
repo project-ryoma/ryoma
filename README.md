@@ -1,1 +1,2 @@
-# monorepo
+# aita
+AI Powered Data Platform
