@@ -1,5 +1,6 @@
-from aita.datasource.base import SQLDataSource
 from sqlalchemy.engine import URL
+
+from aita.datasource.base import SQLDataSource
 
 
 # Implementations for various SQL databases

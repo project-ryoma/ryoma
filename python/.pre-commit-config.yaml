@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3.8
+  python: python3.9
 
 default_stages: [commit, push]
 
@@ -23,7 +23,7 @@ repos:
     hooks:
       - id: isort
         name: isort
-        entry: poetry run isort --settings-path python/pyproject.toml
+        entry: poetry run isort --settings-path pyproject.toml
         types: [python]
         language: system
 
@@ -31,6 +31,6 @@ repos:
     hooks:
       - id: black
         name: black
-        entry: poetry run black --config python/pyproject.toml
+        entry: poetry run black --config pyproject.toml
         types: [python]
         language: system

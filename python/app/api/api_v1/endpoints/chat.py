@@ -1,11 +1,14 @@
+from typing import Any
+
+import importlib
+import json
+
+from fastapi import APIRouter
+
 from aita.tools import tool_schemas
 from aita.utils import chat_completion_request
 from app.api.deps import SessionDep
-from app.models import QueryContent, ChatResponse
-from fastapi import APIRouter
-from typing import Any
-import importlib
-import json
+from app.models import ChatResponse, QueryContent
 
 router = APIRouter()
 

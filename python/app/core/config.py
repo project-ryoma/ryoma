@@ -2,7 +2,7 @@ from typing import Any, List, Optional, Union
 
 import secrets
 
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -70,14 +70,15 @@ class Settings(BaseSettings):
     @field_validator("EMAILS_ENABLED")
     def get_emails_enabled(cls, v: bool, info: ValidationInfo) -> bool:
         return bool(
-            info.data.get("SMTP_HOST") and info.data.get("SMTP_PORT") and info.data.get("EMAILS_FROM_EMAIL")
+            info.data.get("SMTP_HOST")
+            and info.data.get("SMTP_PORT")
+            and info.data.get("EMAILS_FROM_EMAIL")
         )
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: Optional[str] = None
     USERS_OPEN_REGISTRATION: bool = False
-
 
 
 settings = Settings()
