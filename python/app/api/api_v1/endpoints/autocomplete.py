@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.models import ChatResponse
 from aita.utils import chat_completion_request
+from app.models import ChatResponse
 
 router = APIRouter()
 

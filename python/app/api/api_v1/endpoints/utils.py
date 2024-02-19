@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
+
 from app.api.deps import get_current_active_superuser
 from app.core.celery_app import celery_app
 from app.models import Message

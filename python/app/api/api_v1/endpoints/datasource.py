@@ -1,7 +1,8 @@
-from aita.metadb import state_store
-from aita.datasource.factory import DataSourceFactory
-from app.models import ConnectionParams
 from fastapi import APIRouter
+
+from aita.datasource.factory import DataSourceFactory
+from aita.metadb import state_store
+from app.models import ConnectionParams
 
 router = APIRouter()
 

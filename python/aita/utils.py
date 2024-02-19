@@ -1,6 +1,6 @@
 import os
-from openai import ChatCompletion, OpenAI, OpenAIError
 
+from openai import ChatCompletion, OpenAI, OpenAIError
 
 client = OpenAI(
     # This is the default and can be omitted

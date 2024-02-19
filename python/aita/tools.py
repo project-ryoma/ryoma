@@ -1,5 +1,7 @@
-import logging
 from typing import Any
+
+import logging
+
 from aita.function_calls import openai_function
 from aita.metadb import state_store
 

@@ -1,8 +1,8 @@
 # item = CRUDBase[Item, ItemCreate, ItemUpdate](Item)
 from typing import Optional
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate
