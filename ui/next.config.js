@@ -3,7 +3,7 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: "/api/py/:path*",
+        source: "/py/:path*",
         destination: process.env.PYTHON_BACKEND_URL + "/:path*", // Proxy to Backend
       },
     ];

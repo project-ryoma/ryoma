@@ -114,4 +114,4 @@ cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove 
 
 .PHONY: start-local-backend
 start-local-backend:
-	poetry run uvicorn app.main:app --port 5000 --reload
+	poetry run uvicorn app.main:app --host localhost --port 3001 --reload

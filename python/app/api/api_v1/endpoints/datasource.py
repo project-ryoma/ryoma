@@ -7,9 +7,9 @@ from app.models import ConnectionParams
 router = APIRouter()
 
 
-@router.post("/")
-def connect(datasource: str, connection_params: ConnectionParams):
-    conn = DataSourceFactory.create_datasource(datasource=datasource, **connection_params.dict())
+@router.post("/connect")
+def connect(connection_params: ConnectionParams):
+    conn = DataSourceFactory.create_datasource(**connection_params.dict())
 
-    state_store.cache[datasource] = conn
-    return {"status": "Success", "message": f"Connected to datasource: {datasource}"}
+    state_store.cache[connection_params.datasource] = conn
+    return {"status": "Success", "message": f"Connected to datasource: {connection_params.datasource}"}

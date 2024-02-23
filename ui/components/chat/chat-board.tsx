@@ -3,6 +3,7 @@ import ChatForm from "@/components/forms/chat-form"
 import ChatHistory from "@/components/chat/chat-history";
 import { MessageInterface } from "./message-interface";
 import { useState } from "react";
+import ChatSandbox from "@/components/chat/chat-sandbox";
 import * as z from "zod";
 import axios from "axios";
 
@@ -10,9 +11,22 @@ const formSchema = z.object({
   question: z.string(),
 });
 
+const toolFormSchema = z.object({
+  name: z.string(),
+  arguments: z.record(z.string()),
+});
+
+
+export interface ToolInterface {
+  id: string;
+  name: string;
+  arguments: Record<string, string>;
+}
+
 function ChatBoard() {
   const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [prompt, setPrompt] = useState<string>('');
+  const [tool, setTool] = useState<ToolInterface | null>(null);
   const [promptToRetry, setPromptToRetry] = useState<string | null>(null);
   const [uniqueIdToRetry, setUniqueIdToRetry] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -110,13 +124,17 @@ function ChatBoard() {
 
     try {
       // Send a POST request to the API with the prompt in the request body
-      const response = await axios.post('/api/py/chat', {
+      const response = await axios.post('/api/chat', {
         prompt: _prompt,
       });
 
       updateMessage(uniqueId, {
         text: response.data.message.trim(),
       });
+
+      if (response.data.additional_info && response.data.additional_info.type == "use_tool") {
+        setTool(response.data.additional_info);
+      }
 
       setPromptToRetry(null);
       setUniqueIdToRetry(null);
@@ -136,10 +154,52 @@ function ChatBoard() {
     }
   }
 
+  const handleToolSubmit = async (values: z.infer<typeof toolFormSchema>) => {
+    const { name, arguments: args } = values;
+
+
+    let uniqueId: string;
+    uniqueId = addMessage(false);
+    await delay(50);
+
+    const response = await axios.post('http://localhost:3001/api/v1/tools/run', {
+      name,
+      arguments: args,
+    });
+    
+    updateMessage(uniqueId, {
+      text: response.data.message.trim(),
+    });
+
+    if (response.data.additional_info && response.data.additional_info.type == "use_tool") {
+      setTool(response.data.additional_info);
+    }
+
+    setPromptToRetry(null);
+    setUniqueIdToRetry(null);
+    
+  }
+
+
   return (
-    <div className="flex flex-col h-full">
-      <ChatHistory messages={messages} />
-      <div className="p-4 bg-white border-t border-gray-200">
+    <div className="flex flex-1 flex-col h-full">
+      <div className="flex-1 h-full hidden items-start justify-center gap-6 rounded-lg p-8 md:grid lg:grid-cols-2 xl:grid-cols-2">
+        <div className="flex-1 overflow-auto lg:col-span-1 border rounded-md">
+          <ChatHistory messages={messages} />
+        </div>
+        <div className="h-full lg:col-span-1 rounded-md border bg-muted">
+          {tool && tool.name && tool.arguments && (
+          <ChatSandbox
+            tool={tool}
+            onConfirm={handleToolSubmit}
+            onCancel={() => {
+              setTool(null);
+            }}
+          />
+          )}
+        </div>
+      </div>
+      <div className="flex-initial p-4 bg-white border-t border-gray-200">
         <ChatForm onSubmit={onSubmit} loading={loading}  />
       </div>
     </div>

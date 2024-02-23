@@ -1,4 +1,5 @@
-from typing import Union
+from enum import Enum
+from typing import Union, Dict
 
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import relationship
@@ -9,6 +10,7 @@ class Prompt(BaseModel):
 
 
 class ConnectionParams(BaseModel):
+    datasource: str
     host: str
     port: Union[int, None] = None
     user: str
@@ -112,12 +114,20 @@ class NewPassword(BaseModel):
     new_password: str
 
 
-class QueryContent(BaseModel):
-    query: str
+class ChatRequest(BaseModel):
+    prompt: str
+    allow_function_calls: bool = False
+
+
+class ChatResponseStatus(str, Enum):
+    success = 'Success'
+    error = 'Error'
 
 
 class ChatResponse(BaseModel):
     message: str
+    status: ChatResponseStatus
+    additional_info: Union[Dict, None] = None
 
 
 class ConnectionResponse(BaseModel):
@@ -125,4 +135,14 @@ class ConnectionResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
+    message: str
+
+
+class ToolUseRequest(BaseModel):
+    name: str
+    arguments: dict
+
+
+class ToolUseResponse(BaseModel):
+    status: str
     message: str

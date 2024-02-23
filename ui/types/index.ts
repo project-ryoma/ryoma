@@ -31,14 +31,3 @@ export interface FooterItem {
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
-
-export interface DataSource {
-  id: string;
-  name: string;
-  label: string;
-  description?: string;
-  type?: string;
-  icon?: string;
-  status: string;
-  tags?: string[];
-}

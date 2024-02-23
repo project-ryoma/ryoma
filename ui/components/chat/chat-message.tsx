@@ -9,11 +9,11 @@ interface ChatMessageProps {
 // ChatMessage.js
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const {text, selfFlag, error, image } = message;
-  const AvatarIcon = selfFlag ? Icons.user : Icons.logo; // Choose the icon based on who is sending the message
+  const AvatarIcon = selfFlag ? Icons.user : Icons.aita; // Choose the icon based on who is sending the message
 
   return (
     <div className="flex items-center justify-start">
-      <AvatarIcon className="w-10 h-10 rounded-full text-gray-500" />
+      <AvatarIcon className="w-12 h-12 rounded-full text-gray-500" />
       <div className="bg-white shadow p-4 m-2 rounded-lg" id={message.id}>
         {text && <p className={`${error ? 'text-red-500' : 'text-gray-700'}`}>{text}</p>}
         {image && <img src={image} alt="Attached" className="mt-2 rounded" />}

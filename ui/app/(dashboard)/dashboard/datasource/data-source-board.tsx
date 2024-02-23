@@ -1,31 +1,8 @@
 "use client";
-import { DataSource } from "@/types/index";
 import { DataSourceCard } from "./data-source-card";
 import { useState } from "react";
+import { dataSources } from "./data/datasource";
 
-const dataSources: DataSource[] = [
-  {
-    id: "1",
-    name: "Snowflake",
-    type: "Data Warehouse",
-    status: "connected",
-    label: "snowflake",
-  },
-  {
-    id: "2",
-    name: "PostgreSQL",
-    type: "Database",
-    status: "disconnected",
-    label: "postgresql",
-  },
-  {
-    id: "3",
-    name: "BigQuery",
-    type: "Data Warehouse",
-    status: "connecting",
-    label: "bigquery",
-  },
-];
 
 const DataSourceBoard = () => {
   const [searchValue, setSearchValue] = useState("");

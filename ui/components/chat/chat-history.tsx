@@ -12,7 +12,6 @@ function ChatHistory({ messages }: { messages: MessageInterface[] }) {
   useEffect(() => {
     hljs.highlightAll();
   }, [messages]);
-  console.log('messages', messages);
 
   return (
     <div className="flex-grow overflow-auto">

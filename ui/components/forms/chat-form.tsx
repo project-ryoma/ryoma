@@ -53,11 +53,10 @@ export default function ChatForm({ onSubmit, loading }: ChatFormProps) {
                   <FormControl>
                     <Input
                       type="question"
-                        placeholder="Ask your data..."
-                        disabled={loading}
-                        className="flex-grow"
-
-                        {...field}
+                      placeholder="Ask your data..."
+                      disabled={loading}
+                      className="flex-grow"
+                      {...field}
                       />
                   </FormControl>
                   <Button variant="outline" size="icon" type="submit">

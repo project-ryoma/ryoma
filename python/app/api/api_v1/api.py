@@ -10,6 +10,7 @@ from app.api.api_v1.endpoints import (
     login,
     users,
     utils,
+    tools,
 )
 
 api_router = APIRouter()
@@ -22,3 +23,4 @@ api_router.include_router(datasource.router, prefix="/datasource", tags=["dataso
 api_router.include_router(health.router, prefix="/health", tags=["health"])
 api_router.include_router(favicon.router, prefix="/favicon.ico", tags=["favicon"])
 api_router.include_router(autocomplete.router, prefix="/autocomplete", tags=["autocomplete"])
+api_router.include_router(tools.router, prefix="/tools", tags=["tools"])

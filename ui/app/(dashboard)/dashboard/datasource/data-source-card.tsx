@@ -1,11 +1,11 @@
 "use client";
-import { DataSource } from "@/types/index";
 import { Card } from "@/components/ui/card";
-import { DataSourceStatus } from "./data-source-status";
 import { DataSourceModal } from "./data-source-modal";
+import {DataSource} from "./data/datasource";
 import { useState } from "react";
 import axios from "axios";
 import * as z from "zod";
+import cn from "classnames";
 
 type DataSourceCardProps = {
   dataSource: DataSource;
@@ -28,13 +28,12 @@ export function DataSourceCard({ dataSource, onClick }: DataSourceCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    // call api to connect to the data source
     
-    console.log("values", values)
     try {
       // if successful, update the status of the data source
       // and close the modal
-      const response = await axios.post(`/api/py/connect-datasource?datasource=${dataSource.label}`, {
+      const response = await axios.post("/api/datasource/connect", {
+        datasource: dataSource.label,
         ...values,
       });
 
@@ -56,11 +55,20 @@ export function DataSourceCard({ dataSource, onClick }: DataSourceCardProps) {
 
   return (
     <>
-      <Card onClick={() => setModalOpen(true)}>
+      <Card
+        className="hover:bg-accent hover:text-accent-foreground hover:cursor-pointer"
+        onClick={() => setModalOpen(true)}>
         <div className="space-y-2 p-4">
-          <h3 className="text-lg font-semibold">{dataSource.name}</h3>
-          <DataSourceStatus status={dataSource.status} />
-          <p className="text-sm text-gray-500">{dataSource.type}</p>
+          <h3 className="flex items-center justify-between">
+            {dataSource.name}
+            <span
+              className={cn("text-xs rounded-full px-1 py-1", {
+                "bg-green-500 text-white": dataSource.status === "connected",
+                "bg-red-500 text-white": dataSource.status === "disconnected",
+              })}
+            />
+          </h3>
+          <p className="text-gray-500">{dataSource.type}</p>
         </div>
       </Card>
       <DataSourceModal

@@ -54,7 +54,6 @@ export default function Chat() {
             <PresetSave />
             <div className="hidden space-x-2 md:flex">
               <CodeViewer />
-              <PresetShare />
             </div>
             <PresetActions />
           </div>
@@ -64,44 +63,13 @@ export default function Chat() {
           <div className="container h-full py-6">
             <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_200px]">
               <div className="hidden flex-col space-y-4 sm:flex md:order-2">
-                <div className="grid gap-2">
-                  <HoverCard openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Mode
-                      </span>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-[320px] text-sm" side="left">
-                      Choose the interface that best suits your task. You can
-                      provide: a simple prompt to complete, starting and ending
-                      text to insert a completion within, or some text with
-                      instructions to edit it.
-                    </HoverCardContent>
-                  </HoverCard>
-                  <TabsList className="grid grid-cols-3">
-                    <TabsTrigger value="complete">
-                      <span className="sr-only">Complete</span>
-                      <Icons.completeMode className="h-5 w-5" />
-                    </TabsTrigger>
-                    <TabsTrigger value="insert">
-                      <span className="sr-only">Insert</span>
-                      <Icons.insertMode className="h-5 w-5" />
-                    </TabsTrigger>
-                    <TabsTrigger value="edit">
-                      <span className="sr-only">Edit</span>
-                      <Icons.editMode className="h-5 w-5" />
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
                 <ModelSelector types={types} models={models} />
                 <TemperatureSelector defaultValue={[0.56]} />
                 <MaxLengthSelector defaultValue={[256]} />
                 <TopPSelector defaultValue={[0.9]} />
               </div>
               <div className="md:order-1">
-                <TabsContent value="complete" className="h-full mt-0 border-0 p-0">
-                  <ChatBoard />
-                </TabsContent>
+                <ChatBoard />
               </div>
             </div>
           </div>
