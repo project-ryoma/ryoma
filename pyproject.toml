@@ -33,7 +33,7 @@ classifiers = [  #! Update me
 "aita" = "aita.__main__:app"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 
 typer = {extras = ["all"], version = "^0.4.0"}
 rich = "^10.14.0"
@@ -55,6 +55,10 @@ email-validator = "^2.1.0.post1"
 emails = "^0.6"
 python-multipart = "^0.0.9"
 psycopg2-binary = "^2.9.9"
+docstring-parser = "^0.15"
+numpy = "^1.26.4"
+langchain = "^0.1.9"
+langchain-openai = "^0.0.7"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
@@ -111,7 +115,7 @@ color_output = true
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
-python_version = 3.8
+python_version = 3.9
 pretty = true
 show_traceback = true
 color_output = true

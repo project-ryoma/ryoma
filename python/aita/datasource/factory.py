@@ -1,7 +1,7 @@
 from aita.datasource.base import DataSource
 from aita.datasource.bigquery import BigQueryDataSource
-from aita.datasource.mysql import MySQLDataSource
-from aita.datasource.postgresql import PostgreSQLDataSource
+from aita.datasource.mysql import MySqlDataSource
+from aita.datasource.postgresql import PostgreSqlDataSource
 from aita.datasource.snowflake import SnowflakeDataSource
 
 
@@ -10,8 +10,8 @@ class DataSourceFactory:
     def create_datasource(**kwargs) -> DataSource:
         datasource_type = kwargs.pop("datasource")
         datasources = {
-            "mysql": MySQLDataSource,
-            "postgresql": PostgreSQLDataSource,
+            "mysql": MySqlDataSource,
+            "postgresql": PostgreSqlDataSource,
             "bigquery": BigQueryDataSource,
             "snowflake": SnowflakeDataSource,
         }

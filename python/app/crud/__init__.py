@@ -5,10 +5,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate
+from app.models import User, UserCreate, DataSource, DataSourceConnect
 
 from .crud_item import item
 from .crud_user import user
+from .crud_datasource import datasource
 
 # For a new basic set of CRUD operations you could just do
 
@@ -40,3 +41,15 @@ def authenticate(*, session: Session, email: str, password: str) -> Optional[Use
     if not verify_password(password, user.hashed_password):
         return None
     return user
+
+def connect_datasource(*, session: Session, datasource_connect: DataSourceConnect) -> DataSource:
+    db_obj = DataSource.from_orm(datasource_connect, update={"connected": True})
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def get_datasource_by_id(*, session: Session, id: str) -> Optional[DataSource]:
+    statement = select(DataSource).where(DataSource.id == id)
+    session_datasource = session.exec(statement).first()
+    return session_datasource

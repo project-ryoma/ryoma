@@ -1,9 +1,9 @@
 from snowflake.sqlalchemy import URL
 
-from aita.datasource.base import SQLDataSource
+from aita.datasource.base import SqlDataSource
 
 
-class SnowflakeDataSource(SQLDataSource):
+class SnowflakeDataSource(SqlDataSource):
     def __init__(
         self,
         user: str,

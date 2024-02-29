@@ -1,15 +1,23 @@
 from fastapi import APIRouter
 
 from aita.datasource.factory import DataSourceFactory
-from aita.metadb import state_store
-from app.models import ConnectionParams
+from app.models import ConnectionParams, DataSourceConnect, DataSourceConnectResponse
+from app import crud
+from app.api.deps import SessionDep
 
 router = APIRouter()
 
 
-@router.post("/connect")
-def connect(connection_params: ConnectionParams):
+@router.post("/connect", response_model=DataSourceConnectResponse)
+def connect(session: SessionDep, connection_params: ConnectionParams):
     conn = DataSourceFactory.create_datasource(**connection_params.dict())
+    datasource_connect = DataSourceConnect(
+        name=connection_params.datasource,
+        connection_string=conn.connection_string,
+        connected=True,
+    )
+    crud.connect_datasource(session=session, datasource_connect=datasource_connect)
 
-    state_store.cache[connection_params.datasource] = conn
-    return {"status": "Success", "message": f"Connected to datasource: {connection_params.datasource}"}
+    return DataSourceConnectResponse(
+        status="success", message=f"Connected to {connection_params.datasource}"
+    )

@@ -9,7 +9,7 @@ class DataSource(ABC):
         pass
 
 
-class SQLDataSource(DataSource):
+class SqlDataSource(DataSource):
     def __init__(self, connection_url: str):
         self.engine = create_engine(connection_url)
 

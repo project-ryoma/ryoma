@@ -5,22 +5,6 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import relationship
 
 
-class Prompt(BaseModel):
-    prompt: str
-
-
-class ConnectionParams(BaseModel):
-    datasource: str
-    host: str
-    port: Union[int, None] = None
-    user: str
-    password: str
-    schema: Union[str, None] = None
-    database: Union[str, None] = None
-    warehouse: Union[str, None] = None
-    role: Union[str, None] = None
-
-
 # Shared properties
 class UserBase(BaseModel):
     email: EmailStr = Field(unique=True, index=True)
@@ -114,9 +98,18 @@ class NewPassword(BaseModel):
     new_password: str
 
 
+class Prompt(BaseModel):
+    prompt: str
+
+
+
 class ChatRequest(BaseModel):
     prompt: str
     allow_function_calls: bool = False
+    agent: str
+    model: str
+    temperature: float
+    datasource_id: str
 
 
 class ChatResponseStatus(str, Enum):
@@ -144,5 +137,47 @@ class ToolUseRequest(BaseModel):
 
 
 class ToolUseResponse(BaseModel):
+    status: str
+    message: str
+
+
+class DataSourceBase(BaseModel):
+    name: str
+    description: Union[str, None] = None
+    enabled: bool = True
+
+    class Config:
+        orm_mode = True
+
+
+class ConnectionParams(BaseModel):
+    datasource: str
+    host: str
+    port: Union[int, None] = None
+    user: str
+    password: str
+    schema: Union[str, None] = None
+    database: Union[str, None] = None
+    warehouse: Union[str, None] = None
+    role: Union[str, None] = None
+
+
+# Database model, database table inferred from class name
+class DataSource(DataSourceBase):
+    id: int
+    connection_string: str
+    connected: bool = False
+
+    class Config:
+        orm_mode = True
+
+
+class DataSourceConnect(DataSourceBase):
+    name: str
+    connection_string: str
+    connected: bool = False
+
+
+class DataSourceConnectResponse(BaseModel):
     status: str
     message: str

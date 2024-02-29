@@ -1,7 +1,7 @@
 #* Variables
 SHELL := /usr/bin/env bash
 PYTHON := python
-PYTHONPATH := `pwd`
+PYTHONPATH := 'python'
 
 #* Docker variables
 IMAGE := aita
@@ -70,7 +70,7 @@ docker-build:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
 		-t $(IMAGE):$(VERSION) . \
-		-f ./Dockerfile
+		-f ./python/Dockerfile
 
 .PHONY: docker-run
 docker-run:
@@ -114,4 +114,4 @@ cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove 
 
 .PHONY: start-local-backend
 start-local-backend:
-	poetry run uvicorn app.main:app --host localhost --port 3001 --reload
+	PYTHONPATH=$(PYTHONPATH) poetry run uvicorn app.main:app --host localhost --port 3001 --reload

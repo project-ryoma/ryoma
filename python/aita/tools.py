@@ -1,24 +1,33 @@
-from typing import Any
+from typing import Any, Union, Sequence, Dict
 
 import logging
 
-from aita.function_calls import openai_function
-from aita.metadb import state_store
+from langchain_community.tools.sql_database.tool import BaseSQLDatabaseTool
+from langchain_core.tools import BaseTool
 
 log = logging.getLogger(__name__)
 
+from sqlalchemy.engine import Result
 
-@openai_function
-def query_datasource(datasource: str, query: str) -> Any:
-    """query datasource, get the analytics result, etc.
-    Currently, support mysql and snowflake
-    Requirement:
-    - For better performance, limit the number of rows returned by the query to 10 rows.
+
+class QuerySQLDataBaseTool(BaseSQLDatabaseTool, BaseTool):
+    """Tool for querying a SQL database."""
+
+    name: str = "sql_db_query"
+    description: str = """
+    Execute a SQL query against the database and get back the result..
+    If the query is not correct, an error message will be returned.
+    If an error is returned, rewrite the query, check the query, and try again.
     """
-    conn = state_store.cache[datasource]
-    query_result = conn.execute(query).fetchall()
-    json_result = [dict(r) for r in query_result]
-    return json_result
 
-
-tool_schemas = [query_datasource.openai_schema]
+    def _run(
+        self,
+        **kwargs,
+    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
+        """Execute the query, return the results or an error message."""
+        print("hererere", kwargs)
+        if "__arg1" in kwargs:
+            query = kwargs.get("__arg1")
+            return self.db.run_no_throw(query)
+        else:
+            raise ValueError("Missing query input.")
