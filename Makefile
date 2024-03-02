@@ -115,3 +115,7 @@ cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove 
 .PHONY: start-local-backend
 start-local-backend:
 	PYTHONPATH=$(PYTHONPATH) poetry run uvicorn app.main:app --host localhost --port 3001 --reload
+
+.PHONY: build
+build:
+	cd python && poetry build
