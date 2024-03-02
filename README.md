@@ -11,65 +11,23 @@ AI Powered Data Platform
 [![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/projec-taita/aita/blob/main/.pre-commit-config.yaml)
 [![Semantic Versions](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--versions-e10079.svg)](https://github.com/project-aita/aita/releases)
-[![License](https://img.shields.io/github/license/aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
 ![Coverage Report](python/assets/images/coverage.svg)
 
 </div>
 
-## Very first steps
+## Tech Stack
 
-### Initialize your code
+Our platform leverages a combination of cutting-edge technologies and frameworks:
 
-1. Initialize `git` inside your repo:
+- **[OpenAI](https://openai.com/)**: Utilizes advanced natural language processing and machine learning models for insightful data analysis and automation.
+- **[Langchain](https://www.langchain.com/)**: Facilitates the seamless integration of language models into application workflows, significantly enhancing AI interaction capabilities.
+- **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
+- **[FastAPI](https://fastapi.tiangolo.com/)**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+, emphasizing speed, reliability, and ease of use.
+- **[Shadcn](https://ui.shadcn.com/)**
 
-```bash
-cd aita && git init
-```
 
-2. If you don't have `Poetry` installed run:
-
-```bash
-make poetry-download
-```
-
-3. Initialize poetry and install `pre-commit` hooks:
-
-```bash
-make install
-make pre-commit-install
-```
-
-4. Run the codestyle:
-
-```bash
-make codestyle
-```
-
-## Installation
-
-```bash
-pip install -U aita
-```
-
-or install with `Poetry`
-
-```bash
-poetry add aita
-```
-
-Then you can run
-
-```bash
-aita --help
-```
-
-or with `Poetry`:
-
-```bash
-poetry run aita --help
-```
-
-### Makefile usage
+### Project Startup
 
 [`Makefile`](https://github.com/aita/aita/blob/master/Makefile) contains a lot of functions for faster development.
 
@@ -289,7 +247,7 @@ GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Dep
 
 ## 🛡 License
 
-[![License](https://img.shields.io/github/license/aita/aita)](https://github.com/aita/aita/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
 
 This project is licensed under the terms of the `Apache Software License 2.0` license. See [LICENSE](https://github.com/aita/aita/blob/master/LICENSE) for more details.
 
