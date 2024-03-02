@@ -11,7 +11,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./python
+        working-directory: ./
 
     steps:
     - uses: actions/checkout@v4
