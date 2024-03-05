@@ -1412,13 +1412,13 @@ extended-testing = ["aiosqlite (>=0.19.0,<0.20.0)", "aleph-alpha-client (>=2.15.
 
 [[package]]
 name = "langchain-core"
-version = "0.1.28"
+version = "0.1.29"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.8.1,<4.0"
 files = [
-    {file = "langchain_core-0.1.28-py3-none-any.whl", hash = "sha256:f40ca31257e003eb404e6275345d13a1b3839df147153684bab56bb8d80162c6"},
-    {file = "langchain_core-0.1.28.tar.gz", hash = "sha256:04e761a513200b6e5b5818613821945799c07bc5349087d7692e50823107c9d6"},
+    {file = "langchain_core-0.1.29-py3-none-any.whl", hash = "sha256:b96d599ff98810a7fcba726c151d473a4b938e0f90b9907c460b0bf0a1c7a0f7"},
+    {file = "langchain_core-0.1.29.tar.gz", hash = "sha256:6731dabffad03b9213ada2640d54ed7f4ef6b99fce87ade3c71474ae154dd3cc"},
 ]
 
 [package.dependencies]
