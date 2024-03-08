@@ -1470,13 +1470,13 @@ extended-testing = ["lxml (>=5.1.0,<6.0.0)"]
 
 [[package]]
 name = "langsmith"
-version = "0.1.13"
+version = "0.1.23"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = ">=3.8.1,<4.0"
 files = [
-    {file = "langsmith-0.1.13-py3-none-any.whl", hash = "sha256:c4b0bf2ed2075f2a23a8a3ac46a804581ed1e85d85c8ad18f7d0fd2a05441c6d"},
-    {file = "langsmith-0.1.13.tar.gz", hash = "sha256:6cacc88e272c1233e4038be33e9e219221462887f3681d94f2319916fae31fcc"},
+    {file = "langsmith-0.1.23-py3-none-any.whl", hash = "sha256:69984268b9867cb31b875965b3f86b6f56ba17dd5454d487d3a1a999bdaeea69"},
+    {file = "langsmith-0.1.23.tar.gz", hash = "sha256:327c66ec0de8c1bc57bfa47bbc70a29ef749e97c3e5571b9baf754d1e0644220"},
 ]
 
 [package.dependencies]
