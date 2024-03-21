@@ -58,7 +58,7 @@ psycopg2-binary = "^2.9.9"
 docstring-parser = "^0.15"
 numpy = "^1.26.4"
 langchain = "^0.1.9"
-langchain-openai = "^0.0.7"
+langchain-openai = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
