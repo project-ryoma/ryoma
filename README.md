@@ -12,7 +12,7 @@ AI Powered Data Platform
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/projec-taita/aita/blob/main/.pre-commit-config.yaml)
 [![Semantic Versions](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--versions-e10079.svg)](https://github.com/project-aita/aita/releases)
 [![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
-![Coverage Report](python/assets/images/coverage.svg)
+![Coverage Report](aita/assets/images/coverage.svg)
 
 </div>
 

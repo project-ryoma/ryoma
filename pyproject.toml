@@ -31,6 +31,7 @@ classifiers = [  #! Update me
 [tool.poetry.scripts]
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
 "aita" = "aita.__main__:app"
+"init-data" = "app.initial_data:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -59,6 +60,9 @@ docstring-parser = "^0.15"
 numpy = "^1.26.4"
 langchain = "^0.1.9"
 langchain-openai = "^0.0.7"
+mock = "^5.1.0"
+alembic = "^1.13.1"
+bcrypt = "^4.0.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"

@@ -19,7 +19,8 @@ import GoogleSignInButton from "../github-auth-button";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
-  password: z.string()
+  password: z.string(),
+  confirmPassword: z.string(),
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
@@ -28,19 +29,24 @@ export default function UserAuthForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const [loading, setLoading] = useState(false);
-  const defaultValues = {
-    email: "demo@gmail.com",
-  };
+
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues,
   });
 
   const onSubmit = async (data: UserFormValue) => {
-    signIn("credentials", {
+    if (data.password !== data.confirmPassword) {
+      form.setError("confirmPassword", {
+        type: "manual",
+        message: "Passwords do not match",
+      });
+      return;
+    }
+
+    signIn("signup", {
       email: data.email,
       password: data.password,
-      callbackUrl: callbackUrl ?? "/chat",
+      callbackUrl: callbackUrl ?? "/dashboard",
     });
   };
 
@@ -88,6 +94,24 @@ export default function UserAuthForm() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    disabled={loading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button disabled={loading} className="ml-auto w-full" type="submit">
             Continue With Email
           </Button>
@@ -104,7 +128,6 @@ export default function UserAuthForm() {
         </div>
       </div>
       <GoogleSignInButton />
-
     </>
   );
 }

@@ -1,7 +1,7 @@
 #* Variables
 SHELL := /usr/bin/env bash
 PYTHON := python
-PYTHONPATH := 'python'
+PYTHONPATH := '.'
 
 #* Docker variables
 IMAGE := aita
@@ -119,3 +119,11 @@ start-local-backend:
 .PHONY: build
 build:
 	poetry build
+
+.PHONY: init-data
+init-data:
+	poetry run init-data
+
+.PHONY: migration
+migration:
+	poetry run alembic upgrade head
