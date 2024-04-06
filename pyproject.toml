@@ -36,7 +36,7 @@ classifiers = [  #! Update me
 [tool.poetry.dependencies]
 python = "^3.9"
 
-typer = {extras = ["all"], version = "^0.4.0"}
+typer = {extras = ["all"], version = "^0.12.1"}
 rich = "^10.14.0"
 fastapi = "^0.109.2"
 celery = "^5.3.6"
