@@ -92,25 +92,6 @@ export const users: User[] = [
   },
 ];
 
-export type Employee = {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  date_of_birth: string; // Consider using a proper date type if possible
-  street: string;
-  city: string;
-  state: string;
-  country: string;
-  zipcode: string;
-  longitude?: number; // Optional field
-  latitude?: number; // Optional field
-  job: string;
-  profile_picture?: string | null; // Profile picture can be a string (URL) or null (if no picture)
-};
-
 export const navItems: NavItem[] = [
   {
     title: "Chat",
@@ -141,5 +122,52 @@ export const navItems: NavItem[] = [
     href: "/profile",
     icon: "profile",
     label: "profile",
+  },
+];
+
+
+export type DataSource = {
+  id: number;
+  name: string;
+  description: string;
+  label: string;
+  status: string;
+};
+
+export const datasources: DataSource[] = [
+  {
+    id: 1,
+    name: "Postgres",
+    description: "Postgres database",
+    label: "Postgres",
+    status: "connected",
+  },
+  {
+    id: 2,
+    name: "MySQL",
+    description: "MySQL database",
+    label: "MySQL",
+    status: "disconnected",
+  },
+  {
+    id: 3,
+    name: "MongoDB",
+    description: "MongoDB database",
+    label: "MongoDB",
+    status: "connected",
+  },
+  {
+    id: 4,
+    name: "Redis",
+    description: "Redis database",
+    label: "Redis",
+    status: "disconnected",
+  },
+  {
+    id: 5,
+    name: "Elasticsearch",
+    description: "Elasticsearch database",
+    label: "Elasticsearch",
+    status: "connected",
   },
 ];

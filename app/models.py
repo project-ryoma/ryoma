@@ -14,8 +14,8 @@ class User(Base):
     full_name = Column(String)
 
 
-class DataSource(Base):
-    __tablename__ = 'datasource'
+class DataBase(Base):
+    __tablename__ = 'database'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String)

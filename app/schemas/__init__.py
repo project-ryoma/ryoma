@@ -4,6 +4,6 @@ from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate
 from .password import NewPassword
 from .chat import ChatRequest, ChatResponse, ChatResponseStatus
-from .datasource import DataSourceConfig, DataSourceConnect, DataSourceBase, DataSourceDisconnect, DataSourceConnectResponse, ConnectionParams, DataSource, DataSourceCreate, DataSourceUpdate
+from .database import DataBaseCreate, DataBaseUpdate, DataBaseResponse
 from .health import HealthResponse
 from .tool import ToolUseRequest, ToolUseResponse

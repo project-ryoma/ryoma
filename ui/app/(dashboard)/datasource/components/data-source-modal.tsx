@@ -3,10 +3,12 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DataSource } from "./data/datasource";
+import { DataSource } from "../data/datasource";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataSourceCard } from "./data-source-card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 const formSchema = z.object({
   user: z.string(),
@@ -22,25 +24,40 @@ const formSchema = z.object({
 type DataSourceFormValues = z.infer<typeof formSchema>;
 
 interface DataSourceModalProps {
-  dataSource: DataSource;
+  dataSources: DataSource[];
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: DataSourceFormValues) => void;
 }
 
-export function DataSourceModal({ dataSource, isOpen, onClose, onSubmit }: DataSourceModalProps) {
+export function DataSourceModal({ dataSources, isOpen, onClose}: DataSourceModalProps) {
   const form = useForm<DataSourceFormValues>({
     resolver: zodResolver(formSchema),
   });
 
+  const onSubmit = (values: DataSourceFormValues) => {
+    // handle the form submission
+  }
 
   return (
     <Modal
-      title={dataSource.name}
+      title="Create and Connect to a Data Source"
       isOpen={isOpen}
-      description={dataSource.description || ""}
+      description=""
       onClose={onClose}
     >
+      <div className="flex flex-col">
+      <ScrollArea className="w-96 whitespace-nowrap rounded-md" >
+        <div className="flex space-x-4 p-4">
+          {dataSources?.map((dataSource) => (
+            <DataSourceCard
+              key={dataSource.id}
+              dataSource={dataSource}
+              onClick={() => {}}
+            />
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
       <Form {...form}>
         <form className="space-y-4">
           {Object.keys(formSchema.shape).map((key) => {
@@ -74,6 +91,7 @@ export function DataSourceModal({ dataSource, isOpen, onClose, onSubmit }: DataS
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
+      </div>
       </div>
     </Modal>
   );

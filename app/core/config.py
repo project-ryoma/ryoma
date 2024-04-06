@@ -30,7 +30,6 @@ class Settings(BaseSettings):
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     def assemble_db_connection(cls, v: Optional[str], info: ValidationInfo) -> Any:
-        print('here', v, info)
         if isinstance(v, str):
             return v
         url = PostgresDsn.build(

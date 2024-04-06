@@ -11,7 +11,7 @@ from mock import patch
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from datetime import datetime
-from aita.datasource.base import SqlDataSource
+from langchain_community.utilities.sql_database import SQLDatabase
 
 
 def mock_chat_response(content: str, additional_kwargs: Dict = None):
@@ -43,9 +43,10 @@ def agent():
 
 @pytest.fixture
 def sql_agent():
-    with patch("sqlalchemy.create_engine") as mock_create_engine:
-        mock_create_engine.return_value = "engine"
-        return AitaSqlAgent(SqlDataSource("postgresql://:@localhost:5432"), "gpt-3.5-turbo", 0.5, {})
+    with patch("sqlalchemy.create_engine") as mock_engine:
+        mock_engine.return_value = "engine"
+        db = SQLDatabase.from_uri("postgresql://:@localhost:5432")
+        return AitaSqlAgent(db, "gpt-3.5-turbo", 0.5, {})
 
 
 def test_agent(agent):

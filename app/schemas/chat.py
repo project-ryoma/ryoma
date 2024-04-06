@@ -1,7 +1,6 @@
 from typing import Optional
 from enum import Enum
 from pydantic import BaseModel
-from .datasource import DataSourceConfig
 
 
 class ChatRequest(BaseModel):
@@ -10,7 +9,7 @@ class ChatRequest(BaseModel):
     agent: str
     model: str
     temperature: float
-    datasource: Optional[str]
+    database_id: Optional[str]
 
 
 class ChatResponseStatus(Enum):
