@@ -3845,13 +3845,13 @@ test = ["black (>=22.3.0,<23.0.0)", "coverage (>=5.2,<6.0)", "isort (>=5.0.6,<6.
 
 [[package]]
 name = "types-setuptools"
-version = "69.2.0.20240317"
+version = "69.5.0.20240415"
 description = "Typing stubs for setuptools"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-setuptools-69.2.0.20240317.tar.gz", hash = "sha256:b607c4c48842ef3ee49dc0c7fe9c1bad75700b071e1018bb4d7e3ac492d47048"},
-    {file = "types_setuptools-69.2.0.20240317-py3-none-any.whl", hash = "sha256:cf91ff7c87ab7bf0625c3f0d4d90427c9da68561f3b0feab77977aaf0bbf7531"},
+    {file = "types-setuptools-69.5.0.20240415.tar.gz", hash = "sha256:ea64af0a96a674f8c40ba34c09c254f3c70bc3f218c6bffa1d0912bd91584a2f"},
+    {file = "types_setuptools-69.5.0.20240415-py3-none-any.whl", hash = "sha256:637cdb24a0d48a6ab362c09cfe3b89ecaa1c10666a8ba9452924e9a0ae00fa4a"},
 ]
 
 [[package]]
@@ -4164,4 +4164,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4377c92ee6517f15deb082f9ca24f1020683213902d2854bb4e9ccfecc516e64"
+content-hash = "ef7f59f1b8f550e23e9d94bc544ecba2273a4b36c95392a9b47d388d2f03680e"
