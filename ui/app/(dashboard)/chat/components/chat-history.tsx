@@ -14,7 +14,7 @@ function ChatHistory({ messages }: { messages: MessageInterface[] }) {
   }, [messages]);
 
   return (
-    <div className="flex-grow overflow-auto">
+    <div className="max-h-full overflow-y-auto">
       {messages.map((message) => (
         <ChatMessage
           key={message.id}

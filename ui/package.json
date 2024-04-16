@@ -58,6 +58,7 @@
     "react-day-picker": "^8.9.1",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.47.0",
+    "react-monaco-editor": "^0.55.0",
     "recharts": "^2.9.2",
     "sharp": "^0.32.5",
     "tailwind-merge": "^1.14.0",

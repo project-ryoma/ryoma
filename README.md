@@ -1,5 +1,5 @@
 # aita
-AI Powered Data Platform
+AI Powered Data Platform, a comprehensive solution for data analysis, visualization, and automation.
 
 <div align="center">
 
@@ -22,11 +22,22 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 
 - **[OpenAI](https://openai.com/)**: Utilizes advanced natural language processing and machine learning models for insightful data analysis and automation.
 - **[Langchain](https://www.langchain.com/)**: Facilitates the seamless integration of language models into application workflows, significantly enhancing AI interaction capabilities.
-- **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
 - **[FastAPI](https://fastapi.tiangolo.com/)**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+, emphasizing speed, reliability, and ease of use.
-- **[Shadcn](https://ui.shadcn.com/)**
+- **[Shadcn](https://ui.shadcn.com/)**: A comprehensive design system that provides a wide range of UI components and tools for building visually appealing and user-friendly interfaces.
 
+## Supported Data Sources
+- Snowflake
+- BigQuery
+- Postgres
+- MySQL
+- Redshift
+- DynamoDB
 
+## Supported Engines
+- Apache Spark
+- Apache Flink
+- Presto
+- **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
 ### Project Startup
 
 [`Makefile`](https://github.com/aita/aita/blob/master/Makefile) contains a lot of functions for faster development.

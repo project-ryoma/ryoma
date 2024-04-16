@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         // for demo purposes
         if (credentials?.email === "demo@gmail.com") {
-          return {"id": "demo", "user": credentials?.email};
+          return {"id": "demo", "name": "Demo User"};
         }
         const formData = new FormData();
         formData.append('username', credentials?.email ?? "");

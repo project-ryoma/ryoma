@@ -1,7 +1,4 @@
 import os
-import importlib
-from typing import Dict
-
 from openai import ChatCompletion, OpenAI, OpenAIError
 
 client = OpenAI(
@@ -25,26 +22,3 @@ def chat_completion_request(
         return response
     except OpenAIError as e:
         return e
-
-
-def run_tool(
-    tool_name: str, tool_arguments: Dict[str, str]
-) -> ChatCompletion:
-    try:
-        module = importlib.import_module("aita.tools")
-        tool = getattr(module, tool_name)
-        fn_result = tool.__call__(**tool_arguments)
-        chat_response = chat_completion_request(
-            messages=[{"role": "user", "content": fn_result}], n=1
-        )
-        return chat_response
-    except Exception as err:
-        error_template = f"""
-        Failed to execute function: {tool_name} with function arguments: {tool_arguments}
-        Error: {err}.
-        Can you please figure out what went wrong, and maybe ask user for more information?
-        """
-        chat_response = chat_completion_request(
-            messages=[{"role": "user", "content": error_template}], n=1
-        )
-        return chat_response

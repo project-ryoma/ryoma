@@ -16,8 +16,8 @@ class QueryInput(BaseModel):
 
 class QuerySQLDataBaseTool(BaseTool):
     """Tool for querying a SQL database."""
-    db: SqlDataSource = Field(exclude=True)
-    name: str = "sql_db_query"
+    datasource: SqlDataSource = Field(exclude=True)
+    name: str = "sql_datasource_query"
     description: str = """
     Execute a SQL query against the database and get back the result..
     If the query is not correct, an error message will be returned.
@@ -34,7 +34,7 @@ class QuerySQLDataBaseTool(BaseTool):
         **kwargs,
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
-        return self.db.execute(query)
+        return self.datasource.execute(query)
 
 
 class ConvertToPandasTool(BaseTool):
@@ -53,53 +53,31 @@ class ConvertToPandasTool(BaseTool):
         **kwargs,
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
-        return self.db.to_pandas(query)
+        return self.datasource.to_pandas(query)
 
 
-class ExtractMetadataTool(BaseTool):
-    """Tool form extracting metadata from a data source."""
-
-    db: SqlDataSource = Field(exclude=True)
-    name: str = "extract_metadata"
-    description: str = """
-    Extract metadata from a data source.
-    If the data source is not correct, an error message will be returned.
-    """
-    args_schema: Type[BaseModel] = QueryInput
-
-    def _run(
-        self,
-        query,
-        **kwargs,
-    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
-        """Execute the query, return the results or an error message."""
-        return self.db.get_metadata()
+# class ExtractMetadataTool(BaseTool):
+#     """Tool form extracting metadata from a data source."""
+#
+#     datasource: SqlDataSource = Field(exclude=True)
+#     name: str = "extract_metadata"
+#     description: str = """
+#     Extract metadata from a data source.
+#     If the data source is not correct, an error message will be returned.
+#     """
+#     args_schema: Type[BaseModel] = QueryInput
+#
+#     def _run(
+#         self,
+#         query,
+#         **kwargs,
+#     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
+#         """Execute the query, return the results or an error message."""
+#         return self.datasource.get_metadata()
 
 
 class PythonInput(BaseModel):
     script: str = Field(description="python script")
-
-
-class PythonTool(BaseTool):
-    """Tool for running a python script."""
-
-    name: str = "run_python_script_tool"
-    description: str = """
-    Execute a python script.
-    If the script is not correct, an error message will be returned.
-    """
-    args_schema: Type[BaseModel] = PythonInput
-
-    def _run(
-        self,
-        script,
-    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
-        """Execute the script, return the result or an error message."""
-        try:
-            result = exec(script)
-            return result
-        except Exception as e:
-            return str(e)
 
 
 class IPythonTool(BaseTool):

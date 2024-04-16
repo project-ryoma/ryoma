@@ -13,7 +13,7 @@ export interface Model<Type = string> {
 export const models: Model<ModelType>[] = [
   {
     id: "c305f976-8e38-42b1-9fb7-d21b2e34f0da",
-    name: "text-davinci-003",
+    name: "gpt-3.5-turbo",
     description:
       "Most capable GPT-3 model. Can do any task the other models can do, often with higher quality, longer output and better instruction-following. Also supports inserting completions within text.",
     type: "GPT-3",

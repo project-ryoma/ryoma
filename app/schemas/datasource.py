@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class DataBase(BaseModel):
+class DataSource(BaseModel):
     name: str
     description: Optional[str] = None
     connected: bool = True
@@ -13,15 +13,15 @@ class DataBase(BaseModel):
         orm_mode = True
 
 
-class DataBaseCreate(DataBase):
+class DataSourceCreate(DataSource):
     connection_string: str
 
 
-class DataBaseUpdate(DataBase):
+class DataSourceUpdate(DataSource):
     connection_string: str
 
 
-class DataBaseInDBBase(DataBase):
+class DataSourceInDBBase(DataSource):
     id: Optional[int] = None
 
     class Config:
@@ -29,6 +29,6 @@ class DataBaseInDBBase(DataBase):
 
 
 # Additional properties to return via API
-class DataBaseResponse(DataBaseInDBBase):
+class DataSourceResponse(DataSourceInDBBase):
     pass
 

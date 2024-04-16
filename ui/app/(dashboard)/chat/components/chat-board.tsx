@@ -13,8 +13,7 @@ import { Model, models, types } from "../data/models"
 import { DataSource, dataSources, types as datatype } from "../../datasource/data/datasource"
 import * as z from "zod";
 import axios from "axios";
-import ToolForm from "@/components/forms/tool-form";
-import { set } from "date-fns";
+import ToolForm from "@/app/(dashboard)/chat/components/tool-form";
 
 const formSchema = z.object({
   question: z.string(),
@@ -140,21 +139,21 @@ function ChatBoard() {
 
     try {
       // Send a POST request to the API with the prompt in the request body
-      const response = await axios.post('/api/chat', {
+      const response = await axios.post('/api/agent/chat', {
         prompt: _prompt,
-        model: selectedModel.id,
+        model: selectedModel.name,
         agent: "sql",
         temperature: temperature[0],
         top_p: topP[0],
         max_length: maxLength[0],
-        datasource: selectedDataSource.id,
+        datasource_id: selectedDataSource.id,
       });
 
       updateMessage(uniqueId, {
         text: response.data.message.trim(),
       });
 
-      if (response.data.additional_info && response.data.additional_info.type == "use_tool") {
+      if (response.data.additional_info) {
         setTool(response.data.additional_info);
       }
 
@@ -183,9 +182,15 @@ function ChatBoard() {
     let uniqueId: string;
     uniqueId = addMessage(false);
     await delay(50);
+    console.log("args", args)
 
-    const response = await axios.post('http://localhost:3001/api/v1/tools/run', {
+    const response = await axios.post('api/agent/run_tool', {
+      agent: "sql",
       name,
+      model: selectedModel.name,
+      temperature: temperature[0],
+      top_p: topP[0],
+      max_length: maxLength[0],
       arguments: args,
     });
     
@@ -253,28 +258,24 @@ function ChatBoard() {
             />
           </div>
         </div>
-        <div className="md:order-1">
-          <div className="flex flex-1 flex-col h-full">
-           <div className="flex-1 h-full hidden items-start justify-center gap-6 rounded-lg p-8 md:grid lg:grid-cols-2 xl:grid-cols-2">
-             <div className="flex-1 overflow-auto lg:col-span-2 border rounded-md">
-               <ChatHistory messages={messages} />
-             </div>
+        <div className="flex max-h-100 flex-col h-full md:order-1">
+           <div className="h-full flex-1 hidden items-start justify-center gap-6 rounded-lg p-8 md:grid lg:grid-cols-2 xl:grid-cols-2">
+             <ChatHistory messages={messages} />
              {tool && tool.name && tool.arguments && (
-               <div className="h-full lg:col-span-1 rounded-md border bg-muted">
+               <div className="flex-1 lg:col-span-1 rounded-md border bg-muted">
                  <ToolForm
                    tool={tool}
                    onConfirm={handleToolSubmit}
                    onCancel={() => {
                      setTool(null);
                    }}
-                 />
+                 /> 
                </div>
              )}
            </div>
            <div className="flex-initial p-4 bg-white border-t border-gray-200">
              <ChatForm onSubmit={onSubmit} loading={loading}  />
            </div>
-          </div>
         </div>
       </div>
     </div>

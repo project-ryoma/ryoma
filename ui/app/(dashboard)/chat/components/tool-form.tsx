@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { ToolInterface } from "../../app/(dashboard)/chat/components/chat-board";
+import { ToolInterface } from "./chat-board";
 import {
   Form,
   FormControl,
@@ -29,6 +29,8 @@ import { type } from "os";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { use } from "react";
+import { CodeEditor } from "./code-editor";
+import { fi } from "date-fns/locale";
 
 const toolFormSchema = z.object({
   name: z.string(),
@@ -56,23 +58,15 @@ const ToolForm = ({
       arguments: tool.arguments
     } 
   });
-  // create fields from the tool arguments
-  const fields = Object.keys(tool.arguments).map((id) => {
-    return {
-      name: id,
-      value: tool.arguments[id]
-    }
-  });
 
   const handleConfirm = async (values: ToolFormValues) => {
     onConfirm(values);
   }
-  console.log(fields);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Run Tool</CardTitle>
+        <CardTitle>Kernel</CardTitle>
         <CardDescription>Confirm to run tool</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
@@ -93,21 +87,30 @@ const ToolForm = ({
                 </FormItem>
               )}
             />
-            {fields.map((field, index) => (
-              <FormField
-                control={form.control}
-                name={field.name}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="tool_argument_name">{field.name}</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button type="submit">Confirm</Button>
+            {Object.keys(tool.arguments).map((key) => {
+              return (
+                <FormField
+                  key={key}
+                  control={form.control}
+                  name={`arguments.${key}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor={`tool_arguments_${key}`}>
+                        {key}
+                      </FormLabel>
+                      <CodeEditor
+                        value={field.value}
+                        language="sql"
+                        onChange={(value) => {
+                        }}
+                      />
+                    </FormItem>
+                  )}
+                />
+              );
+            })} 
+           
+            <Button type="submit">Run</Button>
             <Button variant="secondary" onClick={onCancel}>
               Cancel
             </Button> 

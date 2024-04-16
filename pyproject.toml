@@ -66,6 +66,7 @@ bcrypt = "^4.0.1"
 pandas = "^2.2.1"
 snowflake-connector-python = {extras = ["pandas"], version = "^3.8.0"}
 ipython = "8.14"
+jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
