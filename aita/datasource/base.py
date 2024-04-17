@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Optional
 import json
 from sqlalchemy import create_engine, MetaData
@@ -9,10 +9,6 @@ class DataSource(ABC):
 
 
 class SqlDataSource(DataSource):
-
-    @abstractmethod
-    def execute(self, query: str, params: None):
-        pass
 
     def __init__(self, connection_url: Optional[str] = None):
         self.engine = self.create_engine(connection_url)

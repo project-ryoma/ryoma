@@ -5,7 +5,7 @@ from aita.datasource.base import SqlDataSource
 
 # Implementations for various SQL databases
 class MySqlDataSource(SqlDataSource):
-    def __init__(self, user: str, password: str, host: str, port: str, database: str, **kwargs):
+    def __init__(self, user: str, password: str, host: str, port: int, database: str, **kwargs):
         url = URL.create(
             "mysql+pymysql",
             username=user,

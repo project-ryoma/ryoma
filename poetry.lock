@@ -552,13 +552,13 @@ files = [
 
 [[package]]
 name = "celery"
-version = "5.3.6"
+version = "5.4.0"
 description = "Distributed Task Queue."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "celery-5.3.6-py3-none-any.whl", hash = "sha256:9da4ea0118d232ce97dff5ed4974587fb1c0ff5c10042eb15278487cdd27d1af"},
-    {file = "celery-5.3.6.tar.gz", hash = "sha256:870cc71d737c0200c397290d730344cc991d13a057534353d124c9380267aab9"},
+    {file = "celery-5.4.0-py3-none-any.whl", hash = "sha256:369631eb580cf8c51a82721ec538684994f8277637edde2dfc0dacd73ed97f64"},
+    {file = "celery-5.4.0.tar.gz", hash = "sha256:504a19140e8d3029d5acad88330c541d4c3f64c789d85f94756762d8bca7e706"},
 ]
 
 [package.dependencies]
@@ -574,7 +574,7 @@ vine = ">=5.1.0,<6.0"
 
 [package.extras]
 arangodb = ["pyArango (>=2.0.2)"]
-auth = ["cryptography (==41.0.5)"]
+auth = ["cryptography (==42.0.5)"]
 azureblockblob = ["azure-storage-blob (>=12.15.0)"]
 brotli = ["brotli (>=1.0.0)", "brotlipy (>=0.7.0)"]
 cassandra = ["cassandra-driver (>=3.25.0,<4)"]
@@ -584,22 +584,23 @@ couchbase = ["couchbase (>=3.0.0)"]
 couchdb = ["pycouchdb (==1.14.2)"]
 django = ["Django (>=2.2.28)"]
 dynamodb = ["boto3 (>=1.26.143)"]
-elasticsearch = ["elastic-transport (<=8.10.0)", "elasticsearch (<=8.11.0)"]
+elasticsearch = ["elastic-transport (<=8.13.0)", "elasticsearch (<=8.13.0)"]
 eventlet = ["eventlet (>=0.32.0)"]
+gcs = ["google-cloud-storage (>=2.10.0)"]
 gevent = ["gevent (>=1.5.0)"]
 librabbitmq = ["librabbitmq (>=2.0.0)"]
 memcache = ["pylibmc (==1.6.3)"]
 mongodb = ["pymongo[srv] (>=4.0.2)"]
-msgpack = ["msgpack (==1.0.7)"]
-pymemcache = ["python-memcached (==1.59)"]
+msgpack = ["msgpack (==1.0.8)"]
+pymemcache = ["python-memcached (>=1.61)"]
 pyro = ["pyro4 (==4.82)"]
-pytest = ["pytest-celery (==0.0.0)"]
+pytest = ["pytest-celery[all] (>=1.0.0)"]
 redis = ["redis (>=4.5.2,!=4.5.5,<6.0.0)"]
 s3 = ["boto3 (>=1.26.143)"]
 slmq = ["softlayer-messaging (>=1.0.3)"]
 solar = ["ephem (==4.1.5)"]
 sqlalchemy = ["sqlalchemy (>=1.4.48,<2.1)"]
-sqs = ["boto3 (>=1.26.143)", "kombu[sqs] (>=5.3.0)", "pycurl (>=7.43.0.5)", "urllib3 (>=1.26.16)"]
+sqs = ["boto3 (>=1.26.143)", "kombu[sqs] (>=5.3.4)", "pycurl (>=7.43.0.5)", "urllib3 (>=1.26.16)"]
 tblib = ["tblib (>=1.3.0)", "tblib (>=1.5.0)"]
 yaml = ["PyYAML (>=3.10)"]
 zookeeper = ["kazoo (>=1.3.1)"]
@@ -2244,13 +2245,13 @@ extended-testing = ["aiosqlite (>=0.19.0,<0.20.0)", "aleph-alpha-client (>=2.15.
 
 [[package]]
 name = "langchain-core"
-version = "0.1.43"
+version = "0.1.44"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langchain_core-0.1.43-py3-none-any.whl", hash = "sha256:9b601916602c17cb7588e8089302e30872cbd049b583a27debf5566018af6405"},
-    {file = "langchain_core-0.1.43.tar.gz", hash = "sha256:499133fadc28efcf7d24306236521518080bb10fd8bf6f7426de4a2bbf2aebb5"},
+    {file = "langchain_core-0.1.44-py3-none-any.whl", hash = "sha256:d8772dccef95fc97bfa2dcd19412e620ebe14def1f0e218374971f6e30a46a49"},
+    {file = "langchain_core-0.1.44.tar.gz", hash = "sha256:e313975d9ae2926342e6f2ad760338d31f18b1223e9b8b4dc408daeeade46a83"},
 ]
 
 [package.dependencies]
@@ -2953,13 +2954,13 @@ setuptools = "*"
 
 [[package]]
 name = "notebook"
-version = "7.1.2"
+version = "7.1.3"
 description = "Jupyter Notebook - A web-based notebook environment for interactive computing"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "notebook-7.1.2-py3-none-any.whl", hash = "sha256:fc6c24b9aef18d0cd57157c9c47e95833b9b0bdc599652639acf0bdb61dc7d5f"},
-    {file = "notebook-7.1.2.tar.gz", hash = "sha256:efc2c80043909e0faa17fce9e9b37c059c03af0ec99a4d4db84cb21d9d2e936a"},
+    {file = "notebook-7.1.3-py3-none-any.whl", hash = "sha256:919b911e59f41f6e3857ce93c9d93535ba66bb090059712770e5968c07e1004d"},
+    {file = "notebook-7.1.3.tar.gz", hash = "sha256:41fcebff44cf7bb9377180808bcbae066629b55d8c7722f1ebbe75ca44f9cfc1"},
 ]
 
 [package.dependencies]
@@ -3038,13 +3039,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.20.0"
+version = "1.21.2"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.20.0-py3-none-any.whl", hash = "sha256:9fcc75256b2425393800e358cd520b02b5ab1a8731921e45aa7ae6aec3ee8187"},
-    {file = "openai-1.20.0.tar.gz", hash = "sha256:d7c0e824b7da3c043731943965c737595cf9631c913b7a1464c502fdf492b9a9"},
+    {file = "openai-1.21.2-py3-none-any.whl", hash = "sha256:65f6bed84ecde0fc20e4f3b458000deb775531aa29154ff4d679e937d7e4370d"},
+    {file = "openai-1.21.2.tar.gz", hash = "sha256:7b6e4d59f3686fcd94efdb2ee61052bf6c9dbb58052b5116fc0d75ba7adbf329"},
 ]
 
 [package.dependencies]
@@ -4759,25 +4760,6 @@ pandas = ["pandas (>=1.0.0,<3.0.0)", "pyarrow"]
 secure-local-storage = ["keyring (>=23.1.0,<25.0.0)"]
 
 [[package]]
-name = "snowflake-sqlalchemy"
-version = "1.5.3"
-description = "Snowflake SQLAlchemy Dialect"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "snowflake_sqlalchemy-1.5.3-py3-none-any.whl", hash = "sha256:0a4aa3f391797b22dd7658892f906191fd1d44870503ae7ca9278cddce6e5b89"},
-    {file = "snowflake_sqlalchemy-1.5.3.tar.gz", hash = "sha256:79191ec3febfb32bcffecd66f2a7dd561bd571345ea4bccbf41cc1fb5c0682ff"},
-]
-
-[package.dependencies]
-snowflake-connector-python = "<4.0.0"
-sqlalchemy = ">=1.4.19,<2.0.0"
-
-[package.extras]
-development = ["mock", "numpy", "pre-commit", "pytest", "pytest-cov", "pytest-rerunfailures", "pytest-timeout", "pytz"]
-pandas = ["snowflake-connector-python[pandas]"]
-
-[[package]]
 name = "sortedcontainers"
 version = "2.4.0"
 description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
@@ -5287,13 +5269,13 @@ files = [
 
 [[package]]
 name = "virtualenv"
-version = "20.25.2"
+version = "20.25.3"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "virtualenv-20.25.2-py3-none-any.whl", hash = "sha256:6e1281a57849c8a54da89ba82e5eb7c8937b9d057ff01aaf5bc9afaa3552e90f"},
-    {file = "virtualenv-20.25.2.tar.gz", hash = "sha256:fa7edb8428620518010928242ec17aa7132ae435319c29c1651d1cf4c4173aad"},
+    {file = "virtualenv-20.25.3-py3-none-any.whl", hash = "sha256:8aac4332f2ea6ef519c648d0bc48a5b1d324994753519919bddbb1aff25a104e"},
+    {file = "virtualenv-20.25.3.tar.gz", hash = "sha256:7bb554bbdfeaacc3349fa614ea5bff6ac300fc7c335e9facf3a3bcfc703f45be"},
 ]
 
 [package.dependencies]
@@ -5569,4 +5551,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "eccf37d9ab2f0bef90d18557be71dfa1d9c7c4944d07a7dfc85ace14d91c66f9"
+content-hash = "2b2d896d5626412a94c8ecd5e14dd219176fbe2f32768901160161c386612969"
