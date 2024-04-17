@@ -4760,18 +4760,18 @@ secure-local-storage = ["keyring (>=23.1.0,<25.0.0)"]
 
 [[package]]
 name = "snowflake-sqlalchemy"
-version = "1.5.2"
+version = "1.5.3"
 description = "Snowflake SQLAlchemy Dialect"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "snowflake_sqlalchemy-1.5.2-py3-none-any.whl", hash = "sha256:36fa417a2c5dc3cc774a3fd1f65c9f815ba99f21123ef6c5c8380e9d1213469c"},
-    {file = "snowflake_sqlalchemy-1.5.2.tar.gz", hash = "sha256:bcf18b84f5a5c3be71703a25563f32d802f9c7be687f9c89fbd8e749f8392705"},
+    {file = "snowflake_sqlalchemy-1.5.3-py3-none-any.whl", hash = "sha256:0a4aa3f391797b22dd7658892f906191fd1d44870503ae7ca9278cddce6e5b89"},
+    {file = "snowflake_sqlalchemy-1.5.3.tar.gz", hash = "sha256:79191ec3febfb32bcffecd66f2a7dd561bd571345ea4bccbf41cc1fb5c0682ff"},
 ]
 
 [package.dependencies]
-snowflake-connector-python = "*"
-sqlalchemy = "*"
+snowflake-connector-python = "<4.0.0"
+sqlalchemy = ">=1.4.19,<2.0.0"
 
 [package.extras]
 development = ["mock", "numpy", "pre-commit", "pytest", "pytest-cov", "pytest-rerunfailures", "pytest-timeout", "pytz"]
@@ -5569,4 +5569,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "a1234b35020e34c7a34b728e90e9a6537d8a7604e35990edcc6c32dfebdf16b7"
+content-hash = "eccf37d9ab2f0bef90d18557be71dfa1d9c7c4944d07a7dfc85ace14d91c66f9"
