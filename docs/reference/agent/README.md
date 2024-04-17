@@ -24,4 +24,9 @@ print(sql_agent.chat("I want to get the top customers which making the most purc
 
 ## Agents
 
-
+Currently supported agents are:
+- [PythonAgent](python.md)
+- [SqlAgent](sql.md)
+- [PandasAgent](pandas.md)
+- [PyarrowAgent](pyarrow.md)
+- [SparkAgent](spark.md)
