@@ -16,4 +16,11 @@ Aita is an AI powered data platform, that helps data users to efficiently use da
 
 ## Who is Aita for?
 
-Aita helps data users with DevOps experience productionize real-time models. Aita can also help these teams build towards a feature platform that improves collaboration between engineers and data scientists.
+Aita helps data users with data access and data analysis by leveraging AI. \
+Instead of writing code on jupyter notebook, data users can interactively code in Aita kernel with AI agent.
+
+## How to get started?
+
+{% hint style="info" %}
+The best way to learn Aita is to use it. Head over to our [Quickstart](getting-started/quickstart.md) and try it out!
+```
