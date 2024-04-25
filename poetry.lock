@@ -488,36 +488,47 @@ files = [
 
 [[package]]
 name = "black"
-version = "22.12.0"
+version = "24.4.1"
 description = "The uncompromising code formatter."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "black-22.12.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9eedd20838bd5d75b80c9f5487dbcb06836a43833a37846cf1d8c1cc01cef59d"},
-    {file = "black-22.12.0-cp310-cp310-win_amd64.whl", hash = "sha256:159a46a4947f73387b4d83e87ea006dbb2337eab6c879620a3ba52699b1f4351"},
-    {file = "black-22.12.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d30b212bffeb1e252b31dd269dfae69dd17e06d92b87ad26e23890f3efea366f"},
-    {file = "black-22.12.0-cp311-cp311-win_amd64.whl", hash = "sha256:7412e75863aa5c5411886804678b7d083c7c28421210180d67dfd8cf1221e1f4"},
-    {file = "black-22.12.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c116eed0efb9ff870ded8b62fe9f28dd61ef6e9ddd28d83d7d264a38417dcee2"},
-    {file = "black-22.12.0-cp37-cp37m-win_amd64.whl", hash = "sha256:1f58cbe16dfe8c12b7434e50ff889fa479072096d79f0a7f25e4ab8e94cd8350"},
-    {file = "black-22.12.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:77d86c9f3db9b1bf6761244bc0b3572a546f5fe37917a044e02f3166d5aafa7d"},
-    {file = "black-22.12.0-cp38-cp38-win_amd64.whl", hash = "sha256:82d9fe8fee3401e02e79767016b4907820a7dc28d70d137eb397b92ef3cc5bfc"},
-    {file = "black-22.12.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:101c69b23df9b44247bd88e1d7e90154336ac4992502d4197bdac35dd7ee3320"},
-    {file = "black-22.12.0-cp39-cp39-win_amd64.whl", hash = "sha256:559c7a1ba9a006226f09e4916060982fd27334ae1998e7a38b3f33a37f7a2148"},
-    {file = "black-22.12.0-py3-none-any.whl", hash = "sha256:436cc9167dd28040ad90d3b404aec22cedf24a6e4d7de221bec2730ec0c97bcf"},
-    {file = "black-22.12.0.tar.gz", hash = "sha256:229351e5a18ca30f447bf724d007f890f97e13af070bb6ad4c0a441cd7596a2f"},
+    {file = "black-24.4.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:1f7749fd0d97ff9415975a1432fac7df89bf13c3833cea079e55fa004d5f28c0"},
+    {file = "black-24.4.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:859f3cc5d2051adadf8fd504a01e02b0fd866d7549fff54bc9202d524d2e8bd7"},
+    {file = "black-24.4.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:59271c9c29dfa97f7fda51f56c7809b3f78e72fd8d2205189bbd23022a0618b6"},
+    {file = "black-24.4.1-cp310-cp310-win_amd64.whl", hash = "sha256:5ed9c34cba223149b5a0144951a0f33d65507cf82c5449cb3c35fe4b515fea9a"},
+    {file = "black-24.4.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:9dae3ae59d6f2dc93700fd5034a3115434686e66fd6e63d4dcaa48d19880f2b0"},
+    {file = "black-24.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:5f8698974a81af83283eb47644f2711b5261138d6d9180c863fce673cbe04b13"},
+    {file = "black-24.4.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0f404b6e77043b23d0321fb7772522b876b6de737ad3cb97d6b156638d68ce81"},
+    {file = "black-24.4.1-cp311-cp311-win_amd64.whl", hash = "sha256:c94e52b766477bdcd010b872ba0714d5458536dc9d0734eff6583ba7266ffd89"},
+    {file = "black-24.4.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:962d9e953872cdb83b97bb737ad47244ce2938054dc946685a4cad98520dab38"},
+    {file = "black-24.4.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b1d8e3b2486b7dd522b1ab2ba1ec4907f0aa8f5e10a33c4271fb331d1d10b70c"},
+    {file = "black-24.4.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ed77e214b785148f57e43ca425b6e0850165144aa727d66ac604e56a70bb7825"},
+    {file = "black-24.4.1-cp312-cp312-win_amd64.whl", hash = "sha256:4ef4764437d7eba8386689cd06e1fb5341ee0ae2e9e22582b21178782de7ed94"},
+    {file = "black-24.4.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:92b183f8eef5baf7b20a513abcf982ad616f544f593f6688bb2850d2982911f1"},
+    {file = "black-24.4.1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:945abd7b3572add997757c94295bb3e73c6ffaf3366b1f26cb2356a4bffd1dc3"},
+    {file = "black-24.4.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:db5154b9e5b478031371d8bc41ff37b33855fa223a6cfba456c9b73fb96f77d4"},
+    {file = "black-24.4.1-cp38-cp38-win_amd64.whl", hash = "sha256:afc84c33c1a9aaf3d73140cee776b4ddf73ff429ffe6b7c56dc1c9c10725856d"},
+    {file = "black-24.4.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:0889f4eb8b3bdf8b189e41a71cf0dbb8141a98346cd1a2695dea5995d416e940"},
+    {file = "black-24.4.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:5bb0143f175db45a55227eefd63e90849d96c266330ba31719e9667d0d5ec3b9"},
+    {file = "black-24.4.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:713a04a78e78f28ef7e8df7a16fe075670ea164860fcef3885e4f3dffc0184b3"},
+    {file = "black-24.4.1-cp39-cp39-win_amd64.whl", hash = "sha256:171959bc879637a8cdbc53dc3fddae2a83e151937a28cf605fd175ce61e0e94a"},
+    {file = "black-24.4.1-py3-none-any.whl", hash = "sha256:ecbab810604fe02c70b3a08afd39beb599f7cc9afd13e81f5336014133b4fe35"},
+    {file = "black-24.4.1.tar.gz", hash = "sha256:5241612dc8cad5b6fd47432b8bd04db80e07cfbc53bb69e9ae18985063bcb8dd"},
 ]
 
 [package.dependencies]
 click = ">=8.0.0"
 mypy-extensions = ">=0.4.3"
+packaging = ">=22.0"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
-tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
-typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typing-extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
-d = ["aiohttp (>=3.7.4)"]
+d = ["aiohttp (>=3.7.4)", "aiohttp (>=3.7.4,!=3.9.0)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
@@ -5551,4 +5562,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "2b2d896d5626412a94c8ecd5e14dd219176fbe2f32768901160161c386612969"
+content-hash = "1499a864c44351bab2e4c365bc7c7c56e74243ae91074a5d1f7b1fe443d20e94"
