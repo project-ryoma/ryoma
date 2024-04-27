@@ -12,7 +12,10 @@ class PandasAgent(AitaAgent):
     {dataframe_metadata}
     """
 
-    def __init__(self, dataframes: Dict[str, pd.DataFrame], model, temperature):
+    def __init__(self,
+                 dataframes: Dict[str, pd.DataFrame],
+                 model_id: str,
+                 model_parameters: Dict = None):
         tool = PandasTool(script_context=dataframes)
         dataframe_metadata = []
         for name, df in dataframes.items():
@@ -21,4 +24,4 @@ class PandasAgent(AitaAgent):
                 "columns": df.columns.tolist()
             })
         self.prompt_context = self.prompt_context.format(dataframe_metadata=dataframe_metadata)
-        super().__init__(model, temperature, [tool], prompt_context=self.prompt_context)
+        super().__init__(model_id, model_parameters, [tool], prompt_context=self.prompt_context)

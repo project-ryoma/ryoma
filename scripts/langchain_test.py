@@ -33,7 +33,7 @@ from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
 from langchain_openai import ChatOpenAI
 
-db = SQLDatabase.from_uri("snowflake://aitatrial:Xh!0135259098@vab48295/SNOWFLAKE_SAMPLE_DATA/TPCH_SF1000?warehouse=COMPUTE_WH&role=PUBLIC_ROLE")
+db = SQLDatabase.from_uri("")
 # print(db.dialect)
 # print(db.get_usable_table_names())
 # db.run("SELECT * FROM orders LIMIT 10;")

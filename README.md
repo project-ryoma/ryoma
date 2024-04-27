@@ -23,7 +23,7 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 - **[OpenAI](https://openai.com/)**: Utilizes advanced natural language processing and machine learning models for insightful data analysis and automation.
 - **[Langchain](https://www.langchain.com/)**: Facilitates the seamless integration of language models into application workflows, significantly enhancing AI interaction capabilities.
 - **[FastAPI](https://fastapi.tiangolo.com/)**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+, emphasizing speed, reliability, and ease of use.
-- **[Shadcn](https://ui.shadcn.com/)**: A comprehensive design system that provides a wide range of UI components and tools for building visually appealing and user-friendly interfaces.
+- **[Apache Arrow](https://arrow.apache.org/)**: A cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware like CPUs and GPUs.
 
 ## Supported Data Sources
 - Snowflake
