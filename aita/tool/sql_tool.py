@@ -15,7 +15,7 @@ class SqlDatabaseTool(BaseTool):
     """Tool for querying a SQL database."""
 
     datasource: SqlDataSource = Field(exclude=True)
-    name: str = "sql_datasource_query"
+    name: str = "sql_database_query"
     description: str = """
     Execute a SQL query against the database and get back the result..
     If the query is not correct, an error message will be returned.

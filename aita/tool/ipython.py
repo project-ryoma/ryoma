@@ -36,7 +36,8 @@ class IPythonTool(BaseTool):
             if not ipython:
                 ipython = InteractiveShell()
 
-            ipython.user_ns.update(self.script_context)
+            if self.script_context:
+                ipython.user_ns.update(self.script_context)
 
             result = ipython.run_cell(script)
             return result

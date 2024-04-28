@@ -51,6 +51,9 @@ class SqlDataSource(DataSource):
         # For demonstration, print the JSON string
         return db_structure_json
 
+    def to_arrow(self, query: str, params=None):
+        raise NotImplementedError
+
 
 class NosqlDataSource(DataSource):
     def __init__(self):

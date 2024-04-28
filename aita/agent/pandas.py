@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from aita.agent.base import AitaAgent
-from aita.tool.pandas import PandasTool
+from aita.tool.pandas_tool import PandasTool
 
 
 class PandasAgent(AitaAgent):
@@ -19,6 +19,6 @@ class PandasAgent(AitaAgent):
         tool = PandasTool(script_context=dataframes)
         dataframe_metadata = []
         for name, df in dataframes.items():
-            dataframe_metadata.append({"name": name, "columns": df.columns.tolist()})
+            dataframe_metadata.append({"name": name, "schema": df.info()})
         self.prompt_context = self.prompt_context.format(script_context=dataframe_metadata)
         super().__init__(model_id, model_parameters, [tool], prompt_context=self.prompt_context)

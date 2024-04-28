@@ -81,6 +81,6 @@ def test_run_tool(sql_agent):
     with patch("aita.tool.sql.SqlDatabaseTool.run") as mock_run:
         mock_run.return_value = "result"
         result = sql_agent.run_tool(
-            {"name": "sql_datasource_query", "args": "SELECT * FROM customers LIMIT 4"}
+            {"name": "sql_database_query", "args": "SELECT * FROM customers LIMIT 4"}
         )
         assert result == "result"

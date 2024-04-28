@@ -68,6 +68,7 @@ ipython = "8.14"
 jupyter = "^1.0.0"
 pyspark = "^3.5.1"
 jupyter-ai-magics = "^2.14.0"
+findspark = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"

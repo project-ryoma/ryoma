@@ -71,6 +71,11 @@ WHERE
     def to_pandas(self, query: str, params=None):
         return pd.read_sql(query, self.engine, params=params)
 
+    def to_arrow(self, query: str, params=None):
+        cur = self.engine.cursor()
+        cur.execute(query, params)
+        return cur.fetch_arrow_all()
+
     def get_uri(self):
         return f"snowflake://{self.user}:{self.password}@{self.account}?warehouse={self.warehouse}&database={self.database}&schema={self.schema}&role={self.role}"
 

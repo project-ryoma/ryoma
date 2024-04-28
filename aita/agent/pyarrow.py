@@ -3,7 +3,7 @@ from typing import Dict
 import pyarrow as pa
 
 from aita.agent.base import AitaAgent
-from aita.tool.arrow import ArrowTool
+from aita.tool.pyarrow_tool import ArrowTool
 
 
 class PyArrowAgent(AitaAgent):
