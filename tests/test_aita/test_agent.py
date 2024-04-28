@@ -1,12 +1,15 @@
-from aita.agent.base import AitaAgent
-from aita.agent.sql import SqlAgent
-from aita.datasource.base import SqlDataSource
+from typing import Dict
+
 from datetime import datetime
+
+import pytest
 from mock import patch
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-from typing import Dict
-import pytest
+
+from aita.agent.base import AitaAgent
+from aita.agent.sql import SqlAgent
+from aita.datasource.base import SqlDataSource
 
 
 def mock_chat_response(content: str, additional_kwargs: Dict = None):
@@ -74,8 +77,7 @@ def test_chat_with_tool(sql_agent):
 def test_run_tool(sql_agent):
     with patch("aita.tool.sql.SqlDatabaseTool.run") as mock_run:
         mock_run.return_value = "result"
-        result = sql_agent.run_tool({
-            "name": "sql_datasource_query",
-            "args": "SELECT * FROM customers LIMIT 4"
-        })
+        result = sql_agent.run_tool(
+            {"name": "sql_datasource_query", "args": "SELECT * FROM customers LIMIT 4"}
+        )
         assert result == "result"

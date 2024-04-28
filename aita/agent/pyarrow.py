@@ -13,9 +13,7 @@ class PyArrowAgent(AitaAgent):
     {script_context}
     """
 
-    def __init__(
-        self, tables: Dict[str, pa.Table], model_id: str, model_parameters: Dict = None
-    ):
+    def __init__(self, tables: Dict[str, pa.Table], model_id: str, model_parameters: Dict = None):
         tool = ArrowTool(script_context=tables)
         table_metadata = []
         for name, table in tables.items():
