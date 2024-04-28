@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { DataSource } from "@/constants/data";
+import { DataSource } from "../data/datasource";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { columns } from "./columns";

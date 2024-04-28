@@ -14,14 +14,10 @@ import { DataSource, dataSources, types as datatype } from "../../datasource/dat
 import * as z from "zod";
 import axios from "axios";
 import ToolForm from "@/app/(dashboard)/chat/components/tool-form";
+import { ToolFormValues, toolFormSchema } from "../data/tools";
 
 const formSchema = z.object({
   question: z.string(),
-});
-
-const toolFormSchema = z.object({
-  name: z.string(),
-  arguments: z.record(z.string()),
 });
 
 
@@ -175,9 +171,8 @@ function ChatBoard() {
     }
   }
 
-  const handleToolSubmit = async (values: z.infer<typeof toolFormSchema>) => {
+  const handleToolSubmit = async (values: ToolFormValues) => {
     const { name, arguments: args } = values;
-
 
     let uniqueId: string;
     uniqueId = addMessage(false);

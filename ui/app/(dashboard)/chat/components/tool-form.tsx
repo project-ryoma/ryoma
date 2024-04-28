@@ -31,14 +31,9 @@ import * as z from "zod";
 import { use } from "react";
 import { CodeEditor } from "./code-editor";
 import { fi } from "date-fns/locale";
+import { toolFormSchema, ToolFormValues } from "../data/tools";
 
-const toolFormSchema = z.object({
-  name: z.string(),
-  // tool_arguments is a record of strings,
-  arguments: z.record(z.string()),
-});
 
-type ToolFormValues = typeof toolFormSchema;
 type ToolFormProps = {
   tool: ToolInterface;
   onConfirm: (values: ToolFormValues) => Promise<void>;

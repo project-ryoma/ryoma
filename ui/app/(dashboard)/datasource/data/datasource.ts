@@ -3,7 +3,7 @@ export const types = ["Data Warehouse", "Database"] as const
 export type DataSourceType = (typeof types)[number]
 
 export interface DataSource {
-  id: string;
+  id: number;
   name: string;
   label: string;
   description: string;
@@ -15,7 +15,7 @@ export interface DataSource {
 
 export const dataSources: DataSource[] = [
   {
-    id: "i",
+    id: 1,
     name: "Snowflake",
     type: "Data Warehouse",
     description: "Snowflake data warehouse",
@@ -23,7 +23,7 @@ export const dataSources: DataSource[] = [
     label: "snowflake",
   },
   {
-    id: "2",
+    id: 2,
     name: "PostgreSQL",
     type: "Database",
     description: "PostgreSQL database",
@@ -31,7 +31,7 @@ export const dataSources: DataSource[] = [
     label: "postgresql",
   },
   {
-    id: "3",
+    id: 3,
     name: "BigQuery",
     type: "Data Warehouse",
     description: "BigQuery data warehouse",
@@ -39,7 +39,7 @@ export const dataSources: DataSource[] = [
     label: "bigquery",
   },
   {
-    id: "4",
+    id: 4,
     name: "Redshift",
     type: "Data Warehouse",
     description: "Redshift data warehouse",
@@ -47,7 +47,7 @@ export const dataSources: DataSource[] = [
     label: "redshift",
   },
   {
-    id: "5",
+    id: 5,
     name: "MongoDB",
     type: "Database",
     description: "MongoDB database",

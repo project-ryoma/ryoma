@@ -52,7 +52,7 @@ export default function AuthenticationPage() {
             <Link
               href={"/signup"}
               className="bg-background px-6 text-muted-foreground hover:text-primary underline underline-offset-4">
-              Don't have an account? Sign up!
+              Do not have an account? Sign up!
             </Link>
           </div>
           <p className="px-8 text-center text-sm text-muted-foreground">
