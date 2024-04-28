@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 
 from datetime import datetime
@@ -36,11 +37,13 @@ def mock_chat_response(content: str, additional_kwargs: Dict = None):
 
 @pytest.fixture
 def agent():
+    os.environ["OPENAI_API_KEY"] = "foo"
     return AitaAgent("gpt-3.5-turbo")
 
 
 @pytest.fixture
 def sql_agent():
+    os.environ["OPENAI_API_KEY"] = "foo"
     with patch("sqlalchemy.create_engine") as mock_engine:
         mock_engine.return_value = "engine"
         datasource = SqlDataSource("sqlite:///test.db")
