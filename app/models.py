@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String, nullable=False)
@@ -15,7 +15,7 @@ class User(Base):
 
 
 class DataSource(Base):
-    __tablename__ = 'datasource'
+    __tablename__ = "datasource"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String)

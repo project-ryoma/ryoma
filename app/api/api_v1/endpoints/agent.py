@@ -1,14 +1,21 @@
-from typing import Any
+from typing import Any, Union
+
+import json
 
 from fastapi import APIRouter
-import json
-from app.api.deps import SessionDep
-from app.schemas import ChatResponse, ChatRequest, ChatResponseStatus, RunToolRequest, RunToolResponse
-from app.crud import crud_datasource
-from aita.datasource.snowflake import SnowflakeDataSource
+
+from aita.agent import PandasAgent, PythonAgent, SqlAgent
 from aita.datasource.base import SqlDataSource
-from aita.agent import SqlAgent, PandasAgent, PythonAgent
-from typing import Union
+from aita.datasource.snowflake import SnowflakeDataSource
+from app.api.deps import SessionDep
+from app.crud import crud_datasource
+from app.schemas import (
+    ChatRequest,
+    ChatResponse,
+    ChatResponseStatus,
+    RunToolRequest,
+    RunToolResponse,
+)
 
 router = APIRouter()
 
@@ -22,13 +29,13 @@ def get_datasource(session: SessionDep):
         warehouse="COMPUTE_WH",
         database="SNOWFLAKE_SAMPLE_DATA",
         schema="TPCH_SF1",
-        role="PUBLIC_ROLE"
+        role="PUBLIC_ROLE",
     )
     datasource.connected = True
     if not datasource or not datasource.connected:
         return ChatResponse(
             status=ChatResponseStatus.error,
-            message="Datasource not connected, Please connect to a datasource before using the agent."
+            message="Datasource not connected, Please connect to a datasource before using the agent.",
         )
     return datasource
 
@@ -48,10 +55,7 @@ def get_agent(chat_request: Union[ChatRequest, RunToolRequest], datasource: SqlD
             temperature=chat_request.temperature,
         )
     else:
-        return ChatResponse(
-            status=ChatResponseStatus.error,
-            message="Agent not supported."
-        )
+        return ChatResponse(status=ChatResponseStatus.error, message="Agent not supported.")
     return agent
 
 
@@ -64,15 +68,13 @@ def chat(*, session: SessionDep, chat_request: ChatRequest) -> Any:
     )
     additional_info = None
     if "tool_calls" in response.additional_kwargs:
-        function_call = response.additional_kwargs["tool_calls"][0]['function']
+        function_call = response.additional_kwargs["tool_calls"][0]["function"]
         additional_info = {
             "name": function_call["name"],
-            "arguments": json.loads(function_call["arguments"])
+            "arguments": json.loads(function_call["arguments"]),
         }
     return ChatResponse(
-        status=ChatResponseStatus.success,
-        message=response.content,
-        additional_info=additional_info
+        status=ChatResponseStatus.success, message=response.content, additional_info=additional_info
     )
 
 
@@ -80,11 +82,5 @@ def chat(*, session: SessionDep, chat_request: ChatRequest) -> Any:
 def run_tool(*, session: SessionDep, run_tool_request: RunToolRequest) -> Any:
     datasource = get_datasource(session)
     agent = get_agent(run_tool_request, datasource)
-    response = agent.run_tool({
-        "name": run_tool_request.name,
-        "args": run_tool_request.arguments
-    })
-    return RunToolResponse(
-        status=ChatResponseStatus.success,
-        message=str(response)
-    )
+    response = agent.run_tool({"name": run_tool_request.name, "args": run_tool_request.arguments})
+    return RunToolResponse(status=ChatResponseStatus.success, message=str(response))

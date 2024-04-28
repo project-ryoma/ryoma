@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.crud import crud_user
 from app.core.config import settings
-from app.models import User # noqa: F401
+from app.crud import crud_user
+from app.models import User  # noqa: F401
 from app.schemas import UserCreate
 
 

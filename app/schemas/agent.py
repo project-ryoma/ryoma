@@ -1,5 +1,7 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 from enum import Enum
+
 from pydantic import BaseModel
 
 
@@ -13,8 +15,8 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponseStatus(Enum):
-    success = 'Success'
-    error = 'Error'
+    success = "Success"
+    error = "Error"
 
 
 class AdditionalInfo(BaseModel):

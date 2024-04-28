@@ -4,14 +4,15 @@
 # test the agent class attributes
 from typing import Dict
 
-import pytest
-from aita.agent import AitaAgent, AitaSqlAgent
-from mock import patch
+from datetime import datetime
 
+import pytest
+from langchain_community.utilities.sql_database import SQLDatabase
+from mock import patch
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-from datetime import datetime
-from langchain_community.utilities.sql_database import SQLDatabase
+
+from aita.agent import AitaAgent, AitaSqlAgent
 
 
 def mock_chat_response(content: str, additional_kwargs: Dict = None):
@@ -32,7 +33,7 @@ def mock_chat_response(content: str, additional_kwargs: Dict = None):
             )
         ],
         created=int(datetime.now().timestamp()),
-        additional_kwargs=additional_kwargs
+        additional_kwargs=additional_kwargs,
     )
 
 
@@ -65,8 +66,7 @@ def test_chat(agent):
 def test_chat_with_tool(sql_agent):
     with patch("langchain_openai.ChatOpenAI.invoke") as mock_invoke:
         mock_invoke.return_value = mock_chat_response(
-            "Hello, world!",
-            additional_kwargs={"tool_calls": "sql_db_query"}
+            "Hello, world!", additional_kwargs={"tool_calls": "sql_db_query"}
         )
 
         chat_response = agent.chat("top 4 customers in database", allow_call_tool=True)

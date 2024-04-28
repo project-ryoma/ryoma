@@ -1,8 +1,9 @@
 from typing import Optional
 
-from aita.datasource.base import SqlDataSource
-import snowflake.connector
 import pandas as pd
+import snowflake.connector
+
+from aita.datasource.base import SqlDataSource
 
 
 class SnowflakeDataSource(SqlDataSource):

@@ -2,9 +2,9 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from app.schemas import DataSourceCreate, DataSourceResponse
-from app.crud import crud_datasource
 from app.api.deps import SessionDep
+from app.crud import crud_datasource
+from app.schemas import DataSourceCreate, DataSourceResponse
 
 router = APIRouter()
 

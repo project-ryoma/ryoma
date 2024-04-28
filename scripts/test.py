@@ -1,5 +1,6 @@
+from typing import Any, Dict, List, Tuple
+
 import math
-from typing import List, Dict, Any, Tuple
 
 import numpy as np
 
@@ -23,9 +24,7 @@ def test_calculate_entropy():
     assert calculate_entropy(np.array(probs)) == calculate_entropy_list(probs)
 
 
-def find_best_split(
-        data: np.ndarray, labels: np.array, feature_idx: int
-) -> Tuple[float, float]:
+def find_best_split(data: np.ndarray, labels: np.array, feature_idx: int) -> Tuple[float, float]:
     # get the unique values of the feature
     unique_values = np.unique(data[:, feature_idx])
     best_entropy = math.inf
@@ -38,10 +37,14 @@ def find_best_split(
         right_labels = labels[right_indices]
 
         left_entropy = calculate_entropy(
-            np.array([np.sum(left_labels == label) / len(left_labels) for label in np.unique(labels)])
+            np.array(
+                [np.sum(left_labels == label) / len(left_labels) for label in np.unique(labels)]
+            )
         )
         right_entropy = calculate_entropy(
-            np.array([np.sum(right_labels == label) / len(right_labels) for label in np.unique(labels)])
+            np.array(
+                [np.sum(right_labels == label) / len(right_labels) for label in np.unique(labels)]
+            )
         )
 
         total_entropy = left_entropy + right_entropy
@@ -53,13 +56,15 @@ def find_best_split(
 
 
 def test_find_best_split():
-    data = np.array([
-        [1, 2, 3, 4, 5],
-        [2, 3, 4, 5, 6],
-        [3, 4, 5, 6, 7],
-        [4, 5, 6, 7, 8],
-        [5, 6, 7, 8, 9],
-    ])
+    data = np.array(
+        [
+            [1, 2, 3, 4, 5],
+            [2, 3, 4, 5, 6],
+            [3, 4, 5, 6, 7],
+            [4, 5, 6, 7, 8],
+            [5, 6, 7, 8, 9],
+        ]
+    )
     labels = np.array([0, 1, 0, 1, 0])
     best_entropy, best_split_value = find_best_split(data, labels, 0)
     expected_entropy = 0.97
@@ -80,19 +85,20 @@ def split_datasets(data: np.ndarray, split_value: float, feature_idx: int) -> Li
 #   'feature_0_split_0': {
 #       'feature_1_split_0': {
 #         'feature_2_split_0': {
-#           
+#
 #         },
 #         'feature_2_split_1': {
-#           
+#
 #         },
 #       },
 #       'feature_1_split_1': {
-#           
+#
 #       },
 #   },
 #   'feature_0_split_1': {
 #   }
 # }
+
 
 class Node:
     def __init__(self):
@@ -118,13 +124,15 @@ def build_tree(data, labels, feature):
 
 
 def test_build_tree():
-    data = np.array([
-        [1, 2, 3, 4, 5],
-        [2, 3, 4, 5, 6],
-        [1, 4, 5, 6, 7],
-        [4, 5, 6, 7, 8],
-        [1, 6, 7, 8, 9],
-    ])
+    data = np.array(
+        [
+            [1, 2, 3, 4, 5],
+            [2, 3, 4, 5, 6],
+            [1, 4, 5, 6, 7],
+            [4, 5, 6, 7, 8],
+            [1, 6, 7, 8, 9],
+        ]
+    )
 
     labels = np.array([0, 1, 0, 1, 0])
 

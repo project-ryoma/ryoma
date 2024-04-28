@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 
 
 class StateStore(ABC):
-
     @abstractmethod
     def store(self, key, value):
         raise NotImplementedError
@@ -15,15 +14,14 @@ class StateStore(ABC):
     @abstractmethod
     def retrieve(self, key):
         raise NotImplementedError
-    
+
     @abstractmethod
     def delete(self, key):
         raise NotImplementedError
-    
+
     @abstractmethod
     def update(self, key, value):
         raise NotImplementedError
-
 
 
 class LocalStateStore(StateStore):
@@ -32,10 +30,10 @@ class LocalStateStore(StateStore):
 
     def store(self, key, value):
         self.states[key] = value
-    
+
     def retrieve(self, key):
         return self.states.get(key)
-    
+
     def delete(self, key):
         if key in self.states:
             del self.states[key]

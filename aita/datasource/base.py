@@ -1,7 +1,9 @@
-from abc import ABC
 from typing import Optional
+
 import json
-from sqlalchemy import create_engine, MetaData
+from abc import ABC
+
+from sqlalchemy import MetaData, create_engine
 
 
 class DataSource(ABC):
@@ -9,7 +11,6 @@ class DataSource(ABC):
 
 
 class SqlDataSource(DataSource):
-
     def __init__(self, connection_url: Optional[str] = None):
         self.engine = self.create_engine(connection_url)
 
@@ -32,13 +33,16 @@ class SqlDataSource(DataSource):
         db_structure = {}
         for table_name, table in metadata.tables.items():
             db_structure[table_name] = {
-                "columns": [{
-                    "name": column.name,
-                    "type": str(column.type),
-                    "nullable": column.nullable,
-                    "default": str(column.default),
-                    "primary_key": column.primary_key,
-                } for column in table.columns]
+                "columns": [
+                    {
+                        "name": column.name,
+                        "type": str(column.type),
+                        "nullable": column.nullable,
+                        "default": str(column.default),
+                        "primary_key": column.primary_key,
+                    }
+                    for column in table.columns
+                ]
             }
 
         # Convert the dictionary to a JSON string
@@ -51,4 +55,3 @@ class SqlDataSource(DataSource):
 class NosqlDataSource(DataSource):
     def __init__(self):
         pass
-

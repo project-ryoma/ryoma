@@ -20,10 +20,30 @@ AI Powered Data Platform, a comprehensive solution for data analysis, visualizat
 
 Our platform leverages a combination of cutting-edge technologies and frameworks:
 
-- **[OpenAI](https://openai.com/)**: Utilizes advanced natural language processing and machine learning models for insightful data analysis and automation.
 - **[Langchain](https://www.langchain.com/)**: Facilitates the seamless integration of language models into application workflows, significantly enhancing AI interaction capabilities.
 - **[FastAPI](https://fastapi.tiangolo.com/)**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+, emphasizing speed, reliability, and ease of use.
 - **[Apache Arrow](https://arrow.apache.org/)**: A cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware like CPUs and GPUs.
+- **[Jupyter Ai Magics](https://github.com/jupyterlab/jupyter-ai)**: A JupyterLab extension that provides a set of magics for working with AI models.
+
+## Supported Models
+Model provider are supported by jupyter ai magics.
+
+| Provider            | Provider ID          | Environment variable(s)    | Python package(s)               |
+|---------------------|----------------------|----------------------------|---------------------------------|
+| AI21                | `ai21`               | `AI21_API_KEY`             | `ai21`                          |
+| Anthropic           | `anthropic`          | `ANTHROPIC_API_KEY`        | `langchain-anthropic`           |
+| Anthropic (chat)    | `anthropic-chat`     | `ANTHROPIC_API_KEY`        | `langchain-anthropic`           |
+| Bedrock             | `bedrock`            | N/A                        | `boto3`                         |
+| Bedrock (chat)      | `bedrock-chat`       | N/A                        | `boto3`                         |
+| Cohere              | `cohere`             | `COHERE_API_KEY`           | `cohere`                        |
+| ERNIE-Bot           | `qianfan`            | `QIANFAN_AK`, `QIANFAN_SK` | `qianfan`                       |
+| Gemini              | `gemini`             | `GOOGLE_API_KEY`           | `langchain-google-genai`        |
+| GPT4All             | `gpt4all`            | N/A                        | `gpt4all`                       |
+| Hugging Face Hub    | `huggingface_hub`    | `HUGGINGFACEHUB_API_TOKEN` | `huggingface_hub`, `ipywidgets`, `pillow` |
+| NVIDIA              | `nvidia-chat`        | `NVIDIA_API_KEY`           | `langchain_nvidia_ai_endpoints` |
+| OpenAI              | `openai`             | `OPENAI_API_KEY`           | `langchain-openai`              |
+| OpenAI (chat)       | `openai-chat`        | `OPENAI_API_KEY`           | `langchain-openai`              |
+| SageMaker           | `sagemaker-endpoint` | N/A                        | `boto3`                         |
 
 ## Supported Data Sources
 - Snowflake

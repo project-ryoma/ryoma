@@ -1,4 +1,5 @@
 import os
+
 from openai import ChatCompletion, OpenAI, OpenAIError
 
 client = OpenAI(

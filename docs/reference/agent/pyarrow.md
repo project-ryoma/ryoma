@@ -7,7 +7,7 @@ The Pyarrow agent can be used to ask questions in natural language and interact 
 
 {% code title="python" %}
 ```python
-from aita.agent import PyarrowAgent
+from aita.agent.pyarrow import PyArrowAgent 
 import pyarrow as pa
 
 table = pa.table({
@@ -15,6 +15,6 @@ table = pa.table({
     'purchase_amount': pa.array([100, 200, 300, 400, 500])
 })
 
-pa_agent = PyarrowAgent({"table": table}, "gpt-3.5-turbo", 0.8)
+pa_agent = PyArrowAgent({"table": table}, "gpt-3.5-turbo")
 ```
 {% endcode %}

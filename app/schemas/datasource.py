@@ -31,4 +31,3 @@ class DataSourceInDBBase(DataSource):
 # Additional properties to return via API
 class DataSourceResponse(DataSourceInDBBase):
     pass
-

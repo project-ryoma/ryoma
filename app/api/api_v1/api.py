@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from app.api.api_v1.endpoints import (
-    autocomplete,
     agent,
+    autocomplete,
     datasources,
     favicon,
     health,

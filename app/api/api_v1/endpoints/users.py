@@ -3,9 +3,9 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
-from app.crud import crud_user
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core.config import settings
+from app.crud import crud_user
 from app.schemas import Message, User, UserCreate, UserUpdate
 from app.utils import send_new_account_email
 

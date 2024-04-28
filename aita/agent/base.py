@@ -1,7 +1,7 @@
-from langchain_core.tools import BaseTool
 from jupyter_ai_magics.providers import *
-from jupyter_ai_magics.utils import get_lm_providers, decompose_model_id
+from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
 from langchain.tools.render import render_text_description
+from langchain_core.tools import BaseTool
 
 
 def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[BaseProvider]:
@@ -26,11 +26,13 @@ class AitaAgent:
     question: {question}
     """
 
-    def __init__(self,
-                 model_id: str,
-                 model_parameters: Optional[Dict],
-                 tools: List[BaseTool],
-                 prompt_context: str = None):
+    def __init__(
+        self,
+        model_id: str,
+        model_parameters: Optional[Dict],
+        tools: List[BaseTool],
+        prompt_context: str = None,
+    ):
         self.model: BaseProvider = get_model(model_id, model_parameters)
         self.tool_registry = {}
         self.prompt_context = prompt_context
@@ -57,14 +59,18 @@ class AitaAgent:
 
     def _build_prompt(self, question: str):
         return self.base_prompt_template.format(
-            prompt_context=self.prompt_context,
-            question=question
+            prompt_context=self.prompt_context, question=question
         )
 
     def chat(self, question: str, allow_run_tool=False):
         prompt = self._build_prompt(question)
         chat_result = self.model.invoke(prompt)
-        if allow_run_tool and "addtiional_kwargs" in chat_result and chat_result.addtiional_kwargs and "tool_calls" in chat_result.additional_kwargs:
+        if (
+            allow_run_tool
+            and "addtiional_kwargs" in chat_result
+            and chat_result.addtiional_kwargs
+            and "tool_calls" in chat_result.additional_kwargs
+        ):
             run_tool_result = self.run_tool(chat_result["tool_calls"])
             return run_tool_result
         return chat_result

@@ -1,9 +1,11 @@
+from typing import Any, Dict, Sequence, Type, Union
+
+import logging
+
+from IPython import get_ipython
+from IPython.core.interactiveshell import ExecutionResult, InteractiveShell
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
-from typing import Any, Union, Sequence, Dict, Type
-import logging
-from IPython import get_ipython
-from IPython.core.interactiveshell import InteractiveShell, ExecutionResult
 
 log = logging.getLogger(__name__)
 
@@ -22,9 +24,7 @@ class IPythonTool(BaseTool):
     """
     args_schema: Type[BaseModel] = PythonInput
 
-    script_context: Dict[str, Any] = Field(
-        description="context for the script execution"
-    )
+    script_context: Dict[str, Any] = Field(description="context for the script execution")
 
     def _run(
         self,
@@ -42,4 +42,3 @@ class IPythonTool(BaseTool):
             return result
         except Exception as e:
             return str(e)
-
