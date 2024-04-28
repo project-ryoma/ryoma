@@ -29,8 +29,8 @@ class AitaAgent:
     def __init__(
         self,
         model_id: str,
-        model_parameters: Optional[Dict],
-        tools: List[BaseTool],
+        model_parameters: Optional[Dict] = None,
+        tools: List[BaseTool] = None,
         prompt_context: str = None,
     ):
         self.model: BaseProvider = get_model(model_id, model_parameters)

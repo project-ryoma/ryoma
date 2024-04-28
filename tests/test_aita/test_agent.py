@@ -1,18 +1,12 @@
-# create a test suite for the agent class
-# test the agent class methods
-# test the agent class properties
-# test the agent class attributes
-from typing import Dict
-
+from aita.agent.base import AitaAgent
+from aita.agent.sql import SqlAgent
+from aita.datasource.base import SqlDataSource
 from datetime import datetime
-
-import pytest
-from langchain_community.utilities.sql_database import SQLDatabase
 from mock import patch
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-
-from aita.agent import AitaAgent, AitaSqlAgent
+from typing import Dict
+import pytest
 
 
 def mock_chat_response(content: str, additional_kwargs: Dict = None):
@@ -39,21 +33,25 @@ def mock_chat_response(content: str, additional_kwargs: Dict = None):
 
 @pytest.fixture
 def agent():
-    return AitaAgent("gpt-3.5-turbo", 0.5, [], {})
+    return AitaAgent("gpt-3.5-turbo")
 
 
 @pytest.fixture
 def sql_agent():
     with patch("sqlalchemy.create_engine") as mock_engine:
         mock_engine.return_value = "engine"
-        db = SQLDatabase.from_uri("postgresql://:@localhost:5432")
-        return AitaSqlAgent(db, "gpt-3.5-turbo", 0.5, {})
+        datasource = SqlDataSource("sqlite:///test.db")
+        return SqlAgent(datasource, "gpt-3.5-turbo")
 
 
 def test_agent(agent):
-    assert agent.model == "gpt-3.5-turbo"
-    assert agent.temperature == 0.5
+    assert "gpt-3.5-turbo" in agent.model.models
     assert agent.tool_registry == {}
+
+
+def test_sql_agent(sql_agent):
+    assert "gpt-3.5-turbo" in sql_agent.model.models
+    assert "sql_datasource_query" in sql_agent.tool_registry
 
 
 def test_chat(agent):
@@ -69,5 +67,15 @@ def test_chat_with_tool(sql_agent):
             "Hello, world!", additional_kwargs={"tool_calls": "sql_db_query"}
         )
 
-        chat_response = agent.chat("top 4 customers in database", allow_call_tool=True)
+        chat_response = sql_agent.chat("top 4 customers in database", allow_run_tool=True)
         assert chat_response.choices[0].message.content == "Hello, world!"
+
+
+def test_run_tool(sql_agent):
+    with patch("aita.tool.sql.SqlDatabaseTool.run") as mock_run:
+        mock_run.return_value = "result"
+        result = sql_agent.run_tool({
+            "name": "sql_datasource_query",
+            "args": "SELECT * FROM customers LIMIT 4"
+        })
+        assert result == "result"
