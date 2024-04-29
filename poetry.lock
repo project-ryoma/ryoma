@@ -2294,13 +2294,13 @@ extended-testing = ["aiosqlite (>=0.19.0,<0.20.0)", "aleph-alpha-client (>=2.15.
 
 [[package]]
 name = "langchain-core"
-version = "0.1.44"
+version = "0.1.46"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langchain_core-0.1.44-py3-none-any.whl", hash = "sha256:d8772dccef95fc97bfa2dcd19412e620ebe14def1f0e218374971f6e30a46a49"},
-    {file = "langchain_core-0.1.44.tar.gz", hash = "sha256:e313975d9ae2926342e6f2ad760338d31f18b1223e9b8b4dc408daeeade46a83"},
+    {file = "langchain_core-0.1.46-py3-none-any.whl", hash = "sha256:1c0befcd2665dd4aa153318aa9bf729071644b4c179e491769b8e583b4bf7441"},
+    {file = "langchain_core-0.1.46.tar.gz", hash = "sha256:17c416349f5c7a9808e70e3725749a3a2df5088f1ecca045c883871aa95f9c9e"},
 ]
 
 [package.dependencies]
@@ -2316,18 +2316,17 @@ extended-testing = ["jinja2 (>=3,<4)"]
 
 [[package]]
 name = "langchain-openai"
-version = "0.0.7"
+version = "0.1.4"
 description = "An integration package connecting OpenAI and LangChain"
 optional = false
-python-versions = ">=3.8.1,<4.0"
+python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langchain_openai-0.0.7-py3-none-any.whl", hash = "sha256:43b64806f45c18db710a7847ef8ada95ec8b3af27d3a4af16de8ac75e8b32b01"},
-    {file = "langchain_openai-0.0.7.tar.gz", hash = "sha256:303746637a971b1f32078afb5e97b904fa94d397fbb3b6c1f71d6a5f4edc6ee4"},
+    {file = "langchain_openai-0.1.4-py3-none-any.whl", hash = "sha256:a349ada8724921e380aab03ee312568f5ca99adbc806f6878d79ff9cd1d6d353"},
+    {file = "langchain_openai-0.1.4.tar.gz", hash = "sha256:1a3220464c270d73ea3987010617789adc2099d4d4740b15c7734ab07e1f054b"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.1.26,<0.2.0"
-numpy = ">=1,<2"
+langchain-core = ">=0.1.46,<0.2.0"
 openai = ">=1.10.0,<2.0.0"
 tiktoken = ">=0.5.2,<1"
 
@@ -5611,4 +5610,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "544439c2cda8d708911df651b2837b8a54a019cfe61432725f05a2368e0f34f6"
+content-hash = "39de44b84cad637b83975f5d9503d26c2d54c48fea9b384f38149574dac6f2a6"
