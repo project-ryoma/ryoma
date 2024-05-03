@@ -1,0 +1,34 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "aita"
+version = "0.1.0"
+description = "Core Aita Library"
+authors = ["aita <contact@project-aita.com>"]
+readme = "README.md"
+license = "Apache Software License 2.0"
+repository = "https://github.com/aita/aita"
+homepage = "https://github.com/aita/aita"
+
+keywords = ["Artificial Intelligence", "Data Analysis", "Code Generation"]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.7.1"
+jupyter-ai-magics = "^2.14.0"
+pandas = "^2.2.2"
+snowflake-connector-python = "^3.9.1"
+
