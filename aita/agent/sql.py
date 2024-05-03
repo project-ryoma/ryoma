@@ -8,7 +8,7 @@ from aita.tool.sql_tool import SqlDatabaseTool
 class SqlAgent(AitaAgent):
 
     prompt_context = """
-    database metadata: {metadata}
+    You are provided with sql data sources: {metadata}
     """
 
     def __init__(
@@ -22,6 +22,5 @@ class SqlAgent(AitaAgent):
             SqlDatabaseTool(datasource=datasource),
         ]
         if allow_extract_metadata:
-            metadata = datasource.get_metadata()
-            self.prompt_context = self.prompt_context.format(metadata=metadata)
+            self.prompt_context = self.prompt_context.format(metadata=datasource.get_metadata())
         super().__init__(model_id, model_parameters, tools, prompt_context=self.prompt_context)

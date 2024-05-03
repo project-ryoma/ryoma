@@ -4,7 +4,8 @@ import json
 
 from fastapi import APIRouter
 
-from aita.agent import PandasAgent, PythonAgent, SqlAgent
+from aita.agent.sql import SqlAgent
+from aita.agent.pandas import PandasAgent
 from aita.datasource.base import SqlDataSource
 from aita.datasource.snowflake import SnowflakeDataSource
 from app.api.deps import SessionDep

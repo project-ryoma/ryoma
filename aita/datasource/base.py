@@ -1,58 +1,48 @@
-from typing import Optional
-
+from abc import ABC, abstractmethod
+from adbc_driver_manager.dbapi import Connection
+from aita.datasource.catalog import Catalog
+from typing import List
 import json
-from abc import ABC
-
-from sqlalchemy import MetaData, create_engine
+import pyarrow as pa
 
 
 class DataSource(ABC):
-    pass
+
+    @abstractmethod
+    def get_metadata(self, **kwargs) -> List[Catalog]:
+        pass
 
 
 class SqlDataSource(DataSource):
-    def __init__(self, connection_url: Optional[str] = None):
-        self.engine = self.create_engine(connection_url)
+    def __init__(self, connection_url: str):
+        self.connection_url = connection_url
 
-    def create_engine(self, connection_url: Optional[str] = None):
-        return create_engine(connection_url)
-
-    def connect(self):
-        return self.engine.connect()
+    @abstractmethod
+    def connect(self) -> Connection:
+        raise NotImplementedError
 
     def execute(self, query: str, params=None):
-        with self.connect() as connection:
-            return connection.execute(query, *(params or ()))
+        with self.connect().cursor() as cursor:
+            cursor.execute(query, *(params or ()))
+            return cursor.fetchall()
 
-    def get_metadata(self, **kwargs):
-        # Reflect metadata from the existing database
-        metadata = MetaData(bind=self.engine)
-        metadata.reflect()
-
-        # Serialize the database structure to a dictionary
-        db_structure = {}
-        for table_name, table in metadata.tables.items():
-            db_structure[table_name] = {
-                "columns": [
-                    {
-                        "name": column.name,
-                        "type": str(column.type),
-                        "nullable": column.nullable,
-                        "default": str(column.default),
-                        "primary_key": column.primary_key,
-                    }
-                    for column in table.columns
-                ]
-            }
-
-        # Convert the dictionary to a JSON string
-        db_structure_json = json.dumps(db_structure, indent=4)
-
-        # For demonstration, print the JSON string
-        return db_structure_json
+    def get_metadata(self, **kwargs) -> List[Catalog]:
+        with self.connect() as conn:
+            catalogs: pa.Table = conn.adbc_get_objects(
+                catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
+                db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
+                table_name_filter=kwargs.get("table"),
+            ).read_all()
+            catalog_list = json.loads(catalogs.to_pandas().to_json(orient="records"))
+            return [Catalog(**catalog) for catalog in catalog_list]
 
     def to_arrow(self, query: str, params=None):
-        raise NotImplementedError
+        with self.connect().cursor() as cursor:
+            cursor.execute(query, *(params or ()))
+            return cursor.fetch_arrow_table()
+
+    def to_pandas(self, query: str, params=None):
+        return self.to_arrow(query, params).to_pandas()
 
 
 class NosqlDataSource(DataSource):

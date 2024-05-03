@@ -7,9 +7,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # sdt working directory
 WORKDIR /app/
 
-# copy app
-#COPY . .
-
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 

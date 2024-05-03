@@ -21,9 +21,9 @@ class AitaAgent:
     tool_registry: Dict[str, BaseTool]
 
     base_prompt_template = """
-    context: {prompt_context}
+    Context: {prompt_context}
 
-    question: {question}
+    Question: {question}
     """
 
     def __init__(
@@ -67,14 +67,19 @@ class AitaAgent:
         chat_result = self.model.invoke(prompt)
         if (
             allow_run_tool
-            and "addtiional_kwargs" in chat_result
-            and chat_result.addtiional_kwargs
+            and hasattr(chat_result, "additional_kwargs")
             and "tool_calls" in chat_result.additional_kwargs
         ):
-            run_tool_result = self.run_tool(chat_result["tool_calls"])
-            return run_tool_result
+            run_tool_results = []
+            for tool in chat_result.additional_kwargs["tool_calls"]:
+                run_tool_result = self.run_tool(tool["function"])
+                run_tool_results.append(run_tool_result)
+            return run_tool_results
         return chat_result
 
-    def run_tool(self, tool_spec: dict) -> Any:
+    def run_tool(self, tool_spec: Dict) -> Any:
         tool = self.tool_registry[tool_spec["name"]]
-        return tool.invoke(tool_spec["args"])
+        arguments = tool_spec.get("arguments")
+        if isinstance(arguments, str):
+            arguments = json.loads(arguments)
+        return tool.invoke(arguments)

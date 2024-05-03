@@ -11,6 +11,7 @@ const nextConfig = {
   images: {
     domains: ["utfs.io"],
   },
+  distDir: 'dist',
 };
 
 module.exports = nextConfig;

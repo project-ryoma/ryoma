@@ -24,3 +24,13 @@ export default function Page() {
     </ScrollArea>
   );
 }
+
+export const generateStaticParams = async () => {
+  const userIds = await fetchUserIds(); // Implement this function to fetch user IDs
+  return userIds.map(userId => ({ params: { userId } }));
+};
+
+async function fetchUserIds() {
+  // Fetch user IDs from an API or database
+  return ['123', '456', '789'];  // Example user IDs
+}

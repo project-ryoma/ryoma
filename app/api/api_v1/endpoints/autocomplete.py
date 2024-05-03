@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from aita.utils import chat_completion_request
 from app.schemas import ChatResponse
 
 router = APIRouter()
@@ -22,7 +21,7 @@ Please ensure that the completed sentence starts with the exact input text.
         messages = [{"role": "user", "content": prompt}]
 
         # Send a request to the GPT-3 API with the text input
-        response = chat_completion_request(messages=messages)
+        response = {}
         # Extract suggestions from the GPT-3 response
         suggestions = [choice.message.content.strip() for choice in response.choices]
         suggestions = list(dict.fromkeys(suggestions))
