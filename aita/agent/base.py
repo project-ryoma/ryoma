@@ -1,6 +1,7 @@
 from jupyter_ai_magics.providers import *
 from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
 from langchain.tools.render import render_text_description
+from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.tools import BaseTool
 
 
@@ -14,6 +15,12 @@ def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[BaseP
     model_parameters = model_parameters or {}
     return Provider(**provider_params, **model_parameters)
 
+
+class OutputModel(BaseModel):
+    content: str
+    additional_kwargs: Dict = {}
+
+parser = PydanticOutputParser(pydantic_object=OutputModel)
 
 class AitaAgent:
     model: str
@@ -75,7 +82,7 @@ class AitaAgent:
                 run_tool_result = self.run_tool(tool["function"])
                 run_tool_results.append(run_tool_result)
             return run_tool_results
-        return chat_result
+        return chat_result.pretty_print()
 
     def run_tool(self, tool_spec: Dict) -> Any:
         tool = self.tool_registry[tool_spec["name"]]

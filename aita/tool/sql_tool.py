@@ -3,7 +3,7 @@ from typing import Any, Dict, Sequence, Type, Union
 from pydantic import BaseModel, Field
 from sqlalchemy.engine import Result
 
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 from aita.tool.ipython import BaseTool
 
 

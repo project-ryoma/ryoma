@@ -1,5 +1,5 @@
 from adbc_driver_manager.dbapi import Connection
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 from typing import Optional
 import adbc_driver_snowflake.dbapi
 

@@ -1,5 +1,5 @@
 from aita.datasource.base import DataSource
-from aita.datasource.bigquery import BigQueryDataSource
+from aita.datasource.bigquery import BigqueryDataSource
 from aita.datasource.mysql import MySqlDataSource
 from aita.datasource.postgresql import PostgreSqlDataSource
 from aita.datasource.snowflake import SnowflakeDataSource
@@ -12,7 +12,7 @@ class DataSourceFactory:
         datasources = {
             "mysql": MySqlDataSource,
             "postgresql": PostgreSqlDataSource,
-            "bigquery": BigQueryDataSource,
+            "bigquery": BigqueryDataSource,
             "snowflake": SnowflakeDataSource,
         }
 

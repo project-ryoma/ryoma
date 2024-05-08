@@ -3,14 +3,14 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "aita-lab"
+name = "aita"
 version = "0.1.0"
 description = "AI Powered Data Platform"
 readme = "README.md"
 authors = ["aita <contact@project-aita.com>"]
 license = "Apache Software License 2.0"
-repository = "https://github.com/aita/aita"
-homepage = "https://github.com/aita/aita"
+repository = "https://github.com/project-aita/aita"
+homepage = "https://www.project-aita.com"
 
 keywords = ["Artificial Intelligence", "Data Analysis", "Code Generation"]
 
@@ -25,14 +25,9 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
 ]
 
-packages = [
-    { include = "app" },
-    { include = "aita" },
-]
 
 [tool.poetry.scripts]
 "aita" = "aita.__main__:app"
-"init-data" = "app.initial_data:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -58,7 +53,7 @@ python-multipart = "^0.0.9"
 psycopg2-binary = "^2.9.9"
 docstring-parser = "^0.15"
 numpy = "^1.26.4"
-langchain = "^0.1.9"
+langchain = "0.1.17"
 langchain-openai = "^0.0.7"
 mock = "^5.1.0"
 alembic = "^1.13.1"
@@ -72,6 +67,7 @@ jupyter-ai-magics = "^2.14.0"
 findspark = "^2.0.1"
 adbc-driver-postgresql = "^0.11.0"
 adbc-driver-snowflake = "^0.11.0"
+boto3 = "^1.34.99"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"

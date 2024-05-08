@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from aita.agent.base import AitaAgent
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 from aita.tool.sql_tool import SqlDatabaseTool
 
 

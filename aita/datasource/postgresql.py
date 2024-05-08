@@ -1,4 +1,4 @@
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 import adbc_driver_postgresql.dbapi
 from adbc_driver_manager.dbapi import Connection
 
