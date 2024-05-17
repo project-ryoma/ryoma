@@ -4,6 +4,7 @@ from adbc_driver_manager.dbapi import Connection
 
 
 class PostgreSqlDataSource(SqlDataSource):
+    name: str = "PostgreSQL"
 
     def connect(self) -> Connection:
         return adbc_driver_postgresql.dbapi.connect(self.connection_url)

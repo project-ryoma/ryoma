@@ -12,7 +12,7 @@ class PandasAgent(AitaAgent):
     Meta data of all available data sources
     {script_context}
 
-    pandas dataframe can be created by using the data source as:
+    Pandas dataframe can be created by using the data source as:
     datasource.to_pandas(query)
     """
 

@@ -5,6 +5,7 @@ from sqlalchemy.engine import Result
 
 from aita.datasource.sql import SqlDataSource
 from aita.tool.ipython import BaseTool
+from aita.datasource.catalog import Table
 
 
 class QueryInput(BaseModel):
@@ -33,6 +34,33 @@ class SqlDatabaseTool(BaseTool):
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
         return self.datasource.execute(query)
+
+
+class CreateTableTool(BaseTool):
+    """Tool for creating a table in a SQL database."""
+
+    datasource: SqlDataSource = Field(exclude=True)
+    name: str = "create_table"
+    description: str = """
+    Create a table in the database.
+    If the table already exists, an error message will be returned.
+    input arguments are table_name and table_columns.
+    """
+    args_schema: Type[BaseModel] = Table
+
+    def _run(
+        self,
+        table_name,
+        table_columns,
+        **kwargs,
+    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
+        """Execute the query, return the results or an error message."""
+        columns = ",\n".join(
+            f"{column.column_name} \"{column.xdbc_type_name}\""
+            for column in table_columns
+        )
+        return self.datasource.execute(
+            "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns))
 
 
 class ConvertToPandasTool(BaseTool):

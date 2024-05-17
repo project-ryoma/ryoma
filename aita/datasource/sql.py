@@ -2,13 +2,13 @@ from abc import abstractmethod
 from adbc_driver_manager.dbapi import Connection
 from aita.datasource.catalog import Catalog
 from aita.datasource.base import DataSource
-from typing import List
-import json
 import pyarrow as pa
-from pyarrow.csv import read_csv
 
 
 class SqlDataSource(DataSource):
+    name: str
+    connection_url: str
+
     def __init__(self, connection_url: str):
         self.connection_url = connection_url
 
@@ -21,15 +21,15 @@ class SqlDataSource(DataSource):
             cursor.execute(query, *(params or ()))
             return cursor.fetchall()
 
-    def get_metadata(self, **kwargs) -> List[Catalog]:
+    def get_metadata(self, **kwargs) -> Catalog:
         with self.connect() as conn:
             catalogs: pa.Table = conn.adbc_get_objects(
                 catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
                 db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
                 table_name_filter=kwargs.get("table"),
             ).read_all()
-            catalog_list = json.loads(catalogs.to_pandas().to_json(orient="records"))
-            return [Catalog(**catalog) for catalog in catalog_list]
+            catalog = catalogs.to_pylist()[0]
+            return Catalog(**catalog)
 
     def to_arrow(self, query: str, params=None):
         with self.connect().cursor() as cursor:
@@ -41,5 +41,6 @@ class SqlDataSource(DataSource):
 
     def ingest(self, table_name: str, data: pa.Table, **kwargs):
         with self.connect().cursor() as cursor:
-            print(cursor.adbc_ingest(table_name, data, **kwargs))
-            cursor.close()
+            res = cursor.adbc_ingest(table_name, data, **kwargs)
+            cursor.connection.commit()
+            return res

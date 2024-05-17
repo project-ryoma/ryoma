@@ -5,6 +5,7 @@ import adbc_driver_snowflake.dbapi
 
 
 class SnowflakeDataSource(SqlDataSource):
+    name: str = "Snowflake"
 
     def __init__(
         self,

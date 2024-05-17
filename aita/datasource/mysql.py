@@ -1,10 +1,12 @@
 from sqlalchemy.engine import URL
 
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 
 
 # Implementations for various SQL databases
 class MySqlDataSource(SqlDataSource):
+    name: str = "MySQL"
+
     def __init__(self, user: str, password: str, host: str, port: int, database: str, **kwargs):
         url = URL.create(
             "mysql+pymysql",

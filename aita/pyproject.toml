@@ -31,4 +31,5 @@ pydantic = "^2.7.1"
 jupyter-ai-magics = "^2.14.0"
 pandas = "^2.2.2"
 snowflake-connector-python = "^3.9.1"
+langgraph = "^0.0.48"
 

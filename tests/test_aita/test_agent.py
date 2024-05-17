@@ -11,7 +11,7 @@ from openai.types.chat.chat_completion import ChatCompletion, Choice
 from aita.agent.base import AitaAgent
 from aita.agent.sql import SqlAgent
 from aita.agent.pandas import PandasAgent
-from aita.datasource.base import SqlDataSource
+from aita.datasource.sql import SqlDataSource
 
 os.environ["OPENAI_API_KEY"] = "foo"
 

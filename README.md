@@ -1,7 +1,6 @@
 # aita
-AI Powered Data Platform, a comprehensive solution for data analysis, visualization, and automation.
+AI Powered Data Agent, a comprehensive solution for data analysis, engineering, and visualization. 
 
-<div align="center">
 
 [![Build status](https://github.com/project-aita/aita/workflows/build/badge.svg)](https://github.com/project-aita/aita/actions/workflows/build.yml?query=workflow%3Abuild)
 [![Python Version](https://img.shields.io/pypi/pyversions/aita.svg)](https://pypi.org/project/aita/)
@@ -10,18 +9,16 @@ AI Powered Data Platform, a comprehensive solution for data analysis, visualizat
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/project-aita/aita/blob/main/.pre-commit-config.yaml)
-[![Semantic Versions](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--versions-e10079.svg)](https://github.com/project-aita/aita/releases)
 [![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
 [![Coverage Report](assets/images/coverage.svg)](https://github.com/project-aita/aita/blob/main/assets/images/coverage.svg)
 
-</div>
 
 ## Tech Stack
 
 Our platform leverages a combination of cutting-edge technologies and frameworks:
 
 - **[Langchain](https://www.langchain.com/)**: Facilitates the seamless integration of language models into application workflows, significantly enhancing AI interaction capabilities.
-- **[FastAPI](https://fastapi.tiangolo.com/)**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+, emphasizing speed, reliability, and ease of use.
+- **[Reflex](https://reflex.dev/)**: An open-source framework for quickly building beautiful, interactive web applications in pure Python
 - **[Apache Arrow](https://arrow.apache.org/)**: A cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware like CPUs and GPUs.
 - **[Jupyter Ai Magics](https://github.com/jupyterlab/jupyter-ai)**: A JupyterLab extension that provides a set of magics for working with AI models.
 
@@ -64,16 +61,3 @@ Model provider are supported by jupyter ai magics.
 [![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
 
 This project is licensed under the terms of the `Apache Software License 2.0` license. See [LICENSE](https://github.com/aita/aita/blob/master/LICENSE) for more details.
-
-## 📃 Citation
-
-```bibtex
-@misc{aita,
-  author = {aita},
-  title = {AI Powered Data Platform},
-  year = {2024},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/project-aita/aita}}
-}
-```

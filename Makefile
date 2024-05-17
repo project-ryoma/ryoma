@@ -112,9 +112,9 @@ build-remove:
 .PHONY: cleanup
 cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
 
-.PHONY: start-local-backend
-start-local-backend:
-	PYTHONPATH=$(PYTHONPATH) poetry run uvicorn app.main:app --host localhost --port 3001 --reload
+.PHONY: start-aitalab
+start-aitalab:
+	PYTHONPATH=$(PYTHONPATH) poetry run reflex run
 
 .PHONY: build
 build:

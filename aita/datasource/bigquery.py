@@ -5,6 +5,8 @@ from aita.datasource.sql import SqlDataSource
 
 
 class BigqueryDataSource(SqlDataSource):
+    name: str = "BigQuery"
+
     def connect(self) -> Connection:
         pass
 
