@@ -359,8 +359,8 @@ files = [
 lazy-object-proxy = ">=1.4.0"
 typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.11\""}
 wrapt = [
-    {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
     {version = ">=1.11,<2", markers = "python_version < \"3.11\""},
+    {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
 ]
 
 [[package]]
@@ -658,8 +658,8 @@ files = [
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
 urllib3 = [
-    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
     {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
+    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
 ]
 
 [package.extras]
@@ -2503,13 +2503,13 @@ extended-testing = ["lxml (>=5.1.0,<6.0.0)"]
 
 [[package]]
 name = "langgraph"
-version = "0.0.48"
+version = "0.0.49"
 description = "langgraph"
 optional = false
 python-versions = "<4.0,>=3.9.0"
 files = [
-    {file = "langgraph-0.0.48-py3-none-any.whl", hash = "sha256:6cc8dea7091718fc232dae23b0590138c41f55887d8c2fda8ffaab878157a2d0"},
-    {file = "langgraph-0.0.48.tar.gz", hash = "sha256:b903e0164de35ac3655ae1d57e159c8b5cf10fbc497a540ccffd6e3c14aae3e2"},
+    {file = "langgraph-0.0.49-py3-none-any.whl", hash = "sha256:229f29959d44c6bc4cec9f42ba68766cadedd25f0b3052afb2a43cbfac4f8d4d"},
+    {file = "langgraph-0.0.49.tar.gz", hash = "sha256:fa10cf938b1fbc270e2f597d79fbb7ab196f9c0a56d6a96a479e65879729d70e"},
 ]
 
 [package.dependencies]
@@ -3447,9 +3447,9 @@ files = [
 
 [package.dependencies]
 numpy = [
+    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
-    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -4141,8 +4141,8 @@ files = [
 astroid = ">=2.15.8,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\""},
     {version = ">=0.2", markers = "python_version < \"3.11\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\""},
 ]
 isort = ">=4.2.5,<6"
 mccabe = ">=0.6,<0.8"
@@ -4770,15 +4770,15 @@ tomlkit = ">=0.12.4,<1.0"
 twine = ">=4.0.0,<6.0"
 typer = ">=0.4.2,<1.0"
 uvicorn = [
-    {version = ">=0.24.0,<0.25.0", markers = "python_version >= \"3.12\""},
     {version = ">=0.20.0,<0.21.0", markers = "python_version < \"3.12\""},
+    {version = ">=0.24.0,<0.25.0", markers = "python_version >= \"3.12\""},
 ]
 watchdog = ">=2.3.1,<5.0"
 watchfiles = ">=0.19.0,<1.0"
 wheel = ">=0.42.0,<1.0"
 wrapt = [
-    {version = ">=1.14.0,<2.0", markers = "python_version >= \"3.11\""},
     {version = ">=1.11.0,<2.0", markers = "python_version < \"3.11\""},
+    {version = ">=1.14.0,<2.0", markers = "python_version >= \"3.11\""},
 ]
 
 [[package]]
@@ -6428,4 +6428,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "76d4cd95dfd1b70a4c5241223112c3b2406e6404c27deeffbdd5eb5309f33fdd"
+content-hash = "4e6fd5837a1653e23efaff66cd83773f30226b93bc03c72f233d0bee7a86b3d9"

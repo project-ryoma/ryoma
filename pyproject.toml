@@ -60,7 +60,7 @@ findspark = "^2.0.1"
 adbc-driver-postgresql = "^0.11.0"
 adbc-driver-snowflake = "^0.11.0"
 boto3 = "^1.34.99"
-langgraph = "^0.0.48"
+langgraph = ">=0.0.48,<0.0.50"
 reflex = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
