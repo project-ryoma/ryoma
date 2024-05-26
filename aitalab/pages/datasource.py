@@ -2,34 +2,27 @@
 
 from aitalab.templates import template
 from aitalab.states.datasource import DataSource, DataSourceState
+from aita.datasource.factory import get_supported_datasources, DataSourceProvider
 
 import reflex as rx
-
-tabular_data = [
-    ["Full name", "Email", "Group"],
-    ["Danilo Sousa", "danilo@example.com", rx.badge("Developer")],
-    ["Zahra Ambessa", "zahra@example.com", rx.badge("Admin", variant="surface")],
-    ["Jasper Eriksson", "jasper@example.com", rx.badge("Developer")],
-]
 
 
 def show_datasource(datasource: DataSource):
     return rx.table.row(
-        rx.table.cell("Name"),
-        rx.table.cell("Connection URL"),
+        rx.table.cell(datasource.name),
+        rx.table.cell(datasource.connection_url),
         rx.table.cell(update_datasource(datasource)),
         rx.table.cell(
             rx.button(
                 "Delete",
                 on_click=lambda: DataSourceState.delete_datasource(datasource),
-                bg="red",
-                color="white",
             )
         )
     )
 
 
 def add_datasource():
+    datasources = [ds.name for ds in get_supported_datasources()]
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
@@ -39,14 +32,16 @@ def add_datasource():
                     spacing="3"
                 ),
                 size="4",
-                radius="full"
+                radius="full",
+                on_click=DataSourceState.toggle_dialog,
             ),
         ),
         rx.dialog.content(
             rx.dialog.title(
                 "Connection Information",
                 size="1",
-                font_family="Inter"
+                font_family="Inter",
+                padding_top="1em",
             ),
             rx.dialog.description(
                 "Select the data source and enter the connection information for your data source",
@@ -56,7 +51,7 @@ def add_datasource():
             ),
             rx.flex(
                 rx.text(
-                    "Name",
+                    "Name *",
                     as_="div",
                     size="2",
                     mb="1",
@@ -65,29 +60,57 @@ def add_datasource():
                 rx.input(
                     placeholder="Enter the name of the data source",
                     on_blur=DataSourceState.set_name,
+                    required=True
                 ),
                 rx.text(
-                    "Type",
+                    "Type *",
                     as_="div",
                     size="2",
                     mb="1",
                     weight="bold",
                 ),
                 rx.select(
-                    ["Postgres", "MySQL", "BigQuery", "Snowflake"],
+                    datasources,
                     placeholder="Select the data source type",
                     on_change=DataSourceState.set_datasource_type,
                 ),
-                rx.text(
-                    "Connection URL",
-                    as_="div",
-                    size="2",
-                    mb="1",
-                    weight="bold",
+                rx.cond(
+                    DataSourceState.datasource_type,
+                    rx.vstack(
+                        rx.foreach(
+                            DataSourceState.datasource_attributes,
+                            lambda field:
+                            rx.vstack(
+                                rx.text(
+                                    field,
+                                    as_="div",
+                                    size="2",
+                                    mb="1",
+                                    weight="bold",
+                                ),
+                                rx.input(placeholder=f"Enter the {field} for the data source",
+                                         on_blur=lambda x: DataSourceState.set_datasource_attributes(field, x),
+                                         width="100%"),
+                                width="100%",
+                            )
+                        ),
+                        width="100%",
+                    )
                 ),
-                rx.input(placeholder="Enter the connection URL", on_blur=DataSourceState.set_connection_url),
                 direction="column",
                 spacing="4",
+            ),
+            rx.cond(
+                DataSourceState.missing_attributes,
+                rx.chakra.alert(
+                    rx.chakra.alert_icon(),
+                    rx.chakra.alert_title(
+                        "Please fill in all the required fields",
+                    ),
+                    status="warning",
+                    mb="3",
+                    mt="3",
+                ),
             ),
             rx.flex(
                 rx.dialog.close(
@@ -95,12 +118,13 @@ def add_datasource():
                         "Cancel",
                         variant="soft",
                         color_scheme="gray",
+                        on_click=DataSourceState.toggle_dialog,
                     )
                 ),
                 rx.dialog.close(
                     rx.button(
                         "Connect",
-                        on_click=DataSourceState.add_datasource,
+                        on_click=DataSourceState.connect_and_add_datasource,
                         variant="solid",
                     )
                 ),
@@ -115,6 +139,7 @@ def add_datasource():
             border_radius="25px",
             font_family="Inter",
         ),
+        open=DataSourceState.is_open,
     )
 
 
@@ -123,8 +148,6 @@ def update_datasource(datasource: DataSource):
         rx.dialog.trigger(
             rx.button(
                 rx.icon("square_pen", width=24, height=24),
-                bg="red",
-                color="white",
                 on_click=lambda: DataSourceState.set_datasource(datasource),
             ),
         ),
@@ -220,7 +243,6 @@ def content_grid():
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        rx.table.column_header_cell("Icon"),
                         rx.table.column_header_cell("Name"),
                         rx.table.column_header_cell("Connection URL"),
                         rx.table.column_header_cell("Edit"),
@@ -231,12 +253,13 @@ def content_grid():
                 # variant="surface",
                 size="3",
                 width="100%",
+                justify="stretch",
             ),
         ),
     )
 
 
-@template(route="/datasource", title="Data Source")
+@template(route="/datasource", title="Data Source", on_load=DataSourceState.on_load())
 def datasource() -> rx.Component:
     """The home page.
 

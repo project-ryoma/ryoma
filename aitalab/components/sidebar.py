@@ -24,7 +24,8 @@ def sidebar_header() -> rx.Component:
                 color_scheme="gray",
                 variant="soft",
             ),
-            href="https://github.com/reflex-dev/reflex",
+            href="https://github.com/project-aita/aita",
+            target="_blank",
         ),
         align="center",
         width="100%",
@@ -44,12 +45,7 @@ def sidebar_footer() -> rx.Component:
         rx.spacer(),
         rx.link(
             rx.text("Docs"),
-            href="https://reflex.dev/docs/getting-started/introduction/",
-            color_scheme="gray",
-        ),
-        rx.link(
-            rx.text("Blog"),
-            href="https://reflex.dev/blog/",
+            href="https://aita-1.gitbook.io/aita",
             color_scheme="gray",
         ),
         width="100%",

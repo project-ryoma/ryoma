@@ -1,5 +1,14 @@
+from typing import Any, Optional
+
 import reflex as rx
 from langchain_core.messages import HumanMessage
+
+from aitalab.states.prompt_template import PromptTemplateState
+from aitalab.states.datasource import DataSourceState
+from aitalab.states.tool import Tool
+from aita.agent.base import AitaAgent
+from aita.agent.factory import AgentFactory
+from aita.datasource.base import DataSource
 
 
 class QA(rx.Base):
@@ -12,30 +21,6 @@ class QA(rx.Base):
 DEFAULT_CHATS = {
     "Intros": [],
 }
-
-from aita.datasource.snowflake import SnowflakeDataSource
-from aita.agent.sql import SqlAgent
-import os
-
-SNOWFLAKE_USER = os.environ.get("SNOWFLAKE_USER")
-SNOWFLAKE_PASSWORD = os.environ.get("SNOWFLAKE_PASSWORD")
-SNOWFLAKE_ACCOUNT = os.environ.get("SNOWFLAKE_ACCOUNT")
-SNOWFLAKE_WAREHOUSE = os.environ.get("SNOWFLAKE_WAREHOUSE")
-SNOWFLAKE_DATABASE = os.environ.get("SNOWFLAKE_DATABASE")
-SNOWFLAKE_SCHEMA = os.environ.get("SNOWFLAKE_SCHEMA")
-SNOWFLAKE_ROLE = os.environ.get("SNOWFLAKE_ROLE")
-
-sf_datasource = SnowflakeDataSource(
-    user=SNOWFLAKE_USER,
-    password=SNOWFLAKE_PASSWORD,
-    account=SNOWFLAKE_ACCOUNT,
-    warehouse=SNOWFLAKE_WAREHOUSE,
-    database=SNOWFLAKE_DATABASE,
-    schema=SNOWFLAKE_SCHEMA,
-    role=SNOWFLAKE_ROLE,
-)
-
-sql_agent = SqlAgent(sf_datasource, "gpt-3.5-turbo", allow_extract_metadata=True)
 
 
 class ChatState(rx.State):
@@ -56,9 +41,21 @@ class ChatState(rx.State):
     # The name of the new chat.
     new_chat_name: str = ""
 
-    current_model: str = "gpt-3.5-turbo"
+    current_model: str
 
-    current_datasource: str = "datasource1"
+    current_datasource: str
+
+    current_prompt_template: str = ""
+
+    _current_agent: AitaAgent = None
+
+    current_tools: list[Tool] = []
+
+    current_tool: Tool = None
+
+    def set_current_tool_arg(self, tool_id: str, key: str, value: str):
+        tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
+        tool.args[key] = value
 
     def create_chat(self):
         """Create a new chat."""
@@ -90,6 +87,17 @@ class ChatState(rx.State):
         """
         return list(self.chats.keys())
 
+    def create_agent(self, datasource: DataSource, prompt: str):
+        agent_type = ""
+        if self.current_datasource:
+            agent_type = "sql"
+        self._current_agent = AgentFactory.create_agent(
+            agent_type,
+            model_id=self.current_model,
+            datasource=datasource,
+            prompt_context=prompt,
+        )
+
     async def process_question(self, form_data: dict[str, str]):
         # Get the question from the form
         question = form_data["question"]
@@ -98,6 +106,32 @@ class ChatState(rx.State):
         if question == "":
             return
 
+        # Get the datasource
+        if self.current_datasource:
+            datasource = DataSourceState.connect(self.current_datasource)
+            catalog = datasource.get_metadata()
+            target = {
+                "catalog": catalog,
+                "question": question,
+                "db_id": "",
+                "path_db": "/Users/haoxu/dev/aita/DAIL-SQL/dataset/spider/database/concert_singer/concert_singer.sqlite",
+                "query": ""
+            }
+
+            # build prompt
+            prompt_template_state = await self.get_state(PromptTemplateState)
+            prompt_template = next(filter(lambda x: x.prompt_template_name == self.current_prompt_template,
+                                          prompt_template_state.prompt_templates), None)
+            prompt = PromptTemplateState.build_prompt(prompt_template, self.current_model, target)
+        else:
+            datasource = None
+            prompt = ""
+
+        # create agent
+        # if self._current_agent is None:
+        #     self._current_agent = SqlAgent(datasource, model_id=self.current_model, prompt_context=prompt)
+        self.create_agent(datasource, prompt)
+
         async for value in self.aita_process_question(question):
             yield value
 
@@ -105,7 +139,7 @@ class ChatState(rx.State):
         """Get the response from the API.
 
         Args:
-            form_data: A dict with the current question.
+            question: A dict with the current question.
         """
 
         # Add the question to the list of questions.
@@ -116,15 +150,31 @@ class ChatState(rx.State):
         self.processing = True
         yield
 
-        for result in sql_agent.chat(question, display=False):
-            message = result.get("messages")
-            if not message:
-                continue
-            if isinstance(message, list):
-                message = message[-1]
-            if not isinstance(message, HumanMessage):
-                self.chats[self.current_chat][-1].answer += message.content
-            yield
+        events = self._current_agent.chat(question, display=False)
+        chat_state = self._current_agent.get_current_state()
+        if chat_state and chat_state.next:
+            # having an action to execute
+            for tool_call in self._current_agent.get_current_tool_calls():
+                tool = Tool(id=tool_call["id"], name=tool_call["name"], args=tool_call["args"])
+                self.current_tools.append(tool)
+
+            # Add the tool call to the answer
+            self.chats[self.current_chat][-1].answer += f"Confirm to run the tool in the panel"
+
+            for event in events:
+                message = event["messages"]
+                if not message:
+                    continue
+                if isinstance(message, list):
+                    message = message[-1]
+                if not isinstance(message, HumanMessage):
+                    self.chats[self.current_chat][-1].answer += message.content
+                yield
+        else:
+            # No action to execute
+            for event in events:
+                self.chats[self.current_chat][-1].answer += event.content
+                yield
 
         # Toggle the processing flag.
         self.processing = False

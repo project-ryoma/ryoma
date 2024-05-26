@@ -18,12 +18,15 @@ class SqlAgent(AitaAgent):
         model_id: str,
         model_parameters: Optional[Dict] = None,
         allow_extract_metadata=False,
+        prompt_context=None,
     ):
         tools = [
             SqlDatabaseTool(datasource=datasource),
             CreateTableTool(datasource=datasource),
         ]
-        if allow_extract_metadata:
+        if prompt_context:
+            self.prompt_context = prompt_context
+        elif allow_extract_metadata:
             self.prompt_context = self.generate_prompt_context(datasource)
         super().__init__(model_id, model_parameters, tools, prompt_context=self.prompt_context)
 

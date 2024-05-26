@@ -1,0 +1,95 @@
+{
+    "args": {
+        "data_type": "spider",
+        "split": "test",
+        "k_shot": 0,
+        "prompt_repr": "SQL",
+        "example_type": "QA",
+        "selector_type": "EUCDISQUESTIONMASK",
+        "max_seq_len": 4096,
+        "max_ans_len": 200,
+        "tokenizer": "gpt-3.5-turbo",
+        "scope_factor": 100,
+        "pre_test_result": null
+    },
+    "costs": {
+        "prompt_tokens_per_prompt": 0.0,
+        "gpt-4": 8.272,
+        "gpt-3.5-turbo": 0.4136,
+        "text-davinci-003": 4.136,
+        "example_quality": 1,
+        "pattern_similarity": 1
+    },
+    "questions": [
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: How many singers do we have? */\nSELECT ",
+            "response": "count(*) FROM singer",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What is the total number of singers? */\nSELECT ",
+            "response": "count(*) FROM singer",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: Show name, country, age for all singers ordered by age from the oldest to the youngest. */\nSELECT ",
+            "response": "name , country , age FROM singer ORDER BY age DESC",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What are the names, countries, and ages for every singer in descending order of age? */\nSELECT ",
+            "response": "name , country , age FROM singer ORDER BY age DESC",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What is the average, minimum, and maximum age of all singers from France? */\nSELECT ",
+            "response": "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What is the average, minimum, and maximum age for all French singers? */\nSELECT ",
+            "response": "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: Show the name and the release year of the song by the youngest singer. */\nSELECT ",
+            "response": "song_name , song_release_year FROM singer ORDER BY age LIMIT 1",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What are the names and release years for all the songs of the youngest singer? */\nSELECT ",
+            "response": "song_name , song_release_year FROM singer ORDER BY age LIMIT 1",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What are all distinct countries where singers above age 20 are from? */\nSELECT ",
+            "response": "DISTINCT country FROM singer WHERE age > 20",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        },
+        {
+            "prompt_tokens": 0,
+            "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What are  the different countries with singers above age 20? */\nSELECT ",
+            "response": "DISTINCT country FROM singer WHERE age > 20",
+            "n_examples": 0,
+            "db_id": "concert_singer"
+        }
+    ]
+}

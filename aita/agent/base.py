@@ -1,5 +1,7 @@
 import uuid
-from typing import Iterable
+
+from langgraph.graph.graph import CompiledGraph
+from langgraph.pregel import StateSnapshot
 
 from aita.states import MessageState
 from jupyter_ai_magics.providers import *
@@ -10,16 +12,14 @@ from langchain_core.runnables import RunnableLambda, RunnableConfig
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, END
-from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-thread_id = str(uuid.uuid4())
-
+# default configuration
+# TODO: make this configurable
 CONFIG = {
     "configurable": {
-        "user_id": "3442 587242",
-        # Checkpoints are accessed by thread_id
-        "thread_id": thread_id,
+        "user_id": str(uuid.uuid4()),
+        "thread_id": str(uuid.uuid4()),
     }
 }
 
@@ -52,9 +52,8 @@ def handle_tool_error(state) -> dict:
 class AitaAgent:
     model: str
     model_parameters: Optional[Dict]
-    memory: MemorySaver
-    graph: CompiledGraph
-    tools: List[BaseTool]
+    llm: Any
+    tools: Optional[List[BaseTool]]
     base_prompt_template = """
     You are an expert in the field of data science, analysis, and data engineering. You are provided with the following context:
 
@@ -67,18 +66,26 @@ class AitaAgent:
         model_parameters: Optional[Dict] = None,
         tools: List[BaseTool] = None,
         prompt_context: str = None,
+        **kwargs,
     ):
         self.model: BaseProvider = get_model(model_id, model_parameters)
         self.memory = MemorySaver()
+        self.tools = None
 
+        # bind tools to the model
         if tools:
             self.tools = tools
             self._bind_tools(tools)
 
+        # build prompt context
         if prompt_context:
             self._build_prompt(prompt_context)
 
-        self.graph = self._build_graph()
+        # build llm agent
+        if tools:
+            self.llm = self._build_graph()
+        else:
+            self.llm = self.model
 
     def _bind_tools(self, tools: List[BaseTool]):
         if hasattr(self.model, "bind_tools"):
@@ -102,16 +109,12 @@ class AitaAgent:
         ).partial(prompt_context=prompt_context)
         self.model = prompt | self.model
 
-    def _build_graph(self):
+    def _build_graph(self) -> CompiledGraph:
         workflow = StateGraph(MessageState)
 
         # Define the two nodes we will cycle between
         workflow.add_node("agent", self.call_model)
         workflow.add_node("action", self._build_tool_node())
-
-        # Set the entrypoint as `agent`
-        # This means that this node is the first one called
-        workflow.set_entry_point("agent")
 
         # We now add a conditional edge
         workflow.add_conditional_edges(
@@ -123,21 +126,39 @@ class AitaAgent:
             },
         )
 
+        # Set the entrypoint as `agent`
+        # This means that this node is the first one called
+        workflow.set_entry_point("agent")
+
         workflow.add_edge("action", "agent")
         return workflow.compile(checkpointer=self.memory, interrupt_before=["action"])
+
+    def get_current_state(self) -> Optional[StateSnapshot]:
+        if isinstance(self.llm, CompiledGraph):
+            return self.llm.get_state(CONFIG)
+        else:
+            return None
+
+    def get_current_tool_calls(self) -> List[ToolMessage]:
+        return self.get_current_state().values.get("messages")[-1].tool_calls
 
     def chat(self,
              question: Optional[str] = "",
              allow_run_tool: Optional[bool] = False,
-             display=True) -> Iterable[dict]:
-        input_message = {"messages": ("user", question)}
-        if allow_run_tool:
-            input_message = None
-        events = self.graph.stream(input_message, CONFIG, stream_mode="values")
-        if display:
-            _printed = set()
-            for event in events:
-                self._print_event(event, _printed)
+             display=True):
+        if isinstance(self.llm, CompiledGraph):
+            if allow_run_tool:
+                input_message = None
+            else:
+                input_message = {"messages": ("user", question)}
+            events = self.llm.stream(input_message, CONFIG, stream_mode="values")
+            if display:
+                self._print_graph_events(events)
+        else:
+            events = self.llm.stream(question, CONFIG)
+            if display:
+                for event in events:
+                    print(event.content, end="", flush=True)
         return events
 
     def _build_tool_node(self):
@@ -151,17 +172,19 @@ class AitaAgent:
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
 
-    def _print_event(self, event: dict, _printed: set, max_length=1500):
-        current_state = event.get("dialog_state")
-        if current_state:
-            print(f"Currently in: ", current_state[-1])
-        message = event.get("messages")
-        if message:
-            if isinstance(message, list):
-                message = message[-1]
-            if message.id not in _printed:
-                msg_repr = message.pretty_repr(html=True)
-                if len(msg_repr) > max_length:
-                    msg_repr = msg_repr[:max_length] + " ... (truncated)"
-                print(msg_repr)
-                _printed.add(message.id)
+    def _print_graph_events(self, events, max_length=1500):
+        _printed = set()
+        for event in events:
+            current_state = event.get("dialog_state")
+            if current_state:
+                print(f"Currently in: ", current_state[-1])
+            message = event.get("messages")
+            if message:
+                if isinstance(message, list):
+                    message = message[-1]
+                if message.id not in _printed:
+                    msg_repr = message.pretty_repr(html=True)
+                    if len(msg_repr) > max_length:
+                        msg_repr = msg_repr[:max_length] + " ... (truncated)"
+                    print(msg_repr)
+                    _printed.add(message.id)

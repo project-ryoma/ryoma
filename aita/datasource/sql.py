@@ -1,19 +1,18 @@
 from abc import abstractmethod
-from adbc_driver_manager.dbapi import Connection
+from typing import Any, Optional
+
+from pydantic import Field
+
 from aita.datasource.catalog import Catalog
 from aita.datasource.base import DataSource
 import pyarrow as pa
 
 
 class SqlDataSource(DataSource):
-    name: str
-    connection_url: str
-
-    def __init__(self, connection_url: str):
-        self.connection_url = connection_url
+    type: str = "sql"
 
     @abstractmethod
-    def connect(self) -> Connection:
+    def connect(self) -> Any:
         raise NotImplementedError
 
     def execute(self, query: str, params=None):
@@ -26,7 +25,7 @@ class SqlDataSource(DataSource):
             catalogs: pa.Table = conn.adbc_get_objects(
                 catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
                 db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
-                table_name_filter=kwargs.get("table"),
+                table_name_filter=kwargs.get("table", None),
             ).read_all()
             catalog = catalogs.to_pylist()[0]
             return Catalog(**catalog)

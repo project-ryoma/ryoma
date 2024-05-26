@@ -1,5 +1,5 @@
 import reflex as rx
-from aitalab.states import ChatState
+from aitalab.states.chat import ChatState
 
 
 def sidebar_chat(chat: str) -> rx.Component:
@@ -83,7 +83,7 @@ def navbar():
         rx.hstack(
             rx.hstack(
                 rx.avatar(fallback="RC", variant="solid"),
-                rx.heading("Reflex Chat"),
+                rx.heading("Aita Chat"),
                 rx.desktop_only(
                     rx.badge(
                         ChatState.current_chat,

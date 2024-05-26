@@ -1,35 +1,24 @@
 from adbc_driver_manager.dbapi import Connection
+from sqlmodel import Field
+
 from aita.datasource.sql import SqlDataSource
 from typing import Optional
 import adbc_driver_snowflake.dbapi
 
 
 class SnowflakeDataSource(SqlDataSource):
-    name: str = "Snowflake"
+    connection_url: str = Field(..., description="Connection URL")
 
     def __init__(
         self,
-        user: str,
-        password: str,
-        account: str,
-        warehouse: Optional[str] = "COMPUTE_WH",
-        role: Optional[str] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
+        connection_url: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(
-            self.build_connection_url(
-                user=user,
-                password=password,
-                account=account,
-                warehouse=warehouse,
-                role=role,
-                database=database,
-                schema=schema,
+        if not connection_url:
+            connection_url = self.build_connection_url(
                 **kwargs,
             )
-        )
+        super().__init__(connection_url=connection_url)
 
     def build_connection_url(
         self,

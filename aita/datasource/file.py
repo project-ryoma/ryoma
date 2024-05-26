@@ -5,11 +5,15 @@ from aita.datasource.catalog import Catalog
 
 
 class FileDataSource(DataSource):
+    file_path: str
+    file_format: str
+    name: str
 
     def __init__(self, file_path: str, name: str, format: str = None):
         self.file_path = file_path
         self.file_format = format
         self.name = name
+        super().__init__(type="file", file_path=self.file_path, file_format=self.file_format, name=self.name)
 
     def get_metadata(self, **kwargs) -> Catalog:
         table_schema = self.to_arrow().schema

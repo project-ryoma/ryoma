@@ -1,22 +1,66 @@
-from typing import List
+from typing import Optional, List, Any, Set
 
-from aita.datasource.sql import SqlDataSource
 from sqlmodel import select
 import reflex as rx
+from aita.datasource.factory import DataSourceProvider, DataSourceFactory
+import logging
 
 
-class DataSource(SqlDataSource, rx.Model, table=True):
+class DataSource(rx.Model, table=True):
     """The SqlDataSource model."""
+    name: str
+    datasource_type: str
+    connection_url: str
 
 
 class DataSourceState(rx.State):
     name: str
+    datasource_names: list[str] = []
     datasource_type: str
-    connection_url: str
     datasources: list[DataSource] = []
     num_datasources: int
+    sort_value: str
+    is_open: bool = False
 
-    def load_entries(self) -> List[DataSource]:
+    # DataSource related attributes
+    connection_url: str
+    open_alert: bool = False
+
+    def toggle_dialog(self):
+        self.is_open = not self.is_open
+
+    @rx.var
+    def datasource_attributes(self) -> List[str]:
+        if self.datasource_type:
+            model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+            return [key for key in model_fields.keys() if key != "type" and key != "name"]
+        else:
+            return []
+
+    @rx.var
+    def missing_attributes(self) -> bool:
+        # required by all datasources
+        if not self.datasource_type or not self.name:
+            return True
+
+        # required by specific datasource
+        model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+        if not all(getattr(self, key) for key in model_fields.keys() if
+                   key != "type" and key != "name"):
+            return True
+        return False
+
+    def set_datasource_attributes(self, attribute: str, value: str):
+        setattr(self, attribute, value)
+
+    def get_datasource_attributes(self) -> Optional[dict]:
+        if self.datasource_type:
+            model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+            return {key: getattr(self, key) for key in model_fields.keys() if key != "type"}
+        else:
+            return None
+
+    def load_entries(self):
         with rx.session() as session:
             self.datasources = session.exec(select(DataSource)).all()
             self.num_datasources = len(self.datasources)
@@ -25,7 +69,7 @@ class DataSourceState(rx.State):
                 self.datasources = sorted(
                     self.datasources, key=lambda datasource: getattr(datasource, self.sort_value).lower()
                 )
-            return self.datasources
+            self.datasource_names = [datasource.name for datasource in self.datasources]
 
     def sort_values(self, sort_value: str):
         self.sort_value = sort_value
@@ -36,16 +80,26 @@ class DataSourceState(rx.State):
         self.datasource_type = datasource.name
         self.connection_url = datasource.connection_url
 
-    def add_datasource(self):
-        with rx.session() as session:
-            session.add(
-                DataSource(
-                    connection_url=self.connection_url
-                )
+    def connect_and_add_datasource(self):
+        if self.missing_attributes:
+            return
+        config = self.get_datasource_attributes()
+        try:
+            DataSourceFactory.create_datasource(self.datasource_type, **config).connect()
+            logging.info(f"Connected to {self.datasource_type}")
+            datasource = DataSource(
+                name=self.name,
+                datasource_type=self.datasource_type,
+                connection_url=self.connection_url
             )
+        except Exception as e:
+            logging.error(f"Failed to connect to {self.datasource_type}: {e}")
+            return
+        with rx.session() as session:
+            session.add(datasource)
             session.commit()
         self.load_entries()
-        return rx.window_alert(f"User {self.name} has been added.")
+        self.toggle_dialog()
 
     def update_datasource(self):
         with rx.session() as session:
@@ -65,4 +119,29 @@ class DataSourceState(rx.State):
             ).first()
             session.delete(datasource)
             session.commit()
+        self.load_entries()
+
+    @staticmethod
+    def get_datasource_by_name(datasource_name: str):
+        with rx.session() as session:
+            datasource = session.exec(
+                select(DataSource).where(DataSource.name == datasource_name)
+            ).first()
+            return datasource
+
+    @staticmethod
+    def connect(datasource_name: str) -> Optional[DataSource]:
+        datasource = DataSourceState.get_datasource_by_name(datasource_name)
+        if not datasource:
+            return
+        try:
+            source = DataSourceFactory.create_datasource(datasource.datasource_type,
+                                                connection_url=datasource.connection_url)
+            source.connect()
+            logging.info(f"Connected to {datasource.datasource_type}")
+            return source
+        except Exception as e:
+            logging.error(f"Failed to connect to {datasource.datasource_type}: {e}")
+
+    def on_load(self):
         self.load_entries()

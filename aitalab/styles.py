@@ -68,5 +68,6 @@ message_style = dict(
     display="inline-block",
     margin_y="0.5em",
     max_width="30em",
-    padding="1em",
+    padding_left="1em",
+    padding_right="1em",
 )

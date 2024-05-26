@@ -1,10 +1,16 @@
 """The chat page."""
+from typing import List
 
+from aitalab.states.datasource import DataSourceState
+from aitalab.states.prompt_template import PromptTemplateState
+from aitalab.states.tool import ToolState
 from aitalab.templates import template
 import reflex as rx
 from aitalab.states.chat import QA, ChatState
 from aitalab.components.loading_icon import loading_icon
 from aitalab.styles import message_style
+from aitalab.components.codeeditor import code_editor
+from aitalab.states.llm_providers import ModelProvider
 
 
 def message(qa: QA) -> rx.Component:
@@ -112,9 +118,16 @@ def action_bar() -> rx.Component:
     )
 
 
+def model_group_selector(provider: str, models: List[str]) -> rx.Component:
+    return rx.select.group(
+        rx.select.label(provider),
+        rx.foreach(models, lambda x: rx.select.item(x))
+    )
+
+
 def model_selector() -> rx.Component:
     """The model selector."""
-    return rx.chakra.form(
+    return rx.form(
         rx.chakra.form_control(
             rx.text(
                 "Model",
@@ -123,14 +136,32 @@ def model_selector() -> rx.Component:
                 size="2",
                 weight="bold",
             ),
-            rx.chakra.select(
-                ["gpt-3.5-turbo"],
+            rx.select.root(
+                rx.select.trigger(
+                    placeholder="Select a model",
+                    width="100%"
+                ),
+                rx.select.content(
+                    *[
+                        rx.select.group(
+                            rx.select.label(p.value.name),
+                            rx.foreach(p.value.models,
+                                       lambda x: rx.select.item(x, value=f"{p.value.id}:{x}")
+                                       ),
+                            width="100%",
+                        ) for p in list(ModelProvider)
+                    ],
+                    width="100%",
+                ),
                 value=ChatState.current_model,
                 on_change=ChatState.set_current_model,
+                default_value="gpt-3.5-turbo",
+                width="100%",
             ),
             label="Model",
+            width="100%",
         ),
-        padding_y="2",
+        width="100%",
     )
 
 
@@ -145,18 +176,116 @@ def datasource_selector() -> rx.Component:
             weight="bold",
         ),
         rx.chakra.form_control(
-            rx.chakra.select(
-                ["datasource1", "datasource2"],
+            rx.select(
+                items=DataSourceState.datasource_names,
                 value=ChatState.current_datasource,
+                placeholder="Select a datasource",
                 on_change=ChatState.set_current_datasource,
+                width="100%",
             ),
             label="Datasource",
+            width="100%",
         ),
         padding_y="2",
     )
 
 
-@template(route="/", title="Chat")
+def prompt_template_selector() -> rx.Component:
+    """The prompt template selector."""
+    return rx.chakra.form(
+        rx.chakra.form_control(
+            rx.text(
+                "Prompt Template",
+                asi_="div",
+                mb="1",
+                size="2",
+                weight="bold",
+            ),
+            rx.select(
+                PromptTemplateState.prompt_template_names,
+                value=ChatState.current_prompt_template,
+                on_change=ChatState.set_current_prompt_template,
+                width="100%",
+                placeholder="Select a prompt template",
+            ),
+            label="Prompt Template",
+            width="100%",
+        ),
+        padding_y="2",
+    )
+
+
+def tools_selector() -> rx.Component:
+    return rx.chakra.form(
+        rx.chakra.form_control(
+            rx.text(
+                "Tools",
+                asi_="div",
+                mb="1",
+                size="2",
+                weight="bold",
+            ),
+            rx.select(
+                items=ToolState.tool_names,
+                value=ChatState.current_tool.name,
+                on_change=ChatState.set_current_tool,
+                width="100%",
+                placeholder="Select a tool",
+            ),
+            label="Tools",
+            width="100%",
+        ),
+        padding_y="2",
+    )
+
+
+def code_editor_wrapper() -> rx.Component:
+    """The code editor wrapper."""
+    return rx.chakra.form(
+        rx.chakra.form_control(
+            rx.text(
+                "Tools",
+                asi_="div",
+                mb="1",
+                size="2",
+                weight="bold",
+            ),
+            rx.cond(
+                ChatState.current_tools,
+                rx.foreach(
+                    ChatState.current_tools,
+                    lambda current_tool: rx.box(
+                        rx.text(
+                            current_tool.name,
+                            asi_="div",
+                            mb="1",
+                            size="2",
+                            weight="bold",
+                            margin_bottom="1em",
+                        ),
+                        rx.foreach(
+                            current_tool.args,
+                            lambda arg: rx.box(
+                                rx.text(arg[0]),
+                                code_editor(
+                                    value=arg[1],
+                                    on_change=lambda x: ChatState.set_current_tool_arg(current_tool.id, arg[0], x),
+                                    width="100%",
+                                    language="python",
+                                    theme="material",
+                                    font_size="1em",
+                                ),
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+        padding_y="2",
+    )
+
+
+@template(route="/", title="Chat", on_load=[DataSourceState.on_load, PromptTemplateState.on_load])
 def chat() -> rx.Component:
     """The main app."""
     return rx.chakra.grid(
@@ -176,6 +305,9 @@ def chat() -> rx.Component:
             rx.chakra.vstack(
                 model_selector(),
                 datasource_selector(),
+                prompt_template_selector(),
+                tools_selector(),
+                code_editor_wrapper(),
                 col_span=1,
                 padding="4",
                 width="100%",
@@ -184,7 +316,8 @@ def chat() -> rx.Component:
                 color=rx.color("mauve", 12),
                 border_left=f"1px solid {rx.color('mauve', 3)}",
                 top="0",
-                spacing="4"
+                spacing="4",
+                align_items="stretch",
             ),
             col_span=1,
         ),
