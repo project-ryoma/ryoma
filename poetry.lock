@@ -65,16 +65,17 @@ test = ["pandas", "polars", "pyarrow (>=8.0.0)", "pytest"]
 
 [[package]]
 name = "adbc-driver-snowflake"
-version = "0.11.0"
+version = "1.0.0"
 description = "An ADBC driver for working with Snowflake."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "adbc_driver_snowflake-0.11.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:8edfa1a7781552639e58b13f961fc05668bbe7b6dfd28b79cf4684ac0f783c0c"},
-    {file = "adbc_driver_snowflake-0.11.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:125f9e25679acc6a42cbe5d7dfbb6888f42d3e383e035d5ab71c0448fbe12e8f"},
-    {file = "adbc_driver_snowflake-0.11.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b4351bf7dc79d1abe1754b6d56e3e897dddd42fc463d9b512b9aed88a7b9fa6c"},
-    {file = "adbc_driver_snowflake-0.11.0-py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:764db68ae6664584bd14580cbf025992b869e52d00eef852d25f53e93c66d10e"},
-    {file = "adbc_driver_snowflake-0.11.0-py3-none-win_amd64.whl", hash = "sha256:11f3d56def4462b38a0c1b426fef7d3d2d2978cd5748c78f3d030a388369fb64"},
+    {file = "adbc_driver_snowflake-1.0.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:23fe1a6ddeb09018c195d331d2c52627f7a004f76420a7e0ee29bd737554160a"},
+    {file = "adbc_driver_snowflake-1.0.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:04c9b2eda8d80854c4705961ce000d4ab960279d9424382ca9c51c5e5e82947b"},
+    {file = "adbc_driver_snowflake-1.0.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:297d35c9eebea6b9d8ba6122055f8d3b864ea7dfc4e2cf7cf48a47c03fb0e546"},
+    {file = "adbc_driver_snowflake-1.0.0-py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:547620e5d189c5ae414744f6b5c5c04034da8f8b5b1e66d9ea441a6c59b57443"},
+    {file = "adbc_driver_snowflake-1.0.0-py3-none-win_amd64.whl", hash = "sha256:1c5256020659e6b93ac975cadfa8c8b095052550cf6e9162c5fe0346e518ba3a"},
+    {file = "adbc_driver_snowflake-1.0.0.tar.gz", hash = "sha256:48f320bd6fb1ba35f007ca47ef97cef4c4b84401e3cc88567f577d434b118b32"},
 ]
 
 [package.dependencies]
@@ -2754,9 +2755,13 @@ files = [
     {file = "lxml-5.2.2-cp36-cp36m-win_amd64.whl", hash = "sha256:edcfa83e03370032a489430215c1e7783128808fd3e2e0a3225deee278585196"},
     {file = "lxml-5.2.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:28bf95177400066596cdbcfc933312493799382879da504633d16cf60bba735b"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a745cc98d504d5bd2c19b10c79c61c7c3df9222629f1b6210c0368177589fb8"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b590b39ef90c6b22ec0be925b211298e810b4856909c8ca60d27ffbca6c12e6"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b336b0416828022bfd5a2e3083e7f5ba54b96242159f83c7e3eebaec752f1716"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:c2faf60c583af0d135e853c86ac2735ce178f0e338a3c7f9ae8f622fd2eb788c"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:4bc6cb140a7a0ad1f7bc37e018d0ed690b7b6520ade518285dc3171f7a117905"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:7ff762670cada8e05b32bf1e4dc50b140790909caa8303cfddc4d702b71ea184"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:57f0a0bbc9868e10ebe874e9f129d2917750adf008fe7b9c1598c0fbbfdde6a6"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_aarch64.whl", hash = "sha256:a6d2092797b388342c1bc932077ad232f914351932353e2e8706851c870bca1f"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:60499fe961b21264e17a471ec296dcbf4365fbea611bf9e303ab69db7159ce61"},
     {file = "lxml-5.2.2-cp37-cp37m-win32.whl", hash = "sha256:d9b342c76003c6b9336a80efcc766748a333573abf9350f4094ee46b006ec18f"},
     {file = "lxml-5.2.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b16db2770517b8799c79aa80f4053cd6f8b716f21f8aca962725a9565ce3ee40"},
@@ -6858,4 +6863,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "8c69fe3788dcfbac2b06963237de58a5352623f77b6f894afe0f04a138c6fe57"
+content-hash = "6f858504ef0fb6f8b5cb951ea74ef01f2322493785b65267771a8f022f099427"
