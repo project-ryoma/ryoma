@@ -43,16 +43,17 @@ test = ["duckdb", "pandas", "pyarrow (>=8.0.0)", "pytest"]
 
 [[package]]
 name = "adbc-driver-postgresql"
-version = "0.11.0"
+version = "1.0.0"
 description = "A libpq-based ADBC driver for working with PostgreSQL."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "adbc_driver_postgresql-0.11.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:2b647623cb81e3820369ef73ad6cf2ff75cf243664a6762fb262626404bcbc46"},
-    {file = "adbc_driver_postgresql-0.11.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e6dfaf56092f21282781ee389aefee66c4e02066258c1ebdae1b826eea61098f"},
-    {file = "adbc_driver_postgresql-0.11.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:628876dbdcea3e22b43d13f3a0221de1634882307168f67e0f65dd18f9a1c901"},
-    {file = "adbc_driver_postgresql-0.11.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2ea34271dd0e5e2816c97ecb2fa2fc7f796d89dd33fb7bf9750b57545f5724ba"},
-    {file = "adbc_driver_postgresql-0.11.0-py3-none-win_amd64.whl", hash = "sha256:e469332c22b7f8ab4f6af141fa0264fb999ab051b867c125e6db3caf1c488a3b"},
+    {file = "adbc_driver_postgresql-1.0.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:1ed5648dfdb19ce85b1eeb3e358f6bc7bcd7493a2f2fd002c1d6899db1da5a83"},
+    {file = "adbc_driver_postgresql-1.0.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:7796950d9f861e800849ec5f1d5b78b3692c239b108c531dec04002baeb82ea8"},
+    {file = "adbc_driver_postgresql-1.0.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7b7dda171ee90bceaef1334ac758aaf4aa5c0592b8f25458fbf7422072cb4879"},
+    {file = "adbc_driver_postgresql-1.0.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1033b481d2ee57575ef34ede79c75322c0f641676aef2a0b0016af77e713347f"},
+    {file = "adbc_driver_postgresql-1.0.0-py3-none-win_amd64.whl", hash = "sha256:836296dd196bdbe3c577b16bd684aede7abe89d123065eba975f706625de4131"},
+    {file = "adbc_driver_postgresql-1.0.0.tar.gz", hash = "sha256:bebc1352dbeccd096849cf686a1e042425e77691223d6e71d5dce8f329458a1d"},
 ]
 
 [package.dependencies]
@@ -2754,9 +2755,13 @@ files = [
     {file = "lxml-5.2.2-cp36-cp36m-win_amd64.whl", hash = "sha256:edcfa83e03370032a489430215c1e7783128808fd3e2e0a3225deee278585196"},
     {file = "lxml-5.2.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:28bf95177400066596cdbcfc933312493799382879da504633d16cf60bba735b"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a745cc98d504d5bd2c19b10c79c61c7c3df9222629f1b6210c0368177589fb8"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b590b39ef90c6b22ec0be925b211298e810b4856909c8ca60d27ffbca6c12e6"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b336b0416828022bfd5a2e3083e7f5ba54b96242159f83c7e3eebaec752f1716"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:c2faf60c583af0d135e853c86ac2735ce178f0e338a3c7f9ae8f622fd2eb788c"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:4bc6cb140a7a0ad1f7bc37e018d0ed690b7b6520ade518285dc3171f7a117905"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:7ff762670cada8e05b32bf1e4dc50b140790909caa8303cfddc4d702b71ea184"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:57f0a0bbc9868e10ebe874e9f129d2917750adf008fe7b9c1598c0fbbfdde6a6"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_aarch64.whl", hash = "sha256:a6d2092797b388342c1bc932077ad232f914351932353e2e8706851c870bca1f"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:60499fe961b21264e17a471ec296dcbf4365fbea611bf9e303ab69db7159ce61"},
     {file = "lxml-5.2.2-cp37-cp37m-win32.whl", hash = "sha256:d9b342c76003c6b9336a80efcc766748a333573abf9350f4094ee46b006ec18f"},
     {file = "lxml-5.2.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b16db2770517b8799c79aa80f4053cd6f8b716f21f8aca962725a9565ce3ee40"},
@@ -6858,4 +6863,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "8c69fe3788dcfbac2b06963237de58a5352623f77b6f894afe0f04a138c6fe57"
+content-hash = "5736ad0ea5fe6c42089e0246cf6f95c94b2e90e6b52ba83157893e790b81457a"
