@@ -1,7 +1,7 @@
-from aita.tool.ipython import IPythonTool
+from aita.tool.ipython import PythonTool
 
 
-class PySparkTool(IPythonTool):
+class PySparkTool(PythonTool):
     """Tool for running PySpark script."""
 
     name: str = "pyspark_tool"

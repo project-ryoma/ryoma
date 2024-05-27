@@ -1,8 +1,7 @@
-from typing import Any, Optional
+from abc import abstractmethod
 
 import reflex as rx
-from langchain_core.messages import HumanMessage
-
+import logging
 from aitalab.states.prompt_template import PromptTemplateState
 from aitalab.states.datasource import DataSourceState
 from aitalab.states.tool import Tool
@@ -13,7 +12,6 @@ from aita.datasource.base import DataSource
 
 class QA(rx.Base):
     """A question and answer pair."""
-
     question: str
     answer: str
 
@@ -49,13 +47,32 @@ class ChatState(rx.State):
 
     _current_agent: AitaAgent = None
 
-    current_tools: list[Tool] = []
+    current_agent_type: str = ""
 
-    current_tool: Tool = None
+    current_tools: list[Tool] = [Tool(id="1", name="Create Table", args={"query": "select *"})]
+
+    current_tool_ids: list[str] = ["1"]
+
+    current_tool: str
 
     def set_current_tool_arg(self, tool_id: str, key: str, value: str):
         tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
         tool.args[key] = value
+
+    def add_tool(self, tool: Tool):
+        self.current_tools.append(tool)
+
+    @abstractmethod
+    def run_tool(self):
+        tool = next(filter(lambda x: x.id == self.current_tool, self.current_tools), None)
+        if tool:
+            tool.run()
+
+    @abstractmethod
+    def cancel_tool(self):
+        tool = next(filter(lambda x: x.id == self.current_tool, self.current_tools), None)
+        if tool:
+            tool.cancel()
 
     def create_chat(self):
         """Create a new chat."""
@@ -88,11 +105,9 @@ class ChatState(rx.State):
         return list(self.chats.keys())
 
     def create_agent(self, datasource: DataSource, prompt: str):
-        agent_type = ""
-        if self.current_datasource:
-            agent_type = "sql"
+        logging.info(f"Creating agent with tool {self.current_agent_type} and model {self.current_model}")
         self._current_agent = AgentFactory.create_agent(
-            agent_type,
+            self.current_agent_type,
             model_id=self.current_model,
             datasource=datasource,
             prompt_context=prompt,
@@ -105,6 +120,9 @@ class ChatState(rx.State):
         # Check if the question is empty
         if question == "":
             return
+
+        logging.info(f"Processing question: {question}")
+        print(f"Processing question: {question}")
 
         # Get the datasource
         if self.current_datasource:
@@ -127,10 +145,14 @@ class ChatState(rx.State):
             datasource = None
             prompt = ""
 
+        print(f"Coneccted to datasource {self.current_datasource}")
+        print(f"Created prompt: {prompt}")
+
         # create agent
         # if self._current_agent is None:
         #     self._current_agent = SqlAgent(datasource, model_id=self.current_model, prompt_context=prompt)
         self.create_agent(datasource, prompt)
+        print(f"Created agent: {self._current_agent}")
 
         async for value in self.aita_process_question(question):
             yield value
@@ -150,7 +172,12 @@ class ChatState(rx.State):
         self.processing = True
         yield
 
+        # Get the response and add it to the answer.
         events = self._current_agent.chat(question, display=False)
+        for event in events:
+            self.chats[self.current_chat][-1].answer += event.content
+            yield
+
         chat_state = self._current_agent.get_current_state()
         if chat_state and chat_state.next:
             # having an action to execute
@@ -160,21 +187,6 @@ class ChatState(rx.State):
 
             # Add the tool call to the answer
             self.chats[self.current_chat][-1].answer += f"Confirm to run the tool in the panel"
-
-            for event in events:
-                message = event["messages"]
-                if not message:
-                    continue
-                if isinstance(message, list):
-                    message = message[-1]
-                if not isinstance(message, HumanMessage):
-                    self.chats[self.current_chat][-1].answer += message.content
-                yield
-        else:
-            # No action to execute
-            for event in events:
-                self.chats[self.current_chat][-1].answer += event.content
-                yield
 
         # Toggle the processing flag.
         self.processing = False

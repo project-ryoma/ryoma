@@ -1,7 +1,7 @@
-from aita.tool.ipython import IPythonTool
+from aita.tool.ipython import PythonTool
 
 
-class PandasTool(IPythonTool):
+class PandasTool(PythonTool):
     """Tool for running Pandas analysis."""
 
     name: str = "pandas_analysis_tool"

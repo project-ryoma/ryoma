@@ -1,7 +1,7 @@
-from aita.tool.ipython import IPythonTool
+from aita.tool.ipython import PythonTool
 
 
-class ArrowTool(IPythonTool):
+class ArrowTool(PythonTool):
     """Tool for using Apache Arrow in Python."""
 
     name: str = "pyarrow_tool"

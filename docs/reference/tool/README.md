@@ -7,4 +7,4 @@ Currently supported aita tools are:
 - [PandasTool](pandas.md)
 - [PyarrowTool](pyarrow.md)
 - [SparkTool](spark.md)
-- [IPythonTool](IPython.md)
+- [PythonTool](IPython.md)

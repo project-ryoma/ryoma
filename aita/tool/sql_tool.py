@@ -1,6 +1,6 @@
 from typing import Any, Dict, Sequence, Type, Union
 
-from pydantic import BaseModel, Field
+from langchain_core.pydantic_v1 import BaseModel, Field
 from sqlalchemy.engine import Result
 
 from aita.datasource.sql import SqlDataSource
@@ -66,6 +66,7 @@ class CreateTableTool(BaseTool):
 class ConvertToPandasTool(BaseTool):
     """Tool for converting a SQL query result to a pandas dataframe."""
 
+    datasource: SqlDataSource = Field(exclude=True)
     name: str = "convert_to_pandas"
     description: str = """
     Convert a SQL query result to a pandas dataframe.

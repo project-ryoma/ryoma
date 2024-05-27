@@ -1,6 +1,7 @@
 from typing import Optional
 
 import reflex as rx
+from aita.tool.factory import get_supported_tools, ToolFactory
 
 
 class Tool(rx.Model):
@@ -13,3 +14,11 @@ class Tool(rx.Model):
 class ToolState(rx.State):
     tools: list[Tool]
     tool_names: list[str]
+
+    def load_tools(self):
+        tools, tool_names = [], []
+        self.tools = tools
+        self.tool_names = tool_names
+
+    def on_load(self):
+        self.load_tools()

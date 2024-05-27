@@ -16,11 +16,15 @@ class AgentProvider(Enum):
     python = PythonAgent
 
 
+def get_supported_agents():
+    return list(AgentProvider)
+
+
 class AgentFactory:
 
     @staticmethod
     def create_agent(agent_type: str, *args, **kwargs) -> AitaAgent:
-        if not hasattr(AgentProvider, agent_type):
+        if not agent_type or not hasattr(AgentProvider, agent_type):
             agent_class = AitaAgent
         else:
             agent_class = AgentProvider[agent_type].value

@@ -7,7 +7,7 @@ from aita.states import MessageState
 from jupyter_ai_magics.providers import *
 from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
 from langchain.tools.render import render_text_description
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import ToolMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda, RunnableConfig
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
@@ -50,10 +50,8 @@ def handle_tool_error(state) -> dict:
 
 
 class AitaAgent:
-    model: str
+    model: Union[BaseProvider, str]
     model_parameters: Optional[Dict]
-    llm: Any
-    tools: Optional[List[BaseTool]]
     base_prompt_template = """
     You are an expert in the field of data science, analysis, and data engineering. You are provided with the following context:
 
@@ -62,30 +60,75 @@ class AitaAgent:
 
     def __init__(
         self,
-        model_id: str,
+        model: str,
         model_parameters: Optional[Dict] = None,
-        tools: List[BaseTool] = None,
         prompt_context: str = None,
         **kwargs,
     ):
-        self.model: BaseProvider = get_model(model_id, model_parameters)
-        self.memory = MemorySaver()
-        self.tools = None
-
-        # bind tools to the model
-        if tools:
-            self.tools = tools
-            self._bind_tools(tools)
+        if isinstance(model, str):
+            self.model: BaseProvider = get_model(model, model_parameters)
+        else:
+            self.model = model
 
         # build prompt context
         if prompt_context:
             self._build_prompt(prompt_context)
 
-        # build llm agent
-        if tools:
-            self.llm = self._build_graph()
+    def _build_prompt(self, prompt_context: str):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", self.base_prompt_template),
+                MessagesPlaceholder(variable_name="messages", optional=True),
+            ]
+        ).partial(prompt_context=prompt_context)
+        self.model = prompt | self.model
+
+    def chat(self,
+             question: Optional[str] = "",
+             display: Optional[bool] = True):
+        events = self.model.stream(question, CONFIG)
+        if display:
+            for event in events:
+                print(event.content, end="", flush=True)
         else:
-            self.llm = self.model
+            return events
+
+
+class ToolAgent(AitaAgent):
+    model: Union[BaseProvider, str]
+    tools: List[BaseTool]
+    model_parameters: Optional[Dict]
+    llm: Any
+    base_prompt_template = """
+    You are an expert in the field of data science, analysis, and data engineering. You are provided with the following context:
+
+    {prompt_context}
+    """
+
+    def __init__(
+        self,
+        model: Union[BaseProvider, str],
+        tools: List[BaseTool],
+        model_parameters: Optional[Dict] = None,
+        prompt_context: str = None,
+        **kwargs,
+    ):
+        if isinstance(model, str):
+            self.model: BaseProvider = get_model(model, model_parameters)
+        else:
+            self.model = model
+
+        # bind tools to the model
+        self.tools = tools
+        self._bind_tools(tools)
+
+        # build prompt context
+        if prompt_context:
+            self._build_prompt(prompt_context)
+
+        # build the graph, this has to happen after the prompt is built
+        self.memory = MemorySaver()
+        self.model_graph = self._build_graph()
 
     def _bind_tools(self, tools: List[BaseTool]):
         if hasattr(self.model, "bind_tools"):
@@ -99,15 +142,6 @@ class AitaAgent:
 
             """
             self.base_prompt_template = tool_prompt + self.base_prompt_template
-
-    def _build_prompt(self, prompt_context: str):
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", self.base_prompt_template),
-                MessagesPlaceholder(variable_name="messages", optional=True),
-            ]
-        ).partial(prompt_context=prompt_context)
-        self.model = prompt | self.model
 
     def _build_graph(self) -> CompiledGraph:
         workflow = StateGraph(MessageState)
@@ -134,10 +168,7 @@ class AitaAgent:
         return workflow.compile(checkpointer=self.memory, interrupt_before=["action"])
 
     def get_current_state(self) -> Optional[StateSnapshot]:
-        if isinstance(self.llm, CompiledGraph):
-            return self.llm.get_state(CONFIG)
-        else:
-            return None
+        return self.model_graph.get_state(CONFIG)
 
     def get_current_tool_calls(self) -> List[ToolMessage]:
         return self.get_current_state().values.get("messages")[-1].tool_calls
@@ -146,20 +177,23 @@ class AitaAgent:
              question: Optional[str] = "",
              allow_run_tool: Optional[bool] = False,
              display=True):
-        if isinstance(self.llm, CompiledGraph):
-            if allow_run_tool:
-                input_message = None
-            else:
-                input_message = {"messages": ("user", question)}
-            events = self.llm.stream(input_message, CONFIG, stream_mode="values")
-            if display:
-                self._print_graph_events(events)
+        if allow_run_tool:
+            input_message = None
         else:
-            events = self.llm.stream(question, CONFIG)
-            if display:
-                for event in events:
-                    print(event.content, end="", flush=True)
+            input_message = {"messages": ("user", question)}
+        events = self.model_graph.stream(input_message, CONFIG, stream_mode="values")
+        if display:
+            self._print_graph_events(events)
         return events
+
+        # for event in events:
+        #     message = event["messages"]
+        #     if not message:
+        #         continue
+        #     if isinstance(message, list):
+        #         message = message[-1]
+        #     if not isinstance(message, HumanMessage):
+        #         yield message
 
     def _build_tool_node(self):
         return ToolNode(self.tools).with_fallbacks(

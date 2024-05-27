@@ -14,7 +14,7 @@ class PythonInput(BaseModel):
     script: str = Field(description="python script")
 
 
-class IPythonTool(BaseTool):
+class PythonTool(BaseTool):
     """Tool for running python script in an IPython environment."""
 
     name: str = "run_ipython_script_tool"
@@ -24,7 +24,7 @@ class IPythonTool(BaseTool):
     """
     args_schema: Type[BaseModel] = PythonInput
 
-    script_context: Dict[str, Any] = Field(description="context for the script execution")
+    script_context: Dict[str, Any]
 
     def _run(
         self,

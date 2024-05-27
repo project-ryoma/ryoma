@@ -1,11 +1,11 @@
 from typing import Dict, Optional
 
-from aita.agent.base import AitaAgent
+from aita.agent.base import ToolAgent
 from aita.datasource.sql import SqlDataSource
 from aita.tool.sql_tool import SqlDatabaseTool, CreateTableTool
 
 
-class SqlAgent(AitaAgent):
+class SqlAgent(ToolAgent):
 
     prompt_context = """
     You are provided with sql data sources:
@@ -15,9 +15,8 @@ class SqlAgent(AitaAgent):
     def __init__(
         self,
         datasource: SqlDataSource,
-        model_id: str,
+        model: str,
         model_parameters: Optional[Dict] = None,
-        allow_extract_metadata=False,
         prompt_context=None,
     ):
         tools = [
@@ -26,9 +25,9 @@ class SqlAgent(AitaAgent):
         ]
         if prompt_context:
             self.prompt_context = prompt_context
-        elif allow_extract_metadata:
+        else:
             self.prompt_context = self.generate_prompt_context(datasource)
-        super().__init__(model_id, model_parameters, tools, prompt_context=self.prompt_context)
+        super().__init__(model, tools, model_parameters,  prompt_context=self.prompt_context)
 
     def generate_prompt_context(self, datasource: SqlDataSource):
         metadata = datasource.get_metadata().json()

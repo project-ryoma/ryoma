@@ -1,9 +1,8 @@
 """The chat page."""
-from typing import List
 
 from aitalab.states.datasource import DataSourceState
 from aitalab.states.prompt_template import PromptTemplateState
-from aitalab.states.tool import ToolState
+from aitalab.states.agent import AgentState
 from aitalab.templates import template
 import reflex as rx
 from aitalab.states.chat import QA, ChatState
@@ -118,13 +117,6 @@ def action_bar() -> rx.Component:
     )
 
 
-def model_group_selector(provider: str, models: List[str]) -> rx.Component:
-    return rx.select.group(
-        rx.select.label(provider),
-        rx.foreach(models, lambda x: rx.select.item(x))
-    )
-
-
 def model_selector() -> rx.Component:
     """The model selector."""
     return rx.form(
@@ -215,24 +207,24 @@ def prompt_template_selector() -> rx.Component:
     )
 
 
-def tools_selector() -> rx.Component:
+def agent_type_selector() -> rx.Component:
     return rx.chakra.form(
         rx.chakra.form_control(
             rx.text(
-                "Tools",
+                "Agent Type",
                 asi_="div",
                 mb="1",
                 size="2",
                 weight="bold",
             ),
             rx.select(
-                items=ToolState.tool_names,
-                value=ChatState.current_tool.name,
-                on_change=ChatState.set_current_tool,
+                AgentState.agent_types,
+                value=ChatState.current_agent_type,
+                on_change=ChatState.set_current_agent_type,
                 width="100%",
-                placeholder="Select a tool",
+                placeholder="Select an agent type",
             ),
-            label="Tools",
+            label="Agent Type",
             width="100%",
         ),
         padding_y="2",
@@ -244,7 +236,7 @@ def code_editor_wrapper() -> rx.Component:
     return rx.chakra.form(
         rx.chakra.form_control(
             rx.text(
-                "Tools",
+                "Kernel",
                 asi_="div",
                 mb="1",
                 size="2",
@@ -252,29 +244,45 @@ def code_editor_wrapper() -> rx.Component:
             ),
             rx.cond(
                 ChatState.current_tools,
-                rx.foreach(
-                    ChatState.current_tools,
-                    lambda current_tool: rx.box(
-                        rx.text(
-                            current_tool.name,
-                            asi_="div",
-                            mb="1",
-                            size="2",
-                            weight="bold",
-                            margin_bottom="1em",
+                rx.chakra.box(
+                    rx.flex(
+                        rx.select(
+                            ChatState.current_tool_ids,
+                            value=ChatState.current_tool,
+                            on_change=ChatState.set_current_tool,
+                            placeholder="Select a tool",
+                            padding="10px",
                         ),
-                        rx.foreach(
-                            current_tool.args,
-                            lambda arg: rx.box(
-                                rx.text(arg[0]),
-                                code_editor(
-                                    value=arg[1],
-                                    on_change=lambda x: ChatState.set_current_tool_arg(current_tool.id, arg[0], x),
-                                    width="100%",
-                                    language="python",
-                                    theme="material",
-                                    font_size="1em",
-                                ),
+                        rx.chakra.button(
+                            rx.icon(tag="play"),
+                            size="xs",
+                            on_click=ChatState.run_tool,
+                        ),
+                        rx.chakra.button(
+                            rx.icon(tag="circle_stop"),
+                            size="xs",
+                            on_click=ChatState.cancel_tool,
+                        ),
+                        align="center",
+                        spacing="2",
+                        width="100%",
+                    ),
+                    rx.foreach(
+                        ChatState.current_tools,
+                        lambda current_tool: rx.box(
+                            rx.foreach(
+                                current_tool.args,
+                                lambda arg: rx.box(
+                                    code_editor(
+                                        value=arg[1],
+                                        on_change=lambda x: ChatState.set_current_tool_arg(current_tool.id, arg[0], x),
+                                        width="100%",
+                                        language="python",
+                                        theme="material",
+                                        font_size="1em",
+                                        margin_top="10px",
+                                    ),
+                                )
                             )
                         )
                     )
@@ -306,7 +314,7 @@ def chat() -> rx.Component:
                 model_selector(),
                 datasource_selector(),
                 prompt_template_selector(),
-                tools_selector(),
+                agent_type_selector(),
                 code_editor_wrapper(),
                 col_span=1,
                 padding="4",
