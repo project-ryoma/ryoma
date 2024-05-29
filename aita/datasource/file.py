@@ -33,3 +33,6 @@ class FileDataSource(DataSource):
             return read_json(self.file_path)
         else:
             raise NotImplementedError(f"FileFormat is unsupported: {self.file_format}")
+
+    def to_pandas(self, **kwargs):
+        return self.to_arrow().to_pandas()

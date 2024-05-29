@@ -1,22 +1,25 @@
-from typing import Dict
+from typing import Dict, Union
 
 from aita.agent.base import ToolAgent
-from aita.tool.pandas_tool import PandasTool
-from aita.datasource.base import DataSource
+from aita.tool.pandas_tool import PandasTool, ConvertToPandasTool
+from pandas import DataFrame
+
+from aita.tool.ipython import PythonTool
 
 
 class PandasAgent(ToolAgent):
-    prompt_context = """
-    Meta data of all available data sources
-    {script_context}
-
-    Pandas dataframe can be created by using the data source as:
-    datasource.to_pandas(query)
-    """
 
     def __init__(
-        self, datasource: DataSource, model: str, model_parameters: Dict = None
+        self, model: str, model_parameters: Dict = None
     ):
-        tool = PandasTool(script_context={"dataframe": datasource})
-        self.prompt_context = self.prompt_context.format(script_context=datasource.get_metadata())
-        super().__init__(model, [tool], model_parameters, prompt_context=self.prompt_context)
+        super().__init__([
+            ConvertToPandasTool(),
+            PandasTool()
+        ], model, model_parameters)
+
+    def add_dataframe(self, dataframe: DataFrame):
+        self.set_prompt_template(dataframe.info())
+        for tool in self.tools:
+            if isinstance(tool, PythonTool):
+                tool.update_script_context(script_context=dataframe)
+        return self

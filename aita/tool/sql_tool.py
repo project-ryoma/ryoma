@@ -1,10 +1,10 @@
-from typing import Any, Dict, Sequence, Type, Union
+from typing import Any, Dict, Sequence, Type, Union, Optional
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 from sqlalchemy.engine import Result
 
 from aita.datasource.sql import SqlDataSource
-from aita.tool.ipython import BaseTool
+from aita.tool.base import DataSourceTool
 from aita.datasource.catalog import Table
 
 
@@ -12,10 +12,9 @@ class QueryInput(BaseModel):
     query: str = Field(description="sql data query")
 
 
-class SqlDatabaseTool(BaseTool):
+class SqlDatabaseTool(DataSourceTool):
     """Tool for querying a SQL database."""
 
-    datasource: SqlDataSource = Field(exclude=True)
     name: str = "sql_database_query"
     description: str = """
     Execute a SQL query against the database and get back the result..
@@ -23,9 +22,6 @@ class SqlDatabaseTool(BaseTool):
     If an error is returned, rewrite the query, check the query, and try again.
     """
     args_schema: Type[BaseModel] = QueryInput
-
-    class Config(BaseTool.Config):
-        pass
 
     def _run(
         self,
@@ -36,10 +32,10 @@ class SqlDatabaseTool(BaseTool):
         return self.datasource.execute(query)
 
 
-class CreateTableTool(BaseTool):
+class CreateTableTool(DataSourceTool):
     """Tool for creating a table in a SQL database."""
 
-    datasource: SqlDataSource = Field(exclude=True)
+    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
     name: str = "create_table"
     description: str = """
     Create a table in the database.
@@ -61,23 +57,3 @@ class CreateTableTool(BaseTool):
         )
         return self.datasource.execute(
             "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns))
-
-
-class ConvertToPandasTool(BaseTool):
-    """Tool for converting a SQL query result to a pandas dataframe."""
-
-    datasource: SqlDataSource = Field(exclude=True)
-    name: str = "convert_to_pandas"
-    description: str = """
-    Convert a SQL query result to a pandas dataframe.
-    If the query result is not correct, an error message will be returned.
-    """
-    args_schema: Type[BaseModel] = QueryInput
-
-    def _run(
-        self,
-        query,
-        **kwargs,
-    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
-        """Execute the query, return the results or an error message."""
-        return self.datasource.to_pandas(query)

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Sequence, Type, Union
+from typing import Any, Dict, Sequence, Type, Union, Optional
 
 import logging
 
@@ -24,8 +24,6 @@ class PythonTool(BaseTool):
     """
     args_schema: Type[BaseModel] = PythonInput
 
-    script_context: Dict[str, Any]
-
     def _run(
         self,
         script,
@@ -36,10 +34,17 @@ class PythonTool(BaseTool):
             if not ipython:
                 ipython = InteractiveShell()
 
-            if self.script_context:
-                ipython.user_ns.update(self.script_context)
-
             result = ipython.run_cell(script)
             return result
+        except Exception as e:
+            return str(e)
+
+    def update_script_context(self, script_context: Any):
+        try:
+            ipython = get_ipython()
+            if not ipython:
+                ipython = InteractiveShell()
+
+            ipython.user_ns.update(script_context)
         except Exception as e:
             return str(e)

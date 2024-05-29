@@ -1,11 +1,11 @@
 from typing import Dict
-from aita.agent.base import AitaAgent
-from aita.tool.pyarrow_tool import ArrowTool
+from aita.agent.base import ToolAgent
+from aita.tool.pyarrow_tool import ArrowTool, ConvertToArrowTool
 from aita.datasource.base import DataSource
+from pyarrow import Table
 
 
-class PyArrowAgent(AitaAgent):
-
+class PyArrowAgent(ToolAgent):
     prompt_context = """
     Meta data of all available data sources:
     {script_context}
@@ -14,7 +14,9 @@ class PyArrowAgent(AitaAgent):
     datasource.to_arrow(query)
     """
 
-    def __init__(self, datasource: DataSource, model_id: str, model_parameters: Dict = None):
-        tool = ArrowTool(script_context={"datasource": datasource})
+    def __init__(self, datasource: [DataSource, Table], model_id: str, model_parameters: Dict = None):
         self.prompt_context = self.prompt_context.format(script_context=datasource.get_metadata())
-        super().__init__(model_id, model_parameters, [tool], prompt_context=self.prompt_context)
+        super().__init__([
+            ConvertToArrowTool(datasource=datasource),
+            ArrowTool(script_context={"table": datasource})
+        ], model_id, model_parameters, prompt_context=self.prompt_context)

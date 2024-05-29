@@ -7,8 +7,14 @@ Spark agent is an Aita agent specialize in writing spark code.
 {% code title="python" %}
 ```python
 from aita.agent.pyspark import PySparkAgent
+from aita.datasource.postgresql import PostgreSqlDataSource 
 
-spark_agent = SparkAgent(None, "gpt-3.5-turbo")
+datasource = PostgreSqlDataSource("postgresql://localhost:5432/db")
+spark_configs = {
+    "master": "local",
+    "appName": "Aita"
+}
+spark_agent = PySparkAgent(datasource,  spark_configs, "gpt-3.5-turbo")
 
 print(spark_agent.chat("I want to get the top customers which making the most purchases"))
 ```

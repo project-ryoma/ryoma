@@ -26,14 +26,14 @@ To start using Aita, you can run the following code:
 {% code title="python" %}
 ```python
 
-from aita.agent import PandasAgent
+from aita.agent.pandas import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({
     'customer_id': [1, 2, 3, 4, 5],
     'purchase_amount': [100, 200, 300, 400, 500]
 })
-sql_agent = PandasAgent({"df": df}, "gpt-3.5-turbo", 0.8)
+sql_agent = PandasAgent(df, "gpt-3.5-turbo")
 
 print(sql_agent.chat("I want to get the top customers which making the most purchases"))
 ```

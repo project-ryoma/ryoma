@@ -43,18 +43,20 @@ Model provider are supported by jupyter ai magics.
 | SageMaker           | `sagemaker-endpoint` | N/A                        | `boto3`                         |
 
 ## Supported Data Sources
-- Snowflake
-- BigQuery
-- Postgres
-- MySQL
-- Redshift
-- DynamoDB
+- [x] Snowflake
+- [x] Sqlite
+- [ ] BigQuery
+- [x] Postgres
+- [ ] MySQL
+- [ ] Redshift
+- [ ] DynamoDB
+- [x] File (CSV, Excel, Parquet, etc.)
 
 ## Supported Engines
-- Apache Spark
-- Apache Flink
-- Presto
-- **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
+- [x] Apache Spark
+- [ ] Apache Flink
+- [ ] Presto
+- [ ] **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
 
 ## 🛡 License
 

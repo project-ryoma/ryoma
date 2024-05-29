@@ -15,6 +15,6 @@ table = pa.table({
     'purchase_amount': pa.array([100, 200, 300, 400, 500])
 })
 
-pa_agent = PyArrowAgent({"table": table}, "gpt-3.5-turbo")
+pa_agent = PyArrowAgent(table, "gpt-3.5-turbo")
 ```
 {% endcode %}

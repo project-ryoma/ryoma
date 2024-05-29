@@ -18,8 +18,8 @@ class PythonAgent(ToolAgent):
         if script_context:
             self.prompt_context = self.prompt_context.format(script_context=script_context)
         super().__init__(
-            model,
             [PythonTool(script_context=script_context)],
+            model,
             model_parameters,
             self.prompt_context,
         )
