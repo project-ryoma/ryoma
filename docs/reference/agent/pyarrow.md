@@ -15,6 +15,9 @@ table = pa.table({
     'purchase_amount': pa.array([100, 200, 300, 400, 500])
 })
 
-pa_agent = PyArrowAgent(table, "gpt-3.5-turbo")
+pa_agent = PyArrowAgent("gpt-3.5-turbo") \
+    .add_table(table)
+
+pa_agent.chat("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

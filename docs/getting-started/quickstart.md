@@ -33,9 +33,10 @@ df = pd.DataFrame({
     'customer_id': [1, 2, 3, 4, 5],
     'purchase_amount': [100, 200, 300, 400, 500]
 })
-sql_agent = PandasAgent(df, "gpt-3.5-turbo")
+pandas_agent = PandasAgent("gpt-3.5-turbo") \
+    .add_dataframe(df)
 
-print(sql_agent.chat("I want to get the top customers which making the most purchases"))
+print(pandas_agent.chat("I want to get the top customer which making the most purchases"))
 ```
 {% endcode %}
 

@@ -8,18 +8,21 @@ The Pandas agent can be used to ask questions in natural language and interact w
 pass Data Source to Pandas Agent and return result as a dataframe.
 
 {% code title="python" %}
+
 ```python
 from aita.agent.pandas import PandasAgent
-from aita.datasource.sql import SqlDataSource
+from aita.datasource.sqlite import SqliteDataSource
+from aita.prompt.base import BasicDataSourcePromptTemplate
 
-datasource = SqlDataSource("sqlite:///data.db")
-pandas_agent = PandasAgent(datasource, "gpt-3.5-turbo")
-df = pandas_agent.chat("Get the top 10 customers by purchase amount")
-print(df)
+datasource = SqliteDataSource("sqlite:///data.db")
+pandas_agent = PandasAgent("gpt-3.5-turbo") \
+    .set_prompt_context(BasicDataSourcePromptTemplate) \
+    .add_datasource(datasource)
+pandas_agent.chat("Get the top 10 customers by purchase amount")
 ```
 {% endcode %}
 
-Pass Pandas DataFrame to Pandas Agent and analyze the data.
+add a DataFrame to the Pandas Agent, ask the agent to analyze the data.
 
 {% code title="python" %}
 ```python
@@ -30,8 +33,9 @@ df = pd.DataFrame({
     'customer_id': [1, 2, 3, 4, 5],
     'purchase_amount': [100, 200, 300, 400, 500]
 })
-sql_agent = PandasAgent(df, "gpt-3.5-turbo")
+pandas_agent = PandasAgent("gpt-3.5-turbo") \
+    .add_dataframe(df)
 
-print(sql_agent.chat("I want to get the top customers which making the most purchases"))
+pandas_agent.chat("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

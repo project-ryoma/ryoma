@@ -1,21 +1,19 @@
 import uuid
 
-from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph.graph import CompiledGraph
 from langgraph.pregel import StateSnapshot
 
+from aita.datasource.base import DataSource
 from aita.states import MessageState
 from jupyter_ai_magics.providers import *
 from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
 from langchain.tools.render import render_text_description
 from langchain_core.messages import ToolMessage, HumanMessage
-from langchain_core.runnables import RunnableLambda, RunnableConfig
+from langchain_core.runnables import RunnableLambda, RunnableConfig, RunnableSerializable
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolNode, tools_condition
-
-from datasource.base import DataSource
+from langgraph.prebuilt import ToolNode, tools_condition, ToolInvocation
 
 # default configuration
 # TODO: make this configurable
@@ -27,7 +25,7 @@ CONFIG = {
 }
 
 
-def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[BaseProvider]:
+def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[RunnableSerializable]:
     providers = get_lm_providers()
     provider_id, local_model_id = decompose_model_id(model_id, providers)
     if provider_id is None or provider_id not in providers:
@@ -53,12 +51,15 @@ def handle_tool_error(state) -> dict:
 
 
 class AitaAgent:
-    model: Union[BaseProvider, str]
+    model: Union[RunnableSerializable, str]
     model_parameters: Optional[Dict]
     prompt_template: Optional[ChatPromptTemplate]
+    prompt_context_template: Optional[ChatPromptTemplate]
     base_prompt_template = """
-    You are an expert in the field of data science, analysis, and data engineering. You are provided with the following context:
-
+    You are an expert in the field of data science, analysis, and data engineering.
+    """
+    base_prompt_context_template = """
+    You are provided with the following context:
     {prompt_context}
     """
 
@@ -69,44 +70,57 @@ class AitaAgent:
         **kwargs,
     ):
         if isinstance(model, str):
-            self.model: BaseProvider = get_model(model, model_parameters)
+            self.model: RunnableSerializable = get_model(model, model_parameters)
         else:
             self.model = model
 
-        self.prompt_template = None
+        self._set_base_prompt_template()
+        self.prompt_context_template = None
 
-    def set_prompt_template(self, prompt_context: Optional[Union[str, ChatPromptTemplate]] = None):
+    def _set_base_prompt_template(self):
+        self.prompt_template = ChatPromptTemplate.from_messages(
+            [
+                ("system", self.base_prompt_template),
+            ]
+        )
+        self.model = self.prompt_template | self.model
+
+    def _set_base_prompt_context_template(self):
+        self.prompt_context_template = ChatPromptTemplate.from_messages(
+            [("system", self.base_prompt_context_template)]
+        )
+
+    def set_prompt_context(self, prompt_context: Optional[Union[str, ChatPromptTemplate]] = None):
         if isinstance(prompt_context, str):
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                [
-                    ("system", self.base_prompt_template),
-                    MessagesPlaceholder(variable_name="messages", optional=True),
-                ]
-            ).partial(prompt_context=prompt_context)
+            prompt_context = ChatPromptTemplate.from_messages(
+                [("system", self.base_prompt_context_template.format(prompt_context=prompt_context))])
+        if not self.prompt_context_template:
+            self.prompt_context_template = prompt_context
         else:
-            self.prompt_template = prompt_context
+            self.prompt_context_template.append(prompt_context)
         return self
 
     def _format_question(self, question: str):
-        if self.prompt_template:
-            return self.prompt_template.format_messages(messages=[("user", question)])
-        return question
+        if self.prompt_context_template:
+            self.prompt_template.append(self.prompt_context_template)
+        self.prompt_template.append(("user", question))
 
-    def _set_prompt_context(self, prompt_context: str):
-        if not self.prompt_template:
-            self.set_prompt_template(prompt_context)
-        else:
-            self.prompt_template = self.prompt_template.partial(prompt_context=prompt_context)
+    def _fill_prompt_context(self, context: str):
+        if not self.prompt_context_template:
+            self._set_base_prompt_context_template()
+        self.prompt_context_template = self.prompt_context_template.partial(
+            prompt_context=context)
+        return self
 
     def add_datasource(self, datasource: DataSource):
-        self._set_prompt_context(str(datasource.get_metadata()))
+        self._fill_prompt_context(str(datasource.get_metadata()))
         return self
 
     def chat(self,
              question: Optional[str] = "",
              display: Optional[bool] = True):
-        formatted_question = self._format_question(question)
-        events = self.model.stream(formatted_question, CONFIG)
+        self._format_question(question)
+        events = self.model.stream(CONFIG)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
@@ -115,31 +129,26 @@ class AitaAgent:
 
 
 class ToolAgent(AitaAgent):
-    model: Union[BaseProvider, str]
     tools: List[BaseTool]
-    model_parameters: Optional[Dict]
-    llm: Any
-    base_prompt_template = """
-    You are an expert in the field of data science, analysis, and data engineering. You are provided with the following context:
-
-    {prompt_context}
-    """
+    model_graph: CompiledGraph
 
     def __init__(
         self,
         tools: List[BaseTool],
-        model: Union[BaseProvider, str],
+        model: Union[RunnableSerializable, str],
         model_parameters: Optional[Dict] = None,
         **kwargs,
     ):
         if isinstance(model, str):
-            self.model: BaseProvider = get_model(model, model_parameters)
+            self.model = get_model(model, model_parameters)
         else:
             self.model = model
 
         # bind tools to the model
         self.tools = tools
         self._bind_tools(self.tools)
+
+        super().__init__(self.model, model_parameters, **kwargs)
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
@@ -195,15 +204,21 @@ class ToolAgent(AitaAgent):
                 tool.datasource = datasource
         return self
 
+    def _format_question(self, question: str):
+        if self.prompt_context_template:
+            self.prompt_template.append(self.prompt_context_template)
+        self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
+
     def chat(self,
              question: Optional[str] = "",
              allow_run_tool: Optional[bool] = False,
              display=True):
         if allow_run_tool:
-            formatted_question = None
+            messages = None
         else:
-            formatted_question = {"messages": self._format_question(question)}
-        events = self.model_graph.stream(formatted_question, CONFIG, stream_mode="values")
+            self._format_question(question)
+            messages = {"messages": [HumanMessage(content=question)]}
+        events = self.model_graph.stream(messages, config=CONFIG, stream_mode="values")
         if display:
             self._print_graph_events(events)
         return events
@@ -213,9 +228,25 @@ class ToolAgent(AitaAgent):
             [RunnableLambda(handle_tool_error)], exception_key="error"
         )
 
+    def call_tool(self, tool_name: str, tool_id: Optional[str] = None, **kwargs):
+        if not tool_name:
+            raise ValueError("Tool name is required.")
+        curr_tool_calls = self.get_current_tool_calls()
+        if tool_id:
+            tool_call = next((tc for tc in curr_tool_calls if tc["id"] == tool_id), None)
+        else:
+            tool_call = next((tc for tc in curr_tool_calls if tc["name"] == tool_name), None)
+        if not tool_call:
+            raise ValueError(f"Tool call {tool_name} not found in current state.")
+        tool = next((t for t in self.tools if t.name == tool_name), None)
+        if not tool:
+            raise ValueError(f"Tool {tool_name} not found in the tool sets.")
+        res = tool.invoke(tool_call["args"], CONFIG)
+        return res
+
     def call_model(self, state: MessageState, config: RunnableConfig):
         messages = {**state, "user_info": config.get("user_id", None)}
-        response = self.model.invoke(messages["messages"])
+        response = self.model.invoke(messages)
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
 

@@ -1,22 +1,21 @@
 from typing import Dict
 from aita.agent.base import ToolAgent
-from aita.tool.pyarrow_tool import ArrowTool, ConvertToArrowTool
-from aita.datasource.base import DataSource
+from aita.tool.sql import ConvertToArrowTool
+from aita.tool.python import PythonTool
+from aita.tool.pyarrow import ArrowTool
 from pyarrow import Table
 
 
 class PyArrowAgent(ToolAgent):
-    prompt_context = """
-    Meta data of all available data sources:
-    {script_context}
-
-    pyarrow table can be created by using the data source as:
-    datasource.to_arrow(query)
-    """
-
-    def __init__(self, datasource: [DataSource, Table], model_id: str, model_parameters: Dict = None):
-        self.prompt_context = self.prompt_context.format(script_context=datasource.get_metadata())
+    def __init__(self, model: str, model_parameters: Dict = None):
         super().__init__([
-            ConvertToArrowTool(datasource=datasource),
-            ArrowTool(script_context={"table": datasource})
-        ], model_id, model_parameters, prompt_context=self.prompt_context)
+            ConvertToArrowTool(),
+            ArrowTool()
+        ], model, model_parameters)
+
+    def add_table(self, table: Table):
+        self._fill_prompt_context(str(table.schema))
+        for tool in self.tools:
+            if isinstance(tool, PythonTool):
+                tool.update_script_context(script_context=table)
+        return self

@@ -1,2 +1,6 @@
 # PandasTool
-Pandastool is a tool that can be used by AI agents to interact with the data platform using Pandas API.
+Pandas tools are used by PandasAgent to interact with the data leveraging Pandas API.
+
+## Source
+
+* [Pandas Tool](../../../aita/tool/pandas.py)

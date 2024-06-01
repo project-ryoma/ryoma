@@ -1,6 +1,6 @@
 import pandas as pd
 
-from aita.tool.ipython import PythonTool
+from aita.tool.python import PythonTool
 
 
 class PySparkTool(PythonTool):

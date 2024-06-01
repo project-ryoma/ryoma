@@ -14,8 +14,8 @@ spark_configs = {
     "master": "local",
     "appName": "Aita"
 }
-spark_agent = PySparkAgent(datasource,  spark_configs, "gpt-3.5-turbo")
+spark_agent = PySparkAgent(spark_configs, "gpt-3.5-turbo")
 
-print(spark_agent.chat("I want to get the top customers which making the most purchases"))
+spark_agent.chat("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

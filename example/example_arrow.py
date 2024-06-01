@@ -1,4 +1,3 @@
-
 # write an arrow ADBC connect to postgresql and ingest data into it
 
 import pyarrow as pa
@@ -8,6 +7,7 @@ table = pa.table({"a": [1, 2, 3], "b": [4, 5, 6]})
 
 # adbc connection
 from adbc_driver_postgresql.dbapi import connect
+
 connection = connect("postgresql://localhost:5432/postgres")
 
 # ingest data

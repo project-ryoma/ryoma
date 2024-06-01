@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 
 from aita.datasource.base import SqlDataSource
 from aita.tool.pyspark_tool import PySparkTool
-from aita.tool.sql_tool import SqlDatabaseTool
+from aita.tool.sql_tool import SqlQueryTool
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_pyspark_tool(pyspark_session, pandas_dataframe):
 def test_sql_tool(sql_database: SqlDataSource):
     with patch("aita.datasource.base.SqlDataSource.execute") as mock_execute:
         mock_execute.return_value = "success"
-        sql_tool = SqlDatabaseTool(datasource=sql_database)
+        sql_tool = SqlQueryTool(datasource=sql_database)
         query = "SELECT * FROM customers LIMIT 4"
         result = sql_tool._run(query)
         assert result == "success"

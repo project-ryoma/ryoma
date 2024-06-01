@@ -8,7 +8,7 @@ The list below contains the functionality that contributors are planning to deve
 * **Data Sources**
   * [x] [Snowflake source](https://docs.aita.dev/reference/data-sources/snowflake)
   * [ ] [BigQuery source](https://docs.aita.dev/reference/data-sources/bigquery)
-  * [ ] [Parquet file source](https://docs.aita.dev/reference/data-sources/file)
+  * [x] [Parquet file source](https://docs.aita.dev/reference/data-sources/file)
   * [x] [Postgresql (contrib plugin)](https://docs.aita.dev/reference/data-sources/postgresql)
 
 * **Agents**

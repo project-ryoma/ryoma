@@ -1,8 +1,7 @@
 from typing import Dict, Optional
 
 from aita.agent.base import ToolAgent
-from aita.datasource.sql import SqlDataSource
-from aita.tool.sql_tool import SqlDatabaseTool, CreateTableTool
+from aita.tool.sql import SqlQueryTool, ConvertToArrowTool, ConvertToPandasTool, CreateTableTool
 
 
 class SqlAgent(ToolAgent):
@@ -13,6 +12,8 @@ class SqlAgent(ToolAgent):
         model_parameters: Optional[Dict] = None,
     ):
         super().__init__([
-            SqlDatabaseTool(),
+            SqlQueryTool(),
             CreateTableTool(),
+            ConvertToArrowTool(),
+            ConvertToPandasTool()
         ], model, model_parameters)

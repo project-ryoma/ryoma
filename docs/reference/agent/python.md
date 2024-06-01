@@ -8,8 +8,8 @@ The Python agent is an Aita agent that run python script in IPython Kernel ([IPy
 ```python
 from aita.agent.python import PythonAgent
 
-python_agent = PythonAgent(None, "gpt-3.5-turbo")
+python_agent = PythonAgent("gpt-3.5-turbo")
 
-print(python_agent.chat("print('Hello, World!')"))
+python_agent.chat("print('Hello, World!')")
 ```
 {% endcode %}

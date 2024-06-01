@@ -1,14 +1,14 @@
 from enum import Enum
 
-from aita.tool.sql_tool import SqlDatabaseTool
-from aita.tool.ipython import PythonTool
-from aita.tool.pandas_tool import PandasTool
-from aita.tool.pyarrow_tool import ArrowTool
-from aita.tool.pyspark_tool import PySparkTool
+from aita.tool.sql import SqlQueryTool
+from aita.tool.python import PythonTool
+from aita.tool.pandas import PandasTool
+from aita.tool.pyarrow import ArrowTool
+from aita.tool.pyspark import PySparkTool
 
 
 class ToolProvider(Enum):
-    sql = SqlDatabaseTool
+    sql = SqlQueryTool
     python = PythonTool
     pandas = PandasTool
     pyarrow = ArrowTool

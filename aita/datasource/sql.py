@@ -1,7 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Optional
-
-from pydantic import Field
+from typing import Any
 
 from aita.datasource.catalog import Catalog
 from aita.datasource.base import DataSource

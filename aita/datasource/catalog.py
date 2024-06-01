@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class Column(BaseModel):
     column_name: str = Field(..., description="Name of the column")
-    xdbc_type_name: str = Field(..., description="Type of the column", alias="column_type")
+    xdbc_type_name: Optional[str] = Field(None, description="Type of the column", alias="column_type")
     xdbc_nullable: Optional[bool] = Field(None, description="Whether the column is nullable", alias="nullable")
     primary_key: Optional[bool] = Field(None, description="Whether the column is a primary key")
 
