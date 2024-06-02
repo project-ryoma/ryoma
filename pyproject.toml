@@ -79,7 +79,7 @@ isort = { extras = ["colors"], version = "^5.10.1" }
 mypy = "^1.9.0"
 pre-commit = "^2.15.0"
 pydocstyle = "^6.1.1"
-pylint = "^2.11.1"
+pylint = ">=2.11.1,<4.0.0"
 pytest = "^8.1.1"
 pyupgrade = "^2.29.1"
 safety = "^1.10.3"
