@@ -1,7 +1,8 @@
 """The Tool Page."""
-from aitalab.templates import template
-from aitalab.states.tool import ToolState
 import reflex as rx
+
+from aitalab.states.tool import ToolState
+from aitalab.templates import template
 
 
 def content_grid():

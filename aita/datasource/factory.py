@@ -2,11 +2,11 @@ from enum import Enum
 
 from aita.datasource.base import DataSource
 from aita.datasource.bigquery import BigqueryDataSource
+from aita.datasource.file import FileDataSource
 from aita.datasource.mysql import MySqlDataSource
+from aita.datasource.nosql import DynamodbDataSource
 from aita.datasource.postgresql import PostgreSqlDataSource
 from aita.datasource.snowflake import SnowflakeDataSource
-from aita.datasource.file import FileDataSource
-from aita.datasource.nosql import DynamodbDataSource
 from aita.datasource.sqlite import SqliteDataSource
 
 

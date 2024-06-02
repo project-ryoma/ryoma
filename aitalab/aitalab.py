@@ -1,9 +1,9 @@
 """Welcome to Reflex!."""
 
 # Import all the pages.
-from aitalab.pages import *
-
 import reflex as rx
+
+from aitalab.pages import *
 
 
 class State(rx.State):

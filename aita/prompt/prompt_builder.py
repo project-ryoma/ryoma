@@ -1,10 +1,8 @@
-from aita.prompt.enums import ReprType
-from aita.prompt.enums import ExampleType
-from aita.prompt.enums import SelectorType
-from aita.prompt.PromptReprTemplate import *
+from aita.prompt.enums import ExampleType, ReprType, SelectorType
 from aita.prompt.ExampleFormatTemplate import *
 from aita.prompt.ExampleSelectorTemplate import *
 from aita.prompt.PromptICLTemplate import BasicICLPrompt
+from aita.prompt.PromptReprTemplate import *
 
 
 def get_repr_cls(repr_type: str):

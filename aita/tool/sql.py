@@ -1,16 +1,14 @@
-from typing import Any, Dict, Sequence, Type, Union
+from typing import Any, Dict, Optional, Sequence, Type, Union
+
+from abc import ABC
 
 import pandas as pd
-from langchain_core.pydantic_v1 import BaseModel
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
 
-from aita.datasource.sql import SqlDataSource
 from aita.datasource.catalog import Table
-from abc import ABC
-from typing import Optional
-
-from langchain_core.tools import BaseTool
-from langchain_core.pydantic_v1 import Field
+from aita.datasource.sql import SqlDataSource
 
 
 class SqlDataSourceTool(BaseTool, ABC):

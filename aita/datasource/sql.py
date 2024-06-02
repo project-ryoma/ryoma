@@ -1,9 +1,11 @@
-from abc import abstractmethod
 from typing import Any
 
-from aita.datasource.catalog import Catalog
-from aita.datasource.base import DataSource
+from abc import abstractmethod
+
 import pyarrow as pa
+
+from aita.datasource.base import DataSource
+from aita.datasource.catalog import Catalog
 
 
 class SqlDataSource(DataSource):

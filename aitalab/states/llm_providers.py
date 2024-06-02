@@ -1,7 +1,16 @@
 from enum import Enum
 
-from jupyter_ai_magics.providers import AI21Provider, BedrockChatProvider, BedrockProvider, CohereProvider, \
-    GPT4AllProvider, HfHubProvider, QianfanProvider, SmEndpointProvider, TogetherAIProvider
+from jupyter_ai_magics.providers import (
+    AI21Provider,
+    BedrockChatProvider,
+    BedrockProvider,
+    CohereProvider,
+    GPT4AllProvider,
+    HfHubProvider,
+    QianfanProvider,
+    SmEndpointProvider,
+    TogetherAIProvider,
+)
 
 
 class OpenAIProvider:

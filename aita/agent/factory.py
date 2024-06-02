@@ -1,11 +1,11 @@
 from enum import Enum
 
 from aita.agent.base import AitaAgent
-from aita.agent.sql import SqlAgent
 from aita.agent.pandas import PandasAgent
 from aita.agent.pyarrow import PyArrowAgent
 from aita.agent.pyspark import PySparkAgent
 from aita.agent.python import PythonAgent
+from aita.agent.sql import SqlAgent
 
 
 class AgentProvider(Enum):

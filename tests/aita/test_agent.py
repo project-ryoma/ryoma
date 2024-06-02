@@ -4,23 +4,20 @@ from typing_extensions import override
 import os
 from datetime import datetime
 
+import openai
+import openai_responses
 import pytest
 from mock import patch
-from openai.types.chat import ChatCompletionMessage
+from openai.types.chat import ChatCompletionChunk, ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
+from openai_responses import OpenAIMock
+from openai_responses.ext.httpx import Request, Response
+from openai_responses.streaming import Event, EventStream
 
 from aita.agent.base import AitaAgent
-from aita.agent.sql import SqlAgent
 from aita.agent.pandas import PandasAgent
+from aita.agent.sql import SqlAgent
 from aita.datasource.sql import SqlDataSource
-
-import openai
-from openai.types.chat import ChatCompletionChunk
-
-import openai_responses
-from openai_responses import OpenAIMock
-from openai_responses.streaming import Event, EventStream
-from openai_responses.ext.httpx import Request, Response
 
 os.environ["OPENAI_API_KEY"] = "foo"
 

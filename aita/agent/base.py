@@ -1,19 +1,19 @@
 import uuid
 
+from jupyter_ai_magics.providers import *
+from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
+from langchain.tools.render import render_text_description
+from langchain_core.messages import HumanMessage, ToolMessage, ToolCall
+from langchain_core.runnables import RunnableConfig, RunnableLambda, RunnableSerializable
+from langchain_core.tools import BaseTool
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, StateGraph
 from langgraph.graph.graph import CompiledGraph
+from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
 
 from aita.datasource.base import DataSource
 from aita.states import MessageState
-from jupyter_ai_magics.providers import *
-from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
-from langchain.tools.render import render_text_description
-from langchain_core.messages import ToolMessage, HumanMessage
-from langchain_core.runnables import RunnableLambda, RunnableConfig, RunnableSerializable
-from langchain_core.tools import BaseTool
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolNode, tools_condition, ToolInvocation
 
 # default configuration
 # TODO: make this configurable
@@ -167,29 +167,25 @@ class ToolAgent(AitaAgent):
 
         # Define the two nodes we will cycle between
         workflow.add_node("agent", self.call_model)
-        workflow.add_node("action", self._build_tool_node())
+        workflow.add_node("tools", self._build_tool_node())
 
         # We now add a conditional edge
         workflow.add_conditional_edges(
             "agent",
             tools_condition,
-            {
-                "action": "action",
-                END: END,
-            },
         )
 
         # Set the entrypoint as `agent`
         # This means that this node is the first one called
         workflow.set_entry_point("agent")
 
-        workflow.add_edge("action", "agent")
-        return workflow.compile(checkpointer=self.memory, interrupt_before=["action"])
+        workflow.add_edge("tools", "agent")
+        return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
 
     def get_current_state(self) -> Optional[StateSnapshot]:
         return self.model_graph.get_state(CONFIG)
 
-    def get_current_tool_calls(self) -> List[ToolMessage]:
+    def get_current_tool_calls(self) -> List[ToolCall]:
         return self.get_current_state().values.get("messages")[-1].tool_calls
 
     def add_datasource(self, datasource: DataSource):
@@ -201,6 +197,20 @@ class ToolAgent(AitaAgent):
 
     def _format_question(self, question: str):
         self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
+        if self.get_current_state().next:
+            tool_calls = self.get_current_tool_calls()
+            return {
+                "messages": [
+                    ToolMessage(
+                        tool_call_id=tool_calls[0]["id"],
+                        content=f"API call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",
+                    )
+                ]
+            }
+        else:
+            return {
+                "messages": [HumanMessage(content=question)]
+            }
 
     def chat(self,
              question: Optional[str] = "",
@@ -209,8 +219,7 @@ class ToolAgent(AitaAgent):
         if allow_run_tool:
             messages = None
         else:
-            self._format_question(question)
-            messages = {"messages": [HumanMessage(content=question)]}
+            messages = self._format_question(question)
         events = self.model_graph.stream(messages, config=CONFIG, stream_mode="values")
         if display:
             self._print_graph_events(events)

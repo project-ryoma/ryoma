@@ -1,7 +1,8 @@
-from langchain_core.messages import HumanMessage, AIMessage
-from langgraph.graph.message import add_messages
-from typing_extensions import TypedDict
 from typing import Annotated
+from typing_extensions import TypedDict
+
+from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.graph.message import add_messages
 
 
 class MessageState(TypedDict):

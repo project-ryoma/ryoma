@@ -1,8 +1,9 @@
 from typing import List
 
+import boto3
+
 from aita.datasource.base import DataSource
 from aita.datasource.catalog import Catalog
-import boto3
 
 
 class DynamodbDataSource(DataSource):

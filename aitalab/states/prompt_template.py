@@ -1,7 +1,9 @@
-import json
 from typing import List
 
+import json
+
 import reflex as rx
+
 from aita.prompt.prompt_builder import prompt_factory
 
 f = open("aita/prompt/templates/formatted_data.json")

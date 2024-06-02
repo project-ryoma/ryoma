@@ -2,7 +2,7 @@ import findspark
 from pyspark.sql import SparkSession
 
 from aita.agent.base import ToolAgent
-from aita.tool.pyspark import PySparkTool, ConvertPandasToPySparkTool
+from aita.tool.pyspark import ConvertPandasToPySparkTool, PySparkTool
 from aita.tool.python import PythonTool
 
 

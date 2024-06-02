@@ -1,7 +1,8 @@
 """The Prompt template Page."""
-from aitalab.templates import template
-from aitalab.states.prompt_template import PromptTemplateState
 import reflex as rx
+
+from aitalab.states.prompt_template import PromptTemplateState
+from aitalab.templates import template
 
 
 def content_grid():

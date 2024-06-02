@@ -3,8 +3,8 @@ import os
 import re
 import sqlite3
 
-from transformers import AutoTokenizer
 from sql_metadata import Parser
+from transformers import AutoTokenizer
 
 
 class SqliteTable(dict):

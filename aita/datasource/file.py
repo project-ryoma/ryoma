@@ -1,9 +1,10 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
+import pyarrow as pa
 from langchain_core.pydantic_v1 import BaseModel, Field
+
 from aita.datasource.base import DataSource
 from aita.datasource.catalog import Catalog
-import pyarrow as pa
 
 
 class FileDataSource(DataSource):

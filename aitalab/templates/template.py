@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from aitalab import styles
-from aitalab.components.sidebar import sidebar
 from typing import Callable
 
 import reflex as rx
+
+from aitalab import styles
+from aitalab.components.sidebar import sidebar
 
 # Meta tags for the app.
 default_meta = [

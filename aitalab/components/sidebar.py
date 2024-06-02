@@ -1,8 +1,8 @@
 """Sidebar component for the app."""
 
-from aitalab import styles
-
 import reflex as rx
+
+from aitalab import styles
 
 
 def sidebar_header() -> rx.Component:

@@ -1,9 +1,9 @@
 """The home page of the app."""
 
+import reflex as rx
+
 from aitalab import styles
 from aitalab.templates import template
-
-import reflex as rx
 
 
 @template(route="/document", title="Document")

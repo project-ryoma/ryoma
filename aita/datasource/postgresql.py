@@ -1,8 +1,10 @@
-from adbc_driver_manager.dbapi import Connection
-from aita.datasource.sql import SqlDataSource
-from pydantic import Field
 from typing import Optional
+
 import adbc_driver_postgresql.dbapi
+from adbc_driver_manager.dbapi import Connection
+from pydantic import Field
+
+from aita.datasource.sql import SqlDataSource
 
 
 class PostgreSqlDataSource(SqlDataSource):

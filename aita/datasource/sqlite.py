@@ -1,11 +1,12 @@
-import adbc_driver_sqlite.dbapi
-from adbc_driver_manager.dbapi import Connection
-from aita.datasource.sql import SqlDataSource
-from pydantic import Field
 from typing import Optional
+
+import adbc_driver_sqlite.dbapi
 import pyarrow as pa
+from adbc_driver_manager.dbapi import Connection
+from pydantic import Field
 
 from aita.datasource.catalog import Catalog
+from aita.datasource.sql import SqlDataSource
 
 
 class SqliteDataSource(SqlDataSource):

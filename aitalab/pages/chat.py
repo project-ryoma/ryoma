@@ -1,15 +1,16 @@
 """The chat page."""
 
-from aitalab.states.datasource import DataSourceState
-from aitalab.states.prompt_template import PromptTemplateState
-from aitalab.states.agent import AgentState
-from aitalab.templates import template
 import reflex as rx
-from aitalab.states.chat import QA, ChatState
-from aitalab.components.loading_icon import loading_icon
-from aitalab.styles import message_style
+
 from aitalab.components.codeeditor import code_editor
+from aitalab.components.loading_icon import loading_icon
+from aitalab.states.agent import AgentState
+from aitalab.states.chat import QA, ChatState
+from aitalab.states.datasource import DataSourceState
 from aitalab.states.llm_providers import ModelProvider
+from aitalab.states.prompt_template import PromptTemplateState
+from aitalab.styles import message_style
+from aitalab.templates import template
 
 
 def message(qa: QA) -> rx.Component:

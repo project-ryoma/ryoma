@@ -1,10 +1,10 @@
 """The home page of the app."""
 
-from aitalab.templates import template
-from aitalab.states.datasource import DataSource, DataSourceState
-from aita.datasource.factory import get_supported_datasources, DataSourceProvider
-
 import reflex as rx
+
+from aita.datasource.factory import DataSourceProvider, get_supported_datasources
+from aitalab.states.datasource import DataSource, DataSourceState
+from aitalab.templates import template
 
 
 def show_datasource(datasource: DataSource):

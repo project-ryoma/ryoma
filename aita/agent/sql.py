@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from aita.agent.base import ToolAgent
-from aita.tool.sql import SqlQueryTool, ConvertToArrowTool, ConvertToPandasTool, CreateTableTool
+from aita.tool.sql import ConvertToArrowTool, ConvertToPandasTool, CreateTableTool, SqlQueryTool
 
 
 class SqlAgent(ToolAgent):

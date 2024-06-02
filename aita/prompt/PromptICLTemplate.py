@@ -1,5 +1,6 @@
-from aita.prompt.utils import get_tokenizer, count_tokens, jaccard_similarity
 import numpy as np
+
+from aita.prompt.utils import count_tokens, get_tokenizer, jaccard_similarity
 
 
 class BasicICLPrompt(object):

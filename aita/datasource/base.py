@@ -1,7 +1,8 @@
 from abc import abstractmethod
 
-from aita.datasource.catalog import Catalog
 from langchain_core.pydantic_v1 import BaseModel, Field
+
+from aita.datasource.catalog import Catalog
 
 
 class DataSource(BaseModel):
