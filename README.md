@@ -22,6 +22,37 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 - **[Apache Arrow](https://arrow.apache.org/)**: A cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware like CPUs and GPUs.
 - **[Jupyter Ai Magics](https://github.com/jupyterlab/jupyter-ai)**: A JupyterLab extension that provides a set of magics for working with AI models.
 
+## Installation
+Simply install the package using pip:
+
+```shell
+pip install aita
+
+```
+Or with extra dependencies:
+
+```shell
+pip install aita[snowflake]
+```
+
+## Example
+Below is an example of using SqlAgent to connect to a PostgreSQL database and ask a question. \
+
+```python
+from aita.agent.sql import SqlAgent
+from aita.datasource.postgresql import PostgreSqlDataSource
+
+# Connect to a PostgreSQL database
+datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")
+
+# Create a SQL agent
+sql_agent = SqlAgent("gpt-3.5-turbo") \
+    .add_datasource(datasource)
+
+# ask question to the agent
+sql_agent.chat("What is the total number of orders?")
+```
+
 ## Supported Models
 Model provider are supported by jupyter ai magics.
 
