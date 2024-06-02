@@ -3,7 +3,7 @@ import uuid
 from jupyter_ai_magics.providers import *
 from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
 from langchain.tools.render import render_text_description
-from langchain_core.messages import HumanMessage, ToolMessage, ToolCall
+from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
 from langchain_core.runnables import RunnableConfig, RunnableLambda, RunnableSerializable
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
