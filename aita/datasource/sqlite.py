@@ -29,4 +29,3 @@ class SqliteDataSource(SqlDataSource):
             ).read_all()
             catalog = catalogs.to_pylist()[0]
             return Catalog(**catalog)
-

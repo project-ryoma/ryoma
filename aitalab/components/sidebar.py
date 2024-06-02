@@ -66,7 +66,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
     """
     # Whether the item is active.
     active = (rx.State.router.page.path == url.lower()) | (
-            (rx.State.router.page.path == "/") & text == "Home"
+        (rx.State.router.page.path == "/") & text == "Home"
     )
 
     return rx.link(

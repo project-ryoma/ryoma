@@ -10,6 +10,7 @@ from aita.datasource.factory import DataSourceFactory, DataSourceProvider
 
 class DataSource(rx.Model, table=True):
     """The SqlDataSource model."""
+
     name: str
     datasource_type: str
     connection_url: str
@@ -47,8 +48,9 @@ class DataSourceState(rx.State):
 
         # required by specific datasource
         model_fields = DataSourceProvider[self.datasource_type].value.model_fields
-        if not all(getattr(self, key) for key in model_fields.keys() if
-                   key != "type" and key != "name"):
+        if not all(
+            getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
+        ):
             return True
         return False
 
@@ -69,7 +71,8 @@ class DataSourceState(rx.State):
 
             if self.sort_value:
                 self.datasources = sorted(
-                    self.datasources, key=lambda datasource: getattr(datasource, self.sort_value).lower()
+                    self.datasources,
+                    key=lambda datasource: getattr(datasource, self.sort_value).lower(),
                 )
             self.datasource_names = [datasource.name for datasource in self.datasources]
 
@@ -92,7 +95,7 @@ class DataSourceState(rx.State):
             datasource = DataSource(
                 name=self.name,
                 datasource_type=self.datasource_type,
-                connection_url=self.connection_url
+                connection_url=self.connection_url,
             )
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource_type}: {e}")
@@ -105,9 +108,7 @@ class DataSourceState(rx.State):
 
     def update_datasource(self):
         with rx.session() as session:
-            datasource = session.exec(
-                select(DataSource).where(DataSource.id == self.id)
-            ).first()
+            datasource = session.exec(select(DataSource).where(DataSource.id == self.id)).first()
             datasource.name = self.name
             datasource.connection_url = self.connection_url
             session.add(datasource)
@@ -137,8 +138,9 @@ class DataSourceState(rx.State):
         if not datasource:
             return
         try:
-            source = DataSourceFactory.create_datasource(datasource.datasource_type,
-                                                connection_url=datasource.connection_url)
+            source = DataSourceFactory.create_datasource(
+                datasource.datasource_type, connection_url=datasource.connection_url
+            )
             source.connect()
             logging.info(f"Connected to {datasource.datasource_type}")
             return source

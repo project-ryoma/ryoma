@@ -15,8 +15,8 @@ def myfunc(fifth: int, sixth: List[str], *args, **kwargs):
     """
     first = args[0]
     second = args[1]
-    third = kwargs.get('third', 0)
-    forth = kwargs.get('forth', 0)
+    third = kwargs.get("third", 0)
+    forth = kwargs.get("forth", 0)
     return fifth + sixth + first + second + third + forth
 
 

@@ -1,45 +1,37 @@
 class SqlExampleStyle(object):
-    """Only show sqls as examples
-
-    """
+    """Only show sqls as examples"""
 
     def get_example_prefix(self):
         return "/* Some SQL examples are provided based on similar problems: */\n"
 
     def format_example(self, example: dict):
-        return example['query']
+        return example["query"]
 
 
 class QuestionSqlExampleStyle(object):
-    """Provide QA pair as examples
-
-    """
+    """Provide QA pair as examples"""
 
     def get_example_prefix(self):
         return "/* Some SQL examples are provided based on similar problems: */\n"
 
     def format_example(self, example: dict):
         template_qa = "/* Answer the following: {} */\n{}"
-        return template_qa.format(example['question'], example['query'])
+        return template_qa.format(example["question"], example["query"])
 
 
 class QuestionSqlWithRuleExampleStyle(object):
-    """Provide QA pair as examples
-
-    """
+    """Provide QA pair as examples"""
 
     def get_example_prefix(self):
         return "/* Some SQL examples are provided based on similar problems: */\n"
 
     def format_example(self, example: dict):
         template_qa = "/* Answer the following with no explanation: {} */\n{}"
-        return template_qa.format(example['question'], example['query'])
+        return template_qa.format(example["question"], example["query"])
 
 
 class CompleteExampleStyle(object):
-    """Examples are in the same format as target question
-
-    """
+    """Examples are in the same format as target question"""
 
     def get_example_prefix(self):
         return ""
@@ -58,7 +50,7 @@ class NumberSignQuestionSqlExampleStyle(object):
 
     def format_example(self, example: dict):
         template_qa = "### {}\n{}"
-        return template_qa.format(example['question'], example['query'])
+        return template_qa.format(example["question"], example["query"])
 
 
 class BaselineQuestionSqlExampleStyle(object):
@@ -71,4 +63,4 @@ class BaselineQuestionSqlExampleStyle(object):
 
     def format_example(self, example: dict):
         template_qa = "Example Q: {}\nExample A: {}"
-        return template_qa.format(example['question'], example['query'])
+        return template_qa.format(example["question"], example["query"])

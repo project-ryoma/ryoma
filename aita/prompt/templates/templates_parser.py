@@ -5,7 +5,7 @@ dataset2 = json.load(open("./dataset2.json"))
 
 formatted_data = {
     "question": "What are the average and minimum price (in Euro) of all products?",
-    "templates": []
+    "templates": [],
 }
 
 
@@ -16,7 +16,10 @@ def convert(data):
     }
 
     for question in data["questions"]:
-        if question["response"] == "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'":
+        if (
+            question["response"]
+            == "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'"
+        ):
             d["formatted_question"] = question
 
     return d

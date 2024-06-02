@@ -32,7 +32,9 @@ class PromptTemplateState(rx.State):
             k_shot = template["args"]["k_shot"]
             example_format = template["args"]["example_type"]
             selector_type = template["args"]["selector_type"]
-            prompt_template_name = f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}_template"
+            prompt_template_name = (
+                f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}_template"
+            )
             prompt_lines = template["formatted_question"]["prompt"].split("\n")
             prompt_template = PromptTemplate(
                 prompt_repr=prompt_repr,
@@ -40,7 +42,7 @@ class PromptTemplateState(rx.State):
                 example_format=example_format,
                 selector_type=selector_type,
                 prompt_template_name=prompt_template_name,
-                prompt_lines=prompt_lines
+                prompt_lines=prompt_lines,
             )
             prompt_template_names.append(prompt_template_name)
             prompt_templates.append(prompt_template)
@@ -59,7 +61,8 @@ class PromptTemplateState(rx.State):
             repr_type=prompt_template.prompt_repr,
             k_shot=0,
             example_format=prompt_template.example_format,
-            selector_type=prompt_template.selector_type)(tokenizer=embedding_model)
+            selector_type=prompt_template.selector_type,
+        )(tokenizer=embedding_model)
         target_prompt = prompt.format(target, 2048, 200, 100, cross_domain=False)
         return target_prompt["prompt"]
 

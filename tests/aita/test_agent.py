@@ -92,9 +92,7 @@ class CreateChatCompletionEventStream(EventStream):  #
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",
-                "choices": [
-                    {"index": 0, "delta": {}, "logprobs": None, "finish_reason": "stop"}
-                ],
+                "choices": [{"index": 0, "delta": {}, "logprobs": None, "finish_reason": "stop"}],
             }
         )
         yield self.event(None, chunk)
@@ -172,18 +170,17 @@ def test_chat(agent, openai_mock: OpenAIMock):
 def test_chat_with_tool(sql_agent):
     with patch("langchain_openai.ChatOpenAI.invoke") as mock_invoke:
         mock_invoke.return_value = mock_chat_response(
-            "Hello, world!", additional_kwargs={
+            "Hello, world!",
+            additional_kwargs={
                 "tool_calls": [
                     {
                         "function": {
                             "name": "sql_database_query",
-                            "arguments": {
-                                "query": "SELECT * FROM customers LIMIT 4"
-                            }
+                            "arguments": {"query": "SELECT * FROM customers LIMIT 4"},
                         }
                     }
                 ]
-            }
+            },
         )
 
         chat_response = sql_agent.chat("top 4 customers in database", allow_run_tool=True)

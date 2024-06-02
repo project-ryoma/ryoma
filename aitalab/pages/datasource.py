@@ -17,7 +17,7 @@ def show_datasource(datasource: DataSource):
                 "Delete",
                 on_click=lambda: DataSourceState.delete_datasource(datasource),
             )
-        )
+        ),
     )
 
 
@@ -26,11 +26,7 @@ def add_datasource():
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
-                rx.flex(
-                    "Add Data Source",
-                    rx.icon(tag="plus", width=24, height=24),
-                    spacing="3"
-                ),
+                rx.flex("Add Data Source", rx.icon(tag="plus", width=24, height=24), spacing="3"),
                 size="4",
                 radius="full",
                 on_click=DataSourceState.toggle_dialog,
@@ -60,7 +56,7 @@ def add_datasource():
                 rx.input(
                     placeholder="Enter the name of the data source",
                     on_blur=DataSourceState.set_name,
-                    required=True
+                    required=True,
                 ),
                 rx.text(
                     "Type *",
@@ -79,8 +75,7 @@ def add_datasource():
                     rx.vstack(
                         rx.foreach(
                             DataSourceState.datasource_attributes,
-                            lambda field:
-                            rx.vstack(
+                            lambda field: rx.vstack(
                                 rx.text(
                                     field,
                                     as_="div",
@@ -88,14 +83,18 @@ def add_datasource():
                                     mb="1",
                                     weight="bold",
                                 ),
-                                rx.input(placeholder=f"Enter the {field} for the data source",
-                                         on_blur=lambda x: DataSourceState.set_datasource_attributes(field, x),
-                                         width="100%"),
+                                rx.input(
+                                    placeholder=f"Enter the {field} for the data source",
+                                    on_blur=lambda x: DataSourceState.set_datasource_attributes(
+                                        field, x
+                                    ),
+                                    width="100%",
+                                ),
                                 width="100%",
-                            )
+                            ),
                         ),
                         width="100%",
-                    )
+                    ),
                 ),
                 direction="column",
                 spacing="4",

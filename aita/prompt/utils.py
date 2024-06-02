@@ -40,7 +40,7 @@ def get_tables(path_db):
                 name=table_name,
                 schema=schema,
                 data=data,
-                table_info=table_info.get(table_name, dict())
+                table_info=table_info.get(table_name, dict()),
             )
         )
 
@@ -61,18 +61,15 @@ def parse_db(path_db, cur=None):
         pks = get_primary_key(table_name, path_db, cur)
         fks = get_foreign_key(table_name, path_db, cur)
 
-        table_info[table_name] = {
-            "primary_key": pks,
-            "foreign_key": fks
-        }
+        table_info[table_name] = {"primary_key": pks, "foreign_key": fks}
     return table_info
 
 
 def execute_query(queries, path_db=None, cur=None):
-    """Execute queries and return results. Reuse cur if it's not None.
-
-    """
-    assert not (path_db is None and cur is None), "path_db and cur cannot be NoneType at the same time"
+    """Execute queries and return results. Reuse cur if it's not None."""
+    assert not (
+        path_db is None and cur is None
+    ), "path_db and cur cannot be NoneType at the same time"
 
     close_in_func = False
     if cur is None:
@@ -123,10 +120,10 @@ def get_primary_key(table_name, path_db=None, cur=None):
 
 
 def get_table_names(path_db=None, cur=None):
-    """Get names of all tables within the database, and reuse cur if it's not None
-
-    """
-    table_names = execute_query(queries="SELECT name FROM sqlite_master WHERE type='table'", path_db=path_db, cur=cur)
+    """Get names of all tables within the database, and reuse cur if it's not None"""
+    table_names = execute_query(
+        queries="SELECT name FROM sqlite_master WHERE type='table'", path_db=path_db, cur=cur
+    )
     table_names = [_[0] for _ in table_names]
     return table_names
 
@@ -138,7 +135,7 @@ def filter_json(raw_response: str) -> str:
         if id_s > id_e:
             raise ValueError("Wrong json format")
         else:
-            return raw_response[id_s: id_e + 1]
+            return raw_response[id_s : id_e + 1]
     except ValueError:
         raise ValueError("Wrong json format")
 
@@ -212,11 +209,12 @@ def sql_normalization(sql):
 
     # double quotation -> single quotation
     def double2single(s):
-        return s.replace("\"", "'")
+        return s.replace('"', "'")
 
     def add_asc(s):
         pattern = re.compile(
-            r'order by (?:\w+ \( \S+ \)|\w+\.\w+|\w+)(?: (?:\+|\-|\<|\<\=|\>|\>\=) (?:\w+ \( \S+ \)|\w+\.\w+|\w+))*')
+            r"order by (?:\w+ \( \S+ \)|\w+\.\w+|\w+)(?: (?:\+|\-|\<|\<\=|\>|\>\=) (?:\w+ \( \S+ \)|\w+\.\w+|\w+))*"
+        )
         if "order by" in s and "asc" not in s and "desc" not in s:
             for p_str in pattern.findall(s):
                 s = s.replace(p_str, p_str + " asc")
@@ -257,8 +255,8 @@ def sql_normalization(sql):
                 new_tables_aliases["t{}".format(i)] = tables_aliases["t{}".format(i)]
         table_names = []
         for tok in sql_split(s):
-            if '.' in tok:
-                table_names.append(tok.split('.')[0])
+            if "." in tok:
+                table_names.append(tok.split(".")[0])
         for table_name in table_names:
             if table_name in tables_aliases.keys():
                 new_tables_aliases[table_name] = tables_aliases[table_name]
@@ -268,19 +266,23 @@ def sql_normalization(sql):
         pre_tok = ""
         for tok in sql_split(s):
             if tok in tables_aliases.keys():
-                if pre_tok == 'as':
+                if pre_tok == "as":
                     new_s = new_s[:-1]
                 elif pre_tok != tables_aliases[tok]:
                     new_s.append(tables_aliases[tok])
-            elif '.' in tok:
-                split_toks = tok.split('.')
+            elif "." in tok:
+                split_toks = tok.split(".")
                 for i in range(len(split_toks)):
-                    if len(split_toks[i]) > 2 and split_toks[i][0] == "'" and split_toks[i][-1] == "'":
+                    if (
+                        len(split_toks[i]) > 2
+                        and split_toks[i][0] == "'"
+                        and split_toks[i][-1] == "'"
+                    ):
                         split_toks[i] = split_toks[i].replace("'", "")
                         split_toks[i] = split_toks[i].lower()
                     if split_toks[i] in tables_aliases.keys():
                         split_toks[i] = tables_aliases[split_toks[i]]
-                new_s.append('.'.join(split_toks))
+                new_s.append(".".join(split_toks))
             else:
                 new_s.append(tok)
             pre_tok = tok
@@ -294,7 +296,7 @@ def sql_normalization(sql):
             if i > 0 and s[i - 1] == "as":
                 continue
             new_s.append(s[i])
-        new_s = ' '.join(new_s)
+        new_s = " ".join(new_s)
 
         # for k, v in tables_aliases.items():
         #     s = s.replace("as " + k + " ", "")
@@ -302,7 +304,9 @@ def sql_normalization(sql):
 
         return new_s
 
-    processing_func = lambda x: remove_table_alias(add_asc(lower(white_space_fix(double2single(remove_semicolon(x))))))
+    processing_func = lambda x: remove_table_alias(
+        add_asc(lower(white_space_fix(double2single(remove_semicolon(x)))))
+    )
 
     return processing_func(sql.strip())
 
@@ -318,7 +322,9 @@ def sql2skeleton(sql: str, db_schema):
         for column_id_and_name in db_schema["column_names_original"]:
             column_id = column_id_and_name[0]
             column_name_original = column_id_and_name[1]
-            table_dot_column_names_original.append(table_name_original.lower() + "." + column_name_original.lower())
+            table_dot_column_names_original.append(
+                table_name_original.lower() + "." + column_name_original.lower()
+            )
             column_names_original.append(column_name_original.lower())
 
     parsed_sql = Parser(sql)
@@ -328,8 +334,7 @@ def sql2skeleton(sql: str, db_schema):
         if token.value in table_names_original:
             new_sql_tokens.append("_")
         # mask column names
-        elif token.value in column_names_original \
-            or token.value in table_dot_column_names_original:
+        elif token.value in column_names_original or token.value in table_dot_column_names_original:
             new_sql_tokens.append("_")
         # mask string values
         elif token.value.startswith("'") and token.value.endswith("'"):
@@ -356,7 +361,7 @@ def sql2skeleton(sql: str, db_schema):
     sql_skeleton = re.sub(pattern3, "_ ", sql_skeleton)
 
     # "_ , _ , ..., _" -> "_"
-    while ("_ , _" in sql_skeleton):
+    while "_ , _" in sql_skeleton:
         sql_skeleton = sql_skeleton.replace("_ , _", "_")
 
     # remove clauses in WHERE keywords
@@ -364,7 +369,7 @@ def sql2skeleton(sql: str, db_schema):
     for op in ops:
         if "_ {} _".format(op) in sql_skeleton:
             sql_skeleton = sql_skeleton.replace("_ {} _".format(op), "_")
-    while ("where _ and _" in sql_skeleton or "where _ or _" in sql_skeleton):
+    while "where _ and _" in sql_skeleton or "where _ or _" in sql_skeleton:
         if "where _ and _" in sql_skeleton:
             sql_skeleton = sql_skeleton.replace("where _ and _", "where _")
         if "where _ or _" in sql_skeleton:
@@ -377,7 +382,11 @@ def sql2skeleton(sql: str, db_schema):
     # double check for order by
     split_skeleton = sql_skeleton.split(" ")
     for i in range(2, len(split_skeleton)):
-        if split_skeleton[i - 2] == "order" and split_skeleton[i - 1] == "by" and split_skeleton[i] != "_":
+        if (
+            split_skeleton[i - 2] == "order"
+            and split_skeleton[i - 1] == "by"
+            and split_skeleton[i] != "_"
+        ):
             split_skeleton[i] = "_"
     sql_skeleton = " ".join(split_skeleton)
 

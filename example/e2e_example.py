@@ -1,4 +1,3 @@
-
 import os
 
 from aita.agent.pandas import PandasAgent
@@ -29,7 +28,5 @@ snowflake_datasource = SnowflakeDataSource(
     schema=schema,
 )
 
-sql_agent = SqlAgent("gpt-3.5-turbo") \
-    .add_datasource(snowflake_datasource) \
-
+sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(snowflake_datasource)
 sql_agent.chat("I want to get the top 5 customers which making the most purchases")

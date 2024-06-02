@@ -33,18 +33,10 @@ overlapping_button_style = {
 }
 
 markdown_style = {
-    "h1": lambda text: rx.heading(
-        text, size="5", margin_y="1em"
-    ),
-    "h2": lambda text: rx.heading(
-        text, size="3", margin_y="1em"
-    ),
-    "h3": lambda text: rx.heading(
-        text, size="1", margin_y="1em"
-    ),
-    "p": lambda text: rx.text(
-        text, color="black", margin_y="1em"
-    ),
+    "h1": lambda text: rx.heading(text, size="5", margin_y="1em"),
+    "h2": lambda text: rx.heading(text, size="3", margin_y="1em"),
+    "h3": lambda text: rx.heading(text, size="1", margin_y="1em"),
+    "p": lambda text: rx.text(text, color="black", margin_y="1em"),
     "code": lambda text: rx.code(text, color_scheme="gray"),
     "codeblock": lambda text, **props: rx.code_block(text, **props, margin_y="1em"),
     "a": lambda text, **props: rx.link(

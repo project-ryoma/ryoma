@@ -98,6 +98,7 @@ def prompt_factory(repr_type: str, k_shot: int, example_format: str, selector_ty
                 repr_cls.__init__(self, *args, **kwargs)
                 # init tokenizer
                 BasicICLPrompt.__init__(self, *args, **kwargs)
+
     else:
         example_format_cls = get_example_format_cls(example_format)
         selector_cls = get_example_selector(selector_type)

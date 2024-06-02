@@ -11,9 +11,8 @@ class SqlAgent(ToolAgent):
         model: str,
         model_parameters: Optional[Dict] = None,
     ):
-        super().__init__([
-            SqlQueryTool(),
-            CreateTableTool(),
-            ConvertToArrowTool(),
-            ConvertToPandasTool()
-        ], model, model_parameters)
+        super().__init__(
+            [SqlQueryTool(), CreateTableTool(), ConvertToArrowTool(), ConvertToPandasTool()],
+            model,
+            model_parameters,
+        )

@@ -62,11 +62,11 @@ class CreateTableTool(SqlDataSourceTool):
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
         columns = ",\n".join(
-            f"{column.column_name} \"{column.xdbc_type_name}\""
-            for column in table_columns
+            f'{column.column_name} "{column.xdbc_type_name}"' for column in table_columns
         )
         return self.datasource.execute(
-            "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns))
+            "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns)
+        )
 
 
 class ConvertToPandasTool(SqlDataSourceTool):

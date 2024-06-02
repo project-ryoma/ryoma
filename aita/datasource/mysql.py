@@ -8,9 +8,7 @@ from aita.datasource.sql import SqlDataSource
 
 class MySqlDataSource(SqlDataSource):
 
-    def __init__(self,
-                 connection_url: Optional[str] = None,
-                 **kwargs):
+    def __init__(self, connection_url: Optional[str] = None, **kwargs):
         if not connection_url:
             user = kwargs.get("user")
             password = kwargs.get("password")

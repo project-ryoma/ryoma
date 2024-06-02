@@ -93,7 +93,13 @@ class AitaAgent:
     def set_prompt_template(self, prompt_template: Optional[Union[str, ChatPromptTemplate]] = None):
         if isinstance(prompt_template, str):
             prompt_template = ChatPromptTemplate.from_messages(
-                [("system", self.base_prompt_context_template.format(prompt_context=prompt_template))])
+                [
+                    (
+                        "system",
+                        self.base_prompt_context_template.format(prompt_context=prompt_template),
+                    )
+                ]
+            )
         self.prompt_context_template = prompt_template
         return self
 
@@ -103,17 +109,14 @@ class AitaAgent:
     def _fill_prompt_context(self, context: str):
         if not self.prompt_context_template:
             self._set_base_prompt_context_template()
-        prompt_context_template = self.prompt_context_template.partial(
-            prompt_context=context)
+        prompt_context_template = self.prompt_context_template.partial(prompt_context=context)
         self.prompt_template.append(prompt_context_template)
 
     def add_datasource(self, datasource: DataSource):
         self._fill_prompt_context(str(datasource.get_metadata()))
         return self
 
-    def chat(self,
-             question: Optional[str] = "",
-             display: Optional[bool] = True):
+    def chat(self, question: Optional[str] = "", display: Optional[bool] = True):
         self._format_question(question)
         events = self.model.stream(CONFIG)
         if display:
@@ -208,14 +211,11 @@ class ToolAgent(AitaAgent):
                 ]
             }
         else:
-            return {
-                "messages": [HumanMessage(content=question)]
-            }
+            return {"messages": [HumanMessage(content=question)]}
 
-    def chat(self,
-             question: Optional[str] = "",
-             allow_run_tool: Optional[bool] = False,
-             display=True):
+    def chat(
+        self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False, display=True
+    ):
         if allow_run_tool:
             messages = None
         else:

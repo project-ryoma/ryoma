@@ -10,10 +10,7 @@ from aita.tool.sql import ConvertToArrowTool
 
 class PyArrowAgent(ToolAgent):
     def __init__(self, model: str, model_parameters: Dict = None):
-        super().__init__([
-            ConvertToArrowTool(),
-            ArrowTool()
-        ], model, model_parameters)
+        super().__init__([ConvertToArrowTool(), ArrowTool()], model, model_parameters)
 
     def add_table(self, table: pa.Table):
         self._fill_prompt_context(str(table.schema))

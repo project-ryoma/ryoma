@@ -15,7 +15,9 @@ class BasicICLPrompt(object):
     def record_example_quality(self, examples, target):
         quality_list = []
         for example in examples:
-            quality_list.append(jaccard_similarity(example["query_skeleton"], target["query_skeleton"]))
+            quality_list.append(
+                jaccard_similarity(example["query_skeleton"], target["query_skeleton"])
+            )
         self.example_qualities.append(quality_list)
 
     def get_example_quality(self):
@@ -33,7 +35,9 @@ class BasicICLPrompt(object):
     def record_pattern_similarity(self, examples, target):
         similarity_list = []
         for example in examples:
-            similarity_list.append(jaccard_similarity(example["question_pattern"], target["question_pattern"]))
+            similarity_list.append(
+                jaccard_similarity(example["question_pattern"], target["question_pattern"])
+            )
         self.pattern_similarities.append(similarity_list)
 
     def get_pattern_similarity(self):
@@ -42,15 +46,25 @@ class BasicICLPrompt(object):
         else:
             return 1
 
-    def format(self, target: dict, max_seq_len: int, max_ans_len: int, scope_factor: int, cross_domain=False, *args,
-               **kwargs):
+    def format(
+        self,
+        target: dict,
+        max_seq_len: int,
+        max_ans_len: int,
+        scope_factor: int,
+        cross_domain=False,
+        *args,
+        **kwargs,
+    ):
         # target question
         prompt_target = self.format_target(target)
         sum_tokens = count_tokens(prompt_target, tokenizer=self.tokenizer)
 
         if self.NUM_EXAMPLE != 0:
             # example questions
-            examples = self.get_examples(target, self.NUM_EXAMPLE * scope_factor, cross_domain=cross_domain)
+            examples = self.get_examples(
+                target, self.NUM_EXAMPLE * scope_factor, cross_domain=cross_domain
+            )
             prompt_example = list()
             question = target["question"]
             example_prefix = self.get_example_prefix()
@@ -65,8 +79,10 @@ class BasicICLPrompt(object):
 
                 # count tokens and drop the example if exceed max_len
                 forward_tokens = count_tokens(
-                    example_prefix + self.SEP_EXAMPLE.join(prompt_example + [example_format, prompt_target]),
-                    tokenizer=self.tokenizer)
+                    example_prefix
+                    + self.SEP_EXAMPLE.join(prompt_example + [example_format, prompt_target]),
+                    tokenizer=self.tokenizer,
+                )
 
                 if forward_tokens + max_ans_len <= max_seq_len:
                     # add an example
@@ -91,11 +107,11 @@ class BasicICLPrompt(object):
             n_valid_example = 0
             prompt = prompt_target
 
-        response_clean = " ".join(target["query"].split())[len("SELECT "):]
+        response_clean = " ".join(target["query"].split())[len("SELECT ") :]
         return {
             "prompt_tokens": sum_tokens,
             "prompt": prompt,
             "response": response_clean,
             "n_examples": n_valid_example,
-            "db_id": target["db_id"]
+            "db_id": target["db_id"],
         }

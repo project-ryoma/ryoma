@@ -27,23 +27,29 @@ class FileDataSource(DataSource):
 
     def get_metadata(self, **kwargs) -> Catalog:
         table_schema = self.arrow_table.schema
-        return Catalog(catalog_name=self.file_name,
-                       columns=[{"column_name": name, "column_type": str(table_schema.field(name))} for name in
-                                table_schema.names])
+        return Catalog(
+            catalog_name=self.file_name,
+            columns=[
+                {"column_name": name, "column_type": str(table_schema.field(name))}
+                for name in table_schema.names
+            ],
+        )
 
     def to_arrow(self, **kwargs) -> pa.Table:
         if self.file_format == "csv":
             from pyarrow.csv import read_csv
+
             return read_csv(self.file_path, **kwargs)
         elif self.file_format == "parquet":
             from pyarrow.parquet import read_table
+
             return read_table(self.file_path, **kwargs)
         elif self.file_format == "json":
             from pyarrow.json import read_json
+
             return read_json(self.file_path, **kwargs)
         else:
             raise NotImplementedError(f"FileFormat is unsupported: {self.file_format}")
 
     def to_pandas(self, **kwargs):
         return self.to_arrow().to_pandas()
-

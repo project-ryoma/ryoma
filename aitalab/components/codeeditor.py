@@ -6,9 +6,7 @@ import reflex as rx
 class CodeEditor(rx.Component):
     library = "@uiw/react-codemirror"
 
-    lib_dependencies: list[str] = [
-        "@codemirror/language"
-    ]
+    lib_dependencies: list[str] = ["@codemirror/language"]
 
     tag = "CodeEditor"
 

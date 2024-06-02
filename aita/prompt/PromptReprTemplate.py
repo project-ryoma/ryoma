@@ -17,8 +17,7 @@ class BasicPrompt(object):
 
 
 class SQLPrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" \
-                    "{}"
+    template_info = "/* Given the following database schema: */\n" "{}"
     template_question = "/* Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -38,8 +37,7 @@ class SQLPrompt(BasicPrompt):
 
 
 class TextPrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" \
-                    "{}"
+    template_info = "Given the following database schema:\n" "{}"
     template_question = "Answer the following: {}"
 
     def format_question(self, example: dict):
@@ -59,11 +57,13 @@ class TextPrompt(BasicPrompt):
 
 
 class NumberSignPrompt(BasicPrompt):
-    template_info = "### Complete sqlite SQL query only and with no explanation\n" \
-                    "### SQLite SQL tables, with their properties:\n" \
-                    "#\n" \
-                    "{}\n" \
-                    "#"
+    template_info = (
+        "### Complete sqlite SQL query only and with no explanation\n"
+        "### SQLite SQL tables, with their properties:\n"
+        "#\n"
+        "{}\n"
+        "#"
+    )
     template_question = "### {}"
 
     def format_question(self, example: dict):
@@ -84,11 +84,13 @@ class NumberSignPrompt(BasicPrompt):
 
 class BaselinePrompt(BasicPrompt):
     template_info = "{}\nForeign_keys={}\n"
-    template_question = "Q: \"{}\""
+    template_question = 'Q: "{}"'
 
     def format_question(self, example: dict):
         # schemas
-        schemas = "\n".join([f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]).replace("'", "")
+        schemas = "\n".join(
+            [f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]
+        ).replace("'", "")
         # foreign_keys
         foreign_keys = list()
         for table in example["tables"]:
@@ -117,7 +119,7 @@ class InstructionPrompt(BasicPrompt):
     template_info = (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
         "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\nWrite a sql to answer the question \"{}\"\n\n### Input:\n{}\n"
+        '### Instruction:\nWrite a sql to answer the question "{}"\n\n### Input:\n{}\n'
     )
     template_question = "### Response:"
 
@@ -139,10 +141,9 @@ class InstructionPrompt(BasicPrompt):
 
 
 class TextWithForeignKeyPrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" \
-                    "{} \n" \
-                    "And their foreign keys:\n" \
-                    "{}"
+    template_info = (
+        "Given the following database schema:\n" "{} \n" "And their foreign keys:\n" "{}"
+    )
     template_question = "Answer the following: {}"
 
     def format_question(self, example: dict):
@@ -169,15 +170,17 @@ class TextWithForeignKeyPrompt(BasicPrompt):
 
 
 class NumberSignWithForeignKeyPrompt(BasicPrompt):
-    template_info = "### Complete sqlite SQL query only and with no explanation\n" \
-                    "### SQLite SQL tables, with their properties:\n" \
-                    "#\n" \
-                    "{}\n" \
-                    "#\n" \
-                    "### Their foreign keys:\n" \
-                    "#\n" \
-                    "{}\n" \
-                    "#"
+    template_info = (
+        "### Complete sqlite SQL query only and with no explanation\n"
+        "### SQLite SQL tables, with their properties:\n"
+        "#\n"
+        "{}\n"
+        "#\n"
+        "### Their foreign keys:\n"
+        "#\n"
+        "{}\n"
+        "#"
+    )
     template_question = "### {}"
 
     def format_question(self, example: dict):
@@ -205,11 +208,13 @@ class NumberSignWithForeignKeyPrompt(BasicPrompt):
 
 class BaselineWithoutForeignKeyPrompt(BasicPrompt):
     template_info = "{}\n"
-    template_question = "Q: \"{}\""
+    template_question = 'Q: "{}"'
 
     def format_question(self, example: dict):
         # schemas
-        schemas = "\n".join([f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]).replace("'", "")
+        schemas = "\n".join(
+            [f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]
+        ).replace("'", "")
 
         # format prompt
         prompt_info = self.template_info.format(schemas)
@@ -232,7 +237,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
     template_info = (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
         "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\nWrite a sql to answer the question \"{}\"\n\n### Input:\n{}\nForeign Keys:{}\n"
+        '### Instruction:\nWrite a sql to answer the question "{}"\n\n### Input:\n{}\nForeign Keys:{}\n'
     )
     template_question = "### Response:"
 
@@ -261,8 +266,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
 
 
 class SQLWithRulePrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" \
-                    "{}"
+    template_info = "/* Given the following database schema: */\n" "{}"
     template_question = "/* Answer the following with no explanation: {} */"
 
     def format_question(self, example: dict):
@@ -282,8 +286,7 @@ class SQLWithRulePrompt(BasicPrompt):
 
 
 class TextWithRulePrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" \
-                    "{}"
+    template_info = "Given the following database schema:\n" "{}"
     template_question = "Answer the following with no explanation: {}"
 
     def format_question(self, example: dict):
@@ -303,11 +306,13 @@ class TextWithRulePrompt(BasicPrompt):
 
 
 class NumberSignWithoutRulePrompt(BasicPrompt):
-    template_info = "### Complete sqlite SQL query\n" \
-                    "### SQLite SQL tables, with their properties:\n" \
-                    "#\n" \
-                    "{}\n" \
-                    "#"
+    template_info = (
+        "### Complete sqlite SQL query\n"
+        "### SQLite SQL tables, with their properties:\n"
+        "#\n"
+        "{}\n"
+        "#"
+    )
     template_question = "### {}"
 
     def format_question(self, example: dict):
@@ -330,7 +335,7 @@ class InstructionWithRulePrompt(BasicPrompt):
     template_info = (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
         "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\nWrite a sql only and with no explanation to answer the question \"{}\"\n\n### Input:\n{}\n"
+        '### Instruction:\nWrite a sql only and with no explanation to answer the question "{}"\n\n### Input:\n{}\n'
     )
     template_question = "### Response:"
 
@@ -352,8 +357,7 @@ class InstructionWithRulePrompt(BasicPrompt):
 
 
 class SQLCOTPrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" \
-                    "{}"
+    template_info = "/* Given the following database schema: */\n" "{}"
     template_question = "/* Let's think step by step. Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -376,8 +380,7 @@ class SQLCOTPrompt(BasicPrompt):
 
 
 class TextCOTPrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" \
-                    "{}"
+    template_info = "Given the following database schema:\n" "{}"
     template_question = "Let's think step by step. Answer the following: {}"
 
     def format_question(self, example: dict):
@@ -400,11 +403,13 @@ class TextCOTPrompt(BasicPrompt):
 
 
 class NumberSignCOTPrompt(BasicPrompt):
-    template_info = "### Let's think step by step. Complete sqlite SQL query only and with no explanation\n" \
-                    "### SQLite SQL tables, with their properties:\n" \
-                    "#\n" \
-                    "{}\n" \
-                    "#"
+    template_info = (
+        "### Let's think step by step. Complete sqlite SQL query only and with no explanation\n"
+        "### SQLite SQL tables, with their properties:\n"
+        "#\n"
+        "{}\n"
+        "#"
+    )
     template_question = "### {}"
 
     def format_question(self, example: dict):
@@ -430,7 +435,7 @@ class InstructionCOTPrompt(BasicPrompt):
     template_info = (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
         "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\nLet's think step by step. Write a sql to answer the question \"{}\"\n\n### Input:\n{}\n"
+        '### Instruction:\nLet\'s think step by step. Write a sql to answer the question "{}"\n\n### Input:\n{}\n'
     )
     template_question = "### Response:"
 
@@ -455,10 +460,12 @@ class InstructionCOTPrompt(BasicPrompt):
 
 
 class CBRPrompt(BasicPrompt):
-    template_info = "# The following are the table names and column names needed to generate SQL:\n" \
-                    "Tables: {}\n" \
-                    "Columns: *, {}\n" \
-                    "Foreign keys: {}"
+    template_info = (
+        "# The following are the table names and column names needed to generate SQL:\n"
+        "Tables: {}\n"
+        "Columns: *, {}\n"
+        "Foreign keys: {}"
+    )
     template_question = '# translate "{}" into SQL query only and with no explanation:'
 
     def format_question(self, example: dict):

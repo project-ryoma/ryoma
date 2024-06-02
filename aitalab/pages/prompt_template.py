@@ -1,4 +1,5 @@
 """The Prompt template Page."""
+
 import reflex as rx
 
 from aitalab.states.prompt_template import PromptTemplateState
@@ -31,11 +32,8 @@ def render_question():
     return rx.box(
         rx.chakra.text("A list of prompt templates for question:", size="md"),
         rx.chakra.badge(
-            PromptTemplateState.question,
-            margin_top="10px",
-            font_size="md",
-            padding="2px"
-        )
+            PromptTemplateState.question, margin_top="10px", font_size="md", padding="2px"
+        ),
     )
 
 

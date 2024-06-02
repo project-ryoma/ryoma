@@ -1,4 +1,5 @@
 """The Tool Page."""
+
 import reflex as rx
 
 from aitalab.states.tool import ToolState

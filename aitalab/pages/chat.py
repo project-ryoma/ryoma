@@ -130,19 +130,18 @@ def model_selector() -> rx.Component:
                 weight="bold",
             ),
             rx.select.root(
-                rx.select.trigger(
-                    placeholder="Select a model",
-                    width="100%"
-                ),
+                rx.select.trigger(placeholder="Select a model", width="100%"),
                 rx.select.content(
                     *[
                         rx.select.group(
                             rx.select.label(p.value.name),
-                            rx.foreach(p.value.models,
-                                       lambda x: rx.select.item(x, value=f"{p.value.id}:{x}")
-                                       ),
+                            rx.foreach(
+                                p.value.models,
+                                lambda x: rx.select.item(x, value=f"{p.value.id}:{x}"),
+                            ),
                             width="100%",
-                        ) for p in list(ModelProvider)
+                        )
+                        for p in list(ModelProvider)
                     ],
                     width="100%",
                 ),
@@ -276,19 +275,21 @@ def code_editor_wrapper() -> rx.Component:
                                 lambda arg: rx.box(
                                     code_editor(
                                         value=arg[1],
-                                        on_change=lambda x: ChatState.set_current_tool_arg(current_tool.id, arg[0], x),
+                                        on_change=lambda x: ChatState.set_current_tool_arg(
+                                            current_tool.id, arg[0], x
+                                        ),
                                         width="100%",
                                         language="python",
                                         theme="material",
                                         font_size="1em",
                                         margin_top="10px",
                                     ),
-                                )
+                                ),
                             )
-                        )
-                    )
-                )
-            )
+                        ),
+                    ),
+                ),
+            ),
         ),
         padding_y="2",
     )

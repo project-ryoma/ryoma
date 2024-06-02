@@ -16,7 +16,9 @@ class BasicExampleSelector(object):
         pass
 
     def domain_mask(self, candidates: list, db_id):
-        cross_domain_candidates = [candidates[i] for i in range(len(self.db_ids)) if self.db_ids[i] != db_id]
+        cross_domain_candidates = [
+            candidates[i] for i in range(len(self.db_ids)) if self.db_ids[i] != db_id
+        ]
         return cross_domain_candidates
 
     def retrieve_index(self, indexes: list, db_id):
@@ -49,6 +51,7 @@ class CosineSimilarExampleSelector(BasicExampleSelector):
         # self.SELECT_MODEL = "sentence-transformers/bert-base-nli-mean-tokens"
 
         from sentence_transformers import SentenceTransformer
+
         self.bert_model = SentenceTransformer(self.SELECT_MODEL, device="cpu")
         self.train_embeddings = self.bert_model.encode(self.train_questions)
 
@@ -58,8 +61,13 @@ class CosineSimilarExampleSelector(BasicExampleSelector):
 
         # find the most similar question in train dataset
         from sklearn.metrics.pairwise import cosine_similarity
-        similarities = np.squeeze(cosine_similarity(target_embedding, self.train_embeddings)).tolist()
-        pairs = [(similarity, index) for similarity, index in zip(similarities, range(len(similarities)))]
+
+        similarities = np.squeeze(
+            cosine_similarity(target_embedding, self.train_embeddings)
+        ).tolist()
+        pairs = [
+            (similarity, index) for similarity, index in zip(similarities, range(len(similarities)))
+        ]
 
         train_json = self.train_json
         pairs_sorted = sorted(pairs, key=lambda x: x[0], reverse=True)
@@ -84,6 +92,7 @@ class EuclideanDistanceExampleSelector(BasicExampleSelector):
         self.SELECT_MODEL = "sentence-transformers/all-mpnet-base-v2"
 
         from sentence_transformers import SentenceTransformer
+
         self.bert_model = SentenceTransformer(self.SELECT_MODEL, device="cpu")
         self.train_embeddings = self.bert_model.encode(self.train_questions)
 
@@ -92,7 +101,10 @@ class EuclideanDistanceExampleSelector(BasicExampleSelector):
 
         # find the most similar question in train dataset
         from sklearn.metrics.pairwise import euclidean_distances
-        distances = np.squeeze(euclidean_distances(target_embedding, self.train_embeddings)).tolist()
+
+        distances = np.squeeze(
+            euclidean_distances(target_embedding, self.train_embeddings)
+        ).tolist()
         pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
 
         train_json = self.train_json
@@ -118,6 +130,7 @@ class EuclideanDistanceThresholdExampleSelector(BasicExampleSelector):
         self.threshold = 0.85
 
         from sentence_transformers import SentenceTransformer
+
         self.bert_model = SentenceTransformer(self.SELECT_MODEL, device="cpu")
         self.train_embeddings = self.bert_model.encode(self.train_questions)
 
@@ -126,7 +139,10 @@ class EuclideanDistanceThresholdExampleSelector(BasicExampleSelector):
 
         # find the most similar question in train dataset
         from sklearn.metrics.pairwise import euclidean_distances
-        distances = np.squeeze(euclidean_distances(target_embedding, self.train_embeddings)).tolist()
+
+        distances = np.squeeze(
+            euclidean_distances(target_embedding, self.train_embeddings)
+        ).tolist()
         pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
 
         train_json = self.train_json
@@ -155,6 +171,7 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
         self.threshold = 0.85
 
         from sentence_transformers import SentenceTransformer
+
         self.bert_model = SentenceTransformer(self.SELECT_MODEL, device="cpu")
         self.train_embeddings = self.bert_model.encode(self.train_questions)
 
@@ -163,7 +180,10 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
 
         # find the most similar question in train dataset
         from sklearn.metrics.pairwise import euclidean_distances
-        distances = np.squeeze(euclidean_distances(target_embedding, self.train_embeddings)).tolist()
+
+        distances = np.squeeze(
+            euclidean_distances(target_embedding, self.train_embeddings)
+        ).tolist()
         pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
 
         train_json = self.train_json
@@ -174,7 +194,10 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
             if cross_domain and similar_db_id == target["db_id"]:
                 continue
             # Skeleton similarity
-            if jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"]) < self.threshold:
+            if (
+                jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"])
+                < self.threshold
+            ):
                 continue
             top_pairs.append((index, d))
             if len(top_pairs) >= num_example:
@@ -186,7 +209,10 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
                 if cross_domain and similar_db_id == target["db_id"]:
                     continue
                 # Skeleton similarity
-                if jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"]) >= self.threshold:
+                if (
+                    jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"])
+                    >= self.threshold
+                ):
                     continue
                 top_pairs.append((index, d))
                 if len(top_pairs) >= num_example:
@@ -202,6 +228,7 @@ class EuclideanDistancePreSkeletonSimilarPlusSelector(BasicExampleSelector):
         self.SELECT_MODEL = "sentence-transformers/all-mpnet-base-v2"
 
         from sentence_transformers import SentenceTransformer
+
         self.bert_model = SentenceTransformer(self.SELECT_MODEL, device="cpu")
         self.train_embeddings = self.bert_model.encode(self.train_questions)
 
@@ -210,10 +237,15 @@ class EuclideanDistancePreSkeletonSimilarPlusSelector(BasicExampleSelector):
 
         # find the most similar question in train dataset
         from sklearn.metrics.pairwise import euclidean_distances
-        distances = np.squeeze(euclidean_distances(target_embedding, self.train_embeddings)).tolist()
+
+        distances = np.squeeze(
+            euclidean_distances(target_embedding, self.train_embeddings)
+        ).tolist()
         train_json = self.train_json
         for i in range(len(train_json)):
-            distances[i] -= jaccard_similarity(train_json[i]["pre_skeleton"], target["pre_skeleton"])
+            distances[i] -= jaccard_similarity(
+                train_json[i]["pre_skeleton"], target["pre_skeleton"]
+            )
         pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
         pairs_sorted = sorted(pairs, key=lambda x: x[0])
         top_pairs = list()

@@ -13,6 +13,7 @@ from aitalab.states.tool import Tool
 
 class QA(rx.Base):
     """A question and answer pair."""
+
     question: str
     answer: str
 
@@ -106,7 +107,9 @@ class ChatState(rx.State):
         return list(self.chats.keys())
 
     def create_agent(self, datasource: DataSource, prompt: str):
-        logging.info(f"Creating agent with tool {self.current_agent_type} and model {self.current_model}")
+        logging.info(
+            f"Creating agent with tool {self.current_agent_type} and model {self.current_model}"
+        )
         self._current_agent = AgentFactory.create_agent(
             self.current_agent_type,
             model_id=self.current_model,
@@ -134,13 +137,18 @@ class ChatState(rx.State):
                 "question": question,
                 "db_id": "",
                 "path_db": "/Users/haoxu/dev/aita/DAIL-SQL/dataset/spider/database/concert_singer/concert_singer.sqlite",
-                "query": ""
+                "query": "",
             }
 
             # build prompt
             prompt_template_state = await self.get_state(PromptTemplateState)
-            prompt_template = next(filter(lambda x: x.prompt_template_name == self.current_prompt_template,
-                                          prompt_template_state.prompt_templates), None)
+            prompt_template = next(
+                filter(
+                    lambda x: x.prompt_template_name == self.current_prompt_template,
+                    prompt_template_state.prompt_templates,
+                ),
+                None,
+            )
             prompt = PromptTemplateState.build_prompt(prompt_template, self.current_model, target)
         else:
             datasource = None
