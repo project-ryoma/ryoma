@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "aita"
-version = "0.1.0"
+version = "0.1.2"
 description = "AI Powered Data Platform"
 readme = "README.md"
 authors = ["aita <contact@project-aita.com>"]
@@ -15,62 +15,67 @@ homepage = "https://www.project-aita.com"
 keywords = ["Artificial Intelligence", "Data Analysis", "Code Generation"]
 
 classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
-  "Operating System :: OS Independent",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "License :: OSI Approved :: Apache Software License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+packages = [
+    { include = "aita" },
 ]
 
 
 [tool.poetry.dependencies]
 python = "^3.9"
 
-typer = {extras = ["all"], version = "^0.4.0"}
-openai = "^1.12.0"
-tenacity = "^8.2.3"
-raven = "^6.10.0"
-types-toml = "^0.10.8.7"
-types-setuptools = "^69.1.0.20240301"
-pydantic = "^2.6.1"
-pydantic-settings = "^2.2.0"
-passlib = "^1.7.4"
-python-jose = "^3.3.0"
-email-validator = "^2.1.0.post1"
-emails = "^0.6"
-python-multipart = "^0.0.9"
-psycopg2-binary = "^2.9.9"
-docstring-parser = "^0.15"
-numpy = "^1.26.4"
-langchain = "0.1.20"
-langchain-openai = "^0.0.7"
 mock = "^5.1.0"
-alembic = "^1.13.1"
-bcrypt = "^4.0.1"
-pandas = "^2.2.1"
-snowflake-connector-python = {extras = ["pandas"], version = "^3.8.0"}
-ipython = "8.14"
-jupyter = "^1.0.0"
-pyspark = "^3.5.1"
+openai = "^1.12.0"
+pydantic = "^2.7.1"
 jupyter-ai-magics = "^2.14.0"
-findspark = "^2.0.1"
-adbc-driver-postgresql = "^0.11.0"
-adbc-driver-snowflake = "^0.11.0"
-boto3 = "^1.34.99"
+pandas = "^2.2.2"
+langchain-openai = "^0.0.7"
+langchain = "0.1.20"
 langgraph = "^0.0.48"
+adbc-driver-sqlite = "^1.0.0"
+ipython = "8.14"
+pyarrow = "^16.1.0"
+typer = "^0.12.3"
+types-setuptools = "^70.0.0.20240524"
+
+# extra dependencies
+boto3 = { version = "^1.34.117", optional = true }
+adbc-driver-postgresql = { version = "^1.0.0", optional = true }
+adbc-driver-snowflake = { version = "^1.0.0", optional = true }
+findspark = { version = "^2.0.1", optional = true }
+pyspark = { version = "^3.2.0", optional = true }
+
+[tool.poetry.group.aitalab]
+optional = true
+
+[tool.poetry.group.aitalab.dependencies]
+alembic = "^1.13.1"
 reflex = "^0.5.0"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
-adbc-driver-sqlite = "^1.0.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.extras]
+dynamodb = ["boto3"]
+postgresql = ["adbc-driver-postgresql"]
+snowflake = ["adbc-driver-snowflake"]
+pyspark = ["findspark", "pyspark"]
+aitalab = ["aitalab"]
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
 bandit = "^1.7.1"
-black = {version = "^22.3.0", allow-prereleases = true}
+black = { version = "^22.3.0", allow-prereleases = true }
 darglint = "^1.8.1"
-isort = {extras = ["colors"], version = "^5.10.1"}
+isort = { extras = ["colors"], version = "^5.10.1" }
 mypy = "^1.0"
 mypy-extensions = "^0.4.3"
 pre-commit = "^2.15.0"
@@ -83,6 +88,7 @@ coverage = "^6.1.2"
 coverage-badge = "^1.1.0"
 pytest-html = "^3.1.1"
 pytest-cov = "^3.0.0"
+
 
 [tool.black]
 # https://github.com/psf/black
@@ -149,15 +155,15 @@ warn_unused_ignores = true
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 # Directories that are not visited by pytest collector:
-norecursedirs =["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
+norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
 
 # Extra options:
 addopts = [
-  "--strict-markers",
-  "--tb=short",
-  "--doctest-modules",
-  "--doctest-continue-on-failure",
+    "--strict-markers",
+    "--tb=short",
+    "--doctest-modules",
+    "--doctest-continue-on-failure",
 ]
 
 [tool.coverage.run]

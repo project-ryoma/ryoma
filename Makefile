@@ -124,6 +124,6 @@ build:
 init-data:
 	poetry run init-data
 
-.PHONY: migration
-migration:
-	poetry run alembic upgrade head
+.PHONY: migrate
+migrate:
+	poetry run reflex db migrate

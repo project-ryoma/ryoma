@@ -27,18 +27,8 @@ snowflake_datasource = SnowflakeDataSource(
     database=database,
     schema=schema,
 )
-sample_sql_query = """
-SELECT c_custkey, c_name, SUM(o_totalprice) AS total_purchase
-FROM snowflake_sample_data.tpch_sf1.customer
-JOIN snowflake_sample_data.tpch_sf1.orders
-ON c_custkey = o_custkey
-GROUP BY c_custkey, c_name
-ORDER BY total_purchase
-DESC LIMIT 10
-"""
 
-# res = snowflake_datasource.execute(sample_sql_query)
-# print(res)
+sql_agent = SqlAgent("gpt-3.5-turbo") \
+    .add_datasource(snowflake_datasource) \
 
-metadata = snowflake_datasource.get_metadata(database=database, schema=schema)
-print(metadata)
+sql_agent.chat("I want to get the top 5 customers which making the most purchases")

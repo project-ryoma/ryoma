@@ -1,5 +1,5 @@
 from adbc_driver_manager.dbapi import Connection
-from sqlmodel import Field
+from langchain_core.pydantic_v1 import Field
 
 from aita.datasource.sql import SqlDataSource
 from typing import Optional

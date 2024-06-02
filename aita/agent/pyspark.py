@@ -33,7 +33,7 @@ class PySparkAgent(ToolAgent):
             spark_configs.get("app_name")).getOrCreate()
 
     def add_dataframe(self, dataframe):
-        self._set_prompt_context(dataframe.info)
+        self._fill_prompt_context(dataframe.info)
         for tool in self.tools:
             if isinstance(tool, PythonTool):
                 tool.update_script_context(script_context=self.spark_session)
