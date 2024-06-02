@@ -16,7 +16,7 @@ from aita.prompt.base import BasicDataSourcePromptTemplate
 
 datasource = SqliteDataSource("sqlite:///data.db")
 pandas_agent = PandasAgent("gpt-3.5-turbo") \
-    .set_prompt_context(BasicDataSourcePromptTemplate) \
+    .set_prompt_template(BasicDataSourcePromptTemplate) \
     .add_datasource(datasource)
 pandas_agent.chat("Get the top 10 customers by purchase amount")
 ```

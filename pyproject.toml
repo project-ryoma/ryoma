@@ -34,7 +34,7 @@ packages = [
 python = "^3.9"
 
 mock = "^5.1.0"
-openai = "^1.12.0"
+openai = "^1.25.0"
 pydantic = "^2.7.1"
 jupyter-ai-magics = "^2.14.0"
 pandas = "^2.2.2"
@@ -73,26 +73,27 @@ aitalab = ["aitalab"]
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 bandit = "^1.7.1"
-black = { version = "^22.3.0", allow-prereleases = true }
+black = "^24.2.0"
 darglint = "^1.8.1"
 isort = { extras = ["colors"], version = "^5.10.1" }
-mypy = "^1.0"
-mypy-extensions = "^0.4.3"
+mypy = "^1.9.0"
 pre-commit = "^2.15.0"
 pydocstyle = "^6.1.1"
 pylint = "^2.11.1"
-pytest = "^6.2.5"
+pytest = "^8.1.1"
 pyupgrade = "^2.29.1"
 safety = "^1.10.3"
 coverage = "^6.1.2"
 coverage-badge = "^1.1.0"
 pytest-html = "^3.1.1"
 pytest-cov = "^3.0.0"
+openai-responses = "^0.6.0"
+typing-extensions = "^4.12.1"
 
 
 [tool.black]
 # https://github.com/psf/black
-target-version = ["py38"]
+target-version = ["py39"]
 line-length = 100
 color = true
 

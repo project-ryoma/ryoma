@@ -90,27 +90,22 @@ class AitaAgent:
             [("system", self.base_prompt_context_template)]
         )
 
-    def set_prompt_context(self, prompt_context: Optional[Union[str, ChatPromptTemplate]] = None):
-        if isinstance(prompt_context, str):
-            prompt_context = ChatPromptTemplate.from_messages(
-                [("system", self.base_prompt_context_template.format(prompt_context=prompt_context))])
-        if not self.prompt_context_template:
-            self.prompt_context_template = prompt_context
-        else:
-            self.prompt_context_template.append(prompt_context)
+    def set_prompt_template(self, prompt_template: Optional[Union[str, ChatPromptTemplate]] = None):
+        if isinstance(prompt_template, str):
+            prompt_template = ChatPromptTemplate.from_messages(
+                [("system", self.base_prompt_context_template.format(prompt_context=prompt_template))])
+        self.prompt_context_template = prompt_template
         return self
 
     def _format_question(self, question: str):
-        if self.prompt_context_template:
-            self.prompt_template.append(self.prompt_context_template)
         self.prompt_template.append(("user", question))
 
     def _fill_prompt_context(self, context: str):
         if not self.prompt_context_template:
             self._set_base_prompt_context_template()
-        self.prompt_context_template = self.prompt_context_template.partial(
+        prompt_context_template = self.prompt_context_template.partial(
             prompt_context=context)
-        return self
+        self.prompt_template.append(prompt_context_template)
 
     def add_datasource(self, datasource: DataSource):
         self._fill_prompt_context(str(datasource.get_metadata()))
@@ -205,8 +200,6 @@ class ToolAgent(AitaAgent):
         return self
 
     def _format_question(self, question: str):
-        if self.prompt_context_template:
-            self.prompt_template.append(self.prompt_context_template)
         self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
 
     def chat(self,

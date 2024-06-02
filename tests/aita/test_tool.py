@@ -3,9 +3,9 @@ import pytest
 from mock import patch
 from pyspark.sql import SparkSession
 
-from aita.datasource.base import SqlDataSource
-from aita.tool.pyspark_tool import PySparkTool
-from aita.tool.sql_tool import SqlQueryTool
+from aita.datasource.sql import SqlDataSource
+from aita.tool.pyspark import PySparkTool
+from aita.tool.sql import SqlQueryTool
 
 
 @pytest.fixture
