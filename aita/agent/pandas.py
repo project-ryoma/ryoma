@@ -21,8 +21,14 @@ class PandasAgent(ToolAgent):
         )
 
     def add_dataframe(self, dataframe: DataFrame):
-        self._fill_prompt_context(dataframe.info)
+        df_id = f"df_{id(dataframe)}"
+        self._fill_prompt_context(
+            f"""
+        dataframe name: {df_id}
+        dataframe metadata: {dataframe.info}
+        """
+        )
         for tool in self.tools:
             if isinstance(tool, PythonTool):
-                tool.update_script_context(script_context=dataframe)
+                tool.update_script_context(script_context={df_id: dataframe})
         return self

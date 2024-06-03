@@ -13,8 +13,14 @@ class PyArrowAgent(ToolAgent):
         super().__init__([ConvertToArrowTool(), ArrowTool()], model, model_parameters)
 
     def add_table(self, table: pa.Table):
-        self._fill_prompt_context(str(table.schema))
+        table_id = f"table_{id(table)}"
+        self._fill_prompt_context(
+            f"""
+        pyarrow table name: {table_id}
+        pyarrow table metadata: {table.schema}
+        """
+        )
         for tool in self.tools:
             if isinstance(tool, PythonTool):
-                tool.update_script_context(script_context=table)
+                tool.update_script_context(script_context={table_id: table})
         return self

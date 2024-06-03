@@ -24,27 +24,27 @@ class PythonTool(BaseTool):
     """
     args_schema: Type[BaseModel] = PythonInput
 
+    ipython: InteractiveShell = None
+
+    def __init__(self, /, **data: Any):
+        super().__init__(**data)
+        self.ipython = get_ipython()
+        if not self.ipython:
+            self.ipython = InteractiveShell()
+
     def _run(
         self,
         script,
     ) -> Union[str, Sequence[Dict[str, Any]], ExecutionResult]:
         """Execute the script, return the result or an error message."""
         try:
-            ipython = get_ipython()
-            if not ipython:
-                ipython = InteractiveShell()
-
-            result = ipython.run_cell(script)
+            result = self.ipython.run_cell(script)
             return result
         except Exception as e:
             return str(e)
 
     def update_script_context(self, script_context: Any):
         try:
-            ipython = get_ipython()
-            if not ipython:
-                ipython = InteractiveShell()
-
-            ipython.user_ns.update(script_context)
+            self.ipython.user_ns.update(script_context)
         except Exception as e:
             return str(e)

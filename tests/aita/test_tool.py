@@ -3,9 +3,9 @@ import pytest
 from mock import patch
 from pyspark.sql import SparkSession
 
-from aita.datasource.sql import SqlDataSource
 from aita.tool.pyspark import PySparkTool
 from aita.tool.sql import SqlQueryTool
+from tests.aita.test_datasource import mock_sql_data_source
 
 
 @pytest.fixture
@@ -21,19 +21,13 @@ def pandas_dataframe():
 
 
 @pytest.fixture
-def sql_database() -> SqlDataSource:
-    return SqlDataSource("sqlite:///data/aita.db")
-
-
-@pytest.fixture
 def pyspark_session():
-    return SparkSession.builder.master("local").appName("aita").getOrCreate()
+    return SparkSession.builder.appName("pytest").getOrCreate()
 
 
 def test_pyspark_tool(pyspark_session, pandas_dataframe):
-    pyspark_tool = PySparkTool(
-        script_context={"spark_session": pyspark_session, "df": pandas_dataframe}
-    )
+    pyspark_tool = PySparkTool()
+    pyspark_tool.update_script_context({"spark_session": pyspark_session, "df": pandas_dataframe})
     script = """
     spark_session.createDataFrame(df).show()
     """
@@ -41,10 +35,10 @@ def test_pyspark_tool(pyspark_session, pandas_dataframe):
     assert result.success is True
 
 
-def test_sql_tool(sql_database: SqlDataSource):
-    with patch("aita.datasource.base.SqlDataSource.execute") as mock_execute:
+def test_sql_tool(mock_sql_data_source):
+    with patch("aita.datasource.sql.SqlDataSource.execute") as mock_execute:
         mock_execute.return_value = "success"
-        sql_tool = SqlQueryTool(datasource=sql_database)
+        sql_tool = SqlQueryTool(datasource=mock_sql_data_source)
         query = "SELECT * FROM customers LIMIT 4"
         result = sql_tool._run(query)
         assert result == "success"

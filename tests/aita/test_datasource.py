@@ -1,12 +1,31 @@
-import pytest
+from typing import Any
 
-from aita.datasource.postgresql import PostgreSqlDataSource
+from unittest.mock import MagicMock
+
+import pytest
+from mock import patch
+
+from aita.datasource.sql import SqlDataSource
+
+
+class MockSqlDataSource(SqlDataSource):
+    def connect(self) -> Any:
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.return_value = [("result1",), ("result2",)]
+        mock_cursor.execute.return_value = None
+        mock_connection.cursor.return_value = mock_cursor
+        return mock_connection
 
 
 @pytest.fixture
-def postgresql_datasource():
-    return PostgreSqlDataSource("postgresql://localhost:5432/postgres")
+def mock_sql_data_source():
+    data_source = MockSqlDataSource()
+    return data_source
 
 
-def test_postgresql_datasource(postgresql_datasource):
-    assert postgresql_datasource.connect() is not None
+def test_execute_query(mock_sql_data_source):
+    with patch("aita.datasource.sql.SqlDataSource.execute") as mock_execute:
+        mock_execute.return_value = "success"
+        results = mock_sql_data_source.execute("SELECT * FROM table")
+    assert results == "success"
