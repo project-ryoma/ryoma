@@ -1338,7 +1338,7 @@ typing = ["typing-extensions (>=4.8)"]
 name = "findspark"
 version = "2.0.1"
 description = "Find pyspark to make it importable."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "findspark-2.0.1-py2.py3-none-any.whl", hash = "sha256:e5d5415ff8ced6b173b801e12fc90c1eefca1fb6bf9c19c4fc1f235d4222e753"},
@@ -3619,7 +3619,7 @@ files = [
 name = "py4j"
 version = "0.10.9.7"
 description = "Enables Python programs to dynamically access arbitrary Java objects"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "py4j-0.10.9.7-py2.py3-none-any.whl", hash = "sha256:85defdfd2b2376eb3abf5ca6474b51ab7e0de341c75a02f46dc9b5976f5a5c1b"},
@@ -3871,7 +3871,7 @@ files = [
 name = "pyspark"
 version = "3.5.1"
 description = "Apache Spark Python API"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyspark-3.5.1.tar.gz", hash = "sha256:dd6569e547365eadc4f887bf57f153e4d582a68c4b490de475d55b9981664910"},
@@ -6494,4 +6494,4 @@ snowflake = ["adbc-driver-snowflake"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "2fc193ac6e3408d324bba8dfce314cc54b703d4ec1640ecb407ddcdaad04baba"
+content-hash = "554b321fd148980c75ee36e2860ae9b9ae0e015258cbd83f641c146972508dba"
