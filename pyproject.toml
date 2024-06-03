@@ -38,7 +38,7 @@ openai = "^1.25.0"
 pydantic = "^2.7.1"
 jupyter-ai-magics = "^2.14.0"
 pandas = "^2.2.2"
-langchain-openai = "^0.0.7"
+langchain-openai = "^0.1.7"
 langchain = "0.1.20"
 langgraph = "^0.0.51"
 adbc-driver-sqlite = "^1.0.0"
@@ -69,6 +69,19 @@ postgresql = ["adbc-driver-postgresql"]
 snowflake = ["adbc-driver-snowflake"]
 pyspark = ["findspark", "pyspark"]
 aitalab = ["aitalab"]
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.1.1"
+pytest-cov = "^3.0.0"
+pytest-html = "^3.1.1"
+coverage = "^7.5.3"
+coverage-badge = "^1.1.0"
+openai-responses = "^0.6.0"
+typing-extensions = "^4.12.1"
+pandas = "^2.2.2"
+pyspark = "^3.2.0"
+findspark = "^2.0.1"
+
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
