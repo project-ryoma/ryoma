@@ -15,6 +15,7 @@ If you want to use additional data source dependency, you can install it by runn
 pip install aita[snowflake]
 ```
 {% endcode%}
+
 Then you can use the data source in your agent like this:
 
 {% code title="python" %}
@@ -26,3 +27,4 @@ snowflake_datasource = SnowflakeDataSource("snowflake://account.region.snowflake
 sql_agent = SqlAgent("gpt-3.5-turbo") \
     .add_datasource(snowflake_datasource)
 ```
+{% endcode%}
