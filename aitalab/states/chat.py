@@ -1,6 +1,7 @@
+from typing import Any, List, Optional, Union
+
 import logging
 from abc import abstractmethod
-from typing import Optional, Union, Any, List
 
 import pandas
 import pandas as pd
@@ -75,7 +76,9 @@ class ChatState(rx.State):
         tool.args[key] = value
 
     def delete_current_tool(self):
-        self.current_tools = [tool for tool in self.current_tools if tool.id != self.current_tool.id]
+        self.current_tools = [
+            tool for tool in self.current_tools if tool.id != self.current_tool.id
+        ]
         self.current_tool = None
 
     def run_tool(self):

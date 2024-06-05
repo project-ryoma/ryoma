@@ -1,4 +1,5 @@
 """The chat page."""
+
 import reflex as rx
 
 from aitalab.components.codeeditor import code_editor
