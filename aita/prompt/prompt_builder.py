@@ -43,7 +43,7 @@ def get_repr_cls(repr_type: str):
     elif repr_type == ReprType.CBR:
         repr_cls = CBRPrompt
     else:
-        raise ValueError(f"{repr_type} is not supproted yet")
+        raise ValueError(f"{repr_type} is not supported yet")
     return repr_cls
 
 
