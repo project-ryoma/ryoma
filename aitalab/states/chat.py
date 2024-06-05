@@ -1,13 +1,16 @@
 import logging
 from abc import abstractmethod
+from typing import Optional, Union, Any, List
 
+import pandas
+import pandas as pd
 import reflex as rx
+from langchain_core.messages import HumanMessage
+from pandas import DataFrame
 
-from aita.agent.base import AitaAgent
+from aita.agent.base import AitaAgent, ToolAgent
 from aita.agent.factory import AgentFactory
-from aita.datasource.base import DataSource
 from aitalab.states.datasource import DataSourceState
-from aitalab.states.prompt_template import PromptTemplateState
 from aitalab.states.tool import Tool
 
 
@@ -21,6 +24,11 @@ class QA(rx.Base):
 DEFAULT_CHATS = {
     "Intros": [],
 }
+
+
+class RunToolOutput(rx.Base):
+    data: pd.DataFrame
+    show: bool = False
 
 
 class ChatState(rx.State):
@@ -47,34 +55,43 @@ class ChatState(rx.State):
 
     current_prompt_template: str = ""
 
-    _current_agent: AitaAgent = None
+    _current_agent: Optional[Union[AitaAgent, ToolAgent]] = None
 
     current_agent_type: str = ""
 
-    current_tools: list[Tool] = [Tool(id="1", name="Create Table", args={"query": "select *"})]
+    current_tools: list[Tool]
 
-    current_tool_ids: list[str] = ["1"]
+    current_tool: Optional[Tool] = None
 
-    current_tool: str
+    # create an example dataframe
+    run_tool_output: Optional[RunToolOutput] = None
+
+    def set_current_tool(self, tool_id: str):
+        logging.info(f"Setting current tool to {tool_id}")
+        self.current_tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
 
     def set_current_tool_arg(self, tool_id: str, key: str, value: str):
         tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
         tool.args[key] = value
 
-    def add_tool(self, tool: Tool):
-        self.current_tools.append(tool)
+    def delete_current_tool(self):
+        self.current_tools = [tool for tool in self.current_tools if tool.id != self.current_tool.id]
+        self.current_tool = None
 
-    @abstractmethod
     def run_tool(self):
-        tool = next(filter(lambda x: x.id == self.current_tool, self.current_tools), None)
-        if tool:
-            tool.run()
+        logging.info(f"Running tool {self.current_tool.name} with args {self.current_tool.args}")
+        try:
+            result = self._current_agent.call_tool(self.current_tool.name, self.current_tool.id)
+            if isinstance(result, DataFrame):
+                self.run_tool_output = RunToolOutput(data=result, show=True)
+        except Exception as e:
+            logging.error(f"Error running tool {self.current_tool.name}: {e}")
+        finally:
+            self.delete_current_tool()
 
-    @abstractmethod
     def cancel_tool(self):
-        tool = next(filter(lambda x: x.id == self.current_tool, self.current_tools), None)
-        if tool:
-            tool.cancel()
+        logging.info(f"Canceling tool {self.current_tool.name}")
+        self._current_agent.cancel_tool(self.current_tool.name, self.current_tool.id)
 
     def create_chat(self):
         """Create a new chat."""
@@ -106,15 +123,14 @@ class ChatState(rx.State):
         """
         return list(self.chats.keys())
 
-    def create_agent(self, datasource: DataSource, prompt: str):
+    def create_agent(self, **kwargs):
         logging.info(
             f"Creating agent with tool {self.current_agent_type} and model {self.current_model}"
         )
         self._current_agent = AgentFactory.create_agent(
-            self.current_agent_type,
-            model_id=self.current_model,
-            datasource=datasource,
-            prompt_context=prompt,
+            agent_type=self.current_agent_type,
+            model=self.current_model,
+            **kwargs,
         )
 
     async def process_question(self, form_data: dict[str, str]):
@@ -126,42 +142,12 @@ class ChatState(rx.State):
             return
 
         logging.info(f"Processing question: {question}")
-        print(f"Processing question: {question}")
 
-        # Get the datasource
+        self.create_agent()
+
         if self.current_datasource:
             datasource = DataSourceState.connect(self.current_datasource)
-            catalog = datasource.get_metadata()
-            target = {
-                "catalog": catalog,
-                "question": question,
-                "db_id": "",
-                "path_db": "/Users/haoxu/dev/aita/DAIL-SQL/dataset/spider/database/concert_singer/concert_singer.sqlite",
-                "query": "",
-            }
-
-            # build prompt
-            prompt_template_state = await self.get_state(PromptTemplateState)
-            prompt_template = next(
-                filter(
-                    lambda x: x.prompt_template_name == self.current_prompt_template,
-                    prompt_template_state.prompt_templates,
-                ),
-                None,
-            )
-            prompt = PromptTemplateState.build_prompt(prompt_template, self.current_model, target)
-        else:
-            datasource = None
-            prompt = ""
-
-        print(f"Coneccted to datasource {self.current_datasource}")
-        print(f"Created prompt: {prompt}")
-
-        # create agent
-        # if self._current_agent is None:
-        #     self._current_agent = SqlAgent(datasource, model_id=self.current_model, prompt_context=prompt)
-        self.create_agent(datasource, prompt)
-        print(f"Created agent: {self._current_agent}")
+            self._current_agent.add_datasource(datasource)
 
         async for value in self.aita_process_question(question):
             yield value
@@ -184,7 +170,12 @@ class ChatState(rx.State):
         # Get the response and add it to the answer.
         events = self._current_agent.chat(question, display=False)
         for event in events:
-            self.chats[self.current_chat][-1].answer += event.content
+            if hasattr(event, "content"):
+                messages = event
+            else:
+                messages = event["messages"][-1]
+            if not isinstance(messages, HumanMessage):
+                self.chats[self.current_chat][-1].answer += messages.content
             yield
 
         chat_state = self._current_agent.get_current_state()
@@ -193,6 +184,8 @@ class ChatState(rx.State):
             for tool_call in self._current_agent.get_current_tool_calls():
                 tool = Tool(id=tool_call["id"], name=tool_call["name"], args=tool_call["args"])
                 self.current_tools.append(tool)
+                if not self.current_tool:
+                    self.current_tool = tool
 
             # Add the tool call to the answer
             self.chats[self.current_chat][-1].answer += f"Confirm to run the tool in the panel"

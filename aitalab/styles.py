@@ -10,9 +10,14 @@ accent_color = rx.color("accent", 1)
 hover_accent_color = {"_hover": {"color": accent_text_color}}
 hover_accent_bg = {"_hover": {"background_color": accent_color}}
 content_width_vw = "90vw"
-sidebar_width = "20em"
+sidebar_width = "18em"
 
-template_page_style = {"padding_top": "5em", "padding_x": ["auto", "2em"], "flex": "1"}
+template_page_style = {
+    "padding_top": "5em",
+    "padding_x": ["auto", "2em"],
+    "flex": "1",
+    "overflow_x": "hidden",
+}
 
 template_content_style = {
     "border_radius": border_radius,
@@ -49,7 +54,6 @@ markdown_style = {
         text_decoration_color=accent_text_color,
     ),
 }
-
 
 # Common styles for questions and answers.
 shadow = "rgba(0, 0, 0, 0.15) 0px 2px 8px"

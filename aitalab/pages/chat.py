@@ -1,5 +1,4 @@
 """The chat page."""
-
 import reflex as rx
 
 from aitalab.components.codeeditor import code_editor
@@ -57,7 +56,7 @@ def chat_history() -> rx.Component:
         max_width="50em",
         padding_x="4px",
         align_self="center",
-        overflow="hidden",
+        overflow="auto",
         padding_bottom="5em",
     )
 
@@ -231,26 +230,33 @@ def agent_type_selector() -> rx.Component:
     )
 
 
-def code_editor_wrapper() -> rx.Component:
-    """The code editor wrapper."""
-    return rx.chakra.form(
-        rx.chakra.form_control(
-            rx.text(
-                "Kernel",
-                asi_="div",
-                mb="1",
-                size="2",
-                weight="bold",
-            ),
-            rx.cond(
-                ChatState.current_tools,
+def run_tool_wrapper() -> rx.Component:
+    """The code editor wrapper for running tools."""
+    return rx.vstack(
+        rx.chakra.form(
+            rx.chakra.form_control(
+                rx.text(
+                    "Tool",
+                    asi_="div",
+                    mb="1",
+                    size="2",
+                    weight="bold",
+                ),
                 rx.chakra.box(
                     rx.flex(
-                        rx.select(
-                            ChatState.current_tool_ids,
-                            value=ChatState.current_tool,
+                        rx.select.root(
+                            rx.select.trigger(),
+                            rx.select.content(
+                                rx.select.group(
+                                    rx.select.label("Select a tool"),
+                                    rx.foreach(
+                                        ChatState.current_tools,
+                                        lambda x: rx.select.item(x.id, value=x.id),
+                                    ),
+                                ),
+                            ),
+                            value=ChatState.current_tool.id,
                             on_change=ChatState.set_current_tool,
-                            placeholder="Select a tool",
                             padding="10px",
                         ),
                         rx.chakra.button(
@@ -267,57 +273,90 @@ def code_editor_wrapper() -> rx.Component:
                         spacing="2",
                         width="100%",
                     ),
-                    rx.foreach(
-                        ChatState.current_tools,
-                        lambda current_tool: rx.box(
+                    rx.cond(
+                        ChatState.current_tool is not None,
+                        rx.box(
                             rx.foreach(
-                                current_tool.args,
+                                ChatState.current_tool.args,
                                 lambda arg: rx.box(
                                     code_editor(
                                         value=arg[1],
                                         on_change=lambda x: ChatState.set_current_tool_arg(
-                                            current_tool.id, arg[0], x
+                                            ChatState.current_tool.id, arg[0], x
                                         ),
                                         width="100%",
+                                        height="20em",
                                         language="python",
                                         theme="material",
                                         font_size="1em",
                                         margin_top="10px",
                                     ),
                                 ),
-                            )
+                            ),
                         ),
                     ),
                 ),
             ),
+            padding="4px",
         ),
-        padding_y="2",
+        tool_output(),
+        width="100%",
+        padding="10px",
+        gap="2",
+        align_items="stretch",
+        background_color=rx.color("mauve", 2),
+        color=rx.color("mauve", 12),
+        border_top=f"1px solid {rx.color('mauve', 3)}",
+        border_bottom=f"1px solid {rx.color('mauve', 3)}",
+    )
+
+
+def tool_output() -> rx.Component:
+    return rx.cond(
+        ChatState.run_tool_output.show,
+        rx.data_table(
+            data=ChatState.run_tool_output.data,
+            width="100%",
+            padding="20px",
+            pagination=True,
+            search=True,
+            sort=True,
+            max_height="400px",
+        ),
     )
 
 
 @template(route="/", title="Chat", on_load=[DataSourceState.on_load, PromptTemplateState.on_load])
 def chat() -> rx.Component:
     """The main app."""
-    return rx.chakra.grid(
-        rx.chakra.grid_item(
+    return rx.chakra.flex(
+        rx.chakra.box(
             rx.chakra.vstack(
                 chat_history(),
                 action_bar(),
                 background_color=rx.color("mauve", 1),
                 color=rx.color("mauve", 12),
-                min_height="100vh",
+                height="90vh",
                 align_items="stretch",
                 spacing="0",
+                padding="20px",
             ),
-            col_span=3,
+            flex_grow=1,
         ),
-        rx.chakra.grid_item(
+        rx.cond(
+            ChatState.current_tools.length() > 0,
+            rx.chakra.grid_item(
+                run_tool_wrapper(),
+                width="100%",
+                flex_grow=1,
+            ),
+        ),
+        rx.chakra.box(
             rx.chakra.vstack(
                 model_selector(),
                 datasource_selector(),
                 prompt_template_selector(),
                 agent_type_selector(),
-                code_editor_wrapper(),
                 col_span=1,
                 padding="4",
                 width="100%",
@@ -329,11 +368,10 @@ def chat() -> rx.Component:
                 spacing="4",
                 align_items="stretch",
             ),
-            col_span=1,
         ),
         h="100vh",
         width="100%",
-        template_columns="repeat(4, 1fr)",
-        template_rows="1fr",
         gap="2",
+        direction="row",
+        overflow_y="hidden",
     )

@@ -15,15 +15,6 @@ from langgraph.pregel import StateSnapshot
 from aita.datasource.base import DataSource
 from aita.states import MessageState
 
-# default configuration
-# TODO: make this configurable
-CONFIG = {
-    "configurable": {
-        "user_id": str(uuid.uuid4()),
-        "thread_id": str(uuid.uuid4()),
-    }
-}
-
 
 def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[RunnableSerializable]:
     providers = get_lm_providers()
@@ -51,6 +42,7 @@ def handle_tool_error(state) -> dict:
 
 
 class AitaAgent:
+    config: Dict[str, Any]
     model: Union[RunnableSerializable, str]
     model_parameters: Optional[Dict]
     prompt_template: Optional[ChatPromptTemplate]
@@ -69,6 +61,13 @@ class AitaAgent:
         model_parameters: Optional[Dict] = None,
         **kwargs,
     ):
+        self.config = {
+            "configurable": {
+                "user_id": kwargs.get("user_id", str(uuid.uuid4())),
+                "thread_id": kwargs.get("thread_id", str(uuid.uuid4())),
+            }
+        }
+
         if isinstance(model, str):
             self.model: RunnableSerializable = get_model(model, model_parameters)
         else:
@@ -118,12 +117,15 @@ class AitaAgent:
 
     def chat(self, question: Optional[str] = "", display: Optional[bool] = True):
         self._format_question(question)
-        events = self.model.stream(CONFIG)
+        events = self.model.stream(self.config)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
         else:
             return events
+
+    def get_current_state(self) -> None:
+        return None
 
 
 class ToolAgent(AitaAgent):
@@ -186,7 +188,7 @@ class ToolAgent(AitaAgent):
         return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
 
     def get_current_state(self) -> Optional[StateSnapshot]:
-        return self.model_graph.get_state(CONFIG)
+        return self.model_graph.get_state(self.config)
 
     def get_current_tool_calls(self) -> List[ToolCall]:
         return self.get_current_state().values.get("messages")[-1].tool_calls
@@ -220,7 +222,7 @@ class ToolAgent(AitaAgent):
             messages = None
         else:
             messages = self._format_question(question)
-        events = self.model_graph.stream(messages, config=CONFIG, stream_mode="values")
+        events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
         if display:
             self._print_graph_events(events)
         return events
@@ -243,8 +245,11 @@ class ToolAgent(AitaAgent):
         tool = next((t for t in self.tools if t.name == tool_name), None)
         if not tool:
             raise ValueError(f"Tool {tool_name} not found in the tool sets.")
-        res = tool.invoke(tool_call["args"], CONFIG)
+        res = tool.invoke(tool_call["args"], self.config)
         return res
+
+    def cancel_tool(self, tool_name: str, tool_id: Optional[str] = None):
+        pass
 
     def call_model(self, state: MessageState, config: RunnableConfig):
         messages = {**state, "user_info": config.get("user_id", None)}

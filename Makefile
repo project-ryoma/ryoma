@@ -114,7 +114,7 @@ cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove 
 
 .PHONY: start-aitalab
 start-aitalab:
-	PYTHONPATH=$(PYTHONPATH) poetry run reflex run
+	poetry run reflex run
 
 .PHONY: build
 build:
