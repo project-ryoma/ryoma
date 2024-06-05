@@ -5,6 +5,7 @@ This document describes the architecture of the project.
 ## Overview
 
 ![img_1.png](img_1.png)
+
 High level architecture of Aita is shown in the above diagram.
 
 
