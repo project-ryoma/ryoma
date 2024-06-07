@@ -59,7 +59,7 @@ optional = true
 
 [tool.poetry.group.aitalab.dependencies]
 alembic = "^1.13.1"
-reflex = "^0.5.2"
+reflex = "^0.5.3"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
 

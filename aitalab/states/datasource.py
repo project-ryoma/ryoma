@@ -17,6 +17,7 @@ class DataSource(rx.Model, table=True):
 
 
 class DataSourceState(rx.State):
+    id: str
     name: str
     datasource_names: list[str] = []
     datasource_type: str
@@ -35,7 +36,7 @@ class DataSourceState(rx.State):
     @rx.var
     def datasource_attributes(self) -> List[str]:
         if self.datasource_type:
-            model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+            model_fields = DataSourceProvider[self.datasource_type].value.__fields__
             return [key for key in model_fields.keys() if key != "type" and key != "name"]
         else:
             return []
@@ -47,7 +48,7 @@ class DataSourceState(rx.State):
             return True
 
         # required by specific datasource
-        model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+        model_fields = DataSourceProvider[self.datasource_type].value.__fields__
         if not all(
             getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
         ):
@@ -81,9 +82,10 @@ class DataSourceState(rx.State):
         self.load_entries()
 
     def set_datasource(self, datasource: DataSource):
-        self.name = datasource.name
-        self.datasource_type = datasource.name
-        self.connection_url = datasource.connection_url
+        self.id = datasource["id"]
+        self.name = datasource["name"]
+        self.datasource_type = datasource["datasource_type"]
+        self.connection_url = datasource["connection_url"]
 
     def connect_and_add_datasource(self):
         if self.missing_attributes:

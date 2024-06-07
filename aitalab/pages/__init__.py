@@ -4,3 +4,4 @@ from .document import document
 from .prompt_template import prompt_template
 from .settings import settings
 from .tool import tool
+from .catalog import catalog

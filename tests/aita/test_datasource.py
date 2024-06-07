@@ -29,3 +29,7 @@ def test_execute_query(mock_sql_data_source):
         mock_execute.return_value = "success"
         results = mock_sql_data_source.execute("SELECT * FROM table")
     assert results == "success"
+
+
+def test_datasource_field_exists():
+    assert hasattr(SqlDataSource, "__fields__")
