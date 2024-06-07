@@ -1,6 +1,7 @@
 """The data catalog page """
 
 import reflex as rx
+
 from aitalab.templates import template
 
 
@@ -15,7 +16,6 @@ def catalog_search():
         justify="center",
         align="center",
         width="100%",
-
     )
 
 
