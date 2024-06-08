@@ -1,11 +1,13 @@
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
-from mock import patch
 from pyspark.sql import SparkSession
 
+from aita.tool.pandas import PandasTool
 from aita.tool.pyspark import PySparkTool
 from aita.tool.sql import SqlQueryTool
-from tests.aita.test_datasource import mock_sql_data_source
+from tests.aita.test_datasource import MockSqlDataSource
 
 
 @pytest.fixture
@@ -18,6 +20,12 @@ def pandas_dataframe():
         }
     )
     return df
+
+
+@pytest.fixture
+def mock_sql_data_source():
+    data_source = MockSqlDataSource()
+    return data_source
 
 
 @pytest.fixture
@@ -42,3 +50,15 @@ def test_sql_tool(mock_sql_data_source):
         query = "SELECT * FROM customers LIMIT 4"
         result = sql_tool._run(query)
         assert result == "success"
+
+
+def test_pandas_tool(pandas_dataframe):
+    pandas_tool = PandasTool()
+    pandas_tool.update_script_context({"df": pandas_dataframe})
+    script = """
+    df["year"] = df["year"] + 1
+    df
+    """
+    result = pandas_tool._run(script)
+    assert result.success is True
+    assert result.result["year"].tolist() == [2021, 2023, 2020, 2022]

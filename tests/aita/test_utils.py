@@ -6,7 +6,6 @@ from datetime import datetime
 
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-from openai_responses import OpenAIMock
 from openai_responses.ext.httpx import Request, Response
 from openai_responses.streaming import Event, EventStream
 
