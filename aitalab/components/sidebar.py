@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aitalab.states.base import BaseState
 from aitalab import styles
+from aitalab.states.base import BaseState
 
 # Icons for the sidebar.
 ICONS = {
@@ -94,7 +94,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
     """
     # Whether the item is active.
     active = (rx.State.router.page.path == url.lower()) | (
-            (rx.State.router.page.path == "/") & text == "Chat"
+        (rx.State.router.page.path == "/") & text == "Chat"
     )
 
     return rx.link(
@@ -128,7 +128,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             padding="1em",
         ),
         href=url,
-        width="100%"
+        width="100%",
     )
 
 
