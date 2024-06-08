@@ -2,7 +2,19 @@
 
 import reflex as rx
 
+from aitalab.states.base import BaseState
 from aitalab import styles
+
+# Icons for the sidebar.
+ICONS = {
+    "Chat": "message-square-more",
+    "Data Catalog": "library",
+    "Data Source": "database",
+    "Document": "file-code",
+    "Prompt Template": "text",
+    "Settings": "settings",
+    "Tool": "hammer",
+}
 
 
 def sidebar_header() -> rx.Component:
@@ -14,18 +26,21 @@ def sidebar_header() -> rx.Component:
     return rx.hstack(
         # The logo.
         rx.color_mode_cond(
-            rx.image(src="/reflex_black.svg", height="2em"),
-            rx.image(src="/reflex_white.svg", height="2em"),
+            rx.image(src="/aita_black.svg", height="3em"),
+            rx.image(src="/aita_white.svg", height="3em"),
         ),
         rx.spacer(),
-        rx.link(
-            rx.button(
-                rx.icon("github"),
-                color_scheme="gray",
-                variant="soft",
+        rx.cond(
+            BaseState.sidebar_displayed,
+            rx.link(
+                rx.button(
+                    rx.icon("github"),
+                    color_scheme="gray",
+                    variant="soft",
+                ),
+                href="https://github.com/project-aita/aita",
+                target="_blank",
             ),
-            href="https://github.com/project-aita/aita",
-            target="_blank",
         ),
         align="center",
         width="100%",
@@ -39,15 +54,28 @@ def sidebar_footer() -> rx.Component:
     """Sidebar footer.
 
     Returns:
-        The sidebar footer component.
+        rx.Component: The sidebar footer component.
     """
-    return rx.hstack(
-        rx.spacer(),
-        rx.link(
-            rx.text("Docs"),
-            href="https://aita-1.gitbook.io/aita",
-            color_scheme="gray",
+    return rx.chakra.hstack(
+        rx.chakra.link(
+            rx.chakra.center(
+                rx.chakra.image(
+                    src="/paneleft.svg",
+                    height="2.5em",
+                    padding="0.5em",
+                ),
+                bg="transparent",
+                border_radius=styles.border_radius,
+                **styles.hover_accent_bg,
+            ),
+            on_click=BaseState.toggle_sidebar_displayed,
+            transform=rx.cond(~BaseState.sidebar_displayed, "rotate(180deg)", ""),
+            transition="transform 0.5s, left 0.5s",
+            position="relative",
+            left=rx.cond(BaseState.sidebar_displayed, "13.5em", "1em"),
+            **styles.overlapping_button_style,
         ),
+        rx.chakra.spacer(),
         width="100%",
         border_top=styles.border,
         padding="1em",
@@ -66,13 +94,18 @@ def sidebar_item(text: str, url: str) -> rx.Component:
     """
     # Whether the item is active.
     active = (rx.State.router.page.path == url.lower()) | (
-        (rx.State.router.page.path == "/") & text == "Home"
+            (rx.State.router.page.path == "/") & text == "Chat"
     )
 
     return rx.link(
         rx.hstack(
+            rx.icon(ICONS[text], color="gray", size=24),
             rx.text(
                 text,
+                opacity=rx.cond(BaseState.sidebar_displayed, 1, 0),
+                visibility=rx.cond(BaseState.sidebar_displayed, "visible", "hidden"),
+                position=rx.cond(BaseState.sidebar_displayed, "relative", "absolute"),
+                transition="opacity 0.3s, visibility 0.3s",
             ),
             bg=rx.cond(
                 active,
@@ -95,7 +128,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             padding="1em",
         ),
         href=url,
-        width="100%",
+        width="100%"
     )
 
 
@@ -129,7 +162,9 @@ def sidebar() -> rx.Component:
             height="100dvh",
         ),
         display=["none", "none", "block"],
-        min_width=styles.sidebar_width,
+        max_width=styles.sidebar_width,
+        width=rx.cond(BaseState.sidebar_displayed, "100%", "100px"),
+        transition="width 0.5s",
         height="100%",
         position="sticky",
         top="0px",

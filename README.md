@@ -1,4 +1,4 @@
-# aita
+# Aita
 AI Powered Data Agent, a comprehensive solution for data analysis, engineering, and visualization. 
 
 
@@ -36,7 +36,8 @@ pip install aita[snowflake]
 ```
 
 ## Example
-Below is an example of using SqlAgent to connect to a PostgreSQL database and ask a question. \
+Below is an example of using SqlAgent to connect to a PostgreSQL database and ask a question.
+You can read more details in the [documentation](https://aita-1.gitbook.io/aita/).
 
 ```python
 from aita.agent.sql import SqlAgent
@@ -46,15 +47,14 @@ from aita.datasource.postgresql import PostgreSqlDataSource
 datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")
 
 # Create a SQL agent
-sql_agent = SqlAgent("gpt-3.5-turbo") \
-    .add_datasource(datasource)
+sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
 
 # ask question to the agent
 sql_agent.chat("What is the total number of orders?")
 ```
 
 ## Supported Models
-Model provider are supported by jupyter ai magics.
+Model provider are supported by jupyter ai magics. Ensure the corresponding environment variables are set before using the Aita agent.
 
 | Provider            | Provider ID          | Environment variable(s)    | Python package(s)               |
 |---------------------|----------------------|----------------------------|---------------------------------|
