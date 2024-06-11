@@ -202,20 +202,23 @@ class ToolAgent(AitaAgent):
 
     def _format_question(self, question: str):
         self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
-        if self.get_current_state().next:
+        current_state = self.get_current_state()
+        if current_state.next and current_state.next[0] == "tools":
+            # We are in the tool node, but the user has asked a new question
+            # We need to deny the tool call and continue with the user's question
             tool_calls = self.get_current_tool_calls()
             return {
                 "messages": [
                     ToolMessage(
                         tool_call_id=tool_calls[0]["id"],
-                        content=f"API call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",
+                        content=f"Tool call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",
                     )
                 ]
             }
         else:
             return {"messages": [HumanMessage(content=question)]}
 
-    def chat(
+    def stream(
         self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False, display=True
     ):
         if allow_run_tool:
@@ -224,8 +227,35 @@ class ToolAgent(AitaAgent):
             messages = self._format_question(question)
         events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
         if display:
-            self._print_graph_events(events)
+            self._print_graph_events(events, set())
         return events
+
+    def iteratively_stream(self, question: Optional[str] = "", max_iterations=10, display=True):
+        messages = self._format_question(question)
+        events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
+        if display:
+            _printed = set()
+            print("Starting the iterative invocation process.")
+            self._print_graph_events(events, _printed)
+        current_state = self.get_current_state()
+
+        iterations = 0
+        while current_state.next and iterations < max_iterations:
+            iterations += 1
+            events = self.model_graph.stream(None, config=self.config)
+            if display:
+                print(f"Iteration {iterations}")
+                self._print_graph_events(events, _printed)
+            current_state = self.get_current_state()
+        return events
+
+    def invoke(self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False):
+        if allow_run_tool:
+            messages = None
+        else:
+            messages = self._format_question(question)
+        result = self.model_graph.invoke(messages, config=self.config)
+        return result
 
     def _build_tool_node(self):
         return ToolNode(self.tools).with_fallbacks(
@@ -257,19 +287,25 @@ class ToolAgent(AitaAgent):
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
 
-    def _print_graph_events(self, events, max_length=1500):
-        _printed = set()
+    def _print_graph_events(self, events, printed, max_length=1500):
         for event in events:
             current_state = event.get("dialog_state")
             if current_state:
                 print(f"Currently in: ", current_state[-1])
-            message = event.get("messages")
+            message = self._get_event_message(event)
             if message:
                 if isinstance(message, list):
                     message = message[-1]
-                if message.id not in _printed:
+                if message.id not in printed:
                     msg_repr = message.pretty_repr(html=True)
                     if len(msg_repr) > max_length:
                         msg_repr = msg_repr[:max_length] + " ... (truncated)"
                     print(msg_repr)
-                    _printed.add(message.id)
+                    printed.add(message.id)
+
+    def _get_event_message(self, event):
+        if "tools" in event:
+            return event["tools"]["messages"]
+        if "agent" in event:
+            return event["agent"]["messages"]
+        return event.get("messages")

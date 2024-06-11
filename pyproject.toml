@@ -102,6 +102,7 @@ pytest-html = ">=3.1.1,<5.0.0"
 pytest-cov = "^3.0.0"
 openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
+azure-identity = "^1.16.0"
 
 
 [tool.black]
@@ -167,6 +168,7 @@ warn_unused_ignores = true
 
 exclude = [
     "aitalab",
+    "research",
 ]
 
 
