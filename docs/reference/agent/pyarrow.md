@@ -18,6 +18,6 @@ table = pa.table({
 pa_agent = PyArrowAgent("gpt-3.5-turbo") \
     .add_table(table)
 
-pa_agent.chat("I want to get the top customers which making the most purchases")
+pa_agent.stream("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

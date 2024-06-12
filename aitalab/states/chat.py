@@ -171,7 +171,7 @@ class ChatState(rx.State):
         yield
 
         # Get the response and add it to the answer.
-        events = self._current_agent.chat(question, display=False)
+        events = self._current_agent.stream(question, display=False)
         for event in events:
             if hasattr(event, "content"):
                 messages = event

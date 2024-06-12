@@ -16,6 +16,6 @@ spark_configs = {
 }
 spark_agent = PySparkAgent(spark_configs, "gpt-3.5-turbo")
 
-spark_agent.chat("I want to get the top customers which making the most purchases")
+spark_agent.stream("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

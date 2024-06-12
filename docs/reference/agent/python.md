@@ -10,6 +10,6 @@ from aita.agent.python import PythonAgent
 
 python_agent = PythonAgent("gpt-3.5-turbo")
 
-python_agent.chat("print('Hello, World!')")
+python_agent.stream("print('Hello, World!')")
 ```
 {% endcode %}

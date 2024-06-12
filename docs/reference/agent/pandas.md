@@ -18,7 +18,7 @@ datasource = SqliteDataSource("sqlite:///data.db")
 pandas_agent = PandasAgent("gpt-3.5-turbo") \
     .set_prompt_template(BasicDataSourcePromptTemplate) \
     .add_datasource(datasource)
-pandas_agent.chat("Get the top 10 customers by purchase amount")
+pandas_agent.stream("Get the top 10 customers by purchase amount")
 ```
 {% endcode %}
 
@@ -36,6 +36,6 @@ df = pd.DataFrame({
 pandas_agent = PandasAgent("gpt-3.5-turbo") \
     .add_dataframe(df)
 
-pandas_agent.chat("I want to get the top customers which making the most purchases")
+pandas_agent.stream("I want to get the top customers which making the most purchases")
 ```
 {% endcode %}

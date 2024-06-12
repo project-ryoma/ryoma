@@ -17,7 +17,7 @@ postgres_datasource = PostgreSqlDataSource("postgresql://localhost:5432/db")
 sql_agent = SqlAgent("gpt-3.5-turbo") \
     .set_prompt_template(BasicDataSourcePromptTemplate) \
     .add_datasource(postgres_datasource)
-sql_agent.chat("Get the top 10 customers by purchase amount")
+sql_agent.stream("Get the top 10 customers by purchase amount")
 ```
 
 {% endcode}

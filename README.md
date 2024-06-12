@@ -50,7 +50,7 @@ datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbn
 sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
 
 # ask question to the agent
-sql_agent.chat("What is the total number of orders?")
+sql_agent.stream("What is the total number of orders?")
 ```
 
 ## Supported Models

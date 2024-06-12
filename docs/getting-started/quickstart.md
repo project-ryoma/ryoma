@@ -36,7 +36,7 @@ df = pd.DataFrame({
 pandas_agent = PandasAgent("gpt-3.5-turbo") \
     .add_dataframe(df)
 
-print(pandas_agent.chat("I want to get the top customer which making the most purchases"))
+print(pandas_agent.stream("I want to get the top customer which making the most purchases"))
 ```
 {% endcode %}
 

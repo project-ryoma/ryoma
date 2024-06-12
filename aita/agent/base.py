@@ -84,6 +84,10 @@ class AitaAgent:
         )
         self.model = self.prompt_template | self.model
 
+    def set_base_prompt_template(self, base_prompt_template: str):
+        self.base_prompt_template = base_prompt_template
+        return self
+
     def _set_base_prompt_context_template(self):
         self.prompt_context_template = ChatPromptTemplate.from_messages(
             [("system", self.base_prompt_context_template)]
@@ -237,8 +241,8 @@ class ToolAgent(AitaAgent):
             _printed = set()
             print("Starting the iterative invocation process.")
             self._print_graph_events(events, _printed)
-        current_state = self.get_current_state()
 
+        current_state = self.get_current_state()
         iterations = 0
         while current_state.next and iterations < max_iterations:
             iterations += 1
@@ -249,12 +253,37 @@ class ToolAgent(AitaAgent):
             current_state = self.get_current_state()
         return events
 
-    def invoke(self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False):
+    def invoke(
+        self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False, display=True
+    ):
         if allow_run_tool:
             messages = None
         else:
             messages = self._format_question(question)
         result = self.model_graph.invoke(messages, config=self.config)
+        if display:
+            _printed = set()
+            print("Starting the iterative invocation process.")
+            self._print_graph_events(result, _printed)
+        return result
+
+    def iteratively_invoke(self, question: Optional[str] = "", max_iterations=10, display=True):
+        messages = self._format_question(question)
+        result = self.model_graph.invoke(messages, config=self.config)
+        if display:
+            _printed = set()
+            print("Starting the iterative invocation process.")
+            self._print_graph_events(result, _printed)
+
+        current_state = self.get_current_state()
+        iterations = 0
+        while current_state.next and iterations < max_iterations:
+            iterations += 1
+            result = self.model_graph.invoke(None, config=self.config)
+            if display:
+                print(f"Iteration {iterations}")
+                self._print_graph_events(result, _printed)
+            current_state = self.get_current_state()
         return result
 
     def _build_tool_node(self):
@@ -288,10 +317,9 @@ class ToolAgent(AitaAgent):
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):
+        if not isinstance(events, list):
+            events = [events]
         for event in events:
-            current_state = event.get("dialog_state")
-            if current_state:
-                print(f"Currently in: ", current_state[-1])
             message = self._get_event_message(event)
             if message:
                 if isinstance(message, list):
@@ -308,4 +336,6 @@ class ToolAgent(AitaAgent):
             return event["tools"]["messages"]
         if "agent" in event:
             return event["agent"]["messages"]
-        return event.get("messages")
+        if "messages" in event:
+            return event["messages"]
+        return event

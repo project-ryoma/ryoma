@@ -12,12 +12,12 @@ class PandasInput(BaseModel):
 class PandasTool(PythonTool):
     """Tool for running Pandas analysis."""
 
-    name: str = "pandas_analysis_tool"
+    name: str = "pandas_tool"
     description: str = """
-    Run a pandas analysis script.
+    Run a python script by using the Pandas library.
     If the script is not correct, an error message will be returned.
 
-    Pandas dataframe is available in the script context.
+    Pandas dataframes are stored in the script context.
     """
 
     args_schema: Type[BaseModel] = PandasInput
