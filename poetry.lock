@@ -2175,13 +2175,13 @@ qtconsole = "*"
 
 [[package]]
 name = "jupyter-ai-magics"
-version = "2.16.0"
+version = "2.17.0"
 description = "Jupyter AI magics Python package. Not published on NPM."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_ai_magics-2.16.0-py3-none-any.whl", hash = "sha256:9c231a12350ca5c8a3db2ea8dae0517bc046bb7d2351b66a26e3ede946edf895"},
-    {file = "jupyter_ai_magics-2.16.0.tar.gz", hash = "sha256:f35cce92814ccf63ac2b900275f7470f459e4857376a3575c4c25f13707923da"},
+    {file = "jupyter_ai_magics-2.17.0-py3-none-any.whl", hash = "sha256:dd241fb9bc08946e8476d9dfe6b20765ed60794be91264360d9021ef0fbb5184"},
+    {file = "jupyter_ai_magics-2.17.0.tar.gz", hash = "sha256:aa7e70e904dbc777252a90215cce666e96a06bff932706c6c7b102f42850c2fa"},
 ]
 
 [package.dependencies]
@@ -2193,7 +2193,7 @@ langchain = ">=0.1.0,<0.2.0"
 typing-extensions = ">=4.5.0"
 
 [package.extras]
-all = ["ai21", "boto3", "cohere (>4.40,<5)", "gpt4all", "huggingface-hub", "ipywidgets", "langchain-anthropic", "langchain-google-genai", "langchain-nvidia-ai-endpoints", "langchain-openai", "pillow", "qianfan", "together"]
+all = ["ai21", "boto3", "cohere (>4.40,<5)", "gpt4all", "huggingface-hub", "ipywidgets", "langchain-anthropic", "langchain-google-genai", "langchain-mistralai", "langchain-nvidia-ai-endpoints", "langchain-openai", "pillow", "qianfan", "together"]
 dev = ["pre-commit (>=3.3.3,<4)"]
 test = ["coverage", "pytest", "pytest-asyncio", "pytest-cov"]
 
