@@ -665,8 +665,8 @@ files = [
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
 urllib3 = [
-    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
     {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
+    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
 ]
 
 [package.extras]
@@ -3408,9 +3408,9 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
+    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -3963,9 +3963,9 @@ files = [
 astroid = ">=3.2.2,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
-    {version = ">=0.2", markers = "python_version < \"3.11\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
     {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
+    {version = ">=0.2", markers = "python_version < \"3.11\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
@@ -4508,13 +4508,13 @@ rpds-py = ">=0.7.0"
 
 [[package]]
 name = "reflex"
-version = "0.5.3"
+version = "0.5.4"
 description = "Web apps in pure Python."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "reflex-0.5.3-py3-none-any.whl", hash = "sha256:44c73b5e88f9b91570a5b8c3e9201b6437f9c833d8b3f9e0afda463b109d4600"},
-    {file = "reflex-0.5.3.tar.gz", hash = "sha256:67795c2b0b773fbc1f784edb28bcb658bb016d08188fc112e0c7db98c77650d4"},
+    {file = "reflex-0.5.4-py3-none-any.whl", hash = "sha256:8b41555428f167562301df0577c3a10db7fc5f98ffce07a9eeb36436ec1bb4be"},
+    {file = "reflex-0.5.4.tar.gz", hash = "sha256:c7e0d235605c20c6452ad299c3031aafdbe7cc9c12bc09541d7f1074acae40f1"},
 ]
 
 [package.dependencies]
@@ -4545,15 +4545,15 @@ tomlkit = ">=0.12.4,<1.0"
 twine = ">=4.0.0,<6.0"
 typer = ">=0.4.2,<1.0"
 uvicorn = [
-    {version = ">=0.20.0,<0.21.0", markers = "python_version < \"3.12\""},
     {version = ">=0.24.0,<0.25.0", markers = "python_version >= \"3.12\""},
+    {version = ">=0.20.0,<0.21.0", markers = "python_version < \"3.12\""},
 ]
 watchdog = ">=2.3.1,<5.0"
 watchfiles = ">=0.19.0,<1.0"
 wheel = ">=0.42.0,<1.0"
 wrapt = [
-    {version = ">=1.11.0,<2.0", markers = "python_version < \"3.11\""},
     {version = ">=1.14.0,<2.0", markers = "python_version >= \"3.11\""},
+    {version = ">=1.11.0,<2.0", markers = "python_version < \"3.11\""},
 ]
 
 [[package]]
