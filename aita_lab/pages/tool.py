@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aitalab.states.tool import ToolState
-from aitalab.templates import template
+from aita_lab.states.tool import ToolState
+from aita_lab.templates import template
 
 
 def content_grid():

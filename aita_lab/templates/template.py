@@ -6,8 +6,8 @@ from typing import Callable
 
 import reflex as rx
 
-from aitalab import styles
-from aitalab.components.sidebar import sidebar
+from aita_lab import styles
+from aita_lab.components.sidebar import sidebar
 
 # Meta tags for the app.
 default_meta = [

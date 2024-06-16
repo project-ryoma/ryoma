@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aitalab import styles
-from aitalab.states.base import BaseState
+from aita_lab import styles
+from aita_lab.states.base import BaseState
 
 # Icons for the sidebar.
 ICONS = {

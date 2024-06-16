@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aitalab.states.prompt_template import PromptTemplateState
-from aitalab.templates import template
+from aita_lab.states.prompt_template import PromptTemplateState
+from aita_lab.templates import template
 
 
 def content_grid():

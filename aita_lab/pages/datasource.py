@@ -3,8 +3,8 @@
 import reflex as rx
 
 from aita.datasource.factory import DataSourceProvider, get_supported_datasources
-from aitalab.states.datasource import DataSource, DataSourceState
-from aitalab.templates import template
+from aita_lab.states.datasource import DataSource, DataSourceState
+from aita_lab.templates import template
 
 
 def show_datasource(datasource: DataSource):

@@ -2,12 +2,12 @@ import findspark
 import pandas as pd
 from pyspark.sql import SparkSession
 
-from aita.agent.base import ToolAgent
+from aita.agent.graph import GraphAgent
 from aita.tool.pyspark import ConvertPandasToPySparkTool, PySparkTool
 from aita.tool.python import PythonTool
 
 
-class PySparkAgent(ToolAgent):
+class PySparkAgent(GraphAgent):
     spark_session: SparkSession
 
     def __init__(self, spark_configs: dict[str, str], model: str, model_parameters=None):

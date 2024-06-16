@@ -1,22 +1,22 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy aita ui
+name: Build and deploy aita api  
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'ui/**'
-      - '.github/workflows/main_aita-ui.yml'
+      - 'aita/**'
+      - 'aita-lab/**'
+      - '.github/workflows/main_aita-demo.yml'
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: "./ui"
+  AZURE_WEBAPP_PACKAGE_PATH: "./Dockerfile"
   COMMIT_SHA: ${{ github.sha }}
-  AITA_UI_URL: ${{ vars.AITA_UI_URL }}
-  PYTHON_BACKEND_URL: ${{ vars.PYTHON_BACKEND_URL }}
 
 jobs:
   build:
@@ -39,18 +39,15 @@ jobs:
 
       - name: docker build image
         run: |
-          docker build --platform linux/amd64 ./ -t aita-ui \
-          --build-arg APP_ENV=production \
-          --build-arg AITA_UI_URL=${{ env.AITA_UI_URL }} \
-          --build-arg PYTHON_BACKEND_URL=${{ env.PYTHON_BACKEND_URL }} 
-
+            docker build --platform linux/amd64 ./ -t aita-api --build-arg APP_ENV=production
+  
       - name: Set up Docker Build
         run: |
-          docker tag aita-ui aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
-
+          docker tag aita-api aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }}
+  
       - name: Publish to Azure Container Registry
         run: |
-          docker push aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
+          docker push aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,11 +59,11 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+            
       - name: deploy Container App
         uses: azure/container-apps-deploy-action@v2
         with:
           acrName: aitaregistry
-          containerAppName: aita-ui
+          containerAppName: aita-dataapp
           resourceGroup: aita
-          imageToDeploy: aitaregistry.azurecr.io/aita-ui:${{ env.COMMIT_SHA }}
+          imageToDeploy: aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }} 

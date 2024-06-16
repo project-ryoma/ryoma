@@ -112,8 +112,8 @@ build-remove:
 .PHONY: cleanup
 cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
 
-.PHONY: start-aitalab
-start-aitalab:
+.PHONY: start-aita-lab
+start-aita-lab:
 	poetry run reflex run
 
 .PHONY: build

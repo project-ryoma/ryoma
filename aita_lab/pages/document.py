@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aitalab import styles
-from aitalab.templates import template
+from aita_lab import styles
+from aita_lab.templates import template
 
 
 @template(route="/document", title="Document")

@@ -1,6 +1,6 @@
 import reflex as rx
 
-from aitalab.states.chat import ChatState
+from aita_lab.states.chat import ChatState
 
 
 def sidebar_chat(chat: str) -> rx.Component:

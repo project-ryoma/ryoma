@@ -9,10 +9,11 @@ import reflex as rx
 from langchain_core.messages import HumanMessage
 from pandas import DataFrame
 
-from aita.agent.base import AitaAgent, ToolAgent
+from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
-from aitalab.states.datasource import DataSourceState
-from aitalab.states.tool import Tool
+from aita.agent.graph import GraphAgent
+from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.tool import Tool
 
 
 class QA(rx.Base):
@@ -56,7 +57,7 @@ class ChatState(rx.State):
 
     current_prompt_template: str = ""
 
-    _current_agent: Optional[Union[AitaAgent, ToolAgent]] = None
+    _current_agent: Optional[Union[AitaAgent, GraphAgent]] = None
 
     current_agent_type: str = ""
 

@@ -1,10 +1,10 @@
 from typing import Dict, Optional
 
-from aita.agent.base import ToolAgent
+from aita.agent.graph import GraphAgent
 from aita.tool.python import PythonTool
 
 
-class PythonAgent(ToolAgent):
+class PythonAgent(GraphAgent):
     def __init__(
         self,
         model: str,

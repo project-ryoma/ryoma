@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from aitalab.templates import template
+from aita_lab.templates import template
 
 
 def catalog_search():

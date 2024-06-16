@@ -1,6 +1,6 @@
 import reflex as rx
 
-from aitalab.states.chat import ChatState, DataSourceState
+from aita_lab.states.chat import ChatState, DataSourceState
 
 
 def modal() -> rx.Component:

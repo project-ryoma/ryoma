@@ -2,13 +2,13 @@ from typing import Dict
 
 import pyarrow as pa
 
-from aita.agent.base import ToolAgent
+from aita.agent.graph import GraphAgent
 from aita.tool.pyarrow import ArrowTool
 from aita.tool.python import PythonTool
 from aita.tool.sql import ConvertToArrowTool
 
 
-class PyArrowAgent(ToolAgent):
+class PyArrowAgent(GraphAgent):
     def __init__(self, model: str, model_parameters: Dict = None):
         super().__init__([ConvertToArrowTool(), ArrowTool()], model, model_parameters)
 

@@ -2,15 +2,15 @@
 
 import reflex as rx
 
-from aitalab.components.codeeditor import code_editor
-from aitalab.components.loading_icon import loading_icon
-from aitalab.states.agent import AgentState
-from aitalab.states.chat import QA, ChatState
-from aitalab.states.datasource import DataSourceState
-from aitalab.states.llm_providers import ModelProvider
-from aitalab.states.prompt_template import PromptTemplateState
-from aitalab.styles import message_style
-from aitalab.templates import template
+from aita_lab.components.codeeditor import code_editor
+from aita_lab.components.loading_icon import loading_icon
+from aita_lab.states.agent import AgentState
+from aita_lab.states.chat import QA, ChatState
+from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.llm_providers import ModelProvider
+from aita_lab.states.prompt_template import PromptTemplateState
+from aita_lab.styles import message_style
+from aita_lab.templates import template
 
 
 def message(qa: QA) -> rx.Component:

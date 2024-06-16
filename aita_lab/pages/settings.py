@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from aitalab.templates import ThemeState, template
+from aita_lab.templates import ThemeState, template
 
 
 @template(route="/settings", title="Settings")

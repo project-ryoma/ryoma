@@ -3,7 +3,7 @@
 # Import all the pages.
 import reflex as rx
 
-from aitalab.pages import *
+from aita_lab.pages import *
 
 
 class State(rx.State):
