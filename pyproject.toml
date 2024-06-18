@@ -62,7 +62,6 @@ alembic = "^1.13.1"
 reflex = "^0.5.3"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
-unzip = "^1.0.0"
 
 [tool.poetry.extras]
 dynamodb = ["boto3"]

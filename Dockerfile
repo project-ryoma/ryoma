@@ -3,6 +3,10 @@
 # Use the official Python image
 FROM python:3.9-slim
 
+# install additional dependencies like unzip
+RUN apt-get update && apt-get install -y \
+    unzip
+
 # Set the working directory
 WORKDIR /app
 
