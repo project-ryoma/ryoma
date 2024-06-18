@@ -36,3 +36,6 @@ venv
 .AppleDouble
 .LSOverride
 ._*
+
+# exclude research in docker build
+research

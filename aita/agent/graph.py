@@ -1,8 +1,9 @@
+from enum import Enum
+
 from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableConfig, RunnableLambda, RunnableSerializable
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
@@ -14,6 +15,14 @@ from langgraph.pregel import StateSnapshot
 from aita.agent.base import AitaAgent
 from aita.datasource.base import DataSource
 from aita.states import MessageState
+
+
+class ToolMode(str, Enum):
+    """The mode of the tool call."""
+
+    DISALLOWED = "disallowed"
+    CONTINUOUS = "continuous"
+    ONCE = "once"
 
 
 def handle_tool_error(state) -> dict:
@@ -41,23 +50,19 @@ class GraphAgent(AitaAgent):
         model_parameters: Optional[Dict] = None,
         **kwargs,
     ):
-        super().__init__(model, model_parameters, **kwargs)
-
-        self.output_parser = None
-
-        # bind tools to the model
         self.tools = tools
-        self._bind_tools(self.tools)
+
+        super().__init__(model, model_parameters, **kwargs)
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
         self.model_graph = self._build_graph()
 
-    def _bind_tools(self, tools: List[BaseTool]):
+    def _bind_tools(self):
         if hasattr(self.model, "bind_tools"):
-            self.model = self.model.bind_tools(tools)
+            return self.model.bind_tools(self.tools)
         else:
-            rendered_tools = render_text_description(tools)
+            rendered_tools = render_text_description(self.tools)
             tool_prompt = f"""
             You are an assistant that has access to the following set of tools. Here are the names and descriptions for each tool:
 
@@ -65,7 +70,7 @@ class GraphAgent(AitaAgent):
 
             """
             self.base_prompt_template = tool_prompt + self.base_prompt_template
-        self._create_chain()
+            return self.model
 
     def _build_graph(self) -> CompiledGraph:
         workflow = StateGraph(MessageState)
@@ -88,7 +93,10 @@ class GraphAgent(AitaAgent):
         return self.model_graph.get_state(self.config)
 
     def get_current_tool_calls(self) -> List[ToolCall]:
-        return self.get_current_state().values.get("messages")[-1].tool_calls
+        current_state = self.get_current_state().values.get("messages")
+        if current_state and current_state[-1].tool_calls:
+            return current_state[-1].tool_calls
+        return []
 
     def add_datasource(self, datasource: DataSource):
         super().add_datasource(datasource)
@@ -116,82 +124,66 @@ class GraphAgent(AitaAgent):
             return {"messages": [HumanMessage(content=question)]}
 
     def stream(
-        self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False, display=True
+        self,
+        question: Optional[str] = "",
+        tool_mode: str = ToolMode.DISALLOWED,
+        max_iterations: int = 10,
+        display=True,
     ):
-        if allow_run_tool:
+        if not tool_mode == ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
             messages = self._format_question(question)
         events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
         if display:
-            self._print_graph_events(events, set())
-        return events
-
-    def iteratively_stream(self, question: Optional[str] = "", max_iterations=10, display=True):
-        messages = self._format_question(question)
-        events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
-        if display:
             _printed = set()
-            print("Starting the iterative invocation process.")
             self._print_graph_events(events, _printed)
 
-        current_state = self.get_current_state()
-        iterations = 0
-        while current_state.next and iterations < max_iterations:
-            iterations += 1
-            events = self.model_graph.stream(None, config=self.config)
-            if display:
-                print(f"Iteration {iterations}")
-                self._print_graph_events(events, _printed)
+        if tool_mode == ToolMode.CONTINUOUS:
             current_state = self.get_current_state()
+            iterations = 0
+            while current_state.next and iterations < max_iterations:
+                iterations += 1
+                events = self.model_graph.stream(None, config=self.config)
+                if display:
+                    print(f"Iteration {iterations}")
+                    self._print_graph_events(events, _printed)
+                current_state = self.get_current_state()
+        if self.output_parser:
+            chain = self.output_prompt_template | self.model | self.output_parser
+            events = self._parse_output(chain, events, max_iterations=max_iterations)
         return events
 
     def invoke(
-        self, question: Optional[str] = "", allow_run_tool: Optional[bool] = False, display=True
+        self,
+        question: Optional[str] = "",
+        tool_mode: str = ToolMode.DISALLOWED,
+        max_iterations: int = 10,
+        display=True,
     ):
-        if allow_run_tool:
+        if not tool_mode == ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
             messages = self._format_question(question)
         result = self.model_graph.invoke(messages, config=self.config)
         if display:
             _printed = set()
-            print("Starting the iterative invocation process.")
-            self._print_graph_events(result, _printed)
-        return result
-
-    def set_output_parser(self, output_parser: BaseModel):
-        self.output_parser = PydanticOutputParser(pydantic_object=output_parser)
-        return self
-
-    def iteratively_invoke(self, question: Optional[str] = "", max_iterations=10, display=True):
-        messages = self._format_question(question)
-        result = self.model_graph.invoke(messages, config=self.config)
-        if display:
-            _printed = set()
-            print("Starting the iterative invocation process.")
             self._print_graph_events(result, _printed)
 
-        current_state = self.get_current_state()
-        iterations = 0
-        while current_state.next and iterations < max_iterations:
-            iterations += 1
-            result = self.model_graph.invoke(None, config=self.config)
-            if display:
-                print(f"Iteration {iterations}")
-                self._print_graph_events(result, _printed)
+        if tool_mode == ToolMode.CONTINUOUS:
+            print("Starting the iterative invocation process.")
             current_state = self.get_current_state()
-
+            iterations = 0
+            while current_state.next and iterations < max_iterations:
+                iterations += 1
+                result = self.model_graph.invoke(None, config=self.config)
+                if display:
+                    print(f"Iteration {iterations}")
+                    self._print_graph_events(result, _printed)
+                current_state = self.get_current_state()
         if self.output_parser:
-            prompt = PromptTemplate(
-                template="Return output in required format given messages.\n{format_instructions}\n{messages}\n",
-                input_variables=["messages"],
-                partial_variables={
-                    "format_instructions": self.output_parser.get_format_instructions()
-                },
-            )
-            output_chain = prompt | self.model | self.output_parser
-            return output_chain.invoke({"messages": result["messages"]}, self.config)
+            chain = self.output_prompt_template | self.model | self.output_parser
+            result = self._parse_output(chain, result, max_iterations=max_iterations)
         return result
 
     def _build_tool_node(self, tools):
@@ -219,8 +211,8 @@ class GraphAgent(AitaAgent):
         pass
 
     def call_model(self, state: MessageState, config: RunnableConfig):
-        messages = {**state, "user_info": config.get("user_id", None)}
-        response = self.chain.invoke(messages)
+        chain = self.prompt_template | self._bind_tools()
+        response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):

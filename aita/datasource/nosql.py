@@ -1,6 +1,9 @@
 from typing import List
 
-import boto3
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 from aita.datasource.base import DataSource
 from aita.datasource.catalog import Catalog

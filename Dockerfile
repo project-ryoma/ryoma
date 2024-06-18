@@ -1,7 +1,7 @@
 # create a basic python image that install poetry and use poetry to install dependencies
 
 # Use the official Python image
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 # Set the working directory
 WORKDIR /app
@@ -9,11 +9,10 @@ WORKDIR /app
 # install poetry
 RUN pip install poetry
 
-# Copy the poetry.lock and pyproject.toml files
-COPY pyproject.toml poetry.lock ./
+COPY . /app
 
 # Install the dependencies
-RUN poetry install --with pyspark,snowflake,postgresql,dynamodb,aita_lab
+RUN poetry install --with dev,aita_lab --all-extras
 
 # Start the application
 CMD ["poetry", "run", "reflex", "run"]

@@ -1,6 +1,9 @@
 from typing import Optional
 
-import adbc_driver_postgresql.dbapi
+try:
+    import adbc_driver_postgresql.dbapi
+except ImportError:
+    adbc_driver_postgresql = None
 from adbc_driver_manager.dbapi import Connection
 from pydantic import Field
 

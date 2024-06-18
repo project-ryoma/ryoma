@@ -1,6 +1,9 @@
 from typing import Optional
 
-import adbc_driver_snowflake.dbapi
+try:
+    import adbc_driver_snowflake.dbapi
+except ImportError:
+    adbc_driver_snowflake = None
 from adbc_driver_manager.dbapi import Connection
 from langchain_core.pydantic_v1 import Field
 

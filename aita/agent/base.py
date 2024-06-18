@@ -2,6 +2,8 @@ import uuid
 
 from jupyter_ai_magics.providers import *
 from jupyter_ai_magics.utils import decompose_model_id, get_lm_providers
+from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableSerializable
 
@@ -22,7 +24,6 @@ def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[Runna
 class AitaAgent:
     config: Dict[str, Any]
     model: RunnableSerializable
-    chain: RunnableSerializable
     model_parameters: Optional[Dict]
     prompt_template: Optional[ChatPromptTemplate]
     prompt_context_template: Optional[ChatPromptTemplate]
@@ -40,6 +41,8 @@ class AitaAgent:
         model_parameters: Optional[Dict] = None,
         **kwargs,
     ):
+        self.output_prompt_template = None
+        self.output_parser = None
         self.config = {
             "configurable": {
                 "user_id": kwargs.get("user_id", str(uuid.uuid4())),
@@ -56,10 +59,10 @@ class AitaAgent:
         self._set_base_prompt_template()
         self.prompt_context_template = None
 
-        self._create_chain()
-
-    def _create_chain(self):
-        self.chain = self.prompt_template | self.model
+    def _create_chain(self, **kwargs) -> RunnableSerializable:
+        if self.output_parser:
+            return self.output_prompt_template | self.model | self.output_parser
+        return self.prompt_template | self.model
 
     def _set_base_prompt_template(self):
         self.prompt_template = ChatPromptTemplate.from_messages(
@@ -71,7 +74,6 @@ class AitaAgent:
     def set_base_prompt_template(self, base_prompt_template: str):
         self.base_prompt_template = base_prompt_template
         self._set_base_prompt_template()
-        self._create_chain()
         return self
 
     def _set_base_prompt_context_template(self):
@@ -107,7 +109,8 @@ class AitaAgent:
 
     def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
         self._format_question(question)
-        events = self.chain.stream(self.config)
+        chain = self._create_chain()
+        events = chain.stream(self.config)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
@@ -117,7 +120,25 @@ class AitaAgent:
     def get_current_state(self) -> None:
         return None
 
-    def with_structured_output(self, output_format: BaseModel):
-        parser = PydanticOutputParser(pydantic_object=output_format)
-        self.chain = self.chain | parser
+    def _parse_output(self, chain, result: dict, max_iterations=10):
+        iteration = 0
+        while iteration < max_iterations:
+            iteration += 1
+            try:
+                return chain.invoke({"messages": result["messages"]}, self.config)
+            except OutputParserException as e:
+                result["messages"] += [
+                    AIMessage(
+                        content=f"Error: {repr(e)}\n please fix your mistakes.",
+                    )
+                ]
+        return result
+
+    def set_output_parser(self, output_parser: BaseModel):
+        self.output_parser = PydanticOutputParser(pydantic_object=output_parser)
+        self.output_prompt_template = PromptTemplate(
+            template="Return output in required format with given messages.\n{format_instructions}\n{messages}\n",
+            input_variables=["messages"],
+            partial_variables={"format_instructions": self.output_parser.get_format_instructions()},
+        )
         return self
