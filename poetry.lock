@@ -3276,19 +3276,19 @@ datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
 
 [[package]]
 name = "openai-responses"
-version = "0.6.0"
+version = "0.7.0"
 description = "🧪🤖 Pytest plugin for automatically mocking OpenAI requests"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "openai_responses-0.6.0-py3-none-any.whl", hash = "sha256:9bab341819eb5971770d81a3cfab2152c0134040c65d109c07e84ba0422d0296"},
-    {file = "openai_responses-0.6.0.tar.gz", hash = "sha256:22be1f621a1a9a3a26af6a9c02ce54294d48f154264b2a5e6c3109a174336b3e"},
+    {file = "openai_responses-0.7.0-py3-none-any.whl", hash = "sha256:037f8d652fde1f308afadaedb38265d124f50c2def1a77525e1b328ec8184af0"},
+    {file = "openai_responses-0.7.0.tar.gz", hash = "sha256:5faf6cd0c80a26a14efa09050439a94521e9c801bb8c792b249e281b535155d1"},
 ]
 
 [package.dependencies]
 faker = ">=24.2.0,<25.0.0"
 faker-openai-api-provider = "0.2.0"
-openai = ">=1.25,<2.0"
+openai = ">=1.32,<1.35"
 requests-toolbelt = ">=1.0.0,<2.0.0"
 respx = ">=0.20.2,<0.21.0"
 
@@ -3410,8 +3410,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -3965,8 +3965,8 @@ astroid = ">=3.2.2,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
     {version = ">=0.2", markers = "python_version < \"3.11\""},
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
@@ -6040,6 +6040,7 @@ h11 = ">=0.8"
 httptools = {version = ">=0.5.0", optional = true, markers = "extra == \"standard\""}
 python-dotenv = {version = ">=0.13", optional = true, markers = "extra == \"standard\""}
 pyyaml = {version = ">=5.1", optional = true, markers = "extra == \"standard\""}
+typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
 uvloop = {version = ">=0.14.0,<0.15.0 || >0.15.0,<0.15.1 || >0.15.1", optional = true, markers = "(sys_platform != \"win32\" and sys_platform != \"cygwin\") and platform_python_implementation != \"PyPy\" and extra == \"standard\""}
 watchfiles = {version = ">=0.13", optional = true, markers = "extra == \"standard\""}
 websockets = {version = ">=10.4", optional = true, markers = "extra == \"standard\""}
@@ -6622,4 +6623,4 @@ snowflake = ["adbc-driver-snowflake"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e6772ae28718293f0d22f12f6319386787ebd2c83801d743f082380e4a18aff9"
+content-hash = "55ac3395add18c6875dc09b55fb48a2d60524859c46088c5fd0f9759fa70db55"
