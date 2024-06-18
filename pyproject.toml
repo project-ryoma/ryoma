@@ -27,6 +27,7 @@ classifiers = [
 
 packages = [
     { include = "aita" },
+    { include = "aita_lab" }
 ]
 
 
