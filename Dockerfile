@@ -5,8 +5,12 @@ FROM python:3.9-slim
 
 # install additional dependencies like unzip
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    software-properties-common \
     unzip \
-    curl
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
@@ -19,10 +23,13 @@ COPY . /app
 # Install the dependencies
 RUN poetry install --with dev,aita_lab --all-extras
 
+# Deploy templates and prepare app
+RUN poetry run reflex init
 
-RUN reflex init
+# Download all npm dependencies and compile frontend
+RUN poetry run reflex export --frontend-only --no-zip
 
-EXPOSE 3000
+RUN poetry run reflex db migrate
 
 # Start the application
-CMD ["poetry", "run", "reflex", "run"]
+CMD ["poetry", "run", "reflex", "run", "--env", "prod"]
