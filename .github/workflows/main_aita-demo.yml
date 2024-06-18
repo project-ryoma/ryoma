@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_PACKAGE_PATH: "./Dockerfile"
+  AZURE_WEBAPP_PACKAGE_PATH: "./"
   COMMIT_SHA: ${{ github.sha }}
 
 jobs:
