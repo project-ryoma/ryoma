@@ -121,7 +121,7 @@ class CreateChatCompletionEventStreamWithToolCall(EventStream):
         yield self.event(None, chunk)
 
 
-def create_chat_completion_response(request: Request) -> Response:
+def create_chat_completion_response_stream(request: Request) -> Response:
     stream = CreateChatCompletionEventStream()
     return Response(201, content=stream)
 

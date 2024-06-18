@@ -6,14 +6,14 @@ import pytest
 from openai_responses import OpenAIMock
 
 from aita.agent.base import AitaAgent
-from tests.aita.test_utils import create_chat_completion_response
+from tests.aita.test_utils import create_chat_completion_response_stream, mock_chat_response
 
 os.environ["OPENAI_API_KEY"] = "foo"
 
 
 @openai_responses.mock()
 def test_create_chat_completion_stream(openai_mock: OpenAIMock):
-    openai_mock.chat.completions.create.response = create_chat_completion_response
+    openai_mock.chat.completions.create.response = create_chat_completion_response_stream
 
     client = openai.Client(api_key="sk-fake123")
     completion = client.chat.completions.create(
@@ -41,7 +41,6 @@ def agent():
 
 @openai_responses.mock()
 def test_chat(agent, openai_mock: OpenAIMock):
-    openai_mock.chat.completions.create.response = create_chat_completion_response
-    chat_response = agent.chat("Hello, world!", display=False)
-    first_response = next(chat_response)
-    assert first_response.content == ""
+    openai_mock.chat.completions.create.response = mock_chat_response("Hello, world!")
+    chat_response = agent.invoke("Hello, world!", display=False)
+    assert chat_response.content == "Hello, world!"

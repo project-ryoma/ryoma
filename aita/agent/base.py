@@ -114,8 +114,22 @@ class AitaAgent:
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
-        else:
-            return events
+        if self.output_parser:
+            chain = self.output_prompt_template | self.model | self.output_parser
+            events = self._parse_output(chain, events)
+        return events
+
+    def invoke(self, question: Optional[str] = "", display: Optional[bool] = True):
+        self._format_question(question)
+        chain = self._create_chain()
+        results = chain.invoke(self.config)
+        if display:
+            for result in results:
+                print(result.content, end="", flush=True)
+        if self.output_parser:
+            chain = self.output_prompt_template | self.model | self.output_parser
+            results = self._parse_output(chain, results)
+        return results
 
     def get_current_state(self) -> None:
         return None

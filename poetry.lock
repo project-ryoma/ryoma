@@ -2605,13 +2605,13 @@ uuid6 = ">=2024.1.12,<2025.0.0"
 
 [[package]]
 name = "langsmith"
-version = "0.1.78"
+version = "0.1.79"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langsmith-0.1.78-py3-none-any.whl", hash = "sha256:87bc5d9072bfcb6392d7552cbcd6089dcc1faed36d688b1587d80bd48a1acba2"},
-    {file = "langsmith-0.1.78.tar.gz", hash = "sha256:d9112d2e9298ec6b02d3b1afec6ed557df9db3746c79d34ef3b448fc18e116cd"},
+    {file = "langsmith-0.1.79-py3-none-any.whl", hash = "sha256:c7f2c23981917713b5515b773f37c84ff68a7adf803476e2ebb5adcb36a04202"},
+    {file = "langsmith-0.1.79.tar.gz", hash = "sha256:d215718cfdcdf4a011126b7a3d4a37eee96d887e59ac1e628a57e24b2bfa3163"},
 ]
 
 [package.dependencies]
@@ -5940,16 +5940,6 @@ files = [
 ]
 
 [[package]]
-name = "unzip"
-version = "1.0.0"
-description = "解串列函式"
-optional = false
-python-versions = "*"
-files = [
-    {file = "unzip-1.0.0.tar.gz", hash = "sha256:62c503d8fc0b16f010811335a24b8b67bc4d175396ab53c449d386ea6d64fda3"},
-]
-
-[[package]]
 name = "uri-template"
 version = "1.3.0"
 description = "RFC 6570 URI Template Processor"
@@ -6632,4 +6622,4 @@ snowflake = ["adbc-driver-snowflake"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4a7723d2835c711f3970b5eb795d434a2811a3a0c849aa603966fb19427e972c"
+content-hash = "e6772ae28718293f0d22f12f6319386787ebd2c83801d743f082380e4a18aff9"
