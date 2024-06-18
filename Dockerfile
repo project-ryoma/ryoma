@@ -19,5 +19,10 @@ COPY . /app
 # Install the dependencies
 RUN poetry install --with dev,aita_lab --all-extras
 
+
+RUN reflex init
+
+EXPOSE 3000
+
 # Start the application
 CMD ["poetry", "run", "reflex", "run"]
