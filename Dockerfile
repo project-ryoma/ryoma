@@ -31,5 +31,8 @@ RUN poetry run reflex export --frontend-only --no-zip
 
 RUN poetry run reflex db migrate
 
+# Needed until Reflex properly passes SIGTERM on backend.
+STOPSIGNAL SIGKILL
+
 # Start the application
 CMD ["poetry", "run", "reflex", "run", "--env", "prod"]
