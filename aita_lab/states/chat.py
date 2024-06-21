@@ -59,9 +59,9 @@ class ChatState(rx.State):
 
     current_agent_type: str = ""
 
-    current_tools: list[Tool] = [Tool(id="1", name="tool1", args={}), Tool(id="2", name="tool2", args={})]
+    current_tools: list[Tool] = []
 
-    current_tool: Optional[Tool] = Tool(id="1", name="tool1", args={})
+    current_tool: Optional[Tool] = None
 
     # create an example dataframe
     run_tool_output: Optional[RunToolOutput] = RunToolOutput(data=pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}),
