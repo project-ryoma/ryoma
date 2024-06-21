@@ -132,3 +132,5 @@ var/
 venv.bak/
 venv/
 wheels/
+
+research/dataset
