@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Set
+from typing import List, Optional
 
 import logging
 
@@ -6,6 +6,7 @@ import reflex as rx
 from sqlmodel import select
 
 from aita.datasource.factory import DataSourceFactory, DataSourceProvider
+from aita_lab.states.catalog import CatalogState
 
 
 class DataSource(rx.Model, table=True):
@@ -25,6 +26,7 @@ class DataSourceState(rx.State):
     num_datasources: int
     sort_value: str
     is_open: bool = False
+    allow_crawl_catalog: bool = True
 
     # DataSource related attributes
     connection_url: str
@@ -32,6 +34,9 @@ class DataSourceState(rx.State):
 
     def toggle_dialog(self):
         self.is_open = not self.is_open
+
+    def change_crawl_catalog(self, value: bool):
+        self.allow_crawl_catalog = value
 
     @rx.var
     def datasource_attributes(self) -> List[str]:
@@ -50,7 +55,7 @@ class DataSourceState(rx.State):
         # required by specific datasource
         model_fields = DataSourceProvider[self.datasource_type].value.__fields__
         if not all(
-            getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
+                getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
         ):
             return True
         return False
@@ -60,7 +65,7 @@ class DataSourceState(rx.State):
 
     def get_datasource_attributes(self) -> Optional[dict]:
         if self.datasource_type:
-            model_fields = DataSourceProvider[self.datasource_type].value.model_fields
+            model_fields = DataSourceProvider[self.datasource_type].value.__fields__
             return {key: getattr(self, key) for key in model_fields.keys() if key != "type"}
         else:
             return None
@@ -92,18 +97,20 @@ class DataSourceState(rx.State):
             return
         config = self.get_datasource_attributes()
         try:
-            DataSourceFactory.create_datasource(self.datasource_type, **config).connect()
+            ds = DataSourceFactory.create_datasource(self.datasource_type, **config)
+            ds.connect()
             logging.info(f"Connected to {self.datasource_type}")
-            datasource = DataSource(
-                name=self.name,
-                datasource_type=self.datasource_type,
-                connection_url=self.connection_url,
-            )
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource_type}: {e}")
             return
+        if self.allow_crawl_catalog:
+            CatalogState.crawl_data_catalog(self.name, ds)
         with rx.session() as session:
-            session.add(datasource)
+            session.add(DataSource(
+                name=self.name,
+                datasource_type=self.datasource_type,
+                connection_url=self.connection_url,
+            ))
             session.commit()
         self.load_entries()
         self.toggle_dialog()

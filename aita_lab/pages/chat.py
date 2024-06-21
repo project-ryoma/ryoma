@@ -231,6 +231,78 @@ def agent_type_selector() -> rx.Component:
     )
 
 
+def tool_panel() -> rx.Component:
+    return rx.chakra.box(
+        rx.flex(
+            rx.select.root(
+                rx.select.trigger(),
+                rx.select.content(
+                    rx.select.group(
+                        rx.select.label("Select a tool"),
+                        rx.foreach(
+                            ChatState.current_tools,
+                            lambda x: rx.select.item(x.id, value=x.id),
+                        ),
+                    ),
+                ),
+                value=ChatState.current_tool.id,
+                on_change=ChatState.set_current_tool_by_id,
+                padding="10px",
+            ),
+            rx.select.root(
+                rx.select.trigger(),
+                rx.select.content(
+                    rx.select.group(
+                        rx.select.label("Tool Name"),
+                        rx.foreach(
+                            ChatState.current_tools,
+                            lambda x: rx.select.item(x.name, value=x.name),
+                        ),
+                    ),
+                ),
+                value=ChatState.current_tool.name,
+                on_change=ChatState.set_current_tool_by_name,
+                padding="10px",
+            ),
+            rx.chakra.button(
+                rx.icon(tag="play"),
+                size="xs",
+                on_click=ChatState.run_tool,
+            ),
+            rx.chakra.button(
+                rx.icon(tag="circle_stop"),
+                size="xs",
+                on_click=ChatState.cancel_tool,
+            ),
+            align="center",
+            spacing="2",
+            width="100%",
+        ),
+        rx.cond(
+            ChatState.current_tool is not None,
+            rx.box(
+                rx.foreach(
+                    ChatState.current_tool.args,
+                    lambda arg: rx.box(
+                        code_editor(
+                            value=arg[1],
+                            on_change=lambda x: ChatState.set_current_tool_arg(
+                                ChatState.current_tool.id, arg[0], x
+                            ),
+                            width="100%",
+                            min_height="20e",
+                            language="python",
+                            theme="material",
+                            font_size="1em",
+                            margin_top="10px",
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+
+
 def run_tool_wrapper() -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(
@@ -240,68 +312,20 @@ def run_tool_wrapper() -> rx.Component:
                     "Tool",
                     asi_="div",
                     mb="1",
-                    size="2",
+                    size="3",
                     weight="bold",
+                    padding="4px",
                 ),
-                rx.chakra.box(
-                    rx.flex(
-                        rx.select.root(
-                            rx.select.trigger(),
-                            rx.select.content(
-                                rx.select.group(
-                                    rx.select.label("Select a tool"),
-                                    rx.foreach(
-                                        ChatState.current_tools,
-                                        lambda x: rx.select.item(x.id, value=x.id),
-                                    ),
-                                ),
-                            ),
-                            value=ChatState.current_tool.id,
-                            on_change=ChatState.set_current_tool,
-                            padding="10px",
-                        ),
-                        rx.chakra.button(
-                            rx.icon(tag="play"),
-                            size="xs",
-                            on_click=ChatState.run_tool,
-                        ),
-                        rx.chakra.button(
-                            rx.icon(tag="circle_stop"),
-                            size="xs",
-                            on_click=ChatState.cancel_tool,
-                        ),
-                        align="center",
-                        spacing="2",
-                        width="100%",
-                    ),
-                    rx.cond(
-                        ChatState.current_tool is not None,
-                        rx.box(
-                            rx.foreach(
-                                ChatState.current_tool.args,
-                                lambda arg: rx.box(
-                                    code_editor(
-                                        value=arg[1],
-                                        on_change=lambda x: ChatState.set_current_tool_arg(
-                                            ChatState.current_tool.id, arg[0], x
-                                        ),
-                                        width="100%",
-                                        height="20em",
-                                        language="python",
-                                        theme="material",
-                                        font_size="1em",
-                                        margin_top="10px",
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
+                tool_panel(),
             ),
             padding="4px",
+            border=f"1px solid {rx.color('mauve', 3)}",
+            border_radius="md",
+            width="100%",
         ),
         tool_output(),
         width="100%",
+        min_width="40em",
         padding="10px",
         gap="2",
         align_items="stretch",
@@ -315,14 +339,24 @@ def run_tool_wrapper() -> rx.Component:
 def tool_output() -> rx.Component:
     return rx.cond(
         ChatState.run_tool_output.show,
-        rx.data_table(
-            data=ChatState.run_tool_output.data,
-            width="100%",
-            padding="20px",
-            pagination=True,
-            search=True,
-            sort=True,
-            max_height="400px",
+        rx.box(
+            rx.text(
+                "Output",
+                asi_="div",
+                mb="1",
+                size="3",
+                weight="bold",
+                padding="4px",
+            ),
+            rx.data_table(
+                data=ChatState.run_tool_output.data,
+                width="100%",
+                padding="20px",
+                pagination=True,
+                search=True,
+                sort=True,
+                max_height="400px",
+            ),
         ),
     )
 

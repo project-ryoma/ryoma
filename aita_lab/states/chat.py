@@ -1,9 +1,7 @@
-from typing import Any, List, Optional, Union
+from typing import Optional, Union
 
 import logging
-from abc import abstractmethod
 
-import pandas
 import pandas as pd
 import reflex as rx
 from langchain_core.messages import HumanMessage
@@ -61,16 +59,21 @@ class ChatState(rx.State):
 
     current_agent_type: str = ""
 
-    current_tools: list[Tool]
+    current_tools: list[Tool] = [Tool(id="1", name="tool1", args={}), Tool(id="2", name="tool2", args={})]
 
-    current_tool: Optional[Tool] = None
+    current_tool: Optional[Tool] = Tool(id="1", name="tool1", args={})
 
     # create an example dataframe
-    run_tool_output: Optional[RunToolOutput] = None
+    run_tool_output: Optional[RunToolOutput] = RunToolOutput(data=pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}),
+                                                             show=True)
 
-    def set_current_tool(self, tool_id: str):
+    def set_current_tool_by_id(self, tool_id: str):
         logging.info(f"Setting current tool to {tool_id}")
         self.current_tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
+
+    def set_current_tool_by_name(self, tool_name: str):
+        logging.info(f"Setting current tool to {tool_name}")
+        self.current_tool = next(filter(lambda x: x.name == tool_name, self.current_tools), None)
 
     def set_current_tool_arg(self, tool_id: str, key: str, value: str):
         tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
@@ -86,11 +89,13 @@ class ChatState(rx.State):
         logging.info(f"Running tool {self.current_tool.name} with args {self.current_tool.args}")
         try:
             result = self._current_agent.call_tool(self.current_tool.name, self.current_tool.id)
+            print(result)
             if isinstance(result, DataFrame):
                 self.run_tool_output = RunToolOutput(data=result, show=True)
         except Exception as e:
             logging.error(f"Error running tool {self.current_tool.name}: {e}")
         finally:
+            print(self.run_tool_output)
             self.delete_current_tool()
 
     def cancel_tool(self):

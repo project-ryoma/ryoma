@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from aita.datasource.factory import DataSourceProvider, get_supported_datasources
+from aita.datasource.factory import get_supported_datasources
 from aita_lab.states.datasource import DataSource, DataSourceState
 from aita_lab.templates import template
 
@@ -110,6 +110,14 @@ def add_datasource():
                     mb="3",
                     mt="3",
                 ),
+            ),
+            rx.flex(
+                rx.switch(
+                    checked=DataSourceState.allow_crawl_catalog,
+                    on_change=DataSourceState.change_crawl_catalog
+                ),
+                rx.text("Crawl Catalog"),
+                spacing="2",
             ),
             rx.flex(
                 rx.dialog.close(

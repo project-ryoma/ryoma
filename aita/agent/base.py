@@ -8,6 +8,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableSerializable
 
 from aita.datasource.base import DataSource
+from aita.datasource.catalog import Catalog
 
 
 def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[RunnableSerializable]:
@@ -97,14 +98,18 @@ class AitaAgent:
     def _format_question(self, question: str):
         self.prompt_template.append(("user", question))
 
-    def _fill_prompt_context(self, context: str):
+    def _fill_prompt_context(self, prompt_context: str):
         if not self.prompt_context_template:
             self._set_base_prompt_context_template()
-        prompt_context_template = self.prompt_context_template.partial(prompt_context=context)
+        prompt_context_template = self.prompt_context_template.partial(prompt_context=prompt_context)
         self.prompt_template.append(prompt_context_template)
 
     def add_datasource(self, datasource: DataSource):
         self._fill_prompt_context(str(datasource.get_metadata()))
+        return self
+
+    def add_data_catalog(self, catalog: Catalog):
+        self._fill_prompt_context(str(catalog))
         return self
 
     def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
