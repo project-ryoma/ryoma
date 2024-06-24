@@ -4,9 +4,9 @@ import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
 
-from aita.tool.pandas import PandasTool
-from aita.tool.pyspark import PySparkTool
-from aita.tool.sql import SqlQueryTool
+from aita.tool.pandas_tool import PandasTool
+from aita.tool.spark_tool import SparkTool
+from aita.tool.sql_tool import SqlQueryTool
 from tests.aita.test_datasource import MockSqlDataSource
 
 
@@ -34,7 +34,7 @@ def pyspark_session():
 
 
 def test_pyspark_tool(pyspark_session, pandas_dataframe):
-    pyspark_tool = PySparkTool()
+    pyspark_tool = SparkTool()
     pyspark_tool.update_script_context({"spark_session": pyspark_session, "df": pandas_dataframe})
     script = """
     spark_session.createDataFrame(df).show()

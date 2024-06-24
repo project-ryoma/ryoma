@@ -23,6 +23,3 @@ class SqlAgent(GraphAgent):
             model,
             model_parameters,
         )
-
-
-print(SqlAgent.type)

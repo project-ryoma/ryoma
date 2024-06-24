@@ -24,15 +24,17 @@ def agent_card(agent: Agent):
                 height="300px",
                 width="50%",
                 margin_right="20px",
+                cursor="pointer",
+                _hover={"background_color": rx.color("gray", 2)},
             )
         ),
         rx.dialog.content(
-            rx.dialog.title(agent.name),
-            rx.dialog.description(""),
+            rx.dialog.title(agent.name, size="6"),
+            rx.dialog.description(agent.description),
             rx.cond(
                 AgentState.current_agent_graph is not None,
                 rx.vstack(
-                    rx.heading("Agent Flow", size="6"),
+                    rx.heading("Agent Flow", size="4"),
                     react_flow(
                         background(),
                         controls(),

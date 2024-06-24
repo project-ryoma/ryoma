@@ -2,16 +2,15 @@
 
 import reflex as rx
 
-from aita_lab.states.tool import ToolState
+from aita_lab.states.tool import Tool, ToolState
 from aita_lab.templates import template
 
 
-def content_grid():
-    """Create a content grid."""
-    return rx.chakra.flex(
-        rx.foreach(
-            ToolState.tools,
-            lambda tool: rx.chakra.card(
+def tool_card(tool: Tool):
+    """Create a tool card."""
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.chakra.card(
                 rx.chakra.text(
                     tool.description,
                     no_of_lines=3,
@@ -23,7 +22,54 @@ def content_grid():
                 height="300px",
                 width="200px",
                 margin="20px",
+                cursor="pointer",
+                _hover={"background_color": rx.color("gray", 2)},
             ),
+        ),
+        rx.dialog.content(
+            rx.dialog.title(tool.name, size="6"),
+            rx.dialog.description(tool.description),
+            rx.cond(
+                tool.args is not None,
+                rx.vstack(
+                    rx.heading("Tool Arguments", size="4"),
+                    rx.flex(
+                        rx.foreach(
+                            tool.args,
+                            lambda arg: rx.flex(
+                                rx.text(
+                                    arg[0],
+                                    as_="div",
+                                    size="2",
+                                    mb="1",
+                                    weight="bold",
+                                ),
+                                rx.code_block(arg[1]),
+                                direction="column",
+                                spacing="3",
+                            ),
+                        )
+                    ),
+                    margin_top="20px",
+                    width="100%",
+                ),
+            ),
+            rx.flex(
+                rx.dialog.close(
+                    rx.button("Close", size="2"),
+                ),
+                justify="end",
+            ),
+        ),
+    )
+
+
+def content_grid():
+    """Create a content grid."""
+    return rx.chakra.flex(
+        rx.foreach(
+            ToolState.tools,
+            lambda tool: tool_card(tool),
         ),
         flex_wrap="wrap",
     )
