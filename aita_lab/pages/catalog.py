@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aita_lab.templates import template
 from aita_lab.states.catalog import CatalogState, CatalogTable
+from aita_lab.templates import template
 
 
 def catalog_search():
@@ -97,7 +97,7 @@ def catalog_grid():
                         rx.table.column_header_cell("Schema"),
                         rx.table.column_header_cell("Table"),
                         rx.table.column_header_cell("Data Source"),
-                        rx.table.column_header_cell("Delete")
+                        rx.table.column_header_cell("Delete"),
                     ),
                 ),
                 rx.table.body(rx.foreach(CatalogState.catalogs, show_catalog)),

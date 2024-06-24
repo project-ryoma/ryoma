@@ -55,7 +55,7 @@ class DataSourceState(rx.State):
         # required by specific datasource
         model_fields = DataSourceProvider[self.datasource_type].value.__fields__
         if not all(
-                getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
+            getattr(self, key) for key in model_fields.keys() if key != "type" and key != "name"
         ):
             return True
         return False
@@ -106,11 +106,13 @@ class DataSourceState(rx.State):
         if self.allow_crawl_catalog:
             CatalogState.crawl_data_catalog(self.name, ds)
         with rx.session() as session:
-            session.add(DataSource(
-                name=self.name,
-                datasource_type=self.datasource_type,
-                connection_url=self.connection_url,
-            ))
+            session.add(
+                DataSource(
+                    name=self.name,
+                    datasource_type=self.datasource_type,
+                    connection_url=self.connection_url,
+                )
+            )
             session.commit()
         self.load_entries()
         self.toggle_dialog()

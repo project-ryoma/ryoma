@@ -2,11 +2,11 @@
 
 import reflex as rx
 
-from aita_lab.states.agent import AgentState, Agent
+from aita_lab.components.reactflow import background, controls, react_flow
+from aita_lab.states.agent import Agent, AgentState
 from aita_lab.states.graph import GraphState
 from aita_lab.states.tool import ToolState
 from aita_lab.templates import template
-from aita_lab.components.reactflow import react_flow, background, controls
 
 
 def agent_card(agent: Agent):
@@ -28,9 +28,7 @@ def agent_card(agent: Agent):
         ),
         rx.dialog.content(
             rx.dialog.title(agent.name),
-            rx.dialog.description(
-                ""
-            ),
+            rx.dialog.description(""),
             rx.cond(
                 AgentState.current_agent_graph is not None,
                 rx.vstack(
@@ -53,8 +51,8 @@ def agent_card(agent: Agent):
                 rx.dialog.close(
                     rx.button("Close", size="2"),
                 ),
-                justify="end"
-            )
+                justify="end",
+            ),
         ),
         on_open_change=lambda is_open: AgentState.open_agent(is_open, agent),
     )
@@ -64,10 +62,7 @@ def content_grid():
     """Create a content grid."""
     return rx.vstack(
         rx.chakra.text("Click on an agent to view its flow", width="100", padding_y="4"),
-        rx.chakra.flex(
-            rx.foreach(AgentState.agents, agent_card, width="100"),
-            width="100%"
-        )
+        rx.chakra.flex(rx.foreach(AgentState.agents, agent_card, width="100"), width="100%"),
     )
 
 
@@ -78,7 +73,7 @@ def create_agent_flow():
             rx.select(
                 ToolState.tool_names,
                 placeholder="Select a tool to add",
-                on_change=GraphState.add_tool_node
+                on_change=GraphState.add_tool_node,
             ),
             rx.button(
                 "Create",
@@ -110,10 +105,7 @@ def create_agent_flow():
     )
 
 
-@template(route="/agent", title="Agent", on_load=[
-    AgentState.on_load,
-    ToolState.on_load
-])
+@template(route="/agent", title="Agent", on_load=[AgentState.on_load, ToolState.on_load])
 def agent() -> rx.Component:
     """The tool page.
 

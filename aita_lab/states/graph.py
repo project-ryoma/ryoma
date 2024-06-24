@@ -1,36 +1,35 @@
-from functools import reduce
+from typing import Any, Dict, List, Optional
 
 import json
-import reflex as rx
 import random
+from functools import reduce
 
+import reflex as rx
 from reflex.state import MutableProxy, serialize_mutable_proxy
-
-from typing import List, Any, Dict, Optional
 
 initial_nodes = [
     {
-        'id': '1',
-        'type': 'input',
-        'data': {'label': '__start__'},
-        'position': {'x': 200, 'y': 25},
+        "id": "1",
+        "type": "input",
+        "data": {"label": "__start__"},
+        "position": {"x": 200, "y": 25},
     },
     {
-        'id': '2',
-        'data': {'label': 'agent'},
-        'position': {'x': 200, 'y': 125},
+        "id": "2",
+        "data": {"label": "agent"},
+        "position": {"x": 200, "y": 125},
     },
     {
-        'id': '3',
-        'type': 'output',
-        'data': {'label': '__end__'},
-        'position': {'x': 200, 'y': 250},
+        "id": "3",
+        "type": "output",
+        "data": {"label": "__end__"},
+        "position": {"x": 200, "y": 250},
     },
 ]
 
 initial_edges = [
-    {'id': 'e1-2', 'source': '1', 'target': '2', 'label': '*', 'animated': True},
-    {'id': 'e2-3', 'source': '2', 'target': '3', 'label': '*', 'animated': True},
+    {"id": "e1-2", "source": "1", "target": "2", "label": "*", "animated": True},
+    {"id": "e2-3", "source": "2", "target": "3", "label": "*", "animated": True},
 ]
 
 
@@ -44,23 +43,26 @@ def to_dict_if_proxy(obj):
 
 def handle_parent_expand(res: List[Any], update_item: Dict[str, Any]) -> None:
     for item in res:
-        if item.get('id') == update_item.get('parentNode'):
-            item['expanded'] = True
+        if item.get("id") == update_item.get("parentNode"):
+            item["expanded"] = True
             break
 
 
-def apply_changes(changes: List[Dict[str, Any]], elements: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def apply_changes(
+    changes: List[Dict[str, Any]], elements: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     # we need this hack to handle the setNodes and setEdges function of the useReactFlow hook for controlled flows
-    if any(c['type'] == 'reset' for c in changes):
-        return [c['item'] for c in changes if c['type'] == 'reset']
+    if any(c["type"] == "reset" for c in changes):
+        return [c["item"] for c in changes if c["type"] == "reset"]
 
-    init_elements = [c['item'] for c in changes if c['type'] == 'add']
+    init_elements = [c["item"] for c in changes if c["type"] == "add"]
     return reduce(lambda res, item: apply_change(res, item, changes), elements, init_elements)
 
 
-def apply_change(res: List[Dict[str, Any]], item: Dict[str, Any], changes: List[Dict[str, Any]]) -> List[
-    Dict[str, Any]]:
-    current_changes = [c for c in changes if c['id'] == item['id']]
+def apply_change(
+    res: List[Dict[str, Any]], item: Dict[str, Any], changes: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    current_changes = [c for c in changes if c["id"] == item["id"]]
 
     if not current_changes:
         res.append(item)
@@ -70,28 +72,31 @@ def apply_change(res: List[Dict[str, Any]], item: Dict[str, Any], changes: List[
 
     for current_change in current_changes:
         if current_change:
-            if current_change['type'] == 'select':
-                update_item['selected'] = current_change['selected']
-            elif current_change['type'] == 'position':
-                if 'position' in current_change:
-                    update_item['position'] = current_change['position']
-                if 'positionAbsolute' in current_change:
-                    update_item['positionAbsolute'] = current_change['positionAbsolute']
-                if 'dragging' in current_change:
-                    update_item['dragging'] = current_change['dragging']
-                if update_item.get('expandParent'):
+            if current_change["type"] == "select":
+                update_item["selected"] = current_change["selected"]
+            elif current_change["type"] == "position":
+                if "position" in current_change:
+                    update_item["position"] = current_change["position"]
+                if "positionAbsolute" in current_change:
+                    update_item["positionAbsolute"] = current_change["positionAbsolute"]
+                if "dragging" in current_change:
+                    update_item["dragging"] = current_change["dragging"]
+                if update_item.get("expandParent"):
                     handle_parent_expand(res, update_item)
-            elif current_change['type'] == 'dimensions':
-                if 'dimensions' in current_change:
-                    update_item['width'] = current_change['dimensions']['width']
-                    update_item['height'] = current_change['dimensions']['height']
-                if 'updateStyle' in current_change:
-                    update_item['style'] = {**(update_item.get('style', {})), **current_change['dimensions']}
-                if 'resizing' in current_change:
-                    update_item['resizing'] = current_change['resizing']
-                if update_item.get('expandParent'):
+            elif current_change["type"] == "dimensions":
+                if "dimensions" in current_change:
+                    update_item["width"] = current_change["dimensions"]["width"]
+                    update_item["height"] = current_change["dimensions"]["height"]
+                if "updateStyle" in current_change:
+                    update_item["style"] = {
+                        **(update_item.get("style", {})),
+                        **current_change["dimensions"],
+                    }
+                if "resizing" in current_change:
+                    update_item["resizing"] = current_change["resizing"]
+                if update_item.get("expandParent"):
                     handle_parent_expand(res, update_item)
-            elif current_change['type'] == 'remove':
+            elif current_change["type"] == "remove":
                 return res
 
     res.append(update_item)
@@ -105,23 +110,24 @@ class Graph(rx.Model):
 
 class GraphState(rx.State):
     """The app state."""
+
     graph: Graph = Graph(nodes=initial_nodes, edges=initial_edges)
 
     current_tool: Optional[str]
 
     def add_tool_node(self, tool):
         self.current_tool = tool
-        new_node_id = f'{len(self.graph.nodes) + 1}'
-        node_type = 'tool'
+        new_node_id = f"{len(self.graph.nodes) + 1}"
+        node_type = "tool"
         x = random.randint(0, 500)
         y = random.randint(0, 500)
 
         new_node = {
-            'id': new_node_id,
-            'type': node_type,
-            'data': {'label': self.current_tool},
-            'position': {'x': x, 'y': y},
-            'draggable': True,
+            "id": new_node_id,
+            "type": node_type,
+            "data": {"label": self.current_tool},
+            "position": {"x": x, "y": y},
+            "draggable": True,
         }
         self.graph.nodes.append(new_node)
 
@@ -129,19 +135,19 @@ class GraphState(rx.State):
         self.graph = graph
 
     def add_random_node(self):
-        new_node_id = f'{len(self.graph.nodes) + 1}'
-        node_type = random.choice(['default'])
+        new_node_id = f"{len(self.graph.nodes) + 1}"
+        node_type = random.choice(["default"])
         # Label is random number
         label = new_node_id
         x = random.randint(0, 500)
         y = random.randint(0, 500)
 
         new_node = {
-            'id': new_node_id,
-            'type': node_type,
-            'data': {'label': label},
-            'position': {'x': x, 'y': y},
-            'draggable': True,
+            "id": new_node_id,
+            "type": node_type,
+            "data": {"label": label},
+            "position": {"x": x, "y": y},
+            "draggable": True,
         }
         self.graph.nodes.append(new_node)
 
@@ -159,13 +165,15 @@ class GraphState(rx.State):
                 break
 
         # Add the new edge
-        self.graph.edges.append({
-            "id": f"e{new_edge['source']}-{new_edge['target']}",
-            "source": new_edge["source"],
-            "target": new_edge["target"],
-            "label": random.choice(["+", "-", "*", "/"]),
-            "animated": True,
-        })
+        self.graph.edges.append(
+            {
+                "id": f"e{new_edge['source']}-{new_edge['target']}",
+                "source": new_edge["source"],
+                "target": new_edge["target"],
+                "label": random.choice(["+", "-", "*", "/"]),
+                "animated": True,
+            }
+        )
 
     def on_nodes_change(self, changes):
         nodes = []

@@ -6,14 +6,14 @@ import pandas as pd
 import reflex as rx
 from langchain_core.messages import HumanMessage
 from pandas import DataFrame
-
 from sqlmodel import select
+
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
 from aita.agent.graph import GraphAgent
+from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.tool import Tool
-from aita_lab.states.base import BaseState
 
 
 class QA(rx.Base):
@@ -77,8 +77,9 @@ class ChatState(BaseState):
     current_tool: Optional[Tool] = None
 
     # create an example dataframe
-    run_tool_output: Optional[RunToolOutput] = RunToolOutput(data=pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}),
-                                                             show=True)
+    run_tool_output: Optional[RunToolOutput] = RunToolOutput(
+        data=pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}), show=True
+    )
 
     def set_current_tool_by_id(self, tool_id: str):
         logging.info(f"Setting current tool to {tool_id}")
@@ -157,9 +158,7 @@ class ChatState(BaseState):
         return list(self.chats.keys())
 
     def _create_agent(self, **kwargs):
-        logging.info(
-            f"Creating {self.current_agent_type} agent with model {self.current_model}"
-        )
+        logging.info(f"Creating {self.current_agent_type} agent with model {self.current_model}")
         if not self._current_agent or self._current_agent.type != self.current_agent_type:
             self._current_agent = AgentFactory.create_agent(
                 agent_type=self.current_agent_type,
@@ -222,15 +221,19 @@ class ChatState(BaseState):
                     self.current_tool = tool
 
             # Add the tool call to the answer
-            self.chats[self.current_chat][-1].answer += \
-                f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
+            self.chats[self.current_chat][
+                -1
+            ].answer += f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
 
         # Toggle the processing flag.
         self.processing = False
 
         # commit the chat to the database
-        self._commit_chat(self.current_chat, self.chats[self.current_chat][-1].question,
-                          self.chats[self.current_chat][-1].answer)
+        self._commit_chat(
+            self.current_chat,
+            self.chats[self.current_chat][-1].question,
+            self.chats[self.current_chat][-1].answer,
+        )
 
     def _commit_chat(self, title: str, question: str, answer: str):
         with rx.session() as session:
@@ -252,9 +255,7 @@ class ChatState(BaseState):
         with rx.session() as session:
             chats = session.exec(select(Chat).where(Chat.user == self.user.name)).all()
             for chat in chats:
-                self.chats[chat.title] = [
-                    QA(question=chat.question, answer=chat.answer)
-                ]
+                self.chats[chat.title] = [QA(question=chat.question, answer=chat.answer)]
             if not self.chats:
                 self.chats = DEFAULT_CHATS
 

@@ -1,10 +1,12 @@
 from typing import Optional
 
-import reflex as rx
 import random
-from langchain_core.runnables.graph import Node, Edge
+
+import reflex as rx
+from langchain_core.runnables.graph import Edge, Node
+
+from aita.agent.factory import AgentFactory, get_supported_agents
 from aita.agent.graph import GraphAgent
-from aita.agent.factory import get_supported_agents, AgentFactory
 from aita_lab.states.graph import Graph
 
 
@@ -36,12 +38,7 @@ def create_agent_graph_node(node: Node):
 
 
 def create_agent_graph_edge(id, edge: Edge):
-    return {
-        "id": id,
-        "source": edge.source,
-        "target": edge.target,
-        "animated": True
-    }
+    return {"id": id, "source": edge.source, "target": edge.target, "animated": True}
 
 
 class AgentState(rx.State):
@@ -57,7 +54,7 @@ class AgentState(rx.State):
             graph = passthrough_agent.get_graph()
             self.current_agent_graph = Graph(
                 nodes=[create_agent_graph_node(node) for _, node in graph.nodes.items()],
-                edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)]
+                edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)],
             )
 
     @rx.var
@@ -65,10 +62,10 @@ class AgentState(rx.State):
         return [agent.name for agent in self.agents]
 
     def on_load(self):
-        self.agents = [Agent(
-            name=agent.name,
-            description=agent.value.description
-        ) for agent in get_supported_agents()]
+        self.agents = [
+            Agent(name=agent.name, description=agent.value.description)
+            for agent in get_supported_agents()
+        ]
 
     def create_agent(self):
         return

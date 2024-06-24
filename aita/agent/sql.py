@@ -1,7 +1,12 @@
 from typing import Dict, Optional
 
 from aita.agent.graph import GraphAgent
-from aita.tool.sql_tool import ConvertToArrowTool, ConvertToPandasTool, CreateTableTool, SqlQueryTool
+from aita.tool.sql_tool import (
+    ConvertToArrowTool,
+    ConvertToPandasTool,
+    CreateTableTool,
+    SqlQueryTool,
+)
 
 
 class SqlAgent(GraphAgent):
@@ -18,5 +23,6 @@ class SqlAgent(GraphAgent):
             model,
             model_parameters,
         )
+
 
 print(SqlAgent.type)

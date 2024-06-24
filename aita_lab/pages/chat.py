@@ -361,14 +361,16 @@ def tool_output() -> rx.Component:
     )
 
 
-@template(route="/",
-          title="Chat",
-          on_load=[
-              ChatState.on_load,
-              DataSourceState.on_load,
-              PromptTemplateState.on_load,
-              AgentState.on_load,
-          ])
+@template(
+    route="/",
+    title="Chat",
+    on_load=[
+        ChatState.on_load,
+        DataSourceState.on_load,
+        PromptTemplateState.on_load,
+        AgentState.on_load,
+    ],
+)
 def chat() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(

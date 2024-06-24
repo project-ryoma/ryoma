@@ -1,8 +1,8 @@
-import logging
 from typing import Optional
 
-import reflex as rx
+import logging
 
+import reflex as rx
 from sqlmodel import select
 
 
@@ -48,12 +48,14 @@ class CatalogState(rx.State):
     @staticmethod
     def commit(catalog: str, schema: str, table: str, datasource_name: Optional[str] = None):
         with rx.session() as session:
-            session.add(CatalogTable(
-                catalog_name=catalog,
-                schema=schema,
-                table=table,
-                datasource_name=datasource_name,
-            ))
+            session.add(
+                CatalogTable(
+                    catalog_name=catalog,
+                    schema=schema,
+                    table=table,
+                    datasource_name=datasource_name,
+                )
+            )
             session.commit()
 
     @staticmethod

@@ -4,8 +4,8 @@ import logging
 
 from IPython import get_ipython
 from IPython.core.interactiveshell import ExecutionResult, InteractiveShell
-from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
 
 log = logging.getLogger(__name__)
 

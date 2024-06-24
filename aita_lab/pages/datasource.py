@@ -114,7 +114,7 @@ def add_datasource():
             rx.flex(
                 rx.switch(
                     checked=DataSourceState.allow_crawl_catalog,
-                    on_change=DataSourceState.change_crawl_catalog
+                    on_change=DataSourceState.change_crawl_catalog,
                 ),
                 rx.text("Crawl Catalog", padding_top="4px"),
                 spacing="2",

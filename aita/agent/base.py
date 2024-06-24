@@ -102,7 +102,9 @@ class AitaAgent:
     def _fill_prompt_context(self, prompt_context: str):
         if not self.prompt_context_template:
             self._set_base_prompt_context_template()
-        prompt_context_template = self.prompt_context_template.partial(prompt_context=prompt_context)
+        prompt_context_template = self.prompt_context_template.partial(
+            prompt_context=prompt_context
+        )
         self.prompt_template.append(prompt_context_template)
 
     def add_datasource(self, datasource: DataSource):

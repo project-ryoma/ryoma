@@ -25,7 +25,7 @@ def content_grid():
                 margin="20px",
             ),
         ),
-        flex_wrap = "wrap"
+        flex_wrap="wrap",
     )
 
 

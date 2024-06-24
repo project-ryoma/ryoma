@@ -17,10 +17,13 @@ class ToolState(rx.State):
     tool_names: list[str]
 
     def load_tools(self):
-        self.tools = [Tool(
-            name=tool[0],
-            description=tool[1].__fields__["description"].default,
-        ) for tool in get_tool_classes()]
+        self.tools = [
+            Tool(
+                name=tool[0],
+                description=tool[1].__fields__["description"].default,
+            )
+            for tool in get_tool_classes()
+        ]
         self.tool_names = [tool.name for tool in self.tools]
 
     def on_load(self):
@@ -29,4 +32,3 @@ class ToolState(rx.State):
 
 class ToolOutput(rx.Base):
     pass
-

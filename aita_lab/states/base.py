@@ -1,4 +1,5 @@
 """Base state for the app."""
+
 from typing import Optional
 
 import reflex as rx
