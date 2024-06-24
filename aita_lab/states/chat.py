@@ -102,13 +102,11 @@ class ChatState(BaseState):
         logging.info(f"Running tool {self.current_tool.name} with args {self.current_tool.args}")
         try:
             result = self._current_agent.call_tool(self.current_tool.name, self.current_tool.id)
-            print(result)
             if isinstance(result, DataFrame):
                 self.run_tool_output = RunToolOutput(data=result, show=True)
         except Exception as e:
             logging.error(f"Error running tool {self.current_tool.name}: {e}")
         finally:
-            print(self.run_tool_output)
             self.delete_current_tool()
 
     def cancel_tool(self):
@@ -163,7 +161,6 @@ class ChatState(BaseState):
             f"Creating {self.current_agent_type} agent with model {self.current_model}"
         )
         if not self._current_agent or self._current_agent.type != self.current_agent_type:
-            print('here', self.current_agent_type, self.current_model)
             self._current_agent = AgentFactory.create_agent(
                 agent_type=self.current_agent_type,
                 model=self.current_model,

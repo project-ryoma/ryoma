@@ -6,6 +6,7 @@ from aita.tool.python_tool import PythonTool
 
 class PythonAgent(GraphAgent):
     type: str = "python"
+    description: str = "A Python agent that can use Python tools to run python scripts."
 
     def __init__(
         self,

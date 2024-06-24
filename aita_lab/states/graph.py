@@ -6,7 +6,7 @@ import random
 
 from reflex.state import MutableProxy, serialize_mutable_proxy
 
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Optional
 
 initial_nodes = [
     {
@@ -20,11 +20,17 @@ initial_nodes = [
         'data': {'label': 'agent'},
         'position': {'x': 200, 'y': 125},
     },
-
+    {
+        'id': '3',
+        'type': 'output',
+        'data': {'label': '__end__'},
+        'position': {'x': 200, 'y': 250},
+    },
 ]
 
 initial_edges = [
     {'id': 'e1-2', 'source': '1', 'target': '2', 'label': '*', 'animated': True},
+    {'id': 'e2-3', 'source': '2', 'target': '3', 'label': '*', 'animated': True},
 ]
 
 
@@ -63,7 +69,6 @@ def apply_change(res: List[Dict[str, Any]], item: Dict[str, Any], changes: List[
     update_item = item.copy()
 
     for current_change in current_changes:
-        print("current_change", current_change)
         if current_change:
             if current_change['type'] == 'select':
                 update_item['selected'] = current_change['selected']
@@ -101,6 +106,24 @@ class Graph(rx.Model):
 class GraphState(rx.State):
     """The app state."""
     graph: Graph = Graph(nodes=initial_nodes, edges=initial_edges)
+
+    current_tool: Optional[str]
+
+    def add_tool_node(self, tool):
+        self.current_tool = tool
+        new_node_id = f'{len(self.graph.nodes) + 1}'
+        node_type = 'tool'
+        x = random.randint(0, 500)
+        y = random.randint(0, 500)
+
+        new_node = {
+            'id': new_node_id,
+            'type': node_type,
+            'data': {'label': self.current_tool},
+            'position': {'x': x, 'y': y},
+            'draggable': True,
+        }
+        self.graph.nodes.append(new_node)
 
     def _set_graph(self, graph: Graph):
         self.graph = graph

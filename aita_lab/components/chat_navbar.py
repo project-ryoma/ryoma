@@ -3,7 +3,7 @@ import reflex as rx
 from aita_lab.states.chat import ChatState
 
 
-def sidebar_chat(chat: str) -> rx.Component:
+def chat_history_item(chat: str) -> rx.Component:
     """A sidebar_chat_history chat item.
 
     Args:
@@ -37,9 +37,9 @@ def sidebar_chat_history(trigger) -> rx.Component:
         rx.drawer.portal(
             rx.drawer.content(
                 rx.vstack(
-                    rx.heading("Chats", color=rx.color("mauve", 11)),
+                    rx.heading("Chat history", color=rx.color("mauve", 11)),
                     rx.divider(),
-                    rx.foreach(ChatState.chat_titles, lambda chat: sidebar_chat(chat)),
+                    rx.foreach(ChatState.chat_titles, lambda chat: chat_history_item(chat)),
                     align_items="stretch",
                     width="100%",
                 ),
@@ -56,7 +56,7 @@ def sidebar_chat_history(trigger) -> rx.Component:
     )
 
 
-def modal(trigger) -> rx.Component:
+def create_chat_modal(trigger) -> rx.Component:
     """A modal to create a new chat."""
     return rx.dialog.root(
         rx.dialog.trigger(trigger),
@@ -85,26 +85,20 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                modal(rx.button("+ New chat")),
+                create_chat_modal(rx.button("+ New chat", variant="solid")),
                 sidebar_chat_history(
                     rx.button(
                         rx.icon(
                             tag="messages-square",
-                            color=rx.color("mauve", 12),
+                            color=rx.color("mauve", 10),
                         ),
-                        background_color=rx.color("mauve", 6),
+                        rx.text("History"),
+                        variant="soft",
+                        color_scheme="gray",
                     )
                 ),
-                rx.desktop_only(
-                    rx.button(
-                        rx.icon(
-                            tag="sliders-horizontal",
-                            color=rx.color("mauve", 12),
-                        ),
-                        background_color=rx.color("mauve", 6),
-                    )
-                ),
-                align_items="center",
+                width="100%",
+                justify="between",
             ),
             justify_content="space-between",
             align_items="center",

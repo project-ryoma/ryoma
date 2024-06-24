@@ -1,18 +1,18 @@
 from enum import Enum
 
 from aita.agent.base import AitaAgent
-from aita.agent.pandas import PandasAgent
-from aita.agent.pyarrow import PyArrowAgent
-from aita.agent.pyspark import PySparkAgent
-from aita.agent.python import PythonAgent
+from aita.agent.pandas_agent import PandasAgent
+from aita.agent.arrow_agent import ArrowAgent
+from aita.agent.spark_agent import SparkAgent
+from aita.agent.python_agent import PythonAgent
 from aita.agent.sql import SqlAgent
 
 
 class AgentProvider(Enum):
     sql = SqlAgent
     pandas = PandasAgent
-    pyarrow = PyArrowAgent
-    pyspark = PySparkAgent
+    pyarrow = ArrowAgent
+    pyspark = SparkAgent
     python = PythonAgent
 
 

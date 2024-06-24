@@ -3,7 +3,7 @@ import pandas as pd
 from aita.tool.python_tool import PythonTool
 
 
-class PySparkTool(PythonTool):
+class SparkTool(PythonTool):
     """Tool for running PySpark script."""
 
     name: str = "pyspark_tool"
@@ -14,7 +14,7 @@ class PySparkTool(PythonTool):
     """
 
 
-class ConvertPandasToPySparkTool(PythonTool):
+class ConvertPandasToSparkTool(PythonTool):
     """Tool for converting a Pandas dataframe to a PySpark dataframe."""
 
     name: str = "convert_pandas_to_pyspark"

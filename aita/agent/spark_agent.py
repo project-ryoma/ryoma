@@ -3,20 +3,21 @@ import pandas as pd
 from pyspark.sql import SparkSession
 
 from aita.agent.graph import GraphAgent
-from aita.tool.pyspark_tool import ConvertPandasToPySparkTool, PySparkTool
+from aita.tool.spark_tool import ConvertPandasToSparkTool, SparkTool
 from aita.tool.python_tool import PythonTool
 
 
-class PySparkAgent(GraphAgent):
+class SparkAgent(GraphAgent):
     type: str = "pyspark"
+    description: str = "A PySpark agent that can use PySpark tools to run PySpark scripts."
     spark_session: SparkSession
 
     def __init__(self, spark_configs: dict[str, str], model: str, model_parameters=None):
         self.init_session(spark_configs)
         super().__init__(
             [
-                PySparkTool(),
-                ConvertPandasToPySparkTool(),
+                SparkTool(),
+                ConvertPandasToSparkTool(),
             ],
             model,
             model_parameters,

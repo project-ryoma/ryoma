@@ -2,7 +2,7 @@ from typing import Optional
 
 import reflex as rx
 import random
-from langchain_core.runnables.graph import Node
+from langchain_core.runnables.graph import Node, Edge
 from aita.agent.graph import GraphAgent
 from aita.agent.factory import get_supported_agents, AgentFactory
 from aita_lab.states.graph import Graph
@@ -27,6 +27,23 @@ def get_node_position(node: Node):
         return {"x": random.randint(0, 500), "y": random.randint(0, 500)}
 
 
+def create_agent_graph_node(node: Node):
+    return {
+        "id": node.id,
+        "data": {"label": node.id},
+        "position": get_node_position(node),
+    }
+
+
+def create_agent_graph_edge(id, edge: Edge):
+    return {
+        "id": id,
+        "source": edge.source,
+        "target": edge.target,
+        "animated": True
+    }
+
+
 class AgentState(rx.State):
     agents: list[Agent] = []
     is_open: bool = False
@@ -39,19 +56,9 @@ class AgentState(rx.State):
         if isinstance(passthrough_agent, GraphAgent):
             graph = passthrough_agent.get_graph()
             self.current_agent_graph = Graph(
-                nodes=[{
-                    "id": node.id,
-                    "data": {"label": node.id},
-                    "position": get_node_position(node),
-                } for node_key, node in graph.nodes.items()],
-                edges=[{
-                    "id": id,
-                    "source": edge.source,
-                    "target": edge.target,
-                    "animated": True
-                } for id, edge in enumerate(graph.edges)]
+                nodes=[create_agent_graph_node(node) for _, node in graph.nodes.items()],
+                edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)]
             )
-            print(self.current_agent_graph)
 
     @rx.var
     def agent_names(self) -> list[str]:
@@ -60,5 +67,8 @@ class AgentState(rx.State):
     def on_load(self):
         self.agents = [Agent(
             name=agent.name,
-            description="",
+            description=agent.value.description
         ) for agent in get_supported_agents()]
+
+    def create_agent(self):
+        return

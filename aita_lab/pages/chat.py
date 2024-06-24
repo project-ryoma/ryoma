@@ -123,7 +123,7 @@ def model_selector() -> rx.Component:
     return rx.form(
         rx.chakra.form_control(
             rx.text(
-                "Model",
+                "Model *",
                 asi_="div",
                 mb="1",
                 size="2",

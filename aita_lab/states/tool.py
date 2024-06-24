@@ -1,10 +1,8 @@
-import importlib
 from typing import Optional
 
 import reflex as rx
 
-from aita.tool.factory import ToolFactory, get_supported_tools
-from aita import tool
+from aita.tool.factory import get_tool_classes
 
 
 class Tool(rx.Model):
@@ -20,9 +18,10 @@ class ToolState(rx.State):
 
     def load_tools(self):
         self.tools = [Tool(
-            name=tool.name,
-            description=tool.value.__fields__["description"].default,
-        ) for tool in get_supported_tools()]
+            name=tool[0],
+            description=tool[1].__fields__["description"].default,
+        ) for tool in get_tool_classes()]
+        self.tool_names = [tool.name for tool in self.tools]
 
     def on_load(self):
         self.load_tools()
@@ -30,3 +29,4 @@ class ToolState(rx.State):
 
 class ToolOutput(rx.Base):
     pass
+

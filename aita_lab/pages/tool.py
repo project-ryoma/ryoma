@@ -12,16 +12,20 @@ def content_grid():
         rx.foreach(
             ToolState.tools,
             lambda tool: rx.chakra.card(
-                rx.chakra.text(tool.description, padding="2px", size="sm"),
+                rx.chakra.text(
+                    tool.description,
+                    no_of_lines=3,
+                ),
                 header=rx.chakra.heading(tool.name, size="md"),
                 # adjust the size and make it scrollable
                 direction="column",
                 overflow="auto",
                 height="300px",
-                width="50%",
-                margin_right="20px",
+                width="200px",
+                margin="20px",
             ),
-        )
+        ),
+        flex_wrap = "wrap"
     )
 
 
@@ -33,7 +37,8 @@ def tool() -> rx.Component:
         The UI for the tool page.
     """
     return rx.vstack(
-        rx.heading("Tool", size="8"),
+        rx.chakra.heading("Tool"),
+        rx.chakra.text("A suite of tools to help you with analyzing your data."),
         rx.box(
             content_grid(),
             margin_top="20px",

@@ -4,6 +4,7 @@ import reflex as rx
 
 from aita_lab.states.agent import AgentState, Agent
 from aita_lab.states.graph import GraphState
+from aita_lab.states.tool import ToolState
 from aita_lab.templates import template
 from aita_lab.components.reactflow import react_flow, background, controls
 
@@ -13,7 +14,10 @@ def agent_card(agent: Agent):
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.chakra.card(
-                rx.chakra.text(agent.description),
+                rx.chakra.text(
+                    agent.description,
+                    no_of_lines=3,
+                ),
                 header=rx.chakra.heading(agent.name, size="md", padding="2px"),
                 direction="column",
                 overflow="auto",
@@ -71,12 +75,20 @@ def create_agent_flow():
     return rx.vstack(
         rx.heading("Create your own agent", size="6"),
         rx.hstack(
-            rx.button(
-                "Add Tool",
-                on_click=GraphState.add_random_node,
+            rx.select(
+                ToolState.tool_names,
+                placeholder="Select a tool to add",
+                on_change=GraphState.add_tool_node
             ),
             rx.button(
-                "Clear graph",
+                "Create",
+                variant="solid",
+                on_click=AgentState.create_agent,
+            ),
+            rx.button(
+                "Clear",
+                variant="soft",
+                color_scheme="gray",
                 on_click=GraphState.clear_graph,
             ),
             width="100%",
@@ -98,7 +110,10 @@ def create_agent_flow():
     )
 
 
-@template(route="/agent", title="Agent", on_load=AgentState.on_load())
+@template(route="/agent", title="Agent", on_load=[
+    AgentState.on_load,
+    ToolState.on_load
+])
 def agent() -> rx.Component:
     """The tool page.
 

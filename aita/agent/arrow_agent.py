@@ -8,8 +8,9 @@ from aita.tool.python_tool import PythonTool
 from aita.tool.sql_tool import ConvertToArrowTool
 
 
-class PyArrowAgent(GraphAgent):
+class ArrowAgent(GraphAgent):
     type: str = "pyarrow"
+    description: str = "An Arrow agent that can use Arrow tools to interact with Arrow Tables."
 
     def __init__(self, model: str, model_parameters: Dict = None):
         super().__init__([ConvertToArrowTool(), ArrowTool()], model, model_parameters)

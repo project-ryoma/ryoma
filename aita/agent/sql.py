@@ -6,6 +6,7 @@ from aita.tool.sql_tool import ConvertToArrowTool, ConvertToPandasTool, CreateTa
 
 class SqlAgent(GraphAgent):
     type: str = "sql"
+    description: str = "A SQL agent that can use SQL Tools to interact with SQL databases."
 
     def __init__(
         self,
@@ -17,3 +18,5 @@ class SqlAgent(GraphAgent):
             model,
             model_parameters,
         )
+
+print(SqlAgent.type)
