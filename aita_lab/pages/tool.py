@@ -12,7 +12,7 @@ def content_grid():
         rx.foreach(
             ToolState.tools,
             lambda tool: rx.chakra.card(
-                rx.chakra.text(tool.name, padding="2px"),
+                rx.chakra.text(tool.description, padding="2px", size="sm"),
                 header=rx.chakra.heading(tool.name, size="md"),
                 # adjust the size and make it scrollable
                 direction="column",

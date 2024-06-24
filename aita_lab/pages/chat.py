@@ -207,7 +207,7 @@ def prompt_template_selector() -> rx.Component:
     )
 
 
-def agent_type_selector() -> rx.Component:
+def agent_selector() -> rx.Component:
     return rx.chakra.form(
         rx.chakra.form_control(
             rx.text(
@@ -218,7 +218,7 @@ def agent_type_selector() -> rx.Component:
                 weight="bold",
             ),
             rx.select(
-                AgentState.agent_types,
+                AgentState.agent_names,
                 value=ChatState.current_agent_type,
                 on_change=ChatState.set_current_agent_type,
                 width="100%",
@@ -361,7 +361,14 @@ def tool_output() -> rx.Component:
     )
 
 
-@template(route="/", title="Chat", on_load=[DataSourceState.on_load, PromptTemplateState.on_load])
+@template(route="/",
+          title="Chat",
+          on_load=[
+              ChatState.on_load,
+              DataSourceState.on_load,
+              PromptTemplateState.on_load,
+              AgentState.on_load,
+          ])
 def chat() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
@@ -391,7 +398,7 @@ def chat() -> rx.Component:
                 model_selector(),
                 datasource_selector(),
                 prompt_template_selector(),
-                agent_type_selector(),
+                agent_selector(),
                 col_span=1,
                 padding="4",
                 width="100%",

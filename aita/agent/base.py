@@ -23,6 +23,7 @@ def get_model(model_id: str, model_parameters: Optional[Dict]) -> Optional[Runna
 
 
 class AitaAgent:
+    type: str = "aita"
     config: Dict[str, Any]
     model: RunnableSerializable
     model_parameters: Optional[Dict]

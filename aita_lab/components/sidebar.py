@@ -3,9 +3,10 @@
 import reflex as rx
 
 from aita_lab import styles
+from aita_lab.components.chat_navbar import navbar
 from aita_lab.states.base import BaseState
 
-# Icons for the sidebar.
+# Icons for the sidebar_chat_history.
 ICONS = {
     "Chat": "message-square-more",
     "Data Catalog": "library",
@@ -14,6 +15,7 @@ ICONS = {
     "Prompt Template": "text",
     "Settings": "settings",
     "Tool": "hammer",
+    "Agent": "bot",
 }
 
 
@@ -21,7 +23,7 @@ def sidebar_header() -> rx.Component:
     """Sidebar header.
 
     Returns:
-        The sidebar header component.
+        The sidebar_chat_history header component.
     """
     return rx.hstack(
         # The logo.
@@ -54,7 +56,7 @@ def sidebar_footer() -> rx.Component:
     """Sidebar footer.
 
     Returns:
-        rx.Component: The sidebar footer component.
+        rx.Component: The sidebar_chat_history footer component.
     """
     return rx.chakra.hstack(
         rx.chakra.link(
@@ -90,7 +92,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
         url: The URL of the item.
 
     Returns:
-        rx.Component: The sidebar item component.
+        rx.Component: The sidebar_chat_history item component.
     """
     # Whether the item is active.
     active = (rx.State.router.page.path == url.lower()) | (
@@ -127,18 +129,22 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             width="100%",
             padding="1em",
         ),
+        rx.cond(
+          text == "Chat" and active,
+          navbar()
+        ),
         href=url,
         width="100%",
     )
 
 
 def sidebar() -> rx.Component:
-    """The sidebar.
+    """The sidebar_chat_history.
 
     Returns:
-        The sidebar component.
+        The sidebar_chat_history component.
     """
-    # Get all the decorated pages and add them to the sidebar.
+    # Get all the decorated pages and add them to the sidebar_chat_history.
     from reflex.page import get_decorated_pages
 
     return rx.box(

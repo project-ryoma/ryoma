@@ -1,5 +1,3 @@
-from typing import Optional
-
 import reflex as rx
 
 

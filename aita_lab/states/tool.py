@@ -1,15 +1,17 @@
+import importlib
 from typing import Optional
 
 import reflex as rx
 
 from aita.tool.factory import ToolFactory, get_supported_tools
+from aita import tool
 
 
 class Tool(rx.Model):
-    id: str
+    id: Optional[str]
     name: str
-    args: dict[str, str]
-    desciption: Optional[str]
+    args: Optional[dict[str, str]] = {}
+    description: Optional[str]
 
 
 class ToolState(rx.State):
@@ -17,9 +19,10 @@ class ToolState(rx.State):
     tool_names: list[str]
 
     def load_tools(self):
-        tools, tool_names = [], []
-        self.tools = tools
-        self.tool_names = tool_names
+        self.tools = [Tool(
+            name=tool.name,
+            description=tool.value.__fields__["description"].default,
+        ) for tool in get_supported_tools()]
 
     def on_load(self):
         self.load_tools()

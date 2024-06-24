@@ -1,10 +1,11 @@
 from typing import Dict, Optional
 
 from aita.agent.graph import GraphAgent
-from aita.tool.sql import ConvertToArrowTool, ConvertToPandasTool, CreateTableTool, SqlQueryTool
+from aita.tool.sql_tool import ConvertToArrowTool, ConvertToPandasTool, CreateTableTool, SqlQueryTool
 
 
 class SqlAgent(GraphAgent):
+    type: str = "sql"
 
     def __init__(
         self,

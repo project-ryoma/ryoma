@@ -4,7 +4,7 @@ from aita_lab.states.chat import ChatState
 
 
 def sidebar_chat(chat: str) -> rx.Component:
-    """A sidebar chat item.
+    """A sidebar_chat_history chat item.
 
     Args:
         chat: The chat item.
@@ -29,8 +29,8 @@ def sidebar_chat(chat: str) -> rx.Component:
     )
 
 
-def sidebar(trigger) -> rx.Component:
-    """The sidebar component."""
+def sidebar_chat_history(trigger) -> rx.Component:
+    """The sidebar_chat_history component."""
     return rx.drawer.root(
         rx.drawer.trigger(trigger),
         rx.drawer.overlay(),
@@ -63,8 +63,8 @@ def modal(trigger) -> rx.Component:
         rx.dialog.content(
             rx.hstack(
                 rx.input(
-                    placeholder="Type something...",
-                    on_blur=ChatState.set_new_chat_name,
+                    placeholder="Create a new chat with title...",
+                    on_blur=ChatState.set_new_chat_title,
                     width=["15em", "20em", "30em", "30em", "30em", "30em"],
                 ),
                 rx.dialog.close(
@@ -85,20 +85,8 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.avatar(fallback="RC", variant="solid"),
-                rx.heading("Aita Chat"),
-                rx.desktop_only(
-                    rx.badge(
-                        ChatState.current_chat,
-                        rx.tooltip(rx.icon("info", size=14), content="The current selected chat."),
-                        variant="soft",
-                    )
-                ),
-                align_items="center",
-            ),
-            rx.hstack(
                 modal(rx.button("+ New chat")),
-                sidebar(
+                sidebar_chat_history(
                     rx.button(
                         rx.icon(
                             tag="messages-square",

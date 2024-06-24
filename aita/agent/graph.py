@@ -89,6 +89,9 @@ class GraphAgent(AitaAgent):
         workflow.add_edge("tools", "agent")
         return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
 
+    def get_graph(self):
+        return self.model_graph.get_graph(self.config)
+
     def get_current_state(self) -> Optional[StateSnapshot]:
         return self.model_graph.get_state(self.config)
 

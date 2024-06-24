@@ -1,10 +1,12 @@
 from typing import Dict, Optional
 
 from aita.agent.graph import GraphAgent
-from aita.tool.python import PythonTool
+from aita.tool.python_tool import PythonTool
 
 
 class PythonAgent(GraphAgent):
+    type: str = "python"
+
     def __init__(
         self,
         model: str,

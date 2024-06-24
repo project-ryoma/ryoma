@@ -3,12 +3,13 @@ from typing import Dict
 from pandas import DataFrame
 
 from aita.agent.graph import GraphAgent
-from aita.tool.pandas import PandasTool
-from aita.tool.python import PythonTool
-from aita.tool.sql import ConvertToPandasTool
+from aita.tool.pandas_tool import PandasTool
+from aita.tool.python_tool import PythonTool
+from aita.tool.sql_tool import ConvertToPandasTool
 
 
 class PandasAgent(GraphAgent):
+    type: str = "pandas"
 
     def __init__(self, model: str, model_parameters: Dict = None):
         super().__init__(

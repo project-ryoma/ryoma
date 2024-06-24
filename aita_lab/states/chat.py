@@ -7,23 +7,20 @@ import reflex as rx
 from langchain_core.messages import HumanMessage
 from pandas import DataFrame
 
+from sqlmodel import select
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
 from aita.agent.graph import GraphAgent
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.tool import Tool
+from aita_lab.states.base import BaseState
 
 
 class QA(rx.Base):
     """A question and answer pair."""
 
-    question: str
-    answer: str
-
-
-DEFAULT_CHATS = {
-    "Intros": [],
-}
+    question: Optional[str]
+    answer: Optional[str]
 
 
 class RunToolOutput(rx.Base):
@@ -31,13 +28,29 @@ class RunToolOutput(rx.Base):
     show: bool = False
 
 
-class ChatState(rx.State):
+class Chat(rx.Model, table=True):
+    """Chat Model"""
+
+    title: str
+    user: str
+    question: Optional[str]
+    answer: Optional[str]
+    description: Optional[str]
+    created_at: Optional[str]
+    updated_at: Optional[str]
+
+
+DEFAULT_CHATS = {
+    "Intros": [],
+}
+
+
+class ChatState(BaseState):
     """The app state."""
 
-    # A dict from the chat name to the list of questions and answers.
     chats: dict[str, list[QA]] = DEFAULT_CHATS
 
-    # The current chat name.
+    # The current chat title.
     current_chat = "Intros"
 
     # The current question.
@@ -47,7 +60,7 @@ class ChatState(rx.State):
     processing: bool = False
 
     # The name of the new chat.
-    new_chat_name: str = ""
+    new_chat_title: str = ""
 
     current_model: str
 
@@ -105,23 +118,36 @@ class ChatState(rx.State):
     def create_chat(self):
         """Create a new chat."""
         # Add the new chat to the list of chats.
-        self.current_chat = self.new_chat_name
-        self.chats[self.new_chat_name] = []
+        self.current_chat = self.new_chat_title
+        self.chats[self.new_chat_title] = []
+        with rx.session() as session:
+            session.add(
+                Chat(
+                    title=self.new_chat_title,
+                    user=self.user.name,
+                    question=None,
+                    answer=None,
+                    description=None,
+                    created_at=None,
+                    updated_at=None,
+                )
+            )
+            session.commit()
 
     def delete_chat(self):
         """Delete the current chat."""
         del self.chats[self.current_chat]
         if len(self.chats) == 0:
-            self.chats = DEFAULT_CHATS
+            self.chats = []
         self.current_chat = list(self.chats.keys())[0]
 
-    def set_chat(self, chat_name: str):
-        """Set the name of the current chat.
+    def set_chat(self, chat_title: str):
+        """Set the title of the current chat.
 
         Args:
-            chat_name: The name of the chat.
+            chat_title: The name of the chat.
         """
-        self.current_chat = chat_name
+        self.current_chat = chat_title
 
     @rx.var
     def chat_titles(self) -> list[str]:
@@ -132,15 +158,17 @@ class ChatState(rx.State):
         """
         return list(self.chats.keys())
 
-    def create_agent(self, **kwargs):
+    def _create_agent(self, **kwargs):
         logging.info(
-            f"Creating agent with tool {self.current_agent_type} and model {self.current_model}"
+            f"Creating {self.current_agent_type} agent with model {self.current_model}"
         )
-        self._current_agent = AgentFactory.create_agent(
-            agent_type=self.current_agent_type,
-            model=self.current_model,
-            **kwargs,
-        )
+        if not self._current_agent or self._current_agent.type != self.current_agent_type:
+            print('here', self.current_agent_type, self.current_model)
+            self._current_agent = AgentFactory.create_agent(
+                agent_type=self.current_agent_type,
+                model=self.current_model,
+                **kwargs,
+            )
 
     async def process_question(self, form_data: dict[str, str]):
         # Get the question from the form
@@ -152,20 +180,20 @@ class ChatState(rx.State):
 
         logging.info(f"Processing question: {question}")
 
-        self.create_agent()
+        self._create_agent()
 
         if self.current_datasource:
             datasource = DataSourceState.connect(self.current_datasource)
             self._current_agent.add_datasource(datasource)
 
-        async for value in self.aita_process_question(question):
+        async for value in self._invoke_question(question):
             yield value
 
-    async def aita_process_question(self, question: str):
+    async def _invoke_question(self, question: str):
         """Get the response from the API.
 
         Args:
-            question: A dict with the current question.
+            question: The question to ask the API.
         """
 
         # Add the question to the list of questions.
@@ -197,7 +225,41 @@ class ChatState(rx.State):
                     self.current_tool = tool
 
             # Add the tool call to the answer
-            self.chats[self.current_chat][-1].answer += f"Confirm to run the tool in the panel"
+            self.chats[self.current_chat][-1].answer += \
+                f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
 
         # Toggle the processing flag.
         self.processing = False
+
+        # commit the chat to the database
+        self._commit_chat(self.current_chat, self.chats[self.current_chat][-1].question,
+                          self.chats[self.current_chat][-1].answer)
+
+    def _commit_chat(self, title: str, question: str, answer: str):
+        with rx.session() as session:
+            session.add(
+                Chat(
+                    title=title,
+                    user=self.user.name,
+                    question=question,
+                    answer=answer,
+                    description=None,
+                    created_at=None,
+                    updated_at=None,
+                )
+            )
+            session.commit()
+
+    def load_chats(self):
+        """Load the chats from the database."""
+        with rx.session() as session:
+            chats = session.exec(select(Chat).where(Chat.user == self.user.name)).all()
+            for chat in chats:
+                self.chats[chat.title] = [
+                    QA(question=chat.question, answer=chat.answer)
+                ]
+            if not self.chats:
+                self.chats = DEFAULT_CHATS
+
+    def on_load(self):
+        self.load_chats()
