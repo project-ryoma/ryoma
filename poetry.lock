@@ -654,7 +654,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 name = "botocore"
 version = "1.34.128"
 description = "Low-level, data-driven core of boto 3."
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "botocore-1.34.128-py3-none-any.whl", hash = "sha256:db67fda136c372ab3fa432580c819c89ba18d28a6152a4d2a7ea40d44082892e"},
@@ -2053,7 +2053,7 @@ i18n = ["Babel (>=2.7)"]
 name = "jmespath"
 version = "1.0.1"
 description = "JSON Matching Expressions"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
@@ -3410,8 +3410,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -3965,8 +3965,8 @@ astroid = ">=3.2.2,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
     {version = ">=0.2", markers = "python_version < \"3.11\""},
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
@@ -4884,13 +4884,13 @@ files = [
 
 [[package]]
 name = "s3transfer"
-version = "0.10.1"
+version = "0.10.2"
 description = "An Amazon S3 Transfer Manager"
-optional = true
-python-versions = ">= 3.8"
+optional = false
+python-versions = ">=3.8"
 files = [
-    {file = "s3transfer-0.10.1-py3-none-any.whl", hash = "sha256:ceb252b11bcf87080fb7850a224fb6e05c8a776bab8f2b64b7f25b969464839d"},
-    {file = "s3transfer-0.10.1.tar.gz", hash = "sha256:5683916b4c724f799e600f41dd9e10a9ff19871bf87623cc8f491cb4f5fa0a19"},
+    {file = "s3transfer-0.10.2-py3-none-any.whl", hash = "sha256:eca1c20de70a39daee580aef4986996620f365c4e0fda6a86100231d62f1bf69"},
+    {file = "s3transfer-0.10.2.tar.gz", hash = "sha256:0711534e9356d3cc692fdde846b4a1e4b0cb6519971860796e6bc4c7aea00ef6"},
 ]
 
 [package.dependencies]
@@ -6040,6 +6040,7 @@ h11 = ">=0.8"
 httptools = {version = ">=0.5.0", optional = true, markers = "extra == \"standard\""}
 python-dotenv = {version = ">=0.13", optional = true, markers = "extra == \"standard\""}
 pyyaml = {version = ">=5.1", optional = true, markers = "extra == \"standard\""}
+typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
 uvloop = {version = ">=0.14.0,<0.15.0 || >0.15.0,<0.15.1 || >0.15.1", optional = true, markers = "(sys_platform != \"win32\" and sys_platform != \"cygwin\") and platform_python_implementation != \"PyPy\" and extra == \"standard\""}
 watchfiles = {version = ">=0.13", optional = true, markers = "extra == \"standard\""}
 websockets = {version = ">=10.4", optional = true, markers = "extra == \"standard\""}
