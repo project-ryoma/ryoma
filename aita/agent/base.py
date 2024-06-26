@@ -6,9 +6,9 @@ from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableSerializable
 
+from aita.agent.utils import get_model
 from aita.datasource.base import DataSource
 from aita.datasource.catalog import Catalog
-from aita.agent.utils import get_model
 
 
 class AitaAgent:

@@ -19,6 +19,7 @@ class SqlDataSource(DataSource):
         with self.connect().cursor() as cursor:
             cursor.execute(query, *(params or ()))
             return cursor.fetchall()
+
     @abstractmethod
     def get_metadata(self, **kwargs) -> Catalog:
         raise NotImplementedError

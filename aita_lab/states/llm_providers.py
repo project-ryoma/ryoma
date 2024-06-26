@@ -1,5 +1,12 @@
 from enum import Enum
 
+# get embedding models
+from jupyter_ai_magics.embedding_providers import (
+    BedrockEmbeddingsProvider,
+    CohereEmbeddingsProvider,
+    GPT4AllEmbeddingsProvider,
+    HfHubEmbeddingsProvider,
+)
 from jupyter_ai_magics.providers import (
     AI21Provider,
     BedrockChatProvider,
@@ -10,15 +17,6 @@ from jupyter_ai_magics.providers import (
     QianfanProvider,
     SmEndpointProvider,
     TogetherAIProvider,
-)
-
-# get embedding models
-from jupyter_ai_magics.embedding_providers import (
-    BedrockEmbeddingsProvider,
-    CohereEmbeddingsProvider,
-    GPT4AllEmbeddingsProvider,
-    HfHubEmbeddingsProvider,
-
 )
 
 

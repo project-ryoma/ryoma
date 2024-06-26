@@ -9,8 +9,8 @@ except ImportError:
 from adbc_driver_manager.dbapi import Connection
 from pydantic import Field
 
-from aita.datasource.sql import SqlDataSource
 from aita.datasource.catalog import Catalog
+from aita.datasource.sql import SqlDataSource
 
 
 class PostgreSqlDataSource(SqlDataSource):

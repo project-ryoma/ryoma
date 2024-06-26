@@ -3,8 +3,8 @@ from typing import Optional
 from sqlalchemy import Engine
 from sqlalchemy.engine import URL, create_engine
 
-from aita.datasource.sql import SqlDataSource
 from aita.datasource.catalog import Catalog
+from aita.datasource.sql import SqlDataSource
 
 
 class MySqlDataSource(SqlDataSource):
