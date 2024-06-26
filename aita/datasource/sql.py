@@ -19,16 +19,9 @@ class SqlDataSource(DataSource):
         with self.connect().cursor() as cursor:
             cursor.execute(query, *(params or ()))
             return cursor.fetchall()
-
+    @abstractmethod
     def get_metadata(self, **kwargs) -> Catalog:
-        with self.connect() as conn:
-            catalogs: pa.Table = conn.adbc_get_objects(
-                catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
-                db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
-                table_name_filter=kwargs.get("table", None),
-            ).read_all()
-            catalog = catalogs.to_pylist()[0]
-            return Catalog(**catalog)
+        raise NotImplementedError
 
     def to_arrow(self, query: str, params=None):
         with self.connect().cursor() as cursor:

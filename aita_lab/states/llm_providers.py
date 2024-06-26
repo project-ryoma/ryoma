@@ -12,6 +12,23 @@ from jupyter_ai_magics.providers import (
     TogetherAIProvider,
 )
 
+# get embedding models
+from jupyter_ai_magics.embedding_providers import (
+    BedrockEmbeddingsProvider,
+    CohereEmbeddingsProvider,
+    GPT4AllEmbeddingsProvider,
+    HfHubEmbeddingsProvider,
+
+)
+
+
+class OpenAIEmbeddingsProvider:
+    pass
+
+
+class MistralAIEmbeddingsProvider:
+    pass
+
 
 class OpenAIProvider:
     name = "OpenAI"
@@ -122,3 +139,12 @@ class ModelProvider(Enum):
     qianfan = QianfanProvider
     sagemaker_endpoint = SmEndpointProvider
     together_ai = TogetherAIProvider
+
+
+class EmbeddingModelProvider(Enum):
+    bedrock = BedrockEmbeddingsProvider
+    cohere = CohereEmbeddingsProvider
+    gpt4all = GPT4AllEmbeddingsProvider
+    openai = OpenAIEmbeddingsProvider
+    mistralai = MistralAIEmbeddingsProvider
+    huggingface_hub = HfHubEmbeddingsProvider

@@ -6,7 +6,7 @@ from aita_lab import styles
 from aita_lab.components.chat_navbar import navbar
 from aita_lab.states.base import BaseState
 
-# Icons for the sidebar_chat_history.
+# Icons for the sidebar
 ICONS = {
     "Chat": "message-square-more",
     "Data Catalog": "library",
@@ -16,6 +16,7 @@ ICONS = {
     "Settings": "settings",
     "Tool": "hammer",
     "Agent": "bot",
+    "RAG": "package",
 }
 
 

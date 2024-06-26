@@ -1,5 +1,7 @@
 from typing import Optional
 
+import pyarrow as pa
+
 try:
     import adbc_driver_snowflake.dbapi
 except ImportError:
@@ -8,6 +10,7 @@ from adbc_driver_manager.dbapi import Connection
 from langchain_core.pydantic_v1 import Field
 
 from aita.datasource.sql import SqlDataSource
+from aita.datasource.catalog import Catalog
 
 
 class SnowflakeDataSource(SqlDataSource):
@@ -44,3 +47,13 @@ class SnowflakeDataSource(SqlDataSource):
 
     def connect(self) -> Connection:
         return adbc_driver_snowflake.dbapi.connect(self.connection_url)
+
+    def get_metadata(self, **kwargs):
+        with self.connect() as conn:
+            catalogs: pa.Table = conn.adbc_get_objects(
+                catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
+                db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
+                table_name_filter=kwargs.get("table", None),
+            ).read_all()
+            catalog = catalogs.to_pylist()[0]
+            return Catalog(**catalog)

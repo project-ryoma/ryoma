@@ -4,6 +4,7 @@ from sqlalchemy import Engine
 from sqlalchemy.engine import URL, create_engine
 
 from aita.datasource.sql import SqlDataSource
+from aita.datasource.catalog import Catalog
 
 
 class MySqlDataSource(SqlDataSource):
@@ -46,3 +47,6 @@ class MySqlDataSource(SqlDataSource):
 
     def connect(self) -> Engine:
         return create_engine(self.connection_url)
+
+    def get_metadata(self, **kwargs) -> Catalog:
+        raise NotImplementedError

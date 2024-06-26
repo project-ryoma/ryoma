@@ -135,9 +135,13 @@ class ChatState(BaseState):
 
     def delete_chat(self):
         """Delete the current chat."""
+        with rx.session() as session:
+            session.exec(
+                select(Chat).where(Chat.title == self.current_chat).delete()
+            )
         del self.chats[self.current_chat]
         if len(self.chats) == 0:
-            self.chats = []
+            self.chats = DEFAULT_CHATS
         self.current_chat = list(self.chats.keys())[0]
 
     def set_chat(self, chat_title: str):
