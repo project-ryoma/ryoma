@@ -1,10 +1,10 @@
 from typing import Optional
 
 import reflex as rx
-
-from aita_lab.states.base import BaseState
 from feast.feature_store import FeatureStore
 from feast.repo_config import RepoConfig
+
+from aita_lab.states.base import BaseState
 
 
 class VectorStore(rx.Model):

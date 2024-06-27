@@ -6,6 +6,7 @@ import pytest
 from mock import patch
 
 from aita.datasource.sql import SqlDataSource
+from aita.datasource.catalog import Catalog
 
 
 class MockSqlDataSource(SqlDataSource):
@@ -16,6 +17,9 @@ class MockSqlDataSource(SqlDataSource):
         mock_cursor.execute.return_value = None
         mock_connection.cursor.return_value = mock_cursor
         return mock_connection
+
+    def get_metadata(self, **kwargs) -> Catalog:
+        return Catalog()
 
 
 @pytest.fixture

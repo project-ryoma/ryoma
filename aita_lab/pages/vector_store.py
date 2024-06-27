@@ -2,8 +2,8 @@
 
 import reflex as rx
 
-from aita_lab.templates import ThemeState, template
 from aita_lab.states.vector_store import VectorStoreState
+from aita_lab.templates import ThemeState, template
 
 
 def add_feature():
@@ -13,7 +13,7 @@ def add_feature():
                 rx.flex("Add Feature", rx.icon(tag="plus", width=24, height=24), spacing="3"),
                 size="4",
                 radius="full",
-                on_click=VectorStoreState.open_feature_dialog
+                on_click=VectorStoreState.open_feature_dialog,
             ),
         ),
         rx.dialog.content(
@@ -120,5 +120,5 @@ def vector_store() -> rx.Component:
     return rx.vstack(
         rx.chakra.heading("Vector Store"),
         rx.chakra.text("Create a vector store to store your embedding features"),
-        setup_store()
+        setup_store(),
     )
