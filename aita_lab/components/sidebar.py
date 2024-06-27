@@ -16,7 +16,7 @@ ICONS = {
     "Settings": "settings",
     "Tool": "hammer",
     "Agent": "bot",
-    "RAG": "package",
+    "Vector Store": "package",
 }
 
 

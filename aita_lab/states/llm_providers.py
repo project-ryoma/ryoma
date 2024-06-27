@@ -3,7 +3,6 @@ from enum import Enum
 # get embedding models
 from jupyter_ai_magics.embedding_providers import (
     BedrockEmbeddingsProvider,
-    CohereEmbeddingsProvider,
     GPT4AllEmbeddingsProvider,
     HfHubEmbeddingsProvider,
 )
@@ -11,7 +10,6 @@ from jupyter_ai_magics.providers import (
     AI21Provider,
     BedrockChatProvider,
     BedrockProvider,
-    CohereProvider,
     GPT4AllProvider,
     HfHubProvider,
     QianfanProvider,
@@ -25,6 +23,10 @@ class OpenAIEmbeddingsProvider:
 
 
 class MistralAIEmbeddingsProvider:
+    pass
+
+
+class CohereEmbeddingsProvider:
     pass
 
 
@@ -117,6 +119,19 @@ class ChatAnthropicProvider:
         "claude-3-opus-20240229",
         "claude-3-sonnet-20240229",
         "claude-3-haiku-20240307",
+    ]
+
+
+class CohereProvider:
+    id = "cohere"
+    name = "Cohere"
+    models = [
+        "command",
+        "command-nightly",
+        "command-light",
+        "command-light-nightly",
+        "command-r-plus",
+        "command-r",
     ]
 
 
