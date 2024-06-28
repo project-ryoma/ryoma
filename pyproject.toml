@@ -54,6 +54,7 @@ adbc-driver-postgresql = { version = "^1.0.0", optional = true }
 adbc-driver-snowflake = { version = "^1.0.0", optional = true }
 findspark = { version = "^2.0.1", optional = true }
 pyspark = { version = "^3.2.0", optional = true }
+sqlite-vec = "^0.0.1a14"
 
 [tool.poetry.group.aita_lab]
 optional = true
