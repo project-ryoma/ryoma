@@ -26,7 +26,7 @@ class PandasAgent(GraphAgent):
 
     def add_dataframe(self, dataframe: DataFrame):
         df_id = f"df_{id(dataframe)}"
-        self._fill_prompt_context(
+        self.add_prompt_context(
             f"""
         dataframe name: {df_id}
         dataframe metadata: {dataframe.info}

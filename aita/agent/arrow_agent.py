@@ -17,7 +17,7 @@ class ArrowAgent(GraphAgent):
 
     def add_table(self, table: pa.Table):
         table_id = f"table_{id(table)}"
-        self._fill_prompt_context(
+        self.add_prompt_context(
             f"""
         pyarrow table name: {table_id}
         pyarrow table metadata: {table.schema}

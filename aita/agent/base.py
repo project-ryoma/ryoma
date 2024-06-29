@@ -13,6 +13,7 @@ from aita.datasource.catalog import Catalog
 
 class AitaAgent:
     type: str = "aita"
+    description: str = "Aita Agent is your best friend!"
     config: Dict[str, Any]
     model: RunnableSerializable
     model_parameters: Optional[Dict]
@@ -88,7 +89,7 @@ class AitaAgent:
     def _format_question(self, question: str):
         self.prompt_template.append(("user", question))
 
-    def _fill_prompt_context(self, prompt_context: str):
+    def add_prompt_context(self, prompt_context: str):
         if not self.prompt_context_template:
             self._set_base_prompt_context_template()
         prompt_context_template = self.prompt_context_template.partial(
@@ -97,11 +98,11 @@ class AitaAgent:
         self.prompt_template.append(prompt_context_template)
 
     def add_datasource(self, datasource: DataSource):
-        self._fill_prompt_context(str(datasource.get_metadata()))
+        self.add_prompt_context(str(datasource.get_metadata()))
         return self
 
     def add_data_catalog(self, catalog: Catalog):
-        self._fill_prompt_context(str(catalog))
+        self.add_prompt_context(str(catalog))
         return self
 
     def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
@@ -127,6 +128,10 @@ class AitaAgent:
             chain = self.output_prompt_template | self.model | self.output_parser
             results = self._parse_output(chain, results)
         return results
+
+    def embed(self, query: str) -> list:
+        assert hasattr(self.model, "embed"), "Model does not support embedding"
+        return self.model.embed(query)
 
     def get_current_state(self) -> None:
         return None

@@ -43,7 +43,7 @@ class SparkAgent(GraphAgent):
 
     def add_pandas_dataframe(self, dataframe: pd.DataFrame):
         df_id = f"df_{id(dataframe)}"
-        self._fill_prompt_context(
+        self.add_prompt_context(
             f"""
         dataframe name: {df_id}
         dataframe metadata: {dataframe.info}

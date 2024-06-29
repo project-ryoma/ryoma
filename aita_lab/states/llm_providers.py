@@ -19,15 +19,35 @@ from jupyter_ai_magics.providers import (
 
 
 class OpenAIEmbeddingsProvider:
-    pass
+    id = "openai"
+    name = "OpenAI"
+    models = [
+        "text-embedding-ada-002",
+        "text-embedding-3-small",
+        "text-embedding-3-large",
+    ]
 
 
 class MistralAIEmbeddingsProvider:
-    pass
+    id = "mistralai"
+    name = "MistralAI"
+    models = [
+        "mistral-embed",
+    ]
 
 
 class CohereEmbeddingsProvider:
-    pass
+    id = "cohere"
+    name = "Cohere"
+    models = [
+        "embed-english-v2.0",
+        "embed-english-light-v2.0",
+        "embed-multilingual-v2.0",
+        "embed-english-v3.0",
+        "embed-english-light-v3.0",
+        "embed-multilingual-v3.0",
+        "embed-multilingual-light-v3.0",
+    ]
 
 
 class OpenAIProvider:
@@ -135,7 +155,7 @@ class CohereProvider:
     ]
 
 
-class ModelProvider(Enum):
+class ChatModelProvider(Enum):
     openai_chat = ChatOpenAIProvider
     openai = OpenAIProvider
     ai21 = AI21Provider

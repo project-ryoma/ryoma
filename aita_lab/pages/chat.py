@@ -2,13 +2,15 @@
 
 import reflex as rx
 
+from aita_lab import styles
 from aita_lab.components.codeeditor import code_editor
 from aita_lab.components.loading_icon import loading_icon
 from aita_lab.states.agent import AgentState
 from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
-from aita_lab.states.llm_providers import ModelProvider
+from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from aita_lab.states.prompt_template import PromptTemplateState
+from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.styles import message_style
 from aita_lab.templates import template
 
@@ -118,37 +120,45 @@ def action_bar() -> rx.Component:
     )
 
 
+def model_provider_selector(model_provider, model_value, on_model_value_change) -> rx.Component:
+    return rx.select.root(
+        rx.select.trigger(placeholder="Select an embedding model", width="100%"),
+        rx.select.content(
+            *[
+                rx.select.group(
+                    rx.select.label(p.value.name),
+                    rx.foreach(
+                        p.value.models,
+                        lambda x: rx.select.item(x, value=f"{p.value.id}:{x}"),
+                    ),
+                    width="100%",
+                )
+                for p in list(model_provider)
+            ],
+            width="100%",
+        ),
+        value=model_value,
+        on_change=on_model_value_change,
+        default_value="gpt-3.5-turbo",
+        width="100%",
+    )
+
+
 def model_selector() -> rx.Component:
     """The model selector."""
     return rx.form(
         rx.chakra.form_control(
             rx.text(
-                "Model *",
+                "Chat Model *",
                 asi_="div",
                 mb="1",
                 size="2",
                 weight="bold",
             ),
-            rx.select.root(
-                rx.select.trigger(placeholder="Select a model", width="100%"),
-                rx.select.content(
-                    *[
-                        rx.select.group(
-                            rx.select.label(p.value.name),
-                            rx.foreach(
-                                p.value.models,
-                                lambda x: rx.select.item(x, value=f"{p.value.id}:{x}"),
-                            ),
-                            width="100%",
-                        )
-                        for p in list(ModelProvider)
-                    ],
-                    width="100%",
-                ),
-                value=ChatState.current_model,
-                on_change=ChatState.set_current_model,
-                default_value="gpt-3.5-turbo",
-                width="100%",
+            model_provider_selector(
+                ChatModelProvider,
+                ChatState.current_chat_model,
+                ChatState.set_current_chat_model
             ),
             label="Model",
             width="100%",
@@ -193,17 +203,77 @@ def prompt_template_selector() -> rx.Component:
                 size="2",
                 weight="bold",
             ),
+
             rx.select(
                 PromptTemplateState.prompt_template_names,
-                value=ChatState.current_prompt_template,
+                value=ChatState.current_prompt_template.prompt_template_name,
                 on_change=ChatState.set_current_prompt_template,
                 width="100%",
                 placeholder="Select a prompt template",
             ),
+            rx.cond(
+                ChatState.current_prompt_template is not None and ChatState.current_prompt_template.k_shot > 0,
+                rx.chakra.box(
+                    rx.flex(
+                        rx.text(
+                            "Embedding Model *",
+                            asi_="div",
+                            mb="1",
+                            size="2",
+                            weight="bold",
+                        ),
+                        model_provider_selector(
+                            EmbeddingModelProvider,
+                            ChatState.current_embedding_model,
+                            ChatState.set_current_embedding_model),
+                        rx.text(
+                            "K-Shot",
+                            asi_="div",
+                            mb="1",
+                            size="2",
+                            weight="bold",
+                        ),
+                        rx.input(
+                            placeholder="Enter the number of examples",
+                            width="100%",
+                            on_blur=ChatState.set_current_k_shot,
+                            padding_top="2",
+                        ),
+                        rx.text(
+                            "Vector Feature *",
+                            asi_="div",
+                            mb="1",
+                            size="2",
+                            weight="bold",
+                        ),
+                        rx.select.root(
+                            rx.select.trigger(
+                                placeholder="Select your feature",
+                            ),
+                            rx.select.content(
+                                rx.select.group(
+                                    rx.select.label("Select your feature"),
+                                    rx.foreach(
+                                        VectorStoreState.vector_features,
+                                        lambda x: rx.select.item(x.name, value=x.name)
+                                    ),
+                                ),
+                            ),
+                            value=ChatState.current_vector_feature,
+                            on_change=ChatState.set_current_vector_feature,
+                        ),
+                        spacing="2",
+                        direction="column",
+                    ),
+                    padding="3",
+                    margin_top="3",
+                    border=styles.border,
+                    border_radius=styles.border_radius
+                )
+            ),
             label="Prompt Template",
             width="100%",
         ),
-        padding_y="2",
     )
 
 
@@ -219,8 +289,8 @@ def agent_selector() -> rx.Component:
             ),
             rx.select(
                 AgentState.agent_names,
-                value=ChatState.current_agent_type,
-                on_change=ChatState.set_current_agent_type,
+                value=ChatState.current_chat_agent_type,
+                on_change=ChatState.set_current_chat_agent_type,
                 width="100%",
                 placeholder="Select an agent type",
             ),
@@ -369,6 +439,7 @@ def tool_output() -> rx.Component:
         DataSourceState.on_load,
         PromptTemplateState.on_load,
         AgentState.on_load,
+        VectorStoreState.on_load
     ],
 )
 def chat() -> rx.Component:
@@ -398,8 +469,8 @@ def chat() -> rx.Component:
         rx.chakra.box(
             rx.chakra.vstack(
                 model_selector(),
-                datasource_selector(),
                 prompt_template_selector(),
+                datasource_selector(),
                 agent_selector(),
                 col_span=1,
                 padding="4",

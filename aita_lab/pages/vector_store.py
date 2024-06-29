@@ -173,28 +173,22 @@ def show_store():
     return rx.chakra.box(
         rx.tabs.root(
             rx.tabs.list(
-                rx.tabs.trigger(
-                    VectorStoreState.project_name,
-                    value="tab1",
-                    cursor="pointer",
-                ),
-                rx.tabs.trigger(
-                    "Tab 2",
-                    value="tab2",
-                    cursor="pointer",
+                rx.foreach(
+                    VectorStoreState.project_names,
+                    lambda project_name: rx.tabs.trigger(
+                        project_name,
+                        value=project_name,
+                        cursor="pointer",
+                    ),
                 ),
             ),
             rx.tabs.content(
                 show_features(),
-                value="tab1",
+                value=VectorStoreState.project_name,
                 width="100%",
             ),
-            rx.tabs.content(
-                rx.text("item on tab 2"),
-                value="tab2",
-                width="100%",
-            ),
-            default_value="tab1",
+            value=VectorStoreState.project_name,
+            on_change=VectorStoreState.set_project,
             orientation="horizontal",
             height="100vh",
             width="100%",

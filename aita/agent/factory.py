@@ -9,11 +9,13 @@ from aita.agent.sql import SqlAgent
 
 
 class AgentProvider(Enum):
+    aita = AitaAgent
     sql = SqlAgent
     pandas = PandasAgent
     pyarrow = ArrowAgent
     pyspark = SparkAgent
     python = PythonAgent
+    embedding = AitaAgent
 
 
 def get_supported_agents():

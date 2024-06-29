@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import json
 
@@ -24,7 +24,8 @@ class PromptTemplateState(rx.State):
     prompt_template_names: List[str] = []
     prompt_templates: List[PromptTemplate] = []
 
-    def load_prompt_templates(self):
+    @staticmethod
+    def load_prompt_templates_from_data():
         prompt_template_names = []
         prompt_templates = []
         for template in data["templates"]:
@@ -33,7 +34,7 @@ class PromptTemplateState(rx.State):
             example_format = template["args"]["example_type"]
             selector_type = template["args"]["selector_type"]
             prompt_template_name = (
-                f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}_template"
+                f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}"
             )
             prompt_lines = template["formatted_question"]["prompt"].split("\n")
             prompt_template = PromptTemplate(
@@ -46,14 +47,15 @@ class PromptTemplateState(rx.State):
             )
             prompt_template_names.append(prompt_template_name)
             prompt_templates.append(prompt_template)
-        self.prompt_template_names = prompt_template_names
-        self.prompt_templates = prompt_templates
+        return prompt_template_names, prompt_templates
 
-    def get_prompt_template(self, prompt_template_name: str) -> PromptTemplate:
-        for prompt_template in self.prompt_templates:
-            if prompt_template.prompt_template_name == prompt_template_name:
-                return prompt_template
-        return None
+    def load_prompt_templates(self):
+        self.prompt_template_names, self.prompt_templates = self.load_prompt_templates_from_data()
+
+    @staticmethod
+    def get_prompt_template(prompt_template_name: str) -> Optional[PromptTemplate]:
+        _, prompt_templates = PromptTemplateState.load_prompt_templates_from_data()
+        return next((pt for pt in prompt_templates if pt.prompt_template_name == prompt_template_name), None)
 
     @staticmethod
     def build_prompt(prompt_template: PromptTemplate, embedding_model: str, target):
