@@ -1,9 +1,9 @@
+from typing import Optional
+
 import json
 import logging
 import os
 from pathlib import Path
-from sqlmodel import select
-from typing import Optional
 
 import pandas as pd
 import reflex as rx
@@ -11,11 +11,13 @@ from feast import FeatureView, FileSource
 from feast.data_format import ParquetFormat
 from feast.data_source import PushSource
 from feast.feature_store import FeatureStore
+from feast.field import Field
 from feast.repo_config import RepoConfig
 from feast.repo_operations import _prepare_registry_and_repo, apply_total_with_repo_instance
-from aita_lab.states.base import BaseState
-from feast.field import Field
 from feast.types import Array, Float32
+from sqlmodel import select
+
+from aita_lab.states.base import BaseState
 
 
 class VectorStore(rx.Model, table=True):
@@ -69,24 +71,29 @@ class VectorStoreState(BaseState):
         self._load_project()
 
     def _load_project(self):
-        project = next((project for project in self.projects if project.project_name == self.project_name), None)
+        project = next(
+            (project for project in self.projects if project.project_name == self.project_name),
+            None,
+        )
         if project:
             repo_config = self._get_feast_repo_config(
                 project_name=project.project_name,
                 online_store_type=project.online_store_type,
                 online_store_configs=project.online_store_configs,
                 offline_store_type=project.offline_store_type,
-                offline_store_configs=project.offline_store_configs
+                offline_store_configs=project.offline_store_configs,
             )
             self._fs = FeatureStore(config=repo_config)
             self.vector_features = self._get_features()
 
-    def _get_feast_repo_config(self,
-                               project_name,
-                               online_store_type,
-                               online_store_configs,
-                               offline_store_type: Optional[str] = None,
-                               offline_store_configs: Optional[str] = None):
+    def _get_feast_repo_config(
+        self,
+        project_name,
+        online_store_type,
+        online_store_configs,
+        offline_store_type: Optional[str] = None,
+        offline_store_configs: Optional[str] = None,
+    ):
         return RepoConfig(
             project=project_name,
             registry="data/vector.db",
@@ -99,7 +106,7 @@ class VectorStoreState(BaseState):
                 **(json.loads(offline_store_configs) if offline_store_configs else {}),
                 "type": offline_store_type,
             },
-            entity_key_serialization_version=3
+            entity_key_serialization_version=3,
         )
 
     def create_store(self):
@@ -108,25 +115,25 @@ class VectorStoreState(BaseState):
             online_store_type=self.online_store_type,
             online_store_configs=self.online_store_configs,
             offline_store_type=self.offline_store_type,
-            offline_store_configs=self.offline_store_configs
+            offline_store_configs=self.offline_store_configs,
         )
         repo_path = Path(os.path.join(Path.cwd(), "data"))
         try:
             project, registry, repo, store = _prepare_registry_and_repo(repo_config, repo_path)
-            apply_total_with_repo_instance(
-                store, project, registry, repo, True
-            )
+            apply_total_with_repo_instance(store, project, registry, repo, True)
             self._fs = FeatureStore(config=repo_config)
 
             # save the project to the database
             with rx.session() as session:
-                session.add(VectorStore(
-                    project_name=self.project_name,
-                    online_store_type=self.online_store_type,
-                    offline_store_type=self.offline_store_type,
-                    online_store_configs=self.online_store_configs,
-                    offline_store_configs=self.offline_store_configs,
-                ))
+                session.add(
+                    VectorStore(
+                        project_name=self.project_name,
+                        online_store_type=self.online_store_type,
+                        offline_store_type=self.offline_store_type,
+                        online_store_configs=self.online_store_configs,
+                        offline_store_configs=self.offline_store_configs,
+                    )
+                )
                 session.commit()
             logging.info("Feature store created")
         except Exception as e:
@@ -145,17 +152,19 @@ class VectorStoreState(BaseState):
                 file_format=ParquetFormat(),
                 path="data/feature.parquet",
                 timestamp_field="event_timestamp",
-            )
+            ),
         )
 
     def create_vector_feature(self):
-        self._fs.apply(FeatureView(
-            name=self.feature_name,
-            entities=self.feature_entities,
-            schema=self._create_feature_schema(),
-            source=self._create_feature_source(),
-            ttl=self.feature_ttl
-        ))
+        self._fs.apply(
+            FeatureView(
+                name=self.feature_name,
+                entities=self.feature_entities,
+                schema=self._create_feature_schema(),
+                source=self._create_feature_source(),
+                ttl=self.feature_ttl,
+            )
+        )
         logging.info(f"Feature {self.feature_name} created")
         self.open_feature_dialog()
 
@@ -166,13 +175,17 @@ class VectorStoreState(BaseState):
         vector_features = []
         for feature_view in self._fs.list_feature_views():
             feature_spec = self._fs.get_feature_view(feature_view.name)
-            vector_features.append(FeastFeature(
-                name=feature_spec.name,
-                entities=", ".join(feature_spec.entities),
-                schema=", ".join([f"{schema.name}:{schema.dtype}" for schema in feature_spec.schema]),
-                source=feature_spec.batch_source.name,
-                ttl=feature_spec.ttl.seconds if feature_spec.ttl else None
-            ))
+            vector_features.append(
+                FeastFeature(
+                    name=feature_spec.name,
+                    entities=", ".join(feature_spec.entities),
+                    schema=", ".join(
+                        [f"{schema.name}:{schema.dtype}" for schema in feature_spec.schema]
+                    ),
+                    source=feature_spec.batch_source.name,
+                    ttl=feature_spec.ttl.seconds if feature_spec.ttl else None,
+                )
+            )
         return vector_features
 
     def load_store(self):
@@ -188,7 +201,7 @@ class VectorStoreState(BaseState):
                 online_store_type=self.projects[0].online_store_type,
                 online_store_configs=self.projects[0].online_store_configs,
                 offline_store_type=self.projects[0].offline_store_type,
-                offline_store_configs=self.projects[0].offline_store_configs
+                offline_store_configs=self.projects[0].offline_store_configs,
             )
             self._fs = FeatureStore(config=repo_config)
             self.vector_features = self._get_features()
@@ -212,11 +225,7 @@ class VectorStoreState(BaseState):
 
     def _retrieve_vector_features(self, feature: str, query, top_k: int = 3) -> dict:
         logging.info(f"Retrieving online documents for {feature} with query {query}")
-        response = self._fs.retrieve_online_documents(
-            feature=feature,
-            query=query,
-            top_k=top_k
-        )
+        response = self._fs.retrieve_online_documents(feature=feature, query=query, top_k=top_k)
         return response.to_dict()
 
     def on_load(self) -> None:

@@ -33,9 +33,7 @@ class PromptTemplateState(rx.State):
             k_shot = template["args"]["k_shot"]
             example_format = template["args"]["example_type"]
             selector_type = template["args"]["selector_type"]
-            prompt_template_name = (
-                f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}"
-            )
+            prompt_template_name = f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}"
             prompt_lines = template["formatted_question"]["prompt"].split("\n")
             prompt_template = PromptTemplate(
                 prompt_repr=prompt_repr,
@@ -55,7 +53,9 @@ class PromptTemplateState(rx.State):
     @staticmethod
     def get_prompt_template(prompt_template_name: str) -> Optional[PromptTemplate]:
         _, prompt_templates = PromptTemplateState.load_prompt_templates_from_data()
-        return next((pt for pt in prompt_templates if pt.prompt_template_name == prompt_template_name), None)
+        return next(
+            (pt for pt in prompt_templates if pt.prompt_template_name == prompt_template_name), None
+        )
 
     @staticmethod
     def build_prompt(prompt_template: PromptTemplate, embedding_model: str, target):

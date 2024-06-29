@@ -149,10 +149,12 @@ def show_features():
                             rx.chakra.td(feature.schema),
                             rx.chakra.td(feature.source),
                             rx.chakra.td(feature.ttl),
-                            rx.chakra.td(rx.chakra.button(
-                                "Load",
-                                on_click=VectorStoreState.load_vector_feature,
-                            ))
+                            rx.chakra.td(
+                                rx.chakra.button(
+                                    "Load",
+                                    on_click=VectorStoreState.load_vector_feature,
+                                )
+                            ),
                         ),
                     ),
                     width="100%",

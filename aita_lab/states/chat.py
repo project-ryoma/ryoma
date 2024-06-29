@@ -115,7 +115,9 @@ class ChatState(BaseState):
         self.current_prompt_template = PromptTemplateState.get_prompt_template(prompt_template_name)
 
     def _create_chat_agent(self, **kwargs):
-        logging.info(f"Creating {self.current_chat_agent_type} agent with model {self.current_chat_model}")
+        logging.info(
+            f"Creating {self.current_chat_agent_type} agent with model {self.current_chat_model}"
+        )
         if not self._current_chat_agent or self._current_chat_agent_state_change:
             self._current_chat_agent = AgentFactory.create_agent(
                 agent_type=self.current_chat_agent_type,
@@ -163,7 +165,9 @@ class ChatState(BaseState):
     def run_tool(self):
         logging.info(f"Running tool {self.current_tool.name} with args {self.current_tool.args}")
         try:
-            result = self._current_chat_agent.call_tool(self.current_tool.name, self.current_tool.id)
+            result = self._current_chat_agent.call_tool(
+                self.current_tool.name, self.current_tool.id
+            )
             if isinstance(result, DataFrame):
                 self.run_tool_output = RunToolOutput(data=result, show=True)
         except Exception as e:
@@ -265,7 +269,9 @@ class ChatState(BaseState):
             embedded_question = self._current_embedding_agent.embed(question)
 
             # retrieve similar features
-            similar_features = VectorStoreState._retrieve_vector_features(self.current_vector_feature, embedded_question)
+            similar_features = VectorStoreState._retrieve_vector_features(
+                self.current_vector_feature, embedded_question
+            )
 
             # TODO: add similar features to the prompt template
             self._current_chat_agent.add_prompt_context(similar_features)

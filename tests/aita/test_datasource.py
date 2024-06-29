@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from mock import patch
 
-from aita.datasource.sql import SqlDataSource
 from aita.datasource.catalog import Catalog
+from aita.datasource.sql import SqlDataSource
 
 
 class MockSqlDataSource(SqlDataSource):

@@ -156,9 +156,7 @@ def model_selector() -> rx.Component:
                 weight="bold",
             ),
             model_provider_selector(
-                ChatModelProvider,
-                ChatState.current_chat_model,
-                ChatState.set_current_chat_model
+                ChatModelProvider, ChatState.current_chat_model, ChatState.set_current_chat_model
             ),
             label="Model",
             width="100%",
@@ -203,7 +201,6 @@ def prompt_template_selector() -> rx.Component:
                 size="2",
                 weight="bold",
             ),
-
             rx.select(
                 PromptTemplateState.prompt_template_names,
                 value=ChatState.current_prompt_template.prompt_template_name,
@@ -212,7 +209,8 @@ def prompt_template_selector() -> rx.Component:
                 placeholder="Select a prompt template",
             ),
             rx.cond(
-                ChatState.current_prompt_template is not None and ChatState.current_prompt_template.k_shot > 0,
+                ChatState.current_prompt_template is not None
+                and ChatState.current_prompt_template.k_shot > 0,
                 rx.chakra.box(
                     rx.flex(
                         rx.text(
@@ -225,7 +223,8 @@ def prompt_template_selector() -> rx.Component:
                         model_provider_selector(
                             EmbeddingModelProvider,
                             ChatState.current_embedding_model,
-                            ChatState.set_current_embedding_model),
+                            ChatState.set_current_embedding_model,
+                        ),
                         rx.text(
                             "K-Shot",
                             asi_="div",
@@ -255,7 +254,7 @@ def prompt_template_selector() -> rx.Component:
                                     rx.select.label("Select your feature"),
                                     rx.foreach(
                                         VectorStoreState.vector_features,
-                                        lambda x: rx.select.item(x.name, value=x.name)
+                                        lambda x: rx.select.item(x.name, value=x.name),
                                     ),
                                 ),
                             ),
@@ -268,8 +267,8 @@ def prompt_template_selector() -> rx.Component:
                     padding="3",
                     margin_top="3",
                     border=styles.border,
-                    border_radius=styles.border_radius
-                )
+                    border_radius=styles.border_radius,
+                ),
             ),
             label="Prompt Template",
             width="100%",
@@ -439,7 +438,7 @@ def tool_output() -> rx.Component:
         DataSourceState.on_load,
         PromptTemplateState.on_load,
         AgentState.on_load,
-        VectorStoreState.on_load
+        VectorStoreState.on_load,
     ],
 )
 def chat() -> rx.Component:
