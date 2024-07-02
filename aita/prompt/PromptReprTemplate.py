@@ -17,7 +17,7 @@ class BasicPrompt(object):
 
 
 class SQLPrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" "{}"
+    template_info = "/* Given the following database feature: */\n" "{}"
     template_question = "/* Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -37,11 +37,11 @@ class SQLPrompt(BasicPrompt):
 
 
 class TextPrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" "{}"
+    template_info = "Given the following database feature:\n" "{}"
     template_question = "Answer the following: {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}: {', '.join(_.schema)}" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}: {', '.join(_.feature)}" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -67,7 +67,7 @@ class NumberSignPrompt(BasicPrompt):
     template_question = "### {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"# {_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"# {_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -89,7 +89,7 @@ class BaselinePrompt(BasicPrompt):
     def format_question(self, example: dict):
         # schemas
         schemas = "\n".join(
-            [f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]
+            [f"Table {_.name}, columns = {_.feature}" for _ in example["tables"]]
         ).replace("'", "")
         # foreign_keys
         foreign_keys = list()
@@ -124,7 +124,7 @@ class InstructionPrompt(BasicPrompt):
     template_question = "### Response:"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(example["question"], schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -142,12 +142,12 @@ class InstructionPrompt(BasicPrompt):
 
 class TextWithForeignKeyPrompt(BasicPrompt):
     template_info = (
-        "Given the following database schema:\n" "{} \n" "And their foreign keys:\n" "{}"
+        "Given the following database feature:\n" "{} \n" "And their foreign keys:\n" "{}"
     )
     template_question = "Answer the following: {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}: {', '.join(_.schema)}" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}: {', '.join(_.feature)}" for _ in example["tables"]])
         # foreign_keys
         foreign_keys = list()
         for table in example["tables"]:
@@ -184,7 +184,7 @@ class NumberSignWithForeignKeyPrompt(BasicPrompt):
     template_question = "### {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"# {_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"# {_.name}({', '.join(_.feature)})" for _ in example["tables"]])
         # foreign_keys
         foreign_keys = list()
         for table in example["tables"]:
@@ -213,7 +213,7 @@ class BaselineWithoutForeignKeyPrompt(BasicPrompt):
     def format_question(self, example: dict):
         # schemas
         schemas = "\n".join(
-            [f"Table {_.name}, columns = {_.schema}" for _ in example["tables"]]
+            [f"Table {_.name}, columns = {_.feature}" for _ in example["tables"]]
         ).replace("'", "")
 
         # format prompt
@@ -242,7 +242,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
     template_question = "### Response:"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}({', '.join(_.feature)})" for _ in example["tables"]])
         # foreign_keys
         foreign_keys = list()
         for table in example["tables"]:
@@ -266,7 +266,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
 
 
 class SQLWithRulePrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" "{}"
+    template_info = "/* Given the following database feature: */\n" "{}"
     template_question = "/* Answer the following with no explanation: {} */"
 
     def format_question(self, example: dict):
@@ -286,11 +286,11 @@ class SQLWithRulePrompt(BasicPrompt):
 
 
 class TextWithRulePrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" "{}"
+    template_info = "Given the following database feature:\n" "{}"
     template_question = "Answer the following with no explanation: {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}: {', '.join(_.schema)}" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}: {', '.join(_.feature)}" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -316,7 +316,7 @@ class NumberSignWithoutRulePrompt(BasicPrompt):
     template_question = "### {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"# {_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"# {_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -340,7 +340,7 @@ class InstructionWithRulePrompt(BasicPrompt):
     template_question = "### Response:"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(example["question"], schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -357,7 +357,7 @@ class InstructionWithRulePrompt(BasicPrompt):
 
 
 class SQLCOTPrompt(BasicPrompt):
-    template_info = "/* Given the following database schema: */\n" "{}"
+    template_info = "/* Given the following database feature: */\n" "{}"
     template_question = "/* Let's think step by step. Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -380,11 +380,11 @@ class SQLCOTPrompt(BasicPrompt):
 
 
 class TextCOTPrompt(BasicPrompt):
-    template_info = "Given the following database schema:\n" "{}"
+    template_info = "Given the following database feature:\n" "{}"
     template_question = "Let's think step by step. Answer the following: {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}: {', '.join(_.schema)}" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}: {', '.join(_.feature)}" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -413,7 +413,7 @@ class NumberSignCOTPrompt(BasicPrompt):
     template_question = "### {}"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"# {_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"# {_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -440,7 +440,7 @@ class InstructionCOTPrompt(BasicPrompt):
     template_question = "### Response:"
 
     def format_question(self, example: dict):
-        schemas = "\n".join([f"{_.name}({', '.join(_.schema)})" for _ in example["tables"]])
+        schemas = "\n".join([f"{_.name}({', '.join(_.feature)})" for _ in example["tables"]])
 
         prompt_info = self.template_info.format(example["question"], schemas)
         prompt_extra_info = self.get_extra_info(example["db_id"])
@@ -470,7 +470,7 @@ class CBRPrompt(BasicPrompt):
 
     def format_question(self, example: dict):
         tables = ", ".join([f"{_.name}" for _ in example["tables"]])
-        columns = ", ".join([f"{_.name}.{col}" for _ in example["tables"] for col in _.schema])
+        columns = ", ".join([f"{_.name}.{col}" for _ in example["tables"] for col in _.feature])
         # foreign_keys
         foreign_keys = list()
         for table in example["tables"]:

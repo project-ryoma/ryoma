@@ -11,7 +11,10 @@ initial_nodes = [
     {
         "id": "1",
         "type": "input",
-        "data": {"label": "__start__"},
+        "data": {
+            "label": "__start__",
+
+        },
         "position": {"x": 200, "y": 25},
     },
     {
@@ -152,8 +155,8 @@ class GraphState(rx.State):
         self.graph.nodes.append(new_node)
 
     def clear_graph(self):
-        self.graph.nodes = []  # Clear the nodes list
-        self.graph.edges = []  # Clear the edges list
+        self.graph.nodes = initial_nodes
+        self.graph.edges = initial_edges
 
     def on_connect(self, new_edge):
         # Iterate over the existing edges

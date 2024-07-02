@@ -5,10 +5,10 @@ import reflex as rx
 from aita_lab import styles
 from aita_lab.components.codeeditor import code_editor
 from aita_lab.components.loading_icon import loading_icon
+from aita_lab.components.model_selector import select_chat_model, select_embedding_model
 from aita_lab.states.agent import AgentState
 from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
-from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.styles import message_style
@@ -120,51 +120,6 @@ def action_bar() -> rx.Component:
     )
 
 
-def model_provider_selector(model_provider, model_value, on_model_value_change) -> rx.Component:
-    return rx.select.root(
-        rx.select.trigger(placeholder="Select an embedding model", width="100%"),
-        rx.select.content(
-            *[
-                rx.select.group(
-                    rx.select.label(p.value.name),
-                    rx.foreach(
-                        p.value.models,
-                        lambda x: rx.select.item(x, value=f"{p.value.id}:{x}"),
-                    ),
-                    width="100%",
-                )
-                for p in list(model_provider)
-            ],
-            width="100%",
-        ),
-        value=model_value,
-        on_change=on_model_value_change,
-        default_value="gpt-3.5-turbo",
-        width="100%",
-    )
-
-
-def model_selector() -> rx.Component:
-    """The model selector."""
-    return rx.form(
-        rx.chakra.form_control(
-            rx.text(
-                "Chat Model *",
-                asi_="div",
-                mb="1",
-                size="2",
-                weight="bold",
-            ),
-            model_provider_selector(
-                ChatModelProvider, ChatState.current_chat_model, ChatState.set_current_chat_model
-            ),
-            label="Model",
-            width="100%",
-        ),
-        width="100%",
-    )
-
-
 def datasource_selector() -> rx.Component:
     """The datasource selector."""
     return rx.chakra.form(
@@ -181,12 +136,11 @@ def datasource_selector() -> rx.Component:
                 value=ChatState.current_datasource,
                 placeholder="Select a datasource",
                 on_change=ChatState.set_current_datasource,
-                width="100%",
+                width="12em",
             ),
             label="Datasource",
             width="100%",
         ),
-        padding_y="2",
     )
 
 
@@ -205,25 +159,15 @@ def prompt_template_selector() -> rx.Component:
                 PromptTemplateState.prompt_template_names,
                 value=ChatState.current_prompt_template.prompt_template_name,
                 on_change=ChatState.set_current_prompt_template,
-                width="100%",
+                width="14em",
                 placeholder="Select a prompt template",
             ),
-            rx.cond(
-                ChatState.current_prompt_template is not None
-                and ChatState.current_prompt_template.k_shot > 0,
-                rx.chakra.box(
+            rx.dialog.root(
+                rx.dialog.content(
                     rx.flex(
-                        rx.text(
-                            "Embedding Model *",
-                            asi_="div",
-                            mb="1",
-                            size="2",
-                            weight="bold",
-                        ),
-                        model_provider_selector(
-                            EmbeddingModelProvider,
+                        select_embedding_model(
                             ChatState.current_embedding_model,
-                            ChatState.set_current_embedding_model,
+                            ChatState.set_current_embedding_model
                         ),
                         rx.text(
                             "K-Shot",
@@ -253,13 +197,19 @@ def prompt_template_selector() -> rx.Component:
                                 rx.select.group(
                                     rx.select.label("Select your feature"),
                                     rx.foreach(
-                                        VectorStoreState.vector_features,
-                                        lambda x: rx.select.item(x.name, value=x.name),
+                                        VectorStoreState.vector_feature_views,
+                                        lambda x: rx.select.item(x.name, value=f"{x.name}:{x.feature}"),
                                     ),
                                 ),
                             ),
                             value=ChatState.current_vector_feature,
                             on_change=ChatState.set_current_vector_feature,
+                        ),
+                        rx.dialog.close(
+                            rx.button(
+                                "Confirm",
+                                on_click=ChatState.close_vector_feature_dialog,
+                            )
                         ),
                         spacing="2",
                         direction="column",
@@ -269,6 +219,7 @@ def prompt_template_selector() -> rx.Component:
                     border=styles.border,
                     border_radius=styles.border_radius,
                 ),
+                open=ChatState.vector_feature_dialog_open,
             ),
             label="Prompt Template",
             width="100%",
@@ -290,13 +241,12 @@ def agent_selector() -> rx.Component:
                 AgentState.agent_names,
                 value=ChatState.current_chat_agent_type,
                 on_change=ChatState.set_current_chat_agent_type,
-                width="100%",
+                width="14em",
                 placeholder="Select an agent type",
             ),
             label="Agent Type",
             width="100%",
-        ),
-        padding_y="2",
+        )
     )
 
 
@@ -347,16 +297,16 @@ def tool_panel() -> rx.Component:
             spacing="2",
             width="100%",
         ),
-        rx.cond(
-            ChatState.current_tool is not None,
-            rx.box(
+        rx.box(
+            rx.cond(
+                ChatState.current_tool is not None and ChatState.current_tool.args is not None,
                 rx.foreach(
                     ChatState.current_tool.args,
                     lambda arg: rx.box(
                         code_editor(
-                            value=arg[1],
+                            value=arg.value,
                             on_change=lambda x: ChatState.set_current_tool_arg(
-                                ChatState.current_tool.id, arg[0], x
+                                ChatState.current_tool.id, arg.name, x
                             ),
                             width="100%",
                             min_height="20e",
@@ -367,18 +317,18 @@ def tool_panel() -> rx.Component:
                         ),
                     ),
                 ),
-            ),
+            )
         ),
     )
 
 
-def run_tool_wrapper() -> rx.Component:
+def tool_kernel() -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(
         rx.chakra.form(
             rx.chakra.form_control(
                 rx.text(
-                    "Tool",
+                    "Tool Kernel",
                     asi_="div",
                     mb="1",
                     size="3",
@@ -387,9 +337,10 @@ def run_tool_wrapper() -> rx.Component:
                 ),
                 tool_panel(),
             ),
-            padding="4px",
-            border=f"1px solid {rx.color('mauve', 3)}",
-            border_radius="md",
+            padding="10px",
+            border=styles.border,
+            border_radius=styles.border_radius,
+            height="40vh",
             width="100%",
         ),
         tool_output(),
@@ -400,33 +351,37 @@ def run_tool_wrapper() -> rx.Component:
         align_items="stretch",
         background_color=rx.color("mauve", 2),
         color=rx.color("mauve", 12),
-        border_top=f"1px solid {rx.color('mauve', 3)}",
-        border_bottom=f"1px solid {rx.color('mauve', 3)}",
     )
 
 
 def tool_output() -> rx.Component:
-    return rx.cond(
-        ChatState.run_tool_output.show,
-        rx.box(
-            rx.text(
-                "Output",
-                asi_="div",
-                mb="1",
-                size="3",
-                weight="bold",
-                padding="4px",
-            ),
-            rx.data_table(
-                data=ChatState.run_tool_output.data,
-                width="100%",
-                padding="20px",
-                pagination=True,
-                search=True,
-                sort=True,
-                max_height="400px",
+    return rx.box(
+        rx.cond(
+            ChatState.run_tool_output.show,
+            rx.box(
+                rx.text(
+                    "Output",
+                    asi_="div",
+                    mb="1",
+                    size="3",
+                    weight="bold",
+                    padding="4px",
+                ),
+                rx.data_table(
+                    data=ChatState.run_tool_output.data,
+                    width="100%",
+                    padding="20px",
+                    pagination=True,
+                    search=True,
+                    sort=True,
+                    max_height="400px",
+                ),
             ),
         ),
+        padding="4px",
+        height="40vh",
+        border=styles.border,
+        border_radius=styles.border_radius,
     )
 
 
@@ -445,36 +400,17 @@ def chat() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
         rx.chakra.box(
-            rx.chakra.vstack(
-                chat_history(),
-                action_bar(),
-                background_color=rx.color("mauve", 1),
-                color=rx.color("mauve", 12),
-                height="90vh",
-                align_items="stretch",
-                spacing="0",
-                padding="20px",
-            ),
-            flex_grow=1,
-        ),
-        rx.cond(
-            ChatState.current_tools.length() > 0,
-            rx.chakra.grid_item(
-                run_tool_wrapper(),
-                width="100%",
-                flex_grow=1,
-            ),
-        ),
-        rx.chakra.box(
-            rx.chakra.vstack(
-                model_selector(),
+            rx.chakra.hstack(
+                select_chat_model(
+                    ChatState.current_chat_model,
+                    ChatState.set_current_chat_model,
+                    style={"width": "12em"},
+                ),
                 prompt_template_selector(),
                 datasource_selector(),
                 agent_selector(),
-                col_span=1,
                 padding="4",
                 width="100%",
-                max_width="20em",
                 background_color=rx.color("mauve", 2),
                 color=rx.color("mauve", 12),
                 border_left=f"1px solid {rx.color('mauve', 3)}",
@@ -482,6 +418,22 @@ def chat() -> rx.Component:
                 spacing="4",
                 align_items="stretch",
             ),
+            rx.chakra.vstack(
+                chat_history(),
+                action_bar(),
+                background_color=rx.color("mauve", 1),
+                color=rx.color("mauve", 12),
+                height="80vh",
+                align_items="stretch",
+                spacing="0",
+                padding="20px",
+                overflow="scroll",
+            ),
+            flex_grow=1,
+        ),
+        rx.chakra.grid_item(
+            tool_kernel(),
+            width="100%",
         ),
         h="100vh",
         width="100%",

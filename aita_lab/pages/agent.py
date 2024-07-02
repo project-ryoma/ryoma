@@ -80,7 +80,7 @@ def create_agent_flow():
             rx.button(
                 "Create",
                 variant="solid",
-                on_click=AgentState.create_agent,
+                on_click=lambda: AgentState.create_agent(GraphState.graph),
             ),
             rx.button(
                 "Clear",

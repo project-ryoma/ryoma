@@ -1,59 +1,54 @@
 from typing import Optional
 
-import inspect
-
+import pandas as pd
 import reflex as rx
-from pydantic import BaseModel
 
 from aita import tool
+from aita_lab.states.utils import get_model_fields, get_model_fields_as_dict, get_model_classes
 
 
-def get_tool_classes() -> list:
-    res = inspect.getmembers(tool, inspect.isclass)
-    return res
-
-
-def get_model_fields(model: BaseModel, field_name: str) -> BaseModel:
-    return model.__fields__[field_name].default
-
-
-def get_model_fields_as_dict(model: BaseModel) -> dict:
-    d = {}
-    for field, value in model.__fields__.items():
-        d[field] = {
-            "name": field,
-            "required": value.required,
-            "description": value.field_info.description,
-        }
-    return d
+class ToolArg(rx.Model):
+    name: str
+    required: Optional[bool]
+    description: Optional[str]
+    value: Optional[str]
 
 
 class Tool(rx.Model):
     id: Optional[str]
     name: str
-    args: Optional[dict[str, str]] = {}
+    args: Optional[list[ToolArg]] = []
     description: Optional[str]
+
+
+class ToolOutput(rx.Base):
+    data: pd.DataFrame
+    show: bool = False
 
 
 class ToolState(rx.State):
     tools: list[Tool]
-    tool_names: list[str]
+
+    @rx.var
+    def tool_names(self) -> list[str]:
+        return [t.name for t in self.tools]
 
     def load_tools(self):
         self.tools = []
-        for tool in get_tool_classes():
-            description = get_model_fields(tool[1], "description")
-            args = get_model_fields_as_dict(get_model_fields(tool[1], "args_schema"))
-            tool = Tool(
-                name=tool[0],
+        for t in get_model_classes(tool):
+            name, cls = t
+            description = get_model_fields(cls, "description")
+            args_schema = get_model_fields(cls, "args_schema")
+            args = get_model_fields_as_dict(args_schema)
+            self.tools.append(Tool(
+                name=name,
                 description=description,
-            )
-            self.tools.append(tool)
-        self.tool_names = [tool.name for tool in self.tools]
+                args=[ToolArg(
+                    name=arg["name"],
+                    required=arg["required"],
+                    description=arg["description"],
+                ) for arg in args.values()],
+            ))
 
     def on_load(self):
         self.load_tools()
-
-
-class ToolOutput(rx.Base):
-    pass

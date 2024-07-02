@@ -33,22 +33,25 @@ def tool_card(tool: Tool):
                 tool.args is not None,
                 rx.vstack(
                     rx.heading("Tool Arguments", size="4"),
-                    rx.flex(
-                        rx.foreach(
-                            tool.args,
-                            lambda arg: rx.flex(
-                                rx.text(
-                                    arg[0],
-                                    as_="div",
-                                    size="2",
-                                    mb="1",
-                                    weight="bold",
-                                ),
-                                rx.code_block(arg[1]),
-                                direction="column",
-                                spacing="3",
+                    rx.foreach(
+                        tool.args,
+                        lambda arg: rx.flex(
+                            rx.text(
+                                arg.name,
+                                as_="div",
+                                size="2",
+                                mb="1",
+                                weight="bold",
                             ),
-                        )
+                            rx.cond(
+                                arg.description,
+                                rx.text(
+                                    arg.description,
+                                ),
+                            ),
+                            direction="column",
+                            spacing="3",
+                        ),
                     ),
                     margin_top="20px",
                     width="100%",

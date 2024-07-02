@@ -41,6 +41,7 @@ def handle_tool_error(state) -> dict:
 
 class GraphAgent(AitaAgent):
     tools: List[BaseTool]
+    graph: StateGraph
     model_graph: CompiledGraph
 
     def __init__(
@@ -48,6 +49,7 @@ class GraphAgent(AitaAgent):
         tools: List[BaseTool],
         model: Union[RunnableSerializable, str],
         model_parameters: Optional[Dict] = None,
+        graph: Optional[StateGraph] = None,
         **kwargs,
     ):
         self.tools = tools
@@ -56,7 +58,7 @@ class GraphAgent(AitaAgent):
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
-        self.model_graph = self._build_graph()
+        self.model_graph = self._build_graph(graph)
 
     def _bind_tools(self):
         if hasattr(self.model, "bind_tools"):
@@ -69,15 +71,17 @@ class GraphAgent(AitaAgent):
             {rendered_tools}
 
             """
-            self.base_prompt_template = tool_prompt + self.base_prompt_template
+            self.base_prompt.append(("system", tool_prompt))
             return self.model
 
-    def _build_graph(self) -> CompiledGraph:
+    def _build_graph(self, graph: StateGraph) -> CompiledGraph:
+        if graph:
+            return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
         workflow = StateGraph(MessageState)
 
         # Define the two nodes we will cycle between
         workflow.add_node("agent", self.call_model)
-        workflow.add_node("tools", self._build_tool_node(self.tools))
+        workflow.add_node("tools", self.build_tool_node(self.tools))
 
         # We now add a conditional edge
         workflow.add_conditional_edges(
@@ -88,6 +92,10 @@ class GraphAgent(AitaAgent):
         workflow.set_entry_point("agent")
         workflow.add_edge("tools", "agent")
         return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
+
+    @staticmethod
+    def init_state_graph():
+        return StateGraph(MessageState)
 
     def get_graph(self):
         return self.model_graph.get_graph(self.config)
@@ -108,8 +116,7 @@ class GraphAgent(AitaAgent):
                 tool.datasource = datasource
         return self
 
-    def _format_question(self, question: str):
-        self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
+    def _build_prompt(self, question: str):
         current_state = self.get_current_state()
         if current_state.next and current_state.next[0] == "tools":
             # We are in the tool node, but the user has asked a new question
@@ -124,6 +131,9 @@ class GraphAgent(AitaAgent):
                 ]
             }
         else:
+            self.prompt_template = ChatPromptTemplate.from_messages(self.base_prompt.messages)
+            self.prompt_template.extend(self.context_prompt_template)
+            self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
             return {"messages": [HumanMessage(content=question)]}
 
     def stream(
@@ -133,10 +143,10 @@ class GraphAgent(AitaAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if not tool_mode == ToolMode.DISALLOWED and self.get_current_tool_calls():
+        if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
-            messages = self._format_question(question)
+            messages = self._build_prompt(question)
         events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
         if display:
             _printed = set()
@@ -153,7 +163,7 @@ class GraphAgent(AitaAgent):
                     self._print_graph_events(events, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
-            chain = self.output_prompt_template | self.model | self.output_parser
+            chain = self.output_prompt | self.model | self.output_parser
             events = self._parse_output(chain, events, max_iterations=max_iterations)
         return events
 
@@ -164,10 +174,10 @@ class GraphAgent(AitaAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if not tool_mode == ToolMode.DISALLOWED and self.get_current_tool_calls():
+        if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
-            messages = self._format_question(question)
+            messages = self._build_prompt(question)
         result = self.model_graph.invoke(messages, config=self.config)
         if display:
             _printed = set()
@@ -185,11 +195,12 @@ class GraphAgent(AitaAgent):
                     self._print_graph_events(result, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
-            chain = self.output_prompt_template | self.model | self.output_parser
+            chain = self.output_prompt | self.model | self.output_parser
             result = self._parse_output(chain, result, max_iterations=max_iterations)
         return result
 
-    def _build_tool_node(self, tools):
+    @staticmethod
+    def build_tool_node(tools):
         return ToolNode(tools).with_fallbacks(
             [RunnableLambda(handle_tool_error)], exception_key="error"
         )

@@ -76,7 +76,7 @@ def catalog_grid():
                     rx.select.content(
                         rx.select.group(
                             rx.select.item("Catalog", value="catalog_name"),
-                            rx.select.item("Schema", value="schema"),
+                            rx.select.item("Schema", value="feature"),
                             rx.select.item("Table", value="table"),
                             rx.select.item("Data Source", value="datasource_name"),
                         )

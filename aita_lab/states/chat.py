@@ -14,7 +14,7 @@ from aita.agent.graph import GraphAgent
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
-from aita_lab.states.tool import Tool
+from aita_lab.states.tool import Tool, ToolOutput
 from aita_lab.states.vector_store import VectorStoreState
 
 
@@ -23,11 +23,6 @@ class QA(rx.Base):
 
     question: Optional[str]
     answer: Optional[str]
-
-
-class RunToolOutput(rx.Base):
-    data: pd.DataFrame
-    show: bool = False
 
 
 class Chat(rx.Model, table=True):
@@ -89,12 +84,15 @@ class ChatState(BaseState):
 
     current_tool: Optional[Tool] = None
 
-    run_tool_output: Optional[RunToolOutput] = RunToolOutput(
-        data=pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}), show=True
-    )
+    run_tool_output: Optional[ToolOutput] = None
 
     # Whether we are processing the question.
     processing: bool = False
+
+    vector_feature_dialog_open: bool = False
+
+    def close_vector_feature_dialog(self):
+        self.vector_feature_dialog_open = False
 
     def set_current_chat_model(self, chat_model: str):
         if self.current_chat_model != chat_model:
@@ -113,12 +111,15 @@ class ChatState(BaseState):
 
     def set_current_prompt_template(self, prompt_template_name: str):
         self.current_prompt_template = PromptTemplateState.get_prompt_template(prompt_template_name)
+        if self.current_prompt_template and self.current_prompt_template.k_shot > 0:
+            self.vector_feature_dialog_open = True
 
     def _create_chat_agent(self, **kwargs):
-        logging.info(
-            f"Creating {self.current_chat_agent_type} agent with model {self.current_chat_model}"
-        )
         if not self._current_chat_agent or self._current_chat_agent_state_change:
+            logging.info(
+                f"Creating {self.current_chat_agent_type} agent with model {self.current_chat_model}"
+            )
+
             self._current_chat_agent = AgentFactory.create_agent(
                 agent_type=self.current_chat_agent_type,
                 model=self.current_chat_model,
@@ -128,17 +129,21 @@ class ChatState(BaseState):
                 datasource = DataSourceState.connect(self.current_datasource)
                 self._current_chat_agent.add_datasource(datasource)
 
+            logging.info(f"Created {self.current_chat_agent_type} agent with model {self.current_chat_model}")
+            self._current_chat_agent_state_change = False
+
     def set_current_embedding_model(self, embedding_model: str):
         if self.current_embedding_model != embedding_model:
             self.current_embedding_model = embedding_model
             self._current_embedding_agent_state_change = True
 
     def _create_embedding_agent(self):
-        logging.info(f"Creating embedding agent with model {self.current_embedding_model}")
         if not self._current_embedding_agent or self._current_embedding_agent_state_change:
+            logging.info(f"Creating embedding agent with model {self.current_embedding_model}")
             self._current_embedding_agent = AgentFactory.create_agent(
                 agent_type="embedding", model=self.current_embedding_model
             )
+            self._current_embedding_agent_state_change = False
 
     def should_create_embedding_agent(self):
         if self.current_prompt_template and self.current_prompt_template.k_shot > 0:
@@ -169,7 +174,7 @@ class ChatState(BaseState):
                 self.current_tool.name, self.current_tool.id
             )
             if isinstance(result, DataFrame):
-                self.run_tool_output = RunToolOutput(data=result, show=True)
+                self.run_tool_output = ToolOutput(data=result, show=True)
         except Exception as e:
             logging.error(f"Error running tool {self.current_tool.name}: {e}")
         finally:
@@ -269,12 +274,12 @@ class ChatState(BaseState):
             embedded_question = self._current_embedding_agent.embed(question)
 
             # retrieve similar features
-            similar_features = VectorStoreState._retrieve_vector_features(
-                self.current_vector_feature, embedded_question
+            top_k_features = VectorStoreState._retrieve_vector_features(
+                self.current_vector_feature, embedded_question, self.current_k_shot
             )
 
             # TODO: add similar features to the prompt template
-            self._current_chat_agent.add_prompt_context(similar_features)
+            self._current_chat_agent.add_prompt_context(top_k_features)
 
         async for value in self._invoke_question(question):
             yield value
@@ -309,7 +314,13 @@ class ChatState(BaseState):
         if chat_state and chat_state.next:
             # having an action to execute
             for tool_call in self._current_chat_agent.get_current_tool_calls():
-                tool = Tool(id=tool_call["id"], name=tool_call["name"], args=tool_call["args"])
+                tool = Tool(
+                    id=tool_call["id"],
+                    name=tool_call["name"],
+                    args=[
+                        ToolArg(name=key, value=value)
+                        for arg in tool_call["args"]]
+                )
                 self.current_tools.append(tool)
                 if not self.current_tool:
                     self.current_tool = tool

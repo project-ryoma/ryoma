@@ -61,7 +61,7 @@ optional = true
 
 [tool.poetry.group.aita_lab.dependencies]
 alembic = "^1.13.1"
-reflex = "^0.5.3"
+reflex = "^0.5.5"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
 feast = "^0.39.0"
@@ -81,7 +81,7 @@ coverage = "^7.5.3"
 coverage-badge = "^1.1.0"
 openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
-pandas = "^2.2.2"
+pandas = "2.2.2"
 pyspark = "^3.2.0"
 findspark = "^2.0.1"
 

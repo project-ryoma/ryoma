@@ -26,7 +26,7 @@ class FileDataSource(DataSource):
         )
 
     def get_metadata(self, **kwargs) -> Catalog:
-        table_schema = self.arrow_table.schema
+        table_schema = self.arrow_table.feature
         return Catalog(
             catalog_name=self.file_name,
             columns=[

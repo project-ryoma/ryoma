@@ -11,4 +11,4 @@ class State(rx.State):
 
 
 # Create the app.
-app = rx.App()
+app = rx.App(style={"overflow": "hidden"})

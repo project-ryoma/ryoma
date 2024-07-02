@@ -27,7 +27,7 @@ def get_tables(path_db):
 
     res = list()
     for table_name in table_names:
-        # schema
+        # feature
         schema = [_[1] for _ in cur.execute(f'PRAGMA table_info("{table_name}")')]
 
         # data

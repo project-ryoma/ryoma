@@ -28,12 +28,11 @@ class VectorStore(rx.Model, table=True):
     offline_store_configs: Optional[str]
 
 
-class FeastFeature(rx.Model):
+class FeastFeatureView(rx.Model):
     name: str
-    schema: str
+    feature: str
     entities: Optional[str] = ""
     source: Optional[str] = ""
-    ttl: Optional[int] = None
 
 
 class VectorStoreState(BaseState):
@@ -46,18 +45,19 @@ class VectorStoreState(BaseState):
     online_store_configs: str
     offline_store_configs: Optional[str] = ""
 
+    feature_view_name: str
     feature_name: str
-    feature_schema: str
     feature_entities: Optional[str] = None
-    feature_source: Optional[str] = ""
-    feature_ttl: Optional[int] = None
+    data_source_type: Optional[str] = ""
 
-    vector_features: list[FeastFeature] = []
+    vector_feature_views: list[FeastFeatureView] = []
 
     store_dialog_open: bool = False
     feature_dialog_open: bool = False
 
     _fs: Optional[FeatureStore] = None
+
+    files: list[str] = []
 
     def open_feature_dialog(self):
         self.feature_dialog_open = not self.feature_dialog_open
@@ -84,15 +84,15 @@ class VectorStoreState(BaseState):
                 offline_store_configs=project.offline_store_configs,
             )
             self._fs = FeatureStore(config=repo_config)
-            self.vector_features = self._get_features()
+            self.vector_feature_views = self._get_feature_views()
 
     def _get_feast_repo_config(
-        self,
-        project_name,
-        online_store_type,
-        online_store_configs,
-        offline_store_type: Optional[str] = None,
-        offline_store_configs: Optional[str] = None,
+            self,
+            project_name,
+            online_store_type,
+            online_store_configs,
+            offline_store_type: Optional[str] = None,
+            offline_store_configs: Optional[str] = None,
     ):
         return RepoConfig(
             project=project_name,
@@ -143,11 +143,11 @@ class VectorStoreState(BaseState):
             self.open_store_dialog()
 
     def _create_feature_schema(self):
-        return [Field(name=self.feature_schema, dtype=Array(Float32))]
+        return [Field(name=self.feature_name, dtype=Array(Float32))]
 
     def _create_feature_source(self):
         return PushSource(
-            name=self.feature_source,
+            name=self.feature_view_name,  # feature view name is used to reference the source
             batch_source=FileSource(
                 file_format=ParquetFormat(),
                 path="data/feature.parquet",
@@ -158,35 +158,31 @@ class VectorStoreState(BaseState):
     def create_vector_feature(self):
         self._fs.apply(
             FeatureView(
-                name=self.feature_name,
-                entities=self.feature_entities,
+                name=self.feature_view_name,
+                entities=self.feature_entities if self.feature_entities else [],
                 schema=self._create_feature_schema(),
                 source=self._create_feature_source(),
-                ttl=self.feature_ttl,
             )
         )
-        logging.info(f"Feature {self.feature_name} created")
+        logging.info(f"Feature View {self.feature_view_name} created")
         self.open_feature_dialog()
 
-    def _embed(self, text: str):
-        pass
-
-    def _get_features(self) -> list[FeastFeature]:
-        vector_features = []
+    def _get_feature_views(self) -> list[FeastFeatureView]:
+        vector_feature_views = []
         for feature_view in self._fs.list_feature_views():
             feature_spec = self._fs.get_feature_view(feature_view.name)
-            vector_features.append(
-                FeastFeature(
+            vector_feature_views.append(
+                FeastFeatureView(
                     name=feature_spec.name,
-                    entities=", ".join(feature_spec.entities),
-                    schema=", ".join(
-                        [f"{schema.name}:{schema.dtype}" for schema in feature_spec.schema]
+                    entities=", ".join(
+                        [entity.name for entity in feature_spec.entity_columns]),
+                    feature=", ".join(
+                        [feature.name for feature in feature_spec.features]
                     ),
-                    source=feature_spec.batch_source.name,
-                    ttl=feature_spec.ttl.seconds if feature_spec.ttl else None,
+                    source=feature_spec.stream_source.name,
                 )
             )
-        return vector_features
+        return vector_feature_views
 
     def load_store(self):
         with rx.session() as session:
@@ -204,21 +200,32 @@ class VectorStoreState(BaseState):
                 offline_store_configs=self.projects[0].offline_store_configs,
             )
             self._fs = FeatureStore(config=repo_config)
-            self.vector_features = self._get_features()
+            self.vector_feature_views = self._get_feature_views()
 
         logging.info("Feature store loaded")
 
-    def load_vector_feature(self):
-        feature_data_frame = pd.DataFrame(
-            {
-                "test_schema": [[1.0, 2.0, 3.0]],
-                "event_timestamp": pd.to_datetime(["2021-01-01"]),
-                "__dummy_id": ["1"],
-            }
-        )
+    def push_source_to_feature(self, feature_view: dict):
+        (
+            name, entities, feature, source
+        ) = feature_view["name"], feature_view["entities"], feature_view["feature"], feature_view["source"]
+        root_dir = rx.get_upload_dir()
+        source_dir = f"{root_dir}/{source}/"
+        feature_df = pd.read_parquet(source_dir)
+        if feature_df.empty:
+            logging.error(f"Error loading feature: {source} is empty")
+            return
+        if not all(
+                col in feature_df.columns
+                for col in ["event_timestamp", feature, entities]
+        ):
+            logging.error(
+                f"Error loading feature: {source} is missing required columns: event_timestamp, {feature}, {entities}"
+            )
+            return
+
         try:
-            self._fs.push(self.feature_source, feature_data_frame)
-            logging.info(f"Feature {self.feature_name} loaded")
+            self._fs.push(source, feature_df)
+            logging.info(f"Source {source} pushed to feature.")
         except Exception as e:
             logging.error(f"Error loading feature: {e}")
             raise e
@@ -227,6 +234,28 @@ class VectorStoreState(BaseState):
         logging.info(f"Retrieving online documents for {feature} with query {query}")
         response = self._fs.retrieve_online_documents(feature=feature, query=query, top_k=top_k)
         return response.to_dict()
+
+    async def handle_upload(self, files: list[rx.UploadFile]):
+        """Handle the upload of file(s).
+
+        Args:
+            files: The uploaded files.
+        """
+        root_dir = rx.get_upload_dir()
+        source_dir = f"{root_dir}/{self.feature_view_name}"
+        if not os.path.exists(source_dir):
+            os.makedirs(source_dir)
+
+        for file in files:
+            upload_data = await file.read()
+            outfile = Path(f"{source_dir}/{file.filename}")
+
+            # Save the file.
+            with outfile.open("wb") as file_object:
+                file_object.write(upload_data)
+
+            # Update the files var.
+            self.files.append(file.filename)
 
     def on_load(self) -> None:
         self.load_store()

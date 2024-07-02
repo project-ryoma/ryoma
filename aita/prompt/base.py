@@ -1,14 +1,24 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-BasicDataSourcePromptTemplate = ChatPromptTemplate.from_messages(
+BasePromptTemplate = ChatPromptTemplate.from_messages(
     messages=[
         (
             "system",
             """
-Given the following data sources schema:
+You are an expert in the field of data science, analysis, and data engineering.
+""",
+        )
+    ]
+)
+
+BasicContextPromptTemplate = ChatPromptTemplate.from_messages(
+    messages=[
+        (
+            "system",
+            """
+You are provided with the following context:
 {prompt_context}
 
-Answer the following questions:
 """,
         )
     ]

@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("datasource_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("catalog_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("schema", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("feature", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("table", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )

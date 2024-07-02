@@ -1,3 +1,4 @@
+import importlib
 from typing import Optional
 
 import random
@@ -8,12 +9,6 @@ from langchain_core.runnables.graph import Edge, Node
 from aita.agent.factory import AgentFactory, get_supported_agents
 from aita.agent.graph import GraphAgent
 from aita_lab.states.graph import Graph
-
-
-class Agent(rx.Model):
-    id: Optional[str]
-    name: str
-    description: Optional[str]
 
 
 def get_node_position(node: Node):
@@ -41,6 +36,13 @@ def create_agent_graph_edge(id, edge: Edge):
     return {"id": id, "source": edge.source, "target": edge.target, "animated": True}
 
 
+class Agent(rx.Model):
+    id: Optional[str]
+    name: str
+    description: Optional[str]
+    tools: Optional[list[str]]
+
+
 class AgentState(rx.State):
     agents: list[Agent] = []
     is_open: bool = False
@@ -61,11 +63,31 @@ class AgentState(rx.State):
     def agent_names(self) -> list[str]:
         return [agent.name for agent in self.agents]
 
+    def get_custom_agents(self):
+        return []
+
     def on_load(self):
         self.agents = [
             Agent(name=agent.name, description=agent.value.description)
-            for agent in get_supported_agents()
+            for agent in get_supported_agents() + self.get_custom_agents()
         ]
 
-    def create_agent(self):
+    def create_agent(self, graph: Graph):
+        state_graph = GraphAgent.init_state_graph()
+        tools = []
+        for node in graph.nodes:
+            if node["type"] == "tool":
+                tool_name = node["data"]["label"]
+                tool_cls = importlib.import_module(f"aita.tool.{tool_name}")
+                tools.append(tool_cls)
+
+        state_graph.set_entry_point("agent")
+        state_graph.add_edge("tools", "agent")
+
+        agent = GraphAgent(
+            type="custom",
+            tools=tools,
+            model=self.current_model,
+            graph=state_graph
+        )
         return

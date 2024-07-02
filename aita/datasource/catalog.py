@@ -26,9 +26,9 @@ class Table(BaseModel):
 
 
 class DatabaseSchema(BaseModel):
-    db_schema_name: str = Field(..., description="Name of the database schema", alias="schema_name")
+    db_schema_name: str = Field(..., description="Name of the database feature", alias="schema_name")
     db_schema_tables: List[Table] = Field(
-        ..., description="List of tables in the schema", alias="tables"
+        ..., description="List of tables in the feature", alias="tables"
     )
 
     class Config:

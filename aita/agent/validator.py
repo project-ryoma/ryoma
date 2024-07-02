@@ -26,7 +26,7 @@ class ValidatorAgent(GraphAgent):
         self.validator_tool = validator
 
         self.base_prompt_template = PromptTemplate(
-            template="Please return the output given messages and following the schema validation\n{messages}",
+            template="Please return the output given messages and following the feature validation\n{messages}",
             input_variables=["messages"],
         )
 
@@ -45,7 +45,7 @@ class ValidatorAgent(GraphAgent):
         except ValidationError as e:
             state = state + [
                 ToolMessage(
-                    content=f"{repr(e)}\n\nPay close attention to the function schema.\n\n"
+                    content=f"{repr(e)}\n\nPay close attention to the function feature.\n\n"
                     + self.validator.schema_json()
                     + " Respond by fixing all validation errors.",
                     tool_call_id=response.tool_calls[0]["id"],
@@ -58,7 +58,7 @@ class ValidatorAgent(GraphAgent):
         workflow = StateGraph(MessageState)
 
         workflow.add_node("agent", self.call_model)
-        workflow.add_node("tools", self._build_tool_node(self.tools))
+        workflow.add_node("tools", self.build_tool_node(self.tools))
         workflow.add_node("validator", self.call_model)
         workflow.add_node("validation", self._validate)
 
@@ -82,7 +82,7 @@ class ValidatorAgent(GraphAgent):
             return {
                 "messages": [
                     ToolMessage(
-                        content=f"{repr(e)}\n\nPay close attention to the function schema.\n\n"
+                        content=f"{repr(e)}\n\nPay close attention to the function feature.\n\n"
                         + " Respond by fixing all validation errors.",
                         tool_call_id=message.tool_calls[0]["id"],
                     )

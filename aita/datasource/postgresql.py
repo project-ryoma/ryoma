@@ -58,7 +58,7 @@ class PostgreSqlDataSource(SqlDataSource):
         with self.connect() as conn:
             catalogs: pa.Table = conn.adbc_get_objects(
                 catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
-                db_schema_filter=kwargs.get("schema", conn.adbc_current_db_schema),
+                db_schema_filter=kwargs.get("feature", conn.adbc_current_db_schema),
                 table_name_filter=kwargs.get("table", None),
             ).read_all()
             catalog = catalogs.to_pylist()[0]

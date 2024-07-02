@@ -10,14 +10,14 @@ pass Data Source to Pandas Agent and return result as a dataframe.
 {% code title="python" %}
 
 ```python
-from aita.agent.pandas import PandasAgent
+from aita.agent.pandas_agent import PandasAgent
 from aita.datasource.sqlite import SqliteDataSource
-from aita.prompt.base import BasicDataSourcePromptTemplate
+from aita.prompt.base import BasicContextPromptTemplate
 
 datasource = SqliteDataSource("sqlite:///data.db")
-pandas_agent = PandasAgent("gpt-3.5-turbo") \
-    .set_prompt_context(BasicDataSourcePromptTemplate) \
-    .add_datasource(datasource)
+pandas_agent = PandasAgent("gpt-3.5-turbo")
+.set_context_prompt(BasicContextPromptTemplate)
+.add_datasource(datasource)
 pandas_agent.stream("Get the top 10 customers by purchase amount")
 ```
 {% endcode %}
@@ -26,7 +26,7 @@ add a DataFrame to the Pandas Agent, ask the agent to analyze the data.
 
 {% code title="python" %}
 ```python
-from aita.agent.pandas import PandasAgent
+from aita.agent.pandas_agent import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({
