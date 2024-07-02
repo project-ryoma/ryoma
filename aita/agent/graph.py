@@ -133,7 +133,9 @@ class GraphAgent(AitaAgent):
         else:
             self.prompt_template = ChatPromptTemplate.from_messages(self.base_prompt.messages)
             self.prompt_template.extend(self.context_prompt_template)
-            self.prompt_template.append(MessagesPlaceholder(variable_name="messages", optional=True))
+            self.prompt_template.append(
+                MessagesPlaceholder(variable_name="messages", optional=True)
+            )
             return {"messages": [HumanMessage(content=question)]}
 
     def stream(

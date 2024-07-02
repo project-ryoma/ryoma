@@ -166,8 +166,7 @@ def prompt_template_selector() -> rx.Component:
                 rx.dialog.content(
                     rx.flex(
                         select_embedding_model(
-                            ChatState.current_embedding_model,
-                            ChatState.set_current_embedding_model
+                            ChatState.current_embedding_model, ChatState.set_current_embedding_model
                         ),
                         rx.text(
                             "K-Shot",
@@ -198,7 +197,9 @@ def prompt_template_selector() -> rx.Component:
                                     rx.select.label("Select your feature"),
                                     rx.foreach(
                                         VectorStoreState.vector_feature_views,
-                                        lambda x: rx.select.item(x.name, value=f"{x.name}:{x.feature}"),
+                                        lambda x: rx.select.item(
+                                            x.name, value=f"{x.name}:{x.feature}"
+                                        ),
                                     ),
                                 ),
                             ),

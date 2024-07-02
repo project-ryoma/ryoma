@@ -129,7 +129,9 @@ class ChatState(BaseState):
                 datasource = DataSourceState.connect(self.current_datasource)
                 self._current_chat_agent.add_datasource(datasource)
 
-            logging.info(f"Created {self.current_chat_agent_type} agent with model {self.current_chat_model}")
+            logging.info(
+                f"Created {self.current_chat_agent_type} agent with model {self.current_chat_model}"
+            )
             self._current_chat_agent_state_change = False
 
     def set_current_embedding_model(self, embedding_model: str):
@@ -317,9 +319,7 @@ class ChatState(BaseState):
                 tool = Tool(
                     id=tool_call["id"],
                     name=tool_call["name"],
-                    args=[
-                        ToolArg(name=key, value=value)
-                        for arg in tool_call["args"]]
+                    args=[ToolArg(name=key, value=value) for arg in tool_call["args"]],
                 )
                 self.current_tools.append(tool)
                 if not self.current_tool:

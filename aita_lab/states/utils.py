@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-import inspect
 from typing import Any
+
+import inspect
+
+from pydantic import BaseModel
 
 
 def get_model_classes(model: Any) -> list:

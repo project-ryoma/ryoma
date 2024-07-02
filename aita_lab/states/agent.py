@@ -1,6 +1,6 @@
-import importlib
 from typing import Optional
 
+import importlib
 import random
 
 import reflex as rx
@@ -84,10 +84,5 @@ class AgentState(rx.State):
         state_graph.set_entry_point("agent")
         state_graph.add_edge("tools", "agent")
 
-        agent = GraphAgent(
-            type="custom",
-            tools=tools,
-            model=self.current_model,
-            graph=state_graph
-        )
+        agent = GraphAgent(type="custom", tools=tools, model=self.current_model, graph=state_graph)
         return

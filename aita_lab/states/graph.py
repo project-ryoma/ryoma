@@ -13,7 +13,6 @@ initial_nodes = [
         "type": "input",
         "data": {
             "label": "__start__",
-
         },
         "position": {"x": 200, "y": 25},
     },

@@ -172,7 +172,9 @@ def show_features():
                             rx.chakra.td(
                                 rx.chakra.button(
                                     "Load",
-                                    on_click=lambda: VectorStoreState.push_source_to_feature(feature_view),
+                                    on_click=lambda: VectorStoreState.push_source_to_feature(
+                                        feature_view
+                                    ),
                                 )
                             ),
                         ),

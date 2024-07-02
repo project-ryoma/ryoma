@@ -87,12 +87,12 @@ class VectorStoreState(BaseState):
             self.vector_feature_views = self._get_feature_views()
 
     def _get_feast_repo_config(
-            self,
-            project_name,
-            online_store_type,
-            online_store_configs,
-            offline_store_type: Optional[str] = None,
-            offline_store_configs: Optional[str] = None,
+        self,
+        project_name,
+        online_store_type,
+        online_store_configs,
+        offline_store_type: Optional[str] = None,
+        offline_store_configs: Optional[str] = None,
     ):
         return RepoConfig(
             project=project_name,
@@ -174,11 +174,8 @@ class VectorStoreState(BaseState):
             vector_feature_views.append(
                 FeastFeatureView(
                     name=feature_spec.name,
-                    entities=", ".join(
-                        [entity.name for entity in feature_spec.entity_columns]),
-                    feature=", ".join(
-                        [feature.name for feature in feature_spec.features]
-                    ),
+                    entities=", ".join([entity.name for entity in feature_spec.entity_columns]),
+                    feature=", ".join([feature.name for feature in feature_spec.features]),
                     source=feature_spec.stream_source.name,
                 )
             )
@@ -205,19 +202,19 @@ class VectorStoreState(BaseState):
         logging.info("Feature store loaded")
 
     def push_source_to_feature(self, feature_view: dict):
-        (
-            name, entities, feature, source
-        ) = feature_view["name"], feature_view["entities"], feature_view["feature"], feature_view["source"]
+        (name, entities, feature, source) = (
+            feature_view["name"],
+            feature_view["entities"],
+            feature_view["feature"],
+            feature_view["source"],
+        )
         root_dir = rx.get_upload_dir()
         source_dir = f"{root_dir}/{source}/"
         feature_df = pd.read_parquet(source_dir)
         if feature_df.empty:
             logging.error(f"Error loading feature: {source} is empty")
             return
-        if not all(
-                col in feature_df.columns
-                for col in ["event_timestamp", feature, entities]
-        ):
+        if not all(col in feature_df.columns for col in ["event_timestamp", feature, entities]):
             logging.error(
                 f"Error loading feature: {source} is missing required columns: event_timestamp, {feature}, {entities}"
             )

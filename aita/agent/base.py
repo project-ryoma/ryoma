@@ -91,9 +91,7 @@ class AitaAgent:
         return self
 
     def add_prompt_context(self, prompt_context: str):
-        context_prompt = self.context_prompt.partial(
-            prompt_context=prompt_context
-        )
+        context_prompt = self.context_prompt.partial(prompt_context=prompt_context)
         self.context_prompt_template.append(context_prompt)
 
     def add_datasource(self, datasource: DataSource):

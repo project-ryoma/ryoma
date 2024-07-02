@@ -1,14 +1,15 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 import reflex as rx
+
 from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 
 
 def select_model(
-        model_provider,
-        model_value,
-        on_model_value_change,
-        style: Optional[dict] = None,
+    model_provider,
+    model_value,
+    on_model_value_change,
+    style: Optional[dict] = None,
 ) -> rx.Component:
     return rx.select.root(
         rx.select.trigger(
@@ -35,9 +36,9 @@ def select_model(
 
 
 def select_chat_model(
-        model: str,
-        set_model: Any,
-        style: Optional[dict] = None,
+    model: str,
+    set_model: Any,
+    style: Optional[dict] = None,
 ) -> rx.Component:
     """The model selector."""
     return rx.form(
@@ -49,9 +50,7 @@ def select_chat_model(
                 size="2",
                 weight="bold",
             ),
-            select_model(
-                ChatModelProvider, model, set_model, style
-            ),
+            select_model(ChatModelProvider, model, set_model, style),
             label="Model",
             width="100%",
         ),
@@ -70,9 +69,7 @@ def select_embedding_model(model, set_model) -> rx.Component:
                 size="2",
                 weight="bold",
             ),
-            select_model(
-                EmbeddingModelProvider, model, set_model
-            ),
+            select_model(EmbeddingModelProvider, model, set_model),
             label="Model",
             width="100%",
         ),

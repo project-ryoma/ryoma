@@ -4,7 +4,7 @@ import pandas as pd
 import reflex as rx
 
 from aita import tool
-from aita_lab.states.utils import get_model_fields, get_model_fields_as_dict, get_model_classes
+from aita_lab.states.utils import get_model_classes, get_model_fields, get_model_fields_as_dict
 
 
 class ToolArg(rx.Model):
@@ -40,15 +40,20 @@ class ToolState(rx.State):
             description = get_model_fields(cls, "description")
             args_schema = get_model_fields(cls, "args_schema")
             args = get_model_fields_as_dict(args_schema)
-            self.tools.append(Tool(
-                name=name,
-                description=description,
-                args=[ToolArg(
-                    name=arg["name"],
-                    required=arg["required"],
-                    description=arg["description"],
-                ) for arg in args.values()],
-            ))
+            self.tools.append(
+                Tool(
+                    name=name,
+                    description=description,
+                    args=[
+                        ToolArg(
+                            name=arg["name"],
+                            required=arg["required"],
+                            description=arg["description"],
+                        )
+                        for arg in args.values()
+                    ],
+                )
+            )
 
     def on_load(self):
         self.load_tools()
