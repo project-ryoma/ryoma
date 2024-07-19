@@ -315,6 +315,8 @@ def tool_panel() -> rx.Component:
                             theme="material",
                             font_size="1em",
                             margin_top="10px",
+                            border=f"1px solid {rx.color('mauve', 3)}",
+                            border_radius=styles.border_radius,
                         ),
                     ),
                 ),
@@ -339,7 +341,7 @@ def tool_kernel() -> rx.Component:
                 tool_panel(),
             ),
             padding="10px",
-            border=styles.border,
+            border=f"1px solid {rx.color('accent', 10)}",
             border_radius=styles.border_radius,
             height="40vh",
             width="100%",
@@ -381,7 +383,7 @@ def tool_output() -> rx.Component:
         ),
         padding="4px",
         height="40vh",
-        border=styles.border,
+        border=f"1px solid {rx.color('accent', 10)}",
         border_radius=styles.border_radius,
     )
 

@@ -25,7 +25,7 @@ class Table(BaseModel):
         populate_by_name = True
 
 
-class DatabaseSchema(BaseModel):
+class Schema(BaseModel):
     db_schema_name: str = Field(
         ..., description="Name of the database feature", alias="schema_name"
     )
@@ -39,7 +39,7 @@ class DatabaseSchema(BaseModel):
 
 class Catalog(BaseModel):
     catalog_name: str = Field(..., description="Name of the catalog", alias="catalog_name")
-    catalog_db_schemas: Optional[List[DatabaseSchema]] = Field(
+    catalog_db_schemas: Optional[List[Schema]] = Field(
         None, description="List of database schemas in the catalog", alias="schemas"
     )
     catalog_tables: Optional[List[Table]] = Field(

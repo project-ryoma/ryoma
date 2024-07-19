@@ -100,6 +100,8 @@ def create_agent_flow():
             nodes=GraphState.graph.nodes,
             edges=GraphState.graph.edges,
             fit_view=True,
+            border=f"1px solid {rx.color('gray', 6)}",
+            border_radius="0.375rem",
         ),
         margin_top="20px",
         height="30em",

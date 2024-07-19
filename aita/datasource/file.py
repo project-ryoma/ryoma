@@ -1,10 +1,10 @@
 from typing import Any, Optional
 
 import pyarrow as pa
-from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.pydantic_v1 import Field
 
 from aita.datasource.base import DataSource
-from aita.datasource.catalog import Catalog
+from aita.datasource.catalog import Table
 
 
 class FileDataSource(DataSource):
@@ -25,11 +25,11 @@ class FileDataSource(DataSource):
             file_format=file_format,
         )
 
-    def get_metadata(self, **kwargs) -> Catalog:
-        table_schema = self.arrow_table.feature
-        return Catalog(
-            catalog_name=self.file_name,
-            columns=[
+    def get_metadata(self, **kwargs) -> Table:
+        table_schema = self.to_arrow(**kwargs).schema
+        return Table(
+            table_name=self.file_name,
+            table_columns=[
                 {"column_name": name, "column_type": str(table_schema.field(name))}
                 for name in table_schema.names
             ],
