@@ -2,7 +2,7 @@ from typing import Any
 
 import inspect
 
-from pydantic import BaseModel
+from langchain_core.pydantic_v1 import BaseModel
 
 
 def get_model_classes(model: Any) -> list:
@@ -19,6 +19,6 @@ def get_model_fields_as_dict(model: BaseModel) -> dict:
         d[field] = {
             "name": field,
             "required": value.required,
-            "description": value.field_info.description,
+            "description": value.field_info.description
         }
     return d

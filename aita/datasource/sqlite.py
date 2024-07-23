@@ -23,6 +23,7 @@ class SqliteDataSource(SqlDataSource):
 
     def get_metadata(self, **kwargs) -> Catalog:
         with self.connect() as conn:
+
             catalogs: pa.Table = conn.adbc_get_objects(
                 catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
                 table_name_filter=kwargs.get("table", None),

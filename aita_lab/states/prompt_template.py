@@ -24,6 +24,8 @@ class PromptTemplateState(rx.State):
     prompt_template_names: List[str] = []
     prompt_templates: List[PromptTemplate] = []
 
+
+
     @staticmethod
     def load_prompt_templates_from_data():
         prompt_template_names = []

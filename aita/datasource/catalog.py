@@ -1,5 +1,4 @@
 from typing import List, Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -20,6 +19,7 @@ class Column(BaseModel):
 class Table(BaseModel):
     table_name: str = Field(..., description="Name of the table")
     table_columns: List[Column] = Field(..., description="List of columns in the table")
+    table_type: Optional[str] = Field(..., description="Type of the table")
 
     class Config:
         populate_by_name = True

@@ -39,10 +39,10 @@ pydantic = "^2.7.1"
 jupyter-ai-magics = "^2.19.0"
 pandas = "^2.2.2"
 langchain-openai = "^0.1.7"
-langchain = "0.2.8"
-langgraph = "^0.1.8"
+langchain = "^0.2.9"
+langgraph = "^0.1.9"
 adbc-driver-sqlite = "^1.0.0"
-ipython = "8.14"
+ipython = "8.14.0"
 pyarrow = "^16.1.0"
 typer = "^0.12.3"
 types-setuptools = "^70.0.0.20240524"
@@ -105,6 +105,7 @@ pytest-cov = "^3.0.0"
 openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
 azure-identity = "^1.16.0"
+adbc-driver-snowflake = { version = "^1.0.0"}
 
 
 [tool.black]

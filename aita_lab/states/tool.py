@@ -17,9 +17,8 @@ class ToolArg(rx.Model):
 class Tool(rx.Model):
     id: Optional[str]
     name: str
-    args: Optional[list[ToolArg]] = []
+    args: dict[str, ToolArg]
     description: Optional[str]
-
 
 class ToolOutput(rx.Base):
     data: pd.DataFrame
@@ -44,14 +43,14 @@ class ToolState(rx.State):
                 Tool(
                     name=name,
                     description=description,
-                    args=[
-                        ToolArg(
+                    args={
+                        arg["name"]: ToolArg(
                             name=arg["name"],
                             required=arg["required"],
                             description=arg["description"],
                         )
                         for arg in args.values()
-                    ],
+                    },
                 )
             )
 

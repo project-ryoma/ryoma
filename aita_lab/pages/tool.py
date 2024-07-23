@@ -35,18 +35,18 @@ def tool_card(tool: Tool):
                     rx.heading("Tool Arguments", size="4"),
                     rx.foreach(
                         tool.args,
-                        lambda arg: rx.flex(
+                        lambda arg_pair: rx.flex(
                             rx.text(
-                                arg.name,
+                                arg_pair[0],
                                 as_="div",
                                 size="2",
                                 mb="1",
                                 weight="bold",
                             ),
                             rx.cond(
-                                arg.description,
+                                arg_pair[1].description is not None,
                                 rx.text(
-                                    arg.description,
+                                    arg_pair[1].description,
                                 ),
                             ),
                             direction="column",

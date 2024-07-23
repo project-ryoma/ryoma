@@ -42,7 +42,7 @@ def handle_tool_error(state) -> dict:
 class GraphAgent(AitaAgent):
     tools: List[BaseTool]
     graph: StateGraph
-    model_graph: CompiledGraph
+    compiled_graph: CompiledGraph
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class GraphAgent(AitaAgent):
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
-        self.model_graph = self._build_graph(graph)
+        self.compiled_graph = self._build_graph(graph)
 
     def _bind_tools(self):
         if hasattr(self.model, "bind_tools"):
@@ -98,15 +98,21 @@ class GraphAgent(AitaAgent):
         return StateGraph(MessageState)
 
     def get_graph(self):
-        return self.model_graph.get_graph(self.config)
+        return self.compiled_graph.get_graph(self.config)
 
     def get_current_state(self) -> Optional[StateSnapshot]:
-        return self.model_graph.get_state(self.config)
+        return self.compiled_graph.get_state(self.config)
+
+    def get_current_state_messages(self):
+        current_state = self.get_current_state()
+        if current_state:
+            return current_state.values.get("messages")
+        return []
 
     def get_current_tool_calls(self) -> List[ToolCall]:
-        current_state = self.get_current_state().values.get("messages")
-        if current_state and current_state[-1].tool_calls:
-            return current_state[-1].tool_calls
+        current_state_messages = self.get_current_state().values.get("messages")
+        if current_state_messages and current_state_messages[-1].tool_calls:
+            return current_state_messages[-1].tool_calls
         return []
 
     def add_datasource(self, datasource: DataSource):
@@ -149,7 +155,7 @@ class GraphAgent(AitaAgent):
             messages = None
         else:
             messages = self._build_prompt(question)
-        events = self.model_graph.stream(messages, config=self.config, stream_mode="values")
+        events = self.compiled_graph.stream(messages, config=self.config, stream_mode="values")
         if display:
             _printed = set()
             self._print_graph_events(events, _printed)
@@ -159,7 +165,7 @@ class GraphAgent(AitaAgent):
             iterations = 0
             while current_state.next and iterations < max_iterations:
                 iterations += 1
-                events = self.model_graph.stream(None, config=self.config)
+                events = self.compiled_graph.stream(None, config=self.config)
                 if display:
                     print(f"Iteration {iterations}")
                     self._print_graph_events(events, _printed)
@@ -180,7 +186,7 @@ class GraphAgent(AitaAgent):
             messages = None
         else:
             messages = self._build_prompt(question)
-        result = self.model_graph.invoke(messages, config=self.config)
+        result = self.compiled_graph.invoke(messages, config=self.config)
         if display:
             _printed = set()
             self._print_graph_events(result, _printed)
@@ -191,7 +197,7 @@ class GraphAgent(AitaAgent):
             iterations = 0
             while current_state.next and iterations < max_iterations:
                 iterations += 1
-                result = self.model_graph.invoke(None, config=self.config)
+                result = self.compiled_graph.invoke(None, config=self.config)
                 if display:
                     print(f"Iteration {iterations}")
                     self._print_graph_events(result, _printed)
@@ -220,10 +226,24 @@ class GraphAgent(AitaAgent):
         tool = next((t for t in self.tools if t.name == tool_name), None)
         if not tool:
             raise ValueError(f"Tool {tool_name} not found in the tool sets.")
+        if kwargs.get("args"):
+            tool_call["args"].update(kwargs["args"])
         res = tool.invoke(tool_call["args"], self.config)
         return res
 
-    def cancel_tool(self, tool_name: str, tool_id: Optional[str] = None):
+    def update_tool(self, tool_id: str, tool_args: dict):
+        if not tool_id:
+            raise ValueError("Tool id is required.")
+        current_state_messages = self.get_current_state_messages()
+        curr_tool_calls = self.get_current_tool_calls()
+        tool_call_index = next((index for (index, tc) in enumerate(curr_tool_calls) if tc["id"] == tool_id), None)
+        if tool_call_index is None:
+            raise ValueError(f"Tool call {tool_id} not found in current state.")
+        current_state_messages[-1].tool_calls[tool_call_index]["args"] = tool_args
+        new_state = {"messages": [current_state_messages[-1]]}
+        self.compiled_graph.update_state(self.config, new_state)
+
+    def cancel_tool(self, tool_id: str):
         pass
 
     def call_model(self, state: MessageState, config: RunnableConfig):
@@ -254,4 +274,4 @@ class GraphAgent(AitaAgent):
         return event
 
     def display_graph(self):
-        display(Image(self.model_graph.get_graph().draw_mermaid_png()))
+        display(Image(self.compiled_graph.get_graph().draw_mermaid_png()))

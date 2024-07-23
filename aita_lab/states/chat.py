@@ -1,20 +1,21 @@
+import base64
+import pickle
 from typing import Optional, Union
 
 import logging
 
-import pandas as pd
 import reflex as rx
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, ToolMessage
 from pandas import DataFrame
-from sqlmodel import select
+from sqlmodel import select, delete
 
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import GraphAgent, ToolMode
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
-from aita_lab.states.tool import Tool, ToolOutput
+from aita_lab.states.tool import Tool, ToolArg, ToolOutput
 from aita_lab.states.vector_store import VectorStoreState
 
 
@@ -80,9 +81,9 @@ class ChatState(BaseState):
     _current_embedding_agent_state_change: bool = False
 
     # tool states
-    current_tools: list[Tool] = []
+    current_tools: dict[str, Tool] = {}
 
-    current_tool: Optional[Tool] = None
+    current_tool_id: Optional[str] = None
 
     run_tool_output: Optional[ToolOutput] = None
 
@@ -90,6 +91,24 @@ class ChatState(BaseState):
     processing: bool = False
 
     vector_feature_dialog_open: bool = False
+
+    @rx.var
+    def current_tools_as_list(self) -> list[Tool]:
+        if self.current_tools:
+            return list(self.current_tools.values())
+        return []
+
+    @rx.var
+    def current_tool_name(self) -> str:
+        if self.current_tools and self.current_tool_id:
+            return self.current_tools[self.current_tool_id].name
+        return ""
+
+    @rx.var
+    def current_tool_args(self) -> list[ToolArg]:
+        if self.current_tools and self.current_tool_id:
+            return list(self.current_tools[self.current_tool_id].args.values())
+        return []
 
     def close_vector_feature_dialog(self):
         self.vector_feature_dialog_open = False
@@ -152,39 +171,37 @@ class ChatState(BaseState):
             return True
 
     def set_current_tool_by_id(self, tool_id: str):
-        logging.info(f"Setting current tool to {tool_id}")
-        self.current_tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
+        if tool_id:
+            logging.info(f"Setting current tool by id to {tool_id}")
+            self.current_tool_id = tool_id
 
     def set_current_tool_by_name(self, tool_name: str):
-        logging.info(f"Setting current tool to {tool_name}")
-        self.current_tool = next(filter(lambda x: x.name == tool_name, self.current_tools), None)
+        if tool_name:
+            logging.info(f"Setting current tool by name to {tool_name}")
+            for tool_id, tool in self.current_tools.items():
+                if tool.name == tool_name:
+                    self.current_tool_id = tool_id
+                    break
 
-    def set_current_tool_arg(self, tool_id: str, key: str, value: str):
-        tool = next(filter(lambda x: x.id == tool_id, self.current_tools), None)
-        tool.args[key] = value
+    def update_current_tool_arg(self, key: str, value: str):
+        tool_arg = self.current_tools[self.current_tool_id].args[key]
+        new_tool_arg = ToolArg(
+            name=key,
+            reqired=tool_arg.required,
+            description=tool_arg.description,
+            value=value
+        )
+        self.current_tools[self.current_tool_id].args[key] = new_tool_arg
 
     def delete_current_tool(self):
-        self.current_tools = [
-            tool for tool in self.current_tools if tool.id != self.current_tool.id
-        ]
-        self.current_tool = None
-
-    def run_tool(self):
-        logging.info(f"Running tool {self.current_tool.name} with args {self.current_tool.args}")
-        try:
-            result = self._current_chat_agent.call_tool(
-                self.current_tool.name, self.current_tool.id
-            )
-            if isinstance(result, DataFrame):
-                self.run_tool_output = ToolOutput(data=result, show=True)
-        except Exception as e:
-            logging.error(f"Error running tool {self.current_tool.name}: {e}")
-        finally:
-            self.delete_current_tool()
+        if self.current_tool_id:
+            logging.info(f"Deleting current tool {self.current_tool_id}")
+            del self.current_tools[self.current_tool_id]
+            self.current_tool_id = None
 
     def cancel_tool(self):
-        logging.info(f"Canceling tool {self.current_tool.name}")
-        self._current_chat_agent.cancel_tool(self.current_tool.name, self.current_tool.id)
+        logging.info(f"Canceling tool {self.current_tool_id}")
+        self._current_chat_agent.cancel_tool(self.current_tool_id)
 
     def create_chat(self):
         """Create a new chat."""
@@ -208,10 +225,12 @@ class ChatState(BaseState):
     def delete_chat(self):
         """Delete the current chat."""
         with rx.session() as session:
-            session.exec(select(Chat).where(Chat.title == self.current_chat).delete())
+            session.exec(
+                delete(Chat).where(Chat.title == self.current_chat)
+            )
+            session.commit()
         del self.chats[self.current_chat]
-        if len(self.chats) == 0:
-            self.chats = DEFAULT_CHATS
+        self.load_chats()
         self.current_chat = list(self.chats.keys())[0]
 
     def set_chat(self, chat_title: str):
@@ -246,22 +265,92 @@ class ChatState(BaseState):
             )
             session.commit()
 
-    def load_chats(self):
-        """Load the chats from the database."""
-        with rx.session() as session:
-            chats = session.exec(select(Chat).where(Chat.user == self.user.name)).all()
-            for chat in chats:
-                self.chats[chat.title] = [QA(question=chat.question, answer=chat.answer)]
-            if not self.chats:
-                self.chats = DEFAULT_CHATS
+    def _process_agent_response(self, events: list[dict]):
+        for event in events:
+            if hasattr(event, "content"):
+                message = event
+            else:
+                message = event["messages"][-1]
+            if isinstance(message, AIMessage):
+                for chunk in message.content:
+                    self.chats[self.current_chat][-1].answer += chunk
+            if isinstance(message, ToolMessage):
+                if message.artifact is not None:
+                    encoded_artifact = message.artifact.encode("utf-8")
+                    artifact = base64.b64decode(encoded_artifact)
+                    result = pickle.loads(artifact)
+                    if isinstance(result, DataFrame):
+                        self.run_tool_output = ToolOutput(data=result, show=True)
+            yield
+
+    def _process_agent_state(self):
+        chat_state = self._current_chat_agent.get_current_state()
+        if chat_state and chat_state.next:
+            # having an action to execute
+            for tool_call in self._current_chat_agent.get_current_tool_calls():
+                tool = Tool(
+                    id=tool_call["id"],
+                    name=tool_call["name"],
+                    args={
+                        key: ToolArg(
+                            name=key,
+                            value=str(value)  # TODO handle other types
+                        ) for key, value in tool_call["args"].items()},
+                )
+                self.current_tools[tool_call["id"]] = tool
+                if not self.current_tool_id:
+                    self.current_tool_id = tool_call["id"]
+
+            # Add the tool call to the answer
+            self.chats[self.current_chat][
+                -1
+            ].answer += f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
+
+    async def run_tool(self):
+        self.processing = True
+
+        tool_args = {tool_arg.name: tool_arg.value for key, tool_arg in
+                     self.current_tools[self.current_tool_id].args.items()}
+        logging.info("Updating tool args: " + str(tool_args.items()))
+        self._current_chat_agent.update_tool(self.current_tool_id, tool_args)
+
+        # Add a empty question to the list of questions.
+        qa = QA(question="", answer="")
+        self.chats[self.current_chat].append(qa)
+
+        events = self._current_chat_agent.stream(tool_mode=ToolMode.ONCE, display=False)
+        for event in self._process_agent_response(events):
+            yield
+
+        self._process_agent_state()
+
+        # Toggle the processing flag.
+        self.processing = False
+
+        # commit the chat to the database
+        self._commit_chat(
+            self.current_chat,
+            self.chats[self.current_chat][-1].question,
+            self.chats[self.current_chat][-1].answer,
+        )
 
     async def process_question(self, form_data: dict[str, str]):
+
+        # Clear the input and start the processing.
+        self.processing = True
+
         # Get the question from the form
         question = form_data["question"]
 
         # Check if the question is empty
         if question == "":
             return
+
+        # Add the question to the list of questions.
+        qa = QA(question=question, answer="")
+        self.chats[self.current_chat].append(qa)
+
+        yield
 
         logging.info(f"Processing question: {question}")
 
@@ -283,52 +372,8 @@ class ChatState(BaseState):
             # TODO: add similar features to the prompt template
             self._current_chat_agent.add_prompt_context(top_k_features)
 
-        async for value in self._invoke_question(question):
-            yield value
-
-    async def _invoke_question(self, question: str):
-        """Get the response from the API.
-
-        Args:
-            question: The question to ask the API.
-        """
-
-        # Add the question to the list of questions.
-        qa = QA(question=question, answer="")
-        self.chats[self.current_chat].append(qa)
-
-        # Clear the input and start the processing.
-        self.processing = True
-        yield
-
-        # Get the response and add it to the answer.
-        events = self._current_chat_agent.stream(question, display=False)
-        for event in events:
-            if hasattr(event, "content"):
-                messages = event
-            else:
-                messages = event["messages"][-1]
-            if not isinstance(messages, HumanMessage):
-                self.chats[self.current_chat][-1].answer += messages.content
+        async for value in self._invoke_agent(question):
             yield
-
-        chat_state = self._current_chat_agent.get_current_state()
-        if chat_state and chat_state.next:
-            # having an action to execute
-            for tool_call in self._current_chat_agent.get_current_tool_calls():
-                tool = Tool(
-                    id=tool_call["id"],
-                    name=tool_call["name"],
-                    args=[ToolArg(name=key, value=value) for arg in tool_call["args"]],
-                )
-                self.current_tools.append(tool)
-                if not self.current_tool:
-                    self.current_tool = tool
-
-            # Add the tool call to the answer
-            self.chats[self.current_chat][
-                -1
-            ].answer += f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
 
         # Toggle the processing flag.
         self.processing = False
@@ -339,6 +384,29 @@ class ChatState(BaseState):
             self.chats[self.current_chat][-1].question,
             self.chats[self.current_chat][-1].answer,
         )
+
+    async def _invoke_agent(self, question: Optional[str] = ""):
+        """Get the response from the API.
+
+        Args:
+            question: The question to ask the API.
+        """
+
+        # Get the response and add it to the answer.
+        events = self._current_chat_agent.stream(question, display=False)
+        for event in self._process_agent_response(events):
+            yield
+
+        self._process_agent_state()
+
+    def load_chats(self):
+        """Load the chats from the database."""
+        with rx.session() as session:
+            chats = session.exec(select(Chat).where(Chat.user == self.user.name)).all()
+            for chat in chats:
+                self.chats[chat.title] = [QA(question=chat.question, answer=chat.answer)]
+            if not self.chats:
+                self.chats = DEFAULT_CHATS
 
     def on_load(self):
         self.load_chats()

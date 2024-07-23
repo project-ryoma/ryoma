@@ -19,7 +19,7 @@ class SqlAgent(GraphAgent):
         model_parameters: Optional[Dict] = None,
     ):
         super().__init__(
-            [SqlQueryTool(), CreateTableTool(), ConvertToArrowTool(), ConvertToPandasTool()],
+            [SqlQueryTool(), CreateTableTool(), ConvertToArrowTool()],
             model,
             model_parameters,
         )

@@ -61,6 +61,7 @@ class CatalogState(rx.State):
     @staticmethod
     def crawl_data_catalog(datasource_name, datasource):
         catalog = datasource.get_metadata()
+        print(catalog)
         for schema in catalog.catalog_db_schemas:
             for table in schema.db_schema_tables:
                 try:

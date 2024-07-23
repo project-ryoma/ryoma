@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional, Sequence, Type, Union
+import base64
+from typing import Any, Dict, Optional, Sequence, Type, Union, Literal
+import pickle
 
 from abc import ABC
 
@@ -7,7 +9,6 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
 
-from aita.datasource.catalog import Table
 from aita.datasource.sql import SqlDataSource
 
 
@@ -32,14 +33,35 @@ class SqlQueryTool(SqlDataSourceTool):
     If an error is returned, rewrite the query, check the query, and try again.
     """
     args_schema: Type[BaseModel] = QueryInput
+    response_format: Literal["content", "content_and_artifact"] = "content_and_artifact"
 
     def _run(
         self,
         query,
         **kwargs,
-    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
+    ) -> (str, str):
         """Execute the query, return the results or an error message."""
-        return self.datasource.execute(query)
+        try:
+            result = self.datasource.to_pandas(query)
+
+            # Serialize the result to a base64 encoded string as the artifact
+            artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")
+            return result, artifact
+        except Exception as e:
+            return "Received an error while executing the query: {}".format(str(e)), ""
+
+
+class Column(BaseModel):
+    column_name: str = Field(..., description="Name of the column")
+    column_type: str = Field(..., description="Type of the column")
+    nullable: Optional[bool] = Field(None, description="Whether the column is nullable")
+    primary_key: Optional[bool] = Field(None, description="Whether the column is a primary key")
+
+
+class Table(BaseModel):
+    table_name: str = Field(..., description="Name of the table")
+    table_columns: Sequence[Column] = Field(..., description="List of columns in the table")
+    table_type: Optional[str] = Field(..., description="Type of the table")
 
 
 class CreateTableTool(SqlDataSourceTool):
@@ -56,13 +78,13 @@ class CreateTableTool(SqlDataSourceTool):
 
     def _run(
         self,
-        table_name,
-        table_columns,
+        table_name: str,
+        table_columns: Sequence[Column],
         **kwargs,
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
         columns = ",\n".join(
-            f'{column.column_name} "{column.xdbc_type_name}"' for column in table_columns
+            f'{column.column_name} "{column.column_type}"' for column in table_columns
         )
         return self.datasource.execute(
             "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns)

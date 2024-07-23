@@ -21,7 +21,6 @@ template_page_style = {
 
 template_content_style = {
     "border_radius": border_radius,
-    "padding": "1em",
     "margin_bottom": "2em",
     "min_height": "90vh",
 }
@@ -53,6 +52,9 @@ markdown_style = {
         text_decoration="underline",
         text_decoration_color=accent_text_color,
     ),
+    "table": lambda el: rx.table.root(el, size="1", width="40em"),
+    "thead": lambda el: rx.table.header(el, border_bottom=border),
+    "tr": lambda text: rx.table.row(text, border_bottom=border),
 }
 
 # Common styles for questions and answers.
@@ -63,7 +65,6 @@ message_style = dict(
     box_shadow=shadow,
     display="inline-block",
     margin_y="0.5em",
-    max_width="30em",
     padding_left="1em",
     padding_right="1em",
 )

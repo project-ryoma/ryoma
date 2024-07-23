@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from aita_lab.states.prompt_template import PromptTemplateState
+from aita_lab.states.prompt_template import PromptTemplateState, PromptTemplate
 from aita_lab.templates import template
 
 
@@ -11,7 +11,29 @@ def content_grid():
     return rx.chakra.flex(
         rx.foreach(
             PromptTemplateState.prompt_templates,
-            lambda pt: rx.chakra.card(
+            lambda pt: prompt_card(pt),
+            # lambda pt: rx.chakra.card(
+            #     rx.chakra.vstack(
+            #         rx.foreach(pt.prompt_lines, lambda line: rx.chakra.text(line, padding="2px")),
+            #         align_items="flex-start",
+            #     ),
+            #     header=rx.chakra.heading(pt.prompt_template_name, size="md"),
+            #     # adjust the size and make it scrollable
+            #     direction="column",
+            #     overflow="auto",
+            #     height="300px",
+            #     width="50%",
+            #     margin_right="20px",
+            # ),
+        )
+    )
+
+
+def prompt_card(pt: PromptTemplate):
+    """Create a prompt card."""
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.chakra.card(
                 rx.chakra.vstack(
                     rx.foreach(pt.prompt_lines, lambda line: rx.chakra.text(line, padding="2px")),
                     align_items="flex-start",
@@ -23,8 +45,33 @@ def content_grid():
                 height="300px",
                 width="50%",
                 margin_right="20px",
+                cursor="pointer",
+                _hover={"background_color": rx.color("gray", 2)},
             ),
-        )
+        ),
+        rx.dialog.content(
+            rx.dialog.title(pt.prompt_template_name, size="6"),
+            rx.chakra.flex(
+                rx.chakra.badge(f"k_shot: {pt.k_shot}"),
+                justify="start",
+                direction="row",
+                padding="4px",
+            ),
+            rx.chakra.vstack(
+                rx.foreach(
+                    pt.prompt_lines,
+                    lambda line: rx.text(line)),
+                align_items="flex-start",
+                font_size="sm",
+                margin_top="10px",
+            ),
+            rx.flex(
+                rx.dialog.close(
+                    rx.button("Close", size="2"),
+                ),
+                justify="end",
+            ),
+        ),
     )
 
 

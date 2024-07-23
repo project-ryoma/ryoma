@@ -1,11 +1,9 @@
 from typing import Optional
 
+import logging
 import pyarrow as pa
 
-try:
-    import adbc_driver_snowflake.dbapi
-except ImportError:
-    adbc_driver_snowflake = None
+import adbc_driver_snowflake.dbapi
 from adbc_driver_manager.dbapi import Connection
 from langchain_core.pydantic_v1 import Field
 
@@ -46,9 +44,11 @@ class SnowflakeDataSource(SqlDataSource):
         return connection_url
 
     def connect(self) -> Connection:
+        logging.info(f"Connecting to Snowflake")
         return adbc_driver_snowflake.dbapi.connect(self.connection_url)
 
     def get_metadata(self, **kwargs):
+        logging.info(f"Getting metadata from Snowflake")
         with self.connect() as conn:
             catalogs: pa.Table = conn.adbc_get_objects(
                 catalog_filter=kwargs.get("database", conn.adbc_current_catalog),

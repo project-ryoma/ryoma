@@ -11,7 +11,7 @@ from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.vector_store import VectorStoreState
-from aita_lab.styles import message_style
+from aita_lab.styles import message_style, markdown_style
 from aita_lab.templates import template
 
 
@@ -30,6 +30,7 @@ def message(qa: QA) -> rx.Component:
                 qa.question,
                 background_color=rx.color("mauve", 4),
                 color=rx.color("mauve", 12),
+                component_map=markdown_style,
                 **message_style,
             ),
             text_align="right",
@@ -40,10 +41,12 @@ def message(qa: QA) -> rx.Component:
                 qa.answer,
                 background_color=rx.color("accent", 4),
                 color=rx.color("accent", 12),
+                component_map=markdown_style,
                 **message_style,
             ),
             text_align="left",
             padding_top="1em",
+            width="100%",
         ),
         width="100%",
     )
@@ -59,7 +62,8 @@ def chat_history() -> rx.Component:
         max_width="50em",
         padding_x="4px",
         align_self="center",
-        overflow="auto",
+        overflow_y="auto",
+        overflow_x="hidden",
         padding_bottom="5em",
     )
 
@@ -70,34 +74,31 @@ def action_bar() -> rx.Component:
         rx.vstack(
             rx.chakra.form(
                 rx.chakra.form_control(
-                    rx.hstack(
-                        rx.radix.text_field.root(
-                            rx.radix.text_field.input(
-                                placeholder="Type something...",
-                                id="question",
-                                width=["15em", "20em", "45em", "50em", "50em", "50em"],
-                            ),
-                            rx.radix.text_field.slot(
-                                rx.tooltip(
-                                    rx.icon("info", size=18),
-                                    content="Enter a question to get a response.",
-                                )
-                            ),
+                    rx.flex(
+                        rx.radix.text_area(
+                            placeholder="Type something...",
+                            id="question",
+                            enter_key_submit=True,
+                            flex_grow=1,
                         ),
                         rx.button(
                             rx.cond(
                                 ChatState.processing,
-                                loading_icon(height="1em"),
+                                loading_icon(height="1em", width="1em"),
                                 rx.text("Send"),
                             ),
                             type="submit",
                         ),
+                        spacing="4",
                         align_items="center",
+                        padding_x="16px",
                     ),
                     is_disabled=ChatState.processing,
+                    width="100%",
                 ),
                 on_submit=ChatState.process_question,
                 reset_on_submit=True,
+                width="100%",
             ),
             rx.text(
                 "Aita may return factually incorrect or misleading responses. Use discretion.",
@@ -106,6 +107,7 @@ def action_bar() -> rx.Component:
                 color=rx.color("mauve", 10),
             ),
             align_items="center",
+            width="100%",
         ),
         position="sticky",
         bottom="0",
@@ -252,7 +254,7 @@ def agent_selector() -> rx.Component:
 
 
 def tool_panel() -> rx.Component:
-    return rx.chakra.box(
+    return rx.flex(
         rx.flex(
             rx.select.root(
                 rx.select.trigger(),
@@ -260,12 +262,12 @@ def tool_panel() -> rx.Component:
                     rx.select.group(
                         rx.select.label("Select a tool"),
                         rx.foreach(
-                            ChatState.current_tools,
+                            ChatState.current_tools_as_list,
                             lambda x: rx.select.item(x.id, value=x.id),
                         ),
                     ),
                 ),
-                value=ChatState.current_tool.id,
+                value=ChatState.current_tool_id,
                 on_change=ChatState.set_current_tool_by_id,
                 padding="10px",
             ),
@@ -275,12 +277,12 @@ def tool_panel() -> rx.Component:
                     rx.select.group(
                         rx.select.label("Tool Name"),
                         rx.foreach(
-                            ChatState.current_tools,
+                            ChatState.current_tools_as_list,
                             lambda x: rx.select.item(x.name, value=x.name),
                         ),
                     ),
                 ),
-                value=ChatState.current_tool.name,
+                value=ChatState.current_tool_name,
                 on_change=ChatState.set_current_tool_by_name,
                 padding="10px",
             ),
@@ -298,62 +300,67 @@ def tool_panel() -> rx.Component:
             spacing="2",
             width="100%",
         ),
-        rx.box(
+        rx.divider(),
+        rx.flex(
             rx.cond(
-                ChatState.current_tool is not None and ChatState.current_tool.args is not None,
+                ChatState.current_tool_id is not None and ChatState.current_tool_args.length() > 0,
                 rx.foreach(
-                    ChatState.current_tool.args,
+                    ChatState.current_tool_args,
                     lambda arg: rx.box(
+                        rx.text(
+                            arg.name,
+                            asi_="div",
+                            mb="1",
+                            size="2",
+                            weight="bold",
+                        ),
                         code_editor(
                             value=arg.value,
-                            on_change=lambda x: ChatState.set_current_tool_arg(
-                                ChatState.current_tool.id, arg.name, x
+                            on_change=lambda x: ChatState.update_current_tool_arg(
+                                arg.name, x
                             ),
                             width="100%",
                             min_height="20e",
                             language="python",
                             theme="material",
                             font_size="1em",
-                            margin_top="10px",
-                            border=f"1px solid {rx.color('mauve', 3)}",
-                            border_radius=styles.border_radius,
+                            padding="4px",
                         ),
+                        padding="6px",
                     ),
                 ),
-            )
+            ),
+            border_radius=styles.border_radius,
+            background_color=rx.color("mauve", 3),
+            direction="column",
         ),
+        spacing="2",
+        direction="column",
     )
 
 
 def tool_kernel() -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(
-        rx.chakra.form(
-            rx.chakra.form_control(
-                rx.text(
-                    "Tool Kernel",
-                    asi_="div",
-                    mb="1",
-                    size="3",
-                    weight="bold",
-                    padding="4px",
-                ),
-                tool_panel(),
-            ),
-            padding="10px",
-            border=f"1px solid {rx.color('accent', 10)}",
-            border_radius=styles.border_radius,
-            height="40vh",
-            width="100%",
+        rx.text(
+            "Tool Kernel",
+            asi_="div",
+            mb="1",
+            size="3",
+            weight="bold",
+            padding="4px",
         ),
+        tool_panel(),
         tool_output(),
-        width="100%",
-        min_width="40em",
+        width="40em",
+        height="85vh",
         padding="10px",
         gap="2",
         align_items="stretch",
         background_color=rx.color("mauve", 2),
         color=rx.color("mauve", 12),
+        border=f"1px solid {rx.color('accent', 10)}",
+        border_radius=styles.border_radius,
     )
 
 
@@ -373,18 +380,19 @@ def tool_output() -> rx.Component:
                 rx.data_table(
                     data=ChatState.run_tool_output.data,
                     width="100%",
+                    max_width="50em",
+                    max_height="20em",
                     padding="20px",
                     pagination=True,
                     search=True,
                     sort=True,
-                    max_height="400px",
+                    resizable=True,
                 ),
             ),
         ),
         padding="4px",
         height="40vh",
-        border=f"1px solid {rx.color('accent', 10)}",
-        border_radius=styles.border_radius,
+
     )
 
 
@@ -430,7 +438,7 @@ def chat() -> rx.Component:
                 align_items="stretch",
                 spacing="0",
                 padding="20px",
-                overflow="scroll",
+                overflow_y="scroll",
             ),
             flex_grow=1,
         ),
