@@ -120,6 +120,10 @@ start-aita-lab:
 build:
 	poetry build
 
+.PHONY: publish
+publish:
+	poetry publish
+
 .PHONY: init-data
 init-data:
 	poetry run init-data

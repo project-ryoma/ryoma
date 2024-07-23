@@ -2869,13 +2869,13 @@ langchain-core = ">=0.2.10,<0.3.0"
 
 [[package]]
 name = "langgraph"
-version = "0.1.10"
+version = "0.1.11"
 description = "Building stateful, multi-actor applications with LLMs"
 optional = false
 python-versions = "<4.0,>=3.9.0"
 files = [
-    {file = "langgraph-0.1.10-py3-none-any.whl", hash = "sha256:0f0b6145f4f9e249f15497adf4dd55818c75694e2aec0e0827b99b84d86b8659"},
-    {file = "langgraph-0.1.10.tar.gz", hash = "sha256:3dbdcd293644d764d6b091decce68e6e6afae82b912eeaed294e0cf2d874a113"},
+    {file = "langgraph-0.1.11-py3-none-any.whl", hash = "sha256:cf35690c9aae57f717ce91a77d6dc97af78af79fd531fd088cb1f4aa15fb67b4"},
+    {file = "langgraph-0.1.11.tar.gz", hash = "sha256:971192bc23d4947f7052643967b3d857f2d77004003928a843432196a565de66"},
 ]
 
 [package.dependencies]
@@ -7127,4 +7127,4 @@ snowflake = ["adbc-driver-snowflake"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "374bafe7aa209daf03c748f4b7090262432d566a759a620cdba1cc38308b2eab"
+content-hash = "7b45fcdc8d0d4fb5b3d8389067cae4dc1fb36e7c9769e6516d86d799d5a3cf70"
