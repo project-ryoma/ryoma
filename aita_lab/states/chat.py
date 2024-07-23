@@ -1,13 +1,13 @@
-import base64
-import pickle
 from typing import Optional, Union
 
+import base64
 import logging
+import pickle
 
 import reflex as rx
 from langchain_core.messages import AIMessage, ToolMessage
 from pandas import DataFrame
-from sqlmodel import select, delete
+from sqlmodel import delete, select
 
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
@@ -186,10 +186,7 @@ class ChatState(BaseState):
     def update_current_tool_arg(self, key: str, value: str):
         tool_arg = self.current_tools[self.current_tool_id].args[key]
         new_tool_arg = ToolArg(
-            name=key,
-            reqired=tool_arg.required,
-            description=tool_arg.description,
-            value=value
+            name=key, reqired=tool_arg.required, description=tool_arg.description, value=value
         )
         self.current_tools[self.current_tool_id].args[key] = new_tool_arg
 
@@ -225,9 +222,7 @@ class ChatState(BaseState):
     def delete_chat(self):
         """Delete the current chat."""
         with rx.session() as session:
-            session.exec(
-                delete(Chat).where(Chat.title == self.current_chat)
-            )
+            session.exec(delete(Chat).where(Chat.title == self.current_chat))
             session.commit()
         del self.chats[self.current_chat]
         self.load_chats()
@@ -292,10 +287,9 @@ class ChatState(BaseState):
                     id=tool_call["id"],
                     name=tool_call["name"],
                     args={
-                        key: ToolArg(
-                            name=key,
-                            value=str(value)  # TODO handle other types
-                        ) for key, value in tool_call["args"].items()},
+                        key: ToolArg(name=key, value=str(value))  # TODO handle other types
+                        for key, value in tool_call["args"].items()
+                    },
                 )
                 self.current_tools[tool_call["id"]] = tool
                 if not self.current_tool_id:
@@ -309,8 +303,10 @@ class ChatState(BaseState):
     async def run_tool(self):
         self.processing = True
 
-        tool_args = {tool_arg.name: tool_arg.value for key, tool_arg in
-                     self.current_tools[self.current_tool_id].args.items()}
+        tool_args = {
+            tool_arg.name: tool_arg.value
+            for key, tool_arg in self.current_tools[self.current_tool_id].args.items()
+        }
         logging.info("Updating tool args: " + str(tool_args.items()))
         self._current_chat_agent.update_tool(self.current_tool_id, tool_args)
 

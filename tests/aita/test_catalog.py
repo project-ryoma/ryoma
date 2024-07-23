@@ -1,24 +1,24 @@
 from aita.datasource.catalog import Catalog
 
 data = {
-    'catalog_name': 'main',
-    'catalog_db_schemas': [
+    "catalog_name": "main",
+    "catalog_db_schemas": [
         {
-            'db_schema_name': '',
-            'db_schema_tables': [
+            "db_schema_name": "",
+            "db_schema_tables": [
                 {
-                    'table_name': 'author',
-                    'table_type': 'table',
-                    'table_columns': [
-                        {'column_name': 'aid', 'xdbc_type_name': 'INT', 'xdbc_nullable': 1},
-                        {'column_name': 'homepage', 'xdbc_type_name': 'TEXT', 'xdbc_nullable': 1},
-                        {'column_name': 'name', 'xdbc_type_name': 'TEXT', 'xdbc_nullable': 1},
-                        {'column_name': 'oid', 'xdbc_type_name': 'INT', 'xdbc_nullable': 1},
-                    ]
+                    "table_name": "author",
+                    "table_type": "table",
+                    "table_columns": [
+                        {"column_name": "aid", "xdbc_type_name": "INT", "xdbc_nullable": 1},
+                        {"column_name": "homepage", "xdbc_type_name": "TEXT", "xdbc_nullable": 1},
+                        {"column_name": "name", "xdbc_type_name": "TEXT", "xdbc_nullable": 1},
+                        {"column_name": "oid", "xdbc_type_name": "INT", "xdbc_nullable": 1},
+                    ],
                 }
-            ]
+            ],
         }
-    ]
+    ],
 }
 
 

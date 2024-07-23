@@ -1,5 +1,6 @@
-from abc import abstractmethod
 from typing import Union
+
+from abc import abstractmethod
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 

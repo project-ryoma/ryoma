@@ -20,6 +20,7 @@ class Tool(rx.Model):
     args: dict[str, ToolArg]
     description: Optional[str]
 
+
 class ToolOutput(rx.Base):
     data: pd.DataFrame
     show: bool = False

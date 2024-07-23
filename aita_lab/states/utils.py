@@ -19,6 +19,6 @@ def get_model_fields_as_dict(model: BaseModel) -> dict:
         d[field] = {
             "name": field,
             "required": value.required,
-            "description": value.field_info.description
+            "description": value.field_info.description,
         }
     return d

@@ -1,7 +1,7 @@
-import base64
-from typing import Any, Dict, Optional, Sequence, Type, Union, Literal
-import pickle
+from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
+import base64
+import pickle
 from abc import ABC
 
 import pandas as pd

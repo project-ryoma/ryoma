@@ -236,7 +236,9 @@ class GraphAgent(AitaAgent):
             raise ValueError("Tool id is required.")
         current_state_messages = self.get_current_state_messages()
         curr_tool_calls = self.get_current_tool_calls()
-        tool_call_index = next((index for (index, tc) in enumerate(curr_tool_calls) if tc["id"] == tool_id), None)
+        tool_call_index = next(
+            (index for (index, tc) in enumerate(curr_tool_calls) if tc["id"] == tool_id), None
+        )
         if tool_call_index is None:
             raise ValueError(f"Tool call {tool_id} not found in current state.")
         current_state_messages[-1].tool_calls[tool_call_index]["args"] = tool_args

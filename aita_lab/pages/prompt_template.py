@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from aita_lab.states.prompt_template import PromptTemplateState, PromptTemplate
+from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from aita_lab.templates import template
 
 
@@ -58,9 +58,7 @@ def prompt_card(pt: PromptTemplate):
                 padding="4px",
             ),
             rx.chakra.vstack(
-                rx.foreach(
-                    pt.prompt_lines,
-                    lambda line: rx.text(line)),
+                rx.foreach(pt.prompt_lines, lambda line: rx.text(line)),
                 align_items="flex-start",
                 font_size="sm",
                 margin_top="10px",

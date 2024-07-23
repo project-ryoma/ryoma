@@ -11,7 +11,7 @@ from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.vector_store import VectorStoreState
-from aita_lab.styles import message_style, markdown_style
+from aita_lab.styles import markdown_style, message_style
 from aita_lab.templates import template
 
 
@@ -316,9 +316,7 @@ def tool_panel() -> rx.Component:
                         ),
                         code_editor(
                             value=arg.value,
-                            on_change=lambda x: ChatState.update_current_tool_arg(
-                                arg.name, x
-                            ),
+                            on_change=lambda x: ChatState.update_current_tool_arg(arg.name, x),
                             width="100%",
                             min_height="20e",
                             language="python",
@@ -392,7 +390,6 @@ def tool_output() -> rx.Component:
         ),
         padding="4px",
         height="40vh",
-
     )
 
 

@@ -1,9 +1,9 @@
 from typing import Optional
 
 import logging
-import pyarrow as pa
 
 import adbc_driver_snowflake.dbapi
+import pyarrow as pa
 from adbc_driver_manager.dbapi import Connection
 from langchain_core.pydantic_v1 import Field
 
