@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "aita"
-version = "0.1.2"
+version = "0.1.4"
 description = "AI Powered Data Platform"
 readme = "README.md"
 authors = ["aita <contact@project-aita.com>"]
