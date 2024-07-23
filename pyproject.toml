@@ -30,6 +30,9 @@ packages = [
     { include = "aita_lab" }
 ]
 
+[tool.poetry.scripts]
+aita_lab = "aita_lab.cli:main"
+
 
 [tool.poetry.dependencies]
 python = "^3.9"

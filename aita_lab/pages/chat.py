@@ -253,6 +253,39 @@ def agent_selector() -> rx.Component:
     )
 
 
+def tool_args() -> rx.Component:
+    return rx.flex(
+        rx.cond(
+            ChatState.current_tool_id is not None and ChatState.current_tool_args.length() > 0,
+            rx.foreach(
+                ChatState.current_tool_args,
+                lambda arg: rx.box(
+                    rx.text(
+                        arg.name,
+                        asi_="div",
+                        mb="1",
+                        size="2",
+                        weight="bold",
+                    ),
+                    code_editor(
+                        value=arg.value,
+                        on_change=lambda x: ChatState.update_current_tool_arg(arg.name, x),
+                        width="100%",
+                        min_height="20e",
+                        language="python",
+                        theme="material",
+                        font_size="1em",
+                        padding="4px",
+                    ),
+                    padding="6px",
+                ),
+            ),
+        ),
+        border_radius=styles.border_radius,
+        direction="column",
+    )
+
+
 def tool_panel() -> rx.Component:
     return rx.flex(
         rx.flex(
@@ -299,54 +332,22 @@ def tool_panel() -> rx.Component:
             align="center",
             spacing="2",
             width="100%",
+            padding="8px",
         ),
         rx.divider(),
-        rx.flex(
-            rx.cond(
-                ChatState.current_tool_id is not None and ChatState.current_tool_args.length() > 0,
-                rx.foreach(
-                    ChatState.current_tool_args,
-                    lambda arg: rx.box(
-                        rx.text(
-                            arg.name,
-                            asi_="div",
-                            mb="1",
-                            size="2",
-                            weight="bold",
-                        ),
-                        code_editor(
-                            value=arg.value,
-                            on_change=lambda x: ChatState.update_current_tool_arg(arg.name, x),
-                            width="100%",
-                            min_height="20e",
-                            language="python",
-                            theme="material",
-                            font_size="1em",
-                            padding="4px",
-                        ),
-                        padding="6px",
-                    ),
-                ),
-            ),
-            border_radius=styles.border_radius,
-            background_color=rx.color("mauve", 3),
-            direction="column",
-        ),
-        spacing="2",
+        tool_args(),
+        spacing="1",
         direction="column",
+        background_color=rx.color("mauve", 3),
     )
 
 
 def tool_kernel() -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(
-        rx.text(
+        rx.chakra.heading(
             "Tool Kernel",
-            asi_="div",
-            mb="1",
-            size="3",
-            weight="bold",
-            padding="4px",
+            size="md",
         ),
         tool_panel(),
         tool_output(),
@@ -367,7 +368,7 @@ def tool_output() -> rx.Component:
         rx.cond(
             ChatState.run_tool_output.show,
             rx.box(
-                rx.text(
+                rx.badge(
                     "Output",
                     asi_="div",
                     mb="1",
@@ -375,21 +376,21 @@ def tool_output() -> rx.Component:
                     weight="bold",
                     padding="4px",
                 ),
-                rx.data_table(
-                    data=ChatState.run_tool_output.data,
-                    width="100%",
-                    max_width="50em",
-                    max_height="20em",
-                    padding="20px",
-                    pagination=True,
-                    search=True,
-                    sort=True,
-                    resizable=True,
+                rx.cond(
+                    ChatState.run_tool_output.show,
+                    rx.data_table(
+                        data=ChatState.run_tool_output.data,
+                        width="38em",
+                        pagination=True,
+                        search=True,
+                        sort=True,
+                        resizable=True,
+                    ),
                 ),
+                width="100%",
+                height="30em"
             ),
         ),
-        padding="4px",
-        height="40vh",
     )
 
 

@@ -267,8 +267,7 @@ class ChatState(BaseState):
             else:
                 message = event["messages"][-1]
             if isinstance(message, AIMessage):
-                for chunk in message.content:
-                    self.chats[self.current_chat][-1].answer += chunk
+                self.chats[self.current_chat][-1].answer += message.content
             if isinstance(message, ToolMessage):
                 if message.artifact is not None:
                     encoded_artifact = message.artifact.encode("utf-8")

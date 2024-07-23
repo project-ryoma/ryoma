@@ -67,4 +67,5 @@ message_style = dict(
     margin_y="0.5em",
     padding_left="1em",
     padding_right="1em",
+    max_width="44em",
 )
