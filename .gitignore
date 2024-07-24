@@ -96,6 +96,7 @@ ENV/
 MANIFEST
 __pycache__/
 __pypackages__/
+assets/external/
 build/
 celerybeat-schedule
 celerybeat.pid
@@ -125,6 +126,7 @@ parts/
 pip-delete-this-directory.txt
 pip-log.txt
 profile_default/
+research/dataset
 sdist/
 share/python-wheels/
 target/
@@ -132,5 +134,3 @@ var/
 venv.bak/
 venv/
 wheels/
-
-research/dataset

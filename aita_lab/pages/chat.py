@@ -388,7 +388,7 @@ def tool_output() -> rx.Component:
                     ),
                 ),
                 width="100%",
-                height="30em"
+                height="30em",
             ),
         ),
     )
