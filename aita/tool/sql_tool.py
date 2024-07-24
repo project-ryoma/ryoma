@@ -9,11 +9,12 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
 
+from aita.datasource.ds_ibis import IbisDataSource
 from aita.datasource.sql import SqlDataSource
 
 
 class SqlDataSourceTool(BaseTool, ABC):
-    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
+    datasource: Optional[IbisDataSource] = Field(None, exclude=True)
 
     class Config(BaseTool.Config):
         pass
@@ -21,6 +22,9 @@ class SqlDataSourceTool(BaseTool, ABC):
 
 class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql database.")
+    result_format: Optional[Literal["pandas", "arrow", "polars"]] = Field(
+        description="Format of the result, currently supports pandas, arrow, and polars. Default is pandas."
+    )
 
 
 class SqlQueryTool(SqlDataSourceTool):
@@ -38,11 +42,12 @@ class SqlQueryTool(SqlDataSourceTool):
     def _run(
         self,
         query,
+        result_format: Optional[Literal["pandas", "arrow", "polars"]] = "pandas",
         **kwargs,
     ) -> (str, str):
         """Execute the query, return the results or an error message."""
         try:
-            result = self.datasource.to_pandas(query)
+            result = self.datasource.execute(query, result_format=result_format)
 
             # Serialize the result to a base64 encoded string as the artifact
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")

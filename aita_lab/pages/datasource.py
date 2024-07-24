@@ -15,9 +15,65 @@ def show_datasource(datasource: DataSource):
         rx.table.cell(
             rx.button(
                 "Delete",
-                on_click=lambda: DataSourceState.delete_datasource(datasource),
+                on_click=lambda: DataSourceState.delete_datasource(datasource.id),
             )
         ),
+    )
+
+
+def show_datasource_configs():
+    return rx.tabs.root(
+        rx.tabs.list(
+            rx.tabs.trigger("Connection URL", value="connection_url"),
+            rx.tabs.trigger("Custom Config", value="custom_config"),
+        ),
+        rx.tabs.content(
+            rx.vstack(
+                rx.text(
+                    DataSourceState.connection_url,
+                    as_="div",
+                    size="2",
+                    mb="1",
+                    weight="bold",
+                ),
+                rx.input(
+                    placeholder=f"Enter the Connection URL for the data source",
+                    on_blur=DataSourceState.set_connection_url,
+                    width="100%",
+                ),
+                width="100%",
+            ),
+            value="connection_url",
+        ),
+        rx.tabs.content(
+            rx.vstack(
+                rx.foreach(
+                    DataSourceState.datasource_attribute_names,
+                    lambda attribute_name: rx.vstack(
+                        rx.text(
+                            attribute_name,
+                            as_="div",
+                            size="2",
+                            mb="1",
+                            weight="bold",
+                        ),
+                        rx.input(
+                            placeholder=f"Enter the {attribute_name} for the data source",
+                            value=DataSourceState.attributes[attribute_name],
+                            on_blur=lambda value: DataSourceState.set_datasource_attributes(
+                                attribute_name, value
+                            ),
+                            width="100%",
+                        ),
+                        width="100%",
+                    ),
+                ),
+                width="100%",
+            ),
+            value="custom_config",
+        ),
+        default_value="connection_url",
+        on_change=DataSourceState.set_config_type,
     )
 
 
@@ -59,7 +115,7 @@ def add_datasource():
                     required=True,
                 ),
                 rx.text(
-                    "Type *",
+                    "Data Source *",
                     as_="div",
                     size="2",
                     mb="1",
@@ -67,40 +123,15 @@ def add_datasource():
                 ),
                 rx.select(
                     datasources,
-                    placeholder="Select the data source type",
-                    on_change=DataSourceState.set_datasource_type,
+                    placeholder="Select the data source",
+                    on_change=DataSourceState.set_datasource,
                 ),
-                rx.cond(
-                    DataSourceState.datasource_type,
-                    rx.vstack(
-                        rx.foreach(
-                            DataSourceState.datasource_attributes,
-                            lambda field: rx.vstack(
-                                rx.text(
-                                    field,
-                                    as_="div",
-                                    size="2",
-                                    mb="1",
-                                    weight="bold",
-                                ),
-                                rx.input(
-                                    placeholder=f"Enter the {field} for the data source",
-                                    on_blur=lambda x: DataSourceState.set_datasource_attributes(
-                                        field, x
-                                    ),
-                                    width="100%",
-                                ),
-                                width="100%",
-                            ),
-                        ),
-                        width="100%",
-                    ),
-                ),
+                rx.cond(DataSourceState.datasource, show_datasource_configs()),
                 direction="column",
                 spacing="4",
             ),
             rx.cond(
-                DataSourceState.missing_attributes,
+                DataSourceState.missing_configs,
                 rx.chakra.alert(
                     rx.chakra.alert_icon(),
                     rx.chakra.alert_title(
@@ -155,7 +186,7 @@ def update_datasource(datasource: DataSource):
         rx.dialog.trigger(
             rx.button(
                 rx.icon("square_pen", width=24, height=24),
-                on_click=lambda: DataSourceState.set_datasource(datasource),
+                on_click=DataSourceState.render_update_datasource(datasource),
             ),
         ),
         rx.dialog.content(
@@ -179,18 +210,7 @@ def update_datasource(datasource: DataSource):
                     default_value=datasource.name,
                     on_blur=DataSourceState.set_name,
                 ),
-                rx.text(
-                    "Connection URL",
-                    as_="div",
-                    size="2",
-                    mb="1",
-                    weight="bold",
-                ),
-                rx.input(
-                    placeholder=datasource.connection_url,
-                    default_value=datasource.connection_url,
-                    on_blur=DataSourceState.set_connection_url,
-                ),
+                show_datasource_configs(),
                 direction="column",
                 spacing="3",
             ),
