@@ -36,6 +36,7 @@ class SparkAgent(GraphAgent):
         # TODO refactor to use ibis spark backend
         import findspark
         from pyspark.sql import SparkSession
+
         findspark.init()
 
         return (
