@@ -1,6 +1,4 @@
-import findspark
 import pandas as pd
-from pyspark.sql import SparkSession
 
 from aita.agent.graph import GraphAgent
 from aita.tool.python_tool import PythonTool
@@ -10,9 +8,9 @@ from aita.tool.spark_tool import ConvertPandasToSparkTool, SparkTool
 class SparkAgent(GraphAgent):
     type: str = "pyspark"
     description: str = "A PySpark agent that can use PySpark tools to run PySpark scripts."
-    spark_session: SparkSession
 
     def __init__(self, spark_configs: dict[str, str], model: str, model_parameters=None):
+        self.spark_session = None
         self.init_session(spark_configs)
         super().__init__(
             [
@@ -34,7 +32,12 @@ class SparkAgent(GraphAgent):
     def create_spark_session(spark_configs: dict[str, str]):
         assert "master" in spark_configs, "master is required in spark_configs"
         assert "app_name" in spark_configs, "app_name is required in spark_configs"
+
+        # TODO refactor to use ibis spark backend
+        import findspark
+        from pyspark.sql import SparkSession
         findspark.init()
+
         return (
             SparkSession.builder.master(spark_configs.get("master"))
             .appName(spark_configs.get("app_name"))

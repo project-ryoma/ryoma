@@ -50,14 +50,9 @@ ipython = "8.14.0"
 pyarrow = "^16.1.0"
 typer = "^0.12.3"
 types-setuptools = "^70.0.0.20240524"
-amundsen-databuilder = "^7.5.0"
-ibis-framework = {version = "9.0.0", extras = ["snowflake"]}
 
 # extra dependencies
 boto3 = { version = "^1.34.122", optional = true }
-adbc-driver-postgresql = { version = "^1.0.0", optional = true }
-adbc-driver-snowflake = { version = "^1.0.0", optional = true }
-findspark = { version = "^2.0.1", optional = true }
 pyspark = { version = "^3.2.0", optional = true }
 
 [tool.poetry.group.aita_lab]
@@ -69,6 +64,40 @@ reflex = "^0.5.5"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
 feast = "^0.39.1"
+amundsen-databuilder = "^7.5.0"
+ibis-framework = "^9.0.0"
+
+# extra dependency group for different databases
+[tool.poetry.group.snowflake]
+optional = true
+
+[tool.poetry.group.snowflake.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["snowflake"] }
+
+[tool.poetry.group.sqlite]
+optional = true
+
+[tool.poetry.group.snowflake.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["sqlite"] }
+
+[tool.poetry.group.postgresql]
+optional = true
+
+[tool.poetry.group.postgresql.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["postgres"] }
+
+[tool.poetry.group.mysql]
+optional = true
+
+[tool.poetry.group.mysqk.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["mysql"] }
+
+[tool.poetry.group.bigquery]
+optional = true
+
+[tool.poetry.group.bigguery.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["bigquery"] }
+
 
 [tool.poetry.extras]
 dynamodb = ["boto3"]
@@ -76,6 +105,12 @@ postgresql = ["adbc-driver-postgresql"]
 snowflake = ["adbc-driver-snowflake"]
 pyspark = ["findspark", "pyspark"]
 aita_lab = ["aita_lab"]
+snowflake = ["snowflake"]
+sqlite = ["sqlite"]
+postgresql = ["postgresql"]
+mysql = ["mysql"]
+bigquery = ["bigquery"]
+
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.1.1"
@@ -87,7 +122,6 @@ openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
 pandas = "^2.2.2"
 pyspark = "^3.2.0"
-findspark = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -110,7 +144,7 @@ pytest-cov = "^3.0.0"
 openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
 azure-identity = "^1.16.0"
-adbc-driver-snowflake = { version = "^1.0.0"}
+adbc-driver-snowflake = { version = "^1.0.0" }
 
 
 [tool.black]
@@ -126,6 +160,7 @@ exclude = '''
     | \.mypy_cache
     | \.tox
     | \.venv
+    | \.db
     | _build
     | buck-out
     | build
@@ -176,7 +211,6 @@ warn_unused_configs = true
 warn_unused_ignores = true
 
 exclude = [
-    "aita_lab",
     "research",
 ]
 
