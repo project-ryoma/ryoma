@@ -1,5 +1,5 @@
 # Aita
-AI Powered Data Agent, a comprehensive solution for data analysis, engineering, and visualization. 
+AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization. 
 
 
 [![Build status](https://github.com/project-aita/aita/workflows/build/badge.svg)](https://github.com/project-aita/aita/actions/workflows/build.yml?query=workflow%3Abuild)
@@ -21,13 +21,15 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 - **[Reflex](https://reflex.dev/)**: An open-source framework for quickly building beautiful, interactive web applications in pure Python
 - **[Apache Arrow](https://arrow.apache.org/)**: A cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware like CPUs and GPUs.
 - **[Jupyter Ai Magics](https://github.com/jupyterlab/jupyter-ai)**: A JupyterLab extension that provides a set of magics for working with AI models.
+- **[Amundsen](https://www.amundsen.io/)**: A data discovery and metadata platform that helps users discover, understand, and trust the data they use.
+- **[Ibis](https://ibis-project.org/)**: A Python data analysis framework that provides a pandas-like API for analytics on large datasets.
+- **[Feast](https://feast.dev/)**: An operational feature store for managing and serving machine learning features to models in production.
 
 ## Installation
 Simply install the package using pip:
 
 ```shell
 pip install aita
-
 ```
 Or with extra dependencies:
 
@@ -35,7 +37,7 @@ Or with extra dependencies:
 pip install aita[snowflake]
 ```
 
-## Example
+## Basic Example
 Below is an example of using SqlAgent to connect to a PostgreSQL database and ask a question.
 You can read more details in the [documentation](https://aita-1.gitbook.io/aita/).
 
@@ -52,6 +54,16 @@ sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
 # ask question to the agent
 sql_agent.stream("What is the total number of orders?")
 ```
+
+## Use Aita Lab
+Aita lab is an application that allows you to interact with your data and AI models in UI.
+The aita lab is built with [Reflex](https://reflex.dev/).
+
+You can start the aita lab by running the following command:
+```shell
+reflex run
+```
+
 
 ## Supported Models
 Model provider are supported by jupyter ai magics. Ensure the corresponding environment variables are set before using the Aita agent.
@@ -76,18 +88,17 @@ Model provider are supported by jupyter ai magics. Ensure the corresponding envi
 ## Supported Data Sources
 - [x] Snowflake
 - [x] Sqlite
-- [ ] BigQuery
+- [x] BigQuery
 - [x] Postgres
-- [ ] MySQL
+- [x] MySQL
+- [x] File (CSV, Excel, Parquet, etc.)
 - [ ] Redshift
 - [ ] DynamoDB
-- [x] File (CSV, Excel, Parquet, etc.)
 
 ## Supported Engines
 - [x] Apache Spark
 - [ ] Apache Flink
 - [ ] Presto
-- [ ] **[Ray.io](https://ray.io/)**: A distributed computing framework that efficiently scales AI tasks and data processing across clusters, improving performance and resource utilization.
 
 ## 🛡 License
 
