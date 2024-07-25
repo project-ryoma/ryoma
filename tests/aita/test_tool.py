@@ -44,7 +44,7 @@ def test_pyspark_tool(pyspark_session, pandas_dataframe):
 
 
 def test_sql_tool(mock_sql_data_source):
-    with patch("aita.datasource.sql.SqlDataSource.to_pandas") as mock_execute:
+    with patch("aita.datasource.base.IbisDataSource.execute") as mock_execute:
         mock_execute.return_value = "success"
         sql_tool = SqlQueryTool(datasource=mock_sql_data_source)
         query = "SELECT * FROM customers LIMIT 4"

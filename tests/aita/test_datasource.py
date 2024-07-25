@@ -5,11 +5,11 @@ from unittest.mock import MagicMock
 import pytest
 from mock import patch
 
+from aita.datasource.base import IbisDataSource
 from aita.datasource.catalog import Catalog
-from aita.datasource.sql import SqlDataSource
 
 
-class MockSqlDataSource(SqlDataSource):
+class MockSqlDataSource(IbisDataSource):
     def connect(self) -> Any:
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
@@ -29,11 +29,11 @@ def mock_sql_data_source():
 
 
 def test_execute_query(mock_sql_data_source):
-    with patch("aita.datasource.sql.SqlDataSource.execute") as mock_execute:
+    with patch("aita.datasource.base.IbisDataSource.execute") as mock_execute:
         mock_execute.return_value = "success"
         results = mock_sql_data_source.execute("SELECT * FROM table")
     assert results == "success"
 
 
 def test_datasource_field_exists():
-    assert hasattr(SqlDataSource, "__fields__")
+    assert hasattr(IbisDataSource, "__fields__")

@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 import ibis
-from ibis.backends.sqlite import Backend
+from ibis import BaseBackend
 from pydantic import Field
 
 from aita.datasource.base import IbisDataSource
@@ -17,7 +17,7 @@ class SqliteDataSource(IbisDataSource):
     ):
         super().__init__(connection_url=connection_url)
 
-    def connect(self) -> Backend:
+    def connect(self) -> BaseBackend:
         return ibis.sqlite.connect(self.connection_url)
 
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:

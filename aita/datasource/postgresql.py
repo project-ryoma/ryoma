@@ -1,70 +1,63 @@
-from typing import Optional
+from typing import Optional, Union
 
-import pyarrow as pa
+import logging
 
-try:
-    import adbc_driver_postgresql.dbapi
-except ImportError:
-    adbc_driver_postgresql = None
-from adbc_driver_manager.dbapi import Connection
+import ibis
+from ibis.backends.postgres import Backend
 from pydantic import Field
 
-from aita.datasource.catalog import Catalog
-from aita.datasource.sql import SqlDataSource
+from aita.datasource.base import IbisDataSource
+from aita.datasource.catalog import Catalog, Column, Database, Table
 
 
-class PostgreSqlDataSource(SqlDataSource):
+class PostgreSqlDataSource(IbisDataSource):
     connection_url: Optional[str] = Field(None, description="Connection URL")
     username: Optional[str] = Field(None, description="User name")
     password: Optional[str] = Field(None, description="Password")
     host: Optional[str] = Field(None, description="Host name")
     port: Optional[int] = Field(None, description="Port number")
     database: Optional[str] = Field(None, description="Database name")
+    db_schema: Optional[str] = Field(None, description="Schema name")
 
-    def __init__(
-        self,
-        connection_url: Optional[str] = None,
-        **kwargs,
-    ):
-        if not connection_url:
-            user = kwargs.get("user")
-            password = kwargs.get("password")
-            host = kwargs.get("host")
-            port = kwargs.get("port")
-            database = kwargs.get("database")
-            connection_url = self.build_connection_url(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database=database,
-                **kwargs,
-            )
-        super().__init__(connection_url=connection_url)
+    def connect(self) -> Backend:
+        return ibis.postgres.coonect(
+            user=self.username,
+            password=self.password,
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            schema=self.db_schema,
+        )
 
-    def build_connection_url(
-        self,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        database: Optional[str] = None,
-        **kwargs,
-    ) -> str:
-        connection_url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
-        if kwargs:
-            connection_url += "?" + "&".join([f"{k}={v}" for k, v in kwargs.items()])
-        return connection_url
+    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+        logging.info("Getting metadata from Postgres")
+        conn = self.connect()
 
-    def connect(self) -> Connection:
-        return adbc_driver_postgresql.dbapi.connect(self.connection_url)
+        def get_table_metadata(database: str, schema: str) -> list[Table]:
+            tables = []
+            for table in conn.list_tables(database=(database, schema)):
+                table_schema = conn.get_schema(table, catalog=database, database=schema)
+                tb = Table(
+                    table_name=table,
+                    columns=[
+                        Column(
+                            name=name,
+                            type=table_schema[name].name,
+                            nullable=table_schema[name].nullable,
+                        )
+                        for name in table_schema
+                    ],
+                )
+                tables.append(tb)
+            return tables
 
-    def get_metadata(self, **kwargs):
-        with self.connect() as conn:
-            catalogs: pa.Table = conn.adbc_get_objects(
-                catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
-                db_schema_filter=kwargs.get("feature", conn.adbc_current_db_schema),
-                table_name_filter=kwargs.get("table", None),
-            ).read_all()
-            catalog = catalogs.to_pylist()[0]
-            return Catalog(**catalog)
+        if self.database and self.db_schema:
+            tables = get_table_metadata(self.database, self.db_schema)
+            database = Database(database_name=self.db_schema, tables=tables)
+            return database
+        elif self.database:
+            databases = []
+            for database in conn.list_databases(catalog=self.database):
+                tables = get_table_metadata(self.database, database)
+                databases.append(Database(database_name=database, tables=tables))
+            return Catalog(catalog_name=self.database, databases=databases)

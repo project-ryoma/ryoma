@@ -4,7 +4,6 @@ import logging
 
 import ibis
 from ibis import BaseBackend
-from ibis.backends.snowflake import Backend
 from langchain_core.pydantic_v1 import Field
 
 from aita.datasource.base import IbisDataSource
@@ -21,7 +20,7 @@ class SnowflakeDataSource(IbisDataSource):
     database: Optional[str] = Field(None, description="Database name")
     db_schema: Optional[str] = Field(None, description="Schema name")
 
-    def connect(self, **kwargs) -> Union[Backend, BaseBackend]:
+    def connect(self, **kwargs) -> BaseBackend:
         logging.info("Connecting to Snowflake")
         logging.info(f"Connection URL: {self.connection_url}")
         try:

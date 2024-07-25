@@ -1,52 +1,54 @@
-from typing import Optional
+from typing import Optional, Union
 
-from sqlalchemy import Engine
-from sqlalchemy.engine import URL, create_engine
+import logging
 
-from aita.datasource.catalog import Catalog
-from aita.datasource.sql import SqlDataSource
+import ibis
+from ibis import BaseBackend
+from pydantic import Field
+
+from aita.datasource.base import IbisDataSource
+from aita.datasource.catalog import Catalog, Column, Database, Table
 
 
-class MySqlDataSource(SqlDataSource):
+class MySqlDataSource(IbisDataSource):
+    connection_url: Optional[str] = Field(None, description="Connection URL")
+    username: Optional[str] = Field(None, description="User name")
+    password: Optional[str] = Field(None, description="Password")
+    host: Optional[str] = Field(None, description="Host name")
+    port: Optional[int] = Field(None, description="Port number")
+    database: Optional[str] = Field(None, description="Database name")
 
-    def __init__(self, connection_url: Optional[str] = None, **kwargs):
-        if not connection_url:
-            user = kwargs.get("user")
-            password = kwargs.get("password")
-            host = kwargs.get("host")
-            port = kwargs.get("port")
-            database = kwargs.get("database")
-            connection_url = self.build_connection_url(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database=database,
-                **kwargs,
-            )
-        super().__init__(connection_url, "mysql")
+    def connect(self, **kwargs) -> BaseBackend:
+        return ibis.mysql.coonect(
+            user=self.username,
+            password=self.password,
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            **kwargs,
+        )
 
-    def build_connection_url(
-        self,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        database: Optional[str] = None,
-        **kwargs,
-    ) -> str:
-        return URL(
-            drivername="mysql+pymysql",
-            username=user,
-            password=password,
-            host=host,
-            port=port,
-            database=database,
-            query=kwargs,
-        ).render_as_string()
+    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+        logging.info("Getting metadata from Mysql")
+        conn = self.connect()
 
-    def connect(self) -> Engine:
-        return create_engine(self.connection_url)
+        def get_table_metadata(database: str) -> list[Table]:
+            tables = []
+            for table in conn.list_tables(database=database):
+                table_schema = conn.get_schema(table, database=database)
+                tb = Table(
+                    table_name=table,
+                    columns=[
+                        Column(
+                            name=name,
+                            type=table_schema[name].name,
+                            nullable=table_schema[name].nullable,
+                        )
+                        for name in table_schema
+                    ],
+                )
+                tables.append(tb)
+            return tables
 
-    def get_metadata(self, **kwargs) -> Catalog:
-        raise NotImplementedError
+        tables = get_table_metadata(self.database)
+        return Database(database_name=self.database, tables=tables)
