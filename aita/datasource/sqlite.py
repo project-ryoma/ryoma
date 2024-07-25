@@ -1,15 +1,14 @@
-from typing import Optional
+from typing import Optional, Union
 
-import adbc_driver_sqlite.dbapi
-import pyarrow as pa
-from adbc_driver_manager.dbapi import Connection
+import ibis
+from ibis.backends.sqlite import Backend
 from pydantic import Field
 
-from aita.datasource.catalog import Catalog
-from aita.datasource.sql import SqlDataSource
+from aita.datasource.base import IbisDataSource
+from aita.datasource.catalog import Catalog, Column, Database, Table
 
 
-class SqliteDataSource(SqlDataSource):
+class SqliteDataSource(IbisDataSource):
     connection_url: str = Field(..., description="Connection URL")
 
     def __init__(
@@ -18,15 +17,27 @@ class SqliteDataSource(SqlDataSource):
     ):
         super().__init__(connection_url=connection_url)
 
-    def connect(self) -> Connection:
-        return adbc_driver_sqlite.dbapi.connect(self.connection_url)
+    def connect(self) -> Backend:
+        return ibis.sqlite.connect(self.connection_url)
 
-    def get_metadata(self, **kwargs) -> Catalog:
-        with self.connect() as conn:
-
-            catalogs: pa.Table = conn.adbc_get_objects(
-                catalog_filter=kwargs.get("database", conn.adbc_current_catalog),
-                table_name_filter=kwargs.get("table", None),
-            ).read_all()
-            catalog = catalogs.to_pylist()[0]
-            return Catalog(**catalog)
+    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+        conn = self.connect()
+        tables = []
+        for table in conn.list_tables():
+            table_schema = conn.get_schema(table)
+            tb = Table(
+                table_name=table,
+                columns=[
+                    Column(
+                        name=name,
+                        type=table_schema[name].name,
+                        nullable=table_schema[name].nullable,
+                    )
+                    for name in table_schema
+                ],
+            )
+            tables.append(tb)
+        return Database(
+            database_name=self.connection_url,
+            tables=tables,
+        )

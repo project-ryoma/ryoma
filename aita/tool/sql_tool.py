@@ -9,8 +9,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
 
-from aita.datasource.ds_ibis import IbisDataSource
-from aita.datasource.sql import SqlDataSource
+from aita.datasource.base import IbisDataSource
 
 
 class SqlDataSourceTool(BaseTool, ABC):
@@ -72,7 +71,7 @@ class Table(BaseModel):
 class CreateTableTool(SqlDataSourceTool):
     """Tool for creating a table in a SQL database."""
 
-    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
+    datasource: Optional[IbisDataSource] = Field(None, exclude=True)
     name: str = "create_table"
     description: str = """
     Create a table in the database.

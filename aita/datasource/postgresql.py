@@ -14,7 +14,12 @@ from aita.datasource.sql import SqlDataSource
 
 
 class PostgreSqlDataSource(SqlDataSource):
-    connection_url: str = Field(..., description="Connection URL")
+    connection_url: Optional[str] = Field(None, description="Connection URL")
+    username: Optional[str] = Field(None, description="User name")
+    password: Optional[str] = Field(None, description="Password")
+    host: Optional[str] = Field(None, description="Host name")
+    port: Optional[int] = Field(None, description="Port number")
+    database: Optional[str] = Field(None, description="Database name")
 
     def __init__(
         self,
