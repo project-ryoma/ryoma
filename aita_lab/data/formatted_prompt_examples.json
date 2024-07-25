@@ -1,0 +1,65 @@
+{
+    "question": "What are the average and minimum price (in Euro) of all products?",
+    "templates": [
+        {
+            "args": {
+                "data_type": "spider",
+                "split": "test",
+                "k_shot": 1,
+                "prompt_repr": "SQL",
+                "example_type": "QA",
+                "selector_type": "EUCDISQUESTIONMASK",
+                "max_seq_len": 4096,
+                "max_ans_len": 200,
+                "tokenizer": "gpt-3.5-turbo",
+                "scope_factor": 100,
+                "pre_test_result": null
+            },
+            "costs": {
+                "prompt_tokens_per_prompt": 0.0,
+                "gpt-4": 8.272,
+                "gpt-3.5-turbo": 0.4136,
+                "text-davinci-003": 4.136,
+                "example_quality": 0.7743360713308084,
+                "pattern_similarity": 0.5690988534018125
+            },
+            "formatted_question": {
+                "prompt_tokens": 0,
+                "prompt": "/* Some SQL examples are provided based on similar problems: */\n/* Answer the following: What are the average and minimum price (in Euro) of all products? */\nSELECT avg(price_in_euros) ,  min(price_in_euros) FROM catalog_contents\n\n/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What is the average, minimum, and maximum age for all French singers? */\nSELECT ",
+                "response": "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'",
+                "n_examples": 1,
+                "db_id": "concert_singer"
+            }
+        },
+        {
+            "args": {
+                "data_type": "spider",
+                "split": "test",
+                "k_shot": 0,
+                "prompt_repr": "SQL",
+                "example_type": "QA",
+                "selector_type": "EUCDISQUESTIONMASK",
+                "max_seq_len": 4096,
+                "max_ans_len": 200,
+                "tokenizer": "gpt-3.5-turbo",
+                "scope_factor": 100,
+                "pre_test_result": null
+            },
+            "costs": {
+                "prompt_tokens_per_prompt": 0.0,
+                "gpt-4": 8.272,
+                "gpt-3.5-turbo": 0.4136,
+                "text-davinci-003": 4.136,
+                "example_quality": 1,
+                "pattern_similarity": 1
+            },
+            "formatted_question": {
+                "prompt_tokens": 0,
+                "prompt": "/* Given the following database schema: */\nCREATE TABLE \"stadium\" (\n\"Stadium_ID\" int,\n\"Location\" text,\n\"Name\" text,\n\"Capacity\" int,\n\"Highest\" int,\n\"Lowest\" int,\n\"Average\" int,\nPRIMARY KEY (\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer\" (\n\"Singer_ID\" int,\n\"Name\" text,\n\"Country\" text,\n\"Song_Name\" text,\n\"Song_release_year\" text,\n\"Age\" int,\n\"Is_male\" bool,\nPRIMARY KEY (\"Singer_ID\")\n)\n\nCREATE TABLE \"concert\" (\n\"concert_ID\" int,\n\"concert_Name\" text,\n\"Theme\" text,\n\"Stadium_ID\" text,\n\"Year\" text,\nPRIMARY KEY (\"concert_ID\"),\nFOREIGN KEY (\"Stadium_ID\") REFERENCES \"stadium\"(\"Stadium_ID\")\n)\n\nCREATE TABLE \"singer_in_concert\" (\n\"concert_ID\" int,\n\"Singer_ID\" text,\nPRIMARY KEY (\"concert_ID\",\"Singer_ID\"),\nFOREIGN KEY (\"concert_ID\") REFERENCES \"concert\"(\"concert_ID\"),\nFOREIGN KEY (\"Singer_ID\") REFERENCES \"singer\"(\"Singer_ID\")\n)\n\n/* Answer the following: What is the average, minimum, and maximum age for all French singers? */\nSELECT ",
+                "response": "avg(age) , min(age) , max(age) FROM singer WHERE country = 'France'",
+                "n_examples": 0,
+                "db_id": "concert_singer"
+            }
+        }
+    ]
+}

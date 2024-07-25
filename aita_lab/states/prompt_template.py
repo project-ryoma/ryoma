@@ -6,7 +6,7 @@ import reflex as rx
 
 from aita.prompt.prompt_builder import prompt_factory
 
-f = open("aita/prompt/templates/formatted_data.json")
+f = open("aita_lab/data/formatted_prompt_examples.json")
 data = json.load(f)
 
 

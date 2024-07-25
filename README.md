@@ -59,7 +59,23 @@ sql_agent.stream("What is the total number of orders?")
 Aita lab is an application that allows you to interact with your data and AI models in UI.
 The aita lab is built with [Reflex](https://reflex.dev/).
 
-You can start the aita lab by running the following command:
+1. Create Aita lab configuration file `rxconfig.py` in your project:
+```python
+import logging
+
+import reflex as rx
+from reflex.constants import LogLevel
+
+config = rx.Config(
+    app_name="aita_lab",
+    loglevel=LogLevel.INFO,
+)
+
+# Setup basic configuration for logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+```
+
+2. You can start the aita lab by running the following command:
 ```shell
 reflex run
 ```
