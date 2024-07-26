@@ -5,6 +5,8 @@ import logging
 import reflex as rx
 from sqlmodel import select
 
+from aita.datasource.base import DataSource
+
 
 class CatalogTable(rx.Model, table=True):
     """The Catalog Table Model."""
@@ -59,20 +61,20 @@ class CatalogState(rx.State):
             session.commit()
 
     @staticmethod
-    def crawl_data_catalog(datasource_name, datasource):
-        catalog = datasource.get_metadata()
-        print(catalog)
-        for schema in catalog.catalog_db_schemas:
-            for table in schema.db_schema_tables:
-                try:
-                    CatalogState.commit(
-                        catalog=catalog.catalog_name,
-                        schema=schema.db_schema_name,
-                        table=table.table_name,
-                        datasource_name=datasource_name,
-                    )
-                except Exception as e:
-                    logging.error(f"Failed to crawl data catalog: {e}")
+    def crawl_data_catalog(datasource_name, datasource: DataSource):
+        # catalog = datasource.get_metadata()
+        # for schema in catalog.catalog_db_schemas:
+        #     for table in schema.db_schema_tables:
+        #         try:
+        #             CatalogState.commit(
+        #                 catalog=catalog.catalog_name,
+        #                 schema=schema.db_schema_name,
+        #                 table=table.table_name,
+        #                 datasource_name=datasource_name,
+        #             )
+        #         except Exception as e:
+        #             logging.error(f"Failed to crawl data catalog: {e}")
+        return datasource.crawl_data_catalog()
 
     def on_load(self):
         self.load_entries()

@@ -3,11 +3,16 @@ from typing import Optional, Union
 import logging
 
 import ibis
+from databuilder.extractor.bigquery_metadata_extractor import BigQueryMetadataExtractor
+from databuilder.job.job import DefaultJob
+from databuilder.loader.base_loader import Loader
+from databuilder.task.task import DefaultTask
 from ibis import BaseBackend, Table
 from pydantic import Field
+from pyhocon import ConfigFactory
 
 from aita.datasource.base import IbisDataSource
-from aita.datasource.catalog import Catalog, Column, Database
+from aita.datasource.metadata import Catalog, Column, Database
 
 
 class BigqueryDataSource(IbisDataSource):
@@ -43,3 +48,18 @@ class BigqueryDataSource(IbisDataSource):
             )
             tables.append(tb)
         return Database(database_name=self.dataset_id, tables=tables)
+
+    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        logging.info("Crawling data catalog from Bigquery")
+        job_config = ConfigFactory.from_dict(
+            {
+                "extractor.bigquery_table_metadata.{}".format(
+                    BigQueryMetadataExtractor.PROJECT_ID_KEY
+                )
+            }
+        )
+        job = DefaultJob(
+            conf=job_config, task=DefaultTask(extractor=BigQueryMetadataExtractor(), loader=loader)
+        )
+
+        job.launch()

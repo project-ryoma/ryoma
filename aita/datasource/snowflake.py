@@ -3,11 +3,17 @@ from typing import Optional, Union
 import logging
 
 import ibis
+from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
+from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
+from databuilder.job.job import DefaultJob
+from databuilder.loader.base_loader import Loader
+from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
 from langchain_core.pydantic_v1 import Field
+from pyhocon import ConfigFactory
 
 from aita.datasource.base import IbisDataSource
-from aita.datasource.catalog import Catalog, Column, Database, Table
+from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
 class SnowflakeDataSource(IbisDataSource):
@@ -74,3 +80,31 @@ class SnowflakeDataSource(IbisDataSource):
                 tables = get_table_metadata(self.database, database)
                 databases.append(Database(database_name=database, tables=tables))
             return Catalog(catalog_name=self.database, databases=databases)
+
+    def connection_string(self):
+        return f"snowflake://{self.user}:{self.password}@{self.account}/{self.database}/{self.db_schema}"
+
+    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        logging.info("Running Snowflake metadata extraction job")
+        job_config = ConfigFactory.from_dict(
+            {
+                "extractor.snowflake.{}".format(
+                    SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY
+                ): self.database,
+                "extractor.snowflake.{}".format(
+                    SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY
+                ): where_clause_suffix,
+                "extractor.snowflake.{}".format(
+                    SnowflakeMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME
+                ): True,
+                "extractor.snowflake.extractor.sqlalchemy.{}".format(
+                    SQLAlchemyExtractor.CONN_STRING
+                ): self.connection_string(),
+            }
+        )
+
+        job = DefaultJob(
+            conf=job_config, task=DefaultTask(extractor=SnowflakeMetadataExtractor(), loader=loader)
+        )
+
+        job.launch()

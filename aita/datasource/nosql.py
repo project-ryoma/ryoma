@@ -6,7 +6,7 @@ except ImportError:
     boto3 = None
 
 from aita.datasource.base import DataSource
-from aita.datasource.catalog import Catalog
+from aita.datasource.metadata import Catalog
 
 
 class DynamodbDataSource(DataSource):

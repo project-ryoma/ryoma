@@ -8,7 +8,7 @@ from ibis.backends.sql import SQLBackend
 from langchain_core.pydantic_v1 import BaseModel
 from pydantic import Field
 
-from aita.datasource.catalog import Catalog, Database
+from aita.datasource.metadata import Catalog, Database
 
 
 class DataSource(BaseModel, ABC):
@@ -17,6 +17,10 @@ class DataSource(BaseModel, ABC):
     @abstractmethod
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
         pass
+
+    @abstractmethod
+    def crawl_data_catalog(self, **kwargs):
+        raise NotImplementedError("crawl_data_catalog is not implemented for this data source")
 
 
 class IbisDataSource(DataSource):
@@ -44,3 +48,6 @@ class IbisDataSource(DataSource):
 
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
         raise NotImplementedError("metadata function needs to be implemented for the data source.")
+
+    def crawl_data_catalog(self, **kwargs):
+        raise NotImplementedError("crawl_data_catalog is not implemented for this data source")

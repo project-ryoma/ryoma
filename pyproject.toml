@@ -49,6 +49,7 @@ pyarrow = "^16.1.0"
 typer = "^0.12.3"
 types-setuptools = "^70.0.0.20240524"
 
+
 # aita lab dependencies
 alembic = "^1.13.1"
 reflex = "^0.5.5"
@@ -64,6 +65,7 @@ optional = true
 
 [tool.poetry.group.snowflake.dependencies]
 ibis-framework = { version = "^9.0.0", extras = ["snowflake"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["snowflake"] }
 
 [tool.poetry.group.sqlite]
 optional = true
@@ -76,18 +78,21 @@ optional = true
 
 [tool.poetry.group.postgresql.dependencies]
 ibis-framework = { version = "^9.0.0", extras = ["postgres"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["postgres"] }
 
 [tool.poetry.group.mysql]
 optional = true
 
 [tool.poetry.group.mysql.dependencies]
 ibis-framework = { version = "^9.0.0", extras = ["mysql"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["mysql"] }
 
 [tool.poetry.group.bigquery]
 optional = true
 
 [tool.poetry.group.bigquery.dependencies]
 ibis-framework = { version = "^9.0.0", extras = ["bigquery"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["bigquery"] }
 
 [tool.poetry.group.pyspark]
 optional = true

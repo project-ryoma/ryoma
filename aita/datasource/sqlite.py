@@ -5,7 +5,7 @@ from ibis import BaseBackend
 from pydantic import Field
 
 from aita.datasource.base import IbisDataSource
-from aita.datasource.catalog import Catalog, Column, Database, Table
+from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
 class SqliteDataSource(IbisDataSource):

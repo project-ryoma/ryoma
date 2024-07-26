@@ -3,11 +3,17 @@ from typing import Optional, Union
 import logging
 
 import ibis
+from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
+from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
+from databuilder.job.job import DefaultJob
+from databuilder.loader.base_loader import Loader
+from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
 from pydantic import Field
+from pyhocon import ConfigFactory
 
 from aita.datasource.base import IbisDataSource
-from aita.datasource.catalog import Catalog, Column, Database, Table
+from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
 class MySqlDataSource(IbisDataSource):
@@ -52,3 +58,26 @@ class MySqlDataSource(IbisDataSource):
 
         tables = get_table_metadata(self.database)
         return Database(database_name=self.database, tables=tables)
+
+    def connection_string(self):
+        return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+
+    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        logging.info("Crawling data catalog from Mysql")
+        job_config = ConfigFactory.from_dict(
+            {
+                "extractor.mysql_metadata.{}".format(
+                    MysqlMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY
+                ): where_clause_suffix,
+                "extractor.mysql_metadata.{}".format(
+                    MysqlMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME
+                ): True,
+                "extractor.mysql_metadata.extractor.sqlalchemy.{}".format(
+                    SQLAlchemyExtractor.CONN_STRING
+                ): self.connection_string(),
+            }
+        )
+        job = DefaultJob(
+            conf=job_config, task=DefaultTask(extractor=MysqlMetadataExtractor(), loader=loader)
+        )
+        job.launch()

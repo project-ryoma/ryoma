@@ -1,13 +1,11 @@
 from typing import List, Optional
 
 import json
+import os
 
 import reflex as rx
 
 from aita.prompt.prompt_builder import prompt_factory
-
-f = open("aita_lab/data/formatted_prompt_examples.json")
-data = json.load(f)
 
 
 class PromptTemplate(rx.Model):
@@ -20,14 +18,17 @@ class PromptTemplate(rx.Model):
 
 
 class PromptTemplateState(rx.State):
-    question: str = data["question"]
+    question: str
     prompt_template_names: List[str] = []
     prompt_templates: List[PromptTemplate] = []
 
-    @staticmethod
-    def load_prompt_templates_from_data():
+    def load_prompt_templates_from_data(self):
         prompt_template_names = []
         prompt_templates = []
+        path = os.path.dirname(__file__)
+        f = open(f"{path}/formatted_prompt_examples.json")
+        data = json.load(f)
+        self.question = data["question"]
         for template in data["templates"]:
             prompt_repr = template["args"]["prompt_repr"]
             k_shot = template["args"]["k_shot"]

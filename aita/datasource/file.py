@@ -4,7 +4,7 @@ import pyarrow as pa
 from langchain_core.pydantic_v1 import Field
 
 from aita.datasource.base import DataSource
-from aita.datasource.catalog import Table
+from aita.datasource.metadata import Table
 
 
 class FileDataSource(DataSource):

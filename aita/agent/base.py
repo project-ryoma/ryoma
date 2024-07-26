@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnableSerializable
 
 from aita.agent.utils import get_model
 from aita.datasource.base import DataSource
-from aita.datasource.catalog import Catalog
+from aita.datasource.metadata import Catalog
 from aita.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
 
 
