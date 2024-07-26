@@ -105,7 +105,6 @@ boto3 = { version = "^1.34.122", optional = true }
 
 [tool.poetry.extras]
 pyspark = ["pyspark"]
-aita_lab = ["aita_lab"]
 snowflake = ["snowflake"]
 sqlite = ["sqlite"]
 postgresql = ["postgresql"]
