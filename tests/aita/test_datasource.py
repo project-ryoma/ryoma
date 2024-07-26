@@ -6,7 +6,7 @@ import pytest
 from mock import patch
 
 from aita.datasource.base import IbisDataSource
-from aita.datasource.catalog import Catalog
+from aita.datasource.metadata import Catalog
 
 
 class MockSqlDataSource(IbisDataSource):

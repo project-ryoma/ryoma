@@ -1,4 +1,4 @@
-from aita.datasource.catalog import Catalog
+from aita.datasource.metadata import Catalog
 
 data = {
     "catalog_name": "main",
