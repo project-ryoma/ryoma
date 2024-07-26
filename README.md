@@ -77,7 +77,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 2. You can start the aita lab by running the following command:
 ```shell
-reflex run
+aita_lab run
 ```
 
 
