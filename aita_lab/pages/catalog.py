@@ -3,8 +3,8 @@
 import reflex as rx
 
 from aita_lab.states.catalog import CatalogState, CatalogTable
-from aita_lab.templates import template
 from aita_lab.states.datasource import DataSourceState
+from aita_lab.templates import template
 
 
 def catalog_search():
@@ -51,11 +51,7 @@ def add_data_catalog():
             ),
             rx.flex(
                 rx.dialog.close(
-                    rx.button(
-                        "Add",
-                        size="2",
-                        on_click=CatalogState.crawl_data_catalog
-                    ),
+                    rx.button("Add", size="2", on_click=CatalogState.crawl_data_catalog),
                 ),
                 rx.dialog.close(
                     rx.button(
@@ -138,10 +134,14 @@ def catalog_grid():
     )
 
 
-@template(route="/catalog", title="Data Catalog", on_load=[
-    CatalogState.on_load(),
-    DataSourceState.on_load(),
-])
+@template(
+    route="/catalog",
+    title="Data Catalog",
+    on_load=[
+        CatalogState.on_load(),
+        DataSourceState.on_load(),
+    ],
+)
 def catalog():
     return rx.vstack(
         rx.heading("Data Catalog", size="8"),

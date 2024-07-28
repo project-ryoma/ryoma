@@ -5,8 +5,8 @@ import logging
 import reflex as rx
 from sqlmodel import delete, select
 
-from aita.datasource.factory import DataSourceFactory, DataSourceProvider
 from aita.datasource.base import DataSource as DataSourceBase
+from aita.datasource.factory import DataSourceFactory, DataSourceProvider
 
 
 class DataSource(rx.Model, table=True):

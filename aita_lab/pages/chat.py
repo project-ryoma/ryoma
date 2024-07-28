@@ -10,10 +10,10 @@ from aita_lab.states.agent import AgentState
 from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplateState
+from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.styles import markdown_style, message_style
 from aita_lab.templates import template
-from aita_lab.states.tool_calls import ToolCallState
 
 
 def message(qa: QA) -> rx.Component:
@@ -254,7 +254,6 @@ def agent_selector() -> rx.Component:
     )
 
 
-
 @template(
     route="/",
     title="Chat",
@@ -309,7 +308,7 @@ def chat() -> rx.Component:
                 ChatState.cancel_tool,
                 ChatState.update_tool_arg,
                 ChatState.tool_output,
-                ToolCallState.tool_calls
+                ToolCallState.tool_calls,
             ),
             width="100%",
         ),

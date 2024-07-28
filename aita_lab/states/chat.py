@@ -16,8 +16,8 @@ from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from aita_lab.states.tool import Tool, ToolArg, ToolOutput
-from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.states.tool_calls import ToolCallState
+from aita_lab.states.vector_store import VectorStoreState
 
 
 class QA(rx.Base):
@@ -268,10 +268,7 @@ class ChatState(BaseState):
 
         self.processing = True
 
-        tool_args = {
-            tool_arg.name: tool_arg.value
-            for tool_arg in self.current_tool.args
-        }
+        tool_args = {tool_arg.name: tool_arg.value for tool_arg in self.current_tool.args}
         logging.info("Updating tool args: " + str(tool_args))
         self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
 
