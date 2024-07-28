@@ -1,11 +1,13 @@
-from typing import Optional
-
-import logging
+from typing import Optional, Any
 
 import reflex as rx
+from databuilder.loader.base_loader import Loader
+from databuilder.loader.generic_loader import GenericLoader
+from databuilder.models.table_metadata import TableMetadata
+from pyhocon import ConfigFactory
 from sqlmodel import select
 
-from aita.datasource.base import DataSource
+from aita_lab.states.datasource import DataSourceState
 
 
 class CatalogTable(rx.Model, table=True):
@@ -18,6 +20,7 @@ class CatalogTable(rx.Model, table=True):
 
 
 class CatalogState(rx.State):
+    current_datasource: Optional[str] = None
     catalogs: list[CatalogTable] = []
 
     is_open: bool = False
@@ -48,33 +51,37 @@ class CatalogState(rx.State):
                 )
 
     @staticmethod
-    def commit(catalog: str, schema: str, table: str, datasource_name: Optional[str] = None):
+    def commit(datasource_name: str, catalog: str, schema: str, table: str):
         with rx.session() as session:
             session.add(
                 CatalogTable(
+                    datasource_name=datasource_name,
                     catalog_name=catalog,
                     schema=schema,
                     table=table,
-                    datasource_name=datasource_name,
                 )
             )
             session.commit()
 
-    @staticmethod
-    def crawl_data_catalog(datasource_name, datasource: DataSource):
-        # catalog = datasource.get_metadata()
-        # for schema in catalog.catalog_db_schemas:
-        #     for table in schema.db_schema_tables:
-        #         try:
-        #             CatalogState.commit(
-        #                 catalog=catalog.catalog_name,
-        #                 schema=schema.db_schema_name,
-        #                 table=table.table_name,
-        #                 datasource_name=datasource_name,
-        #             )
-        #         except Exception as e:
-        #             logging.error(f"Failed to crawl data catalog: {e}")
-        return datasource.crawl_data_catalog()
+    def _load_catalog_entries(self, record: TableMetadata):
+        self.commit(
+            record.database,
+            record.cluster,
+            record.schema,
+            record.name,
+        )
+
+    def _data_source_loader(self) -> Loader:
+        loader = GenericLoader()
+        loader.init(ConfigFactory.from_dict({"callback_function": self.commit}))
+        return GenericLoader()
+
+    def crawl_data_catalog(self):
+        datasource = DataSourceState.connect(self.current_datasource)
+        try:
+            datasource.crawl_data_catalog(loader=self._data_source_loader())
+        except NotImplementedError as e:
+            rx.toast(e)
 
     def on_load(self):
         self.load_entries()

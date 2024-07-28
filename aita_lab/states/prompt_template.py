@@ -19,16 +19,19 @@ class PromptTemplate(rx.Model):
 
 class PromptTemplateState(rx.State):
     question: str
-    prompt_template_names: List[str] = []
     prompt_templates: List[PromptTemplate] = []
 
-    def load_prompt_templates_from_data(self):
-        prompt_template_names = []
-        prompt_templates = []
+    @rx.var
+    def prompt_template_names(self) -> List[str]:
+        return [pt.prompt_template_name for pt in self.prompt_templates]
+
+    @staticmethod
+    def load_prompt_templates_from_data():
         path = os.path.dirname(__file__)
         f = open(f"{path}/formatted_prompt_examples.json")
         data = json.load(f)
-        self.question = data["question"]
+        question = data["question"]
+        prompt_templates = []
         for template in data["templates"]:
             prompt_repr = template["args"]["prompt_repr"]
             k_shot = template["args"]["k_shot"]
@@ -44,12 +47,11 @@ class PromptTemplateState(rx.State):
                 prompt_template_name=prompt_template_name,
                 prompt_lines=prompt_lines,
             )
-            prompt_template_names.append(prompt_template_name)
             prompt_templates.append(prompt_template)
-        return prompt_template_names, prompt_templates
+        return question, prompt_templates
 
     def load_prompt_templates(self):
-        self.prompt_template_names, self.prompt_templates = self.load_prompt_templates_from_data()
+        self.question, self.prompt_templates = self.load_prompt_templates_from_data()
 
     @staticmethod
     def get_prompt_template(prompt_template_name: str) -> Optional[PromptTemplate]:

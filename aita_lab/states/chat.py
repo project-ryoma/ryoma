@@ -17,6 +17,7 @@ from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from aita_lab.states.tool import Tool, ToolArg, ToolOutput
 from aita_lab.states.vector_store import VectorStoreState
+from aita_lab.states.tool_calls import ToolCallState
 
 
 class QA(rx.Base):
@@ -81,11 +82,9 @@ class ChatState(BaseState):
     _current_embedding_agent_state_change: bool = False
 
     # tool states
-    current_tools: dict[str, Tool] = {}
+    current_tool: Optional[Tool] = None
 
-    current_tool_id: Optional[str] = None
-
-    run_tool_output: Optional[ToolOutput] = None
+    tool_output: Optional[ToolOutput] = None
 
     # Whether we are processing the question.
     processing: bool = False
@@ -93,22 +92,10 @@ class ChatState(BaseState):
     vector_feature_dialog_open: bool = False
 
     @rx.var
-    def current_tools_as_list(self) -> list[Tool]:
-        if self.current_tools:
-            return list(self.current_tools.values())
-        return []
-
-    @rx.var
     def current_tool_name(self) -> str:
-        if self.current_tools and self.current_tool_id:
-            return self.current_tools[self.current_tool_id].name
+        if self.current_tool:
+            return self.current_tool.name
         return ""
-
-    @rx.var
-    def current_tool_args(self) -> list[ToolArg]:
-        if self.current_tools and self.current_tool_id:
-            return list(self.current_tools[self.current_tool_id].args.values())
-        return []
 
     def close_vector_feature_dialog(self):
         self.vector_feature_dialog_open = False
@@ -170,31 +157,10 @@ class ChatState(BaseState):
         if self.current_prompt_template and self.current_prompt_template.k_shot > 0:
             return True
 
-    def set_current_tool_by_id(self, tool_id: str):
-        if tool_id:
-            logging.info(f"Setting current tool by id to {tool_id}")
-            self.current_tool_id = tool_id
-
-    def set_current_tool_by_name(self, tool_name: str):
-        if tool_name:
-            logging.info(f"Setting current tool by name to {tool_name}")
-            for tool_id, tool in self.current_tools.items():
-                if tool.name == tool_name:
-                    self.current_tool_id = tool_id
-                    break
-
-    def update_current_tool_arg(self, key: str, value: str):
-        tool_arg = self.current_tools[self.current_tool_id].args[key]
-        new_tool_arg = ToolArg(
-            name=key, reqired=tool_arg.required, description=tool_arg.description, value=value
-        )
-        self.current_tools[self.current_tool_id].args[key] = new_tool_arg
-
-    def delete_current_tool(self):
-        if self.current_tool_id:
-            logging.info(f"Deleting current tool {self.current_tool_id}")
-            del self.current_tools[self.current_tool_id]
-            self.current_tool_id = None
+    def update_tool_arg(self, key: str, value: str):
+        for arg in self.current_tool.args:
+            if arg.name == key:
+                arg.value = value
 
     def cancel_tool(self):
         logging.info(f"Canceling tool {self.current_tool_id}")
@@ -274,25 +240,22 @@ class ChatState(BaseState):
                     artifact = base64.b64decode(encoded_artifact)
                     result = pickle.loads(artifact)
                     if isinstance(result, DataFrame):
-                        self.run_tool_output = ToolOutput(data=result, show=True)
+                        self.tool_output = ToolOutput(data=result, show=True)
             yield
 
     def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
         if chat_state and chat_state.next:
             # having an action to execute
-            for tool_call in self._current_chat_agent.get_current_tool_calls():
-                tool = Tool(
-                    id=tool_call["id"],
-                    name=tool_call["name"],
-                    args={
-                        key: ToolArg(name=key, value=str(value))  # TODO handle other types
-                        for key, value in tool_call["args"].items()
-                    },
-                )
-                self.current_tools[tool_call["id"]] = tool
-                if not self.current_tool_id:
-                    self.current_tool_id = tool_call["id"]
+            tool_call = self._current_chat_agent.get_current_tool_calls()[0]
+            self.current_tool = Tool(
+                id=tool_call["id"],
+                name=tool_call["name"],
+                args=[
+                    ToolArg(name=key, value=str(value))  # TODO handle other types
+                    for key, value in tool_call["args"].items()
+                ],
+            )
 
             # Add the tool call to the answer
             self.chats[self.current_chat][
@@ -300,16 +263,19 @@ class ChatState(BaseState):
             ].answer += f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
 
     async def run_tool(self):
+        if not self.current_tool:
+            return
+
         self.processing = True
 
         tool_args = {
             tool_arg.name: tool_arg.value
-            for key, tool_arg in self.current_tools[self.current_tool_id].args.items()
+            for tool_arg in self.current_tool.args
         }
-        logging.info("Updating tool args: " + str(tool_args.items()))
-        self._current_chat_agent.update_tool(self.current_tool_id, tool_args)
+        logging.info("Updating tool args: " + str(tool_args))
+        self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
 
-        # Add a empty question to the list of questions.
+        # Add an empty question to the list of questions.
         qa = QA(question="", answer="")
         self.chats[self.current_chat].append(qa)
 
@@ -321,6 +287,9 @@ class ChatState(BaseState):
 
         # Toggle the processing flag.
         self.processing = False
+
+        # add tool call to history
+        ToolCallState.add_tool_call(self.current_tool, self.tool_output)
 
         # commit the chat to the database
         self._commit_chat(

@@ -4,6 +4,7 @@ import reflex as rx
 
 from aita_lab.states.catalog import CatalogState, CatalogTable
 from aita_lab.templates import template
+from aita_lab.states.datasource import DataSourceState
 
 
 def catalog_search():
@@ -42,6 +43,32 @@ def add_data_catalog():
                 size="2",
                 mb="4",
                 padding_bottom="1em",
+            ),
+            rx.select(
+                DataSourceState.datasource_names,
+                on_change=CatalogState.set_current_datasource,
+                placeholder="Select Data Source",
+            ),
+            rx.flex(
+                rx.dialog.close(
+                    rx.button(
+                        "Add",
+                        size="2",
+                        on_click=CatalogState.crawl_data_catalog
+                    ),
+                ),
+                rx.dialog.close(
+                    rx.button(
+                        "Cancel",
+                        variant="soft",
+                        color_scheme="gray",
+                        on_click=DataSourceState.toggle_dialog,
+                    )
+                ),
+                padding_top="1em",
+                spacing="3",
+                mt="4",
+                justify="end",
             ),
         ),
     )
@@ -111,7 +138,10 @@ def catalog_grid():
     )
 
 
-@template(route="/catalog", title="Data Catalog", on_load=CatalogState.on_load())
+@template(route="/catalog", title="Data Catalog", on_load=[
+    CatalogState.on_load(),
+    DataSourceState.on_load(),
+])
 def catalog():
     return rx.vstack(
         rx.heading("Data Catalog", size="8"),

@@ -3,9 +3,9 @@
 import reflex as rx
 
 from aita_lab import styles
-from aita_lab.components.codeeditor import code_editor
 from aita_lab.components.loading_icon import loading_icon
 from aita_lab.components.model_selector import select_chat_model, select_embedding_model
+from aita_lab.components.tool_kernel import notebook
 from aita_lab.states.agent import AgentState
 from aita_lab.states.chat import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
@@ -13,6 +13,7 @@ from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.styles import markdown_style, message_style
 from aita_lab.templates import template
+from aita_lab.states.tool_calls import ToolCallState
 
 
 def message(qa: QA) -> rx.Component:
@@ -253,146 +254,6 @@ def agent_selector() -> rx.Component:
     )
 
 
-def tool_args() -> rx.Component:
-    return rx.flex(
-        rx.cond(
-            ChatState.current_tool_id is not None and ChatState.current_tool_args.length() > 0,
-            rx.foreach(
-                ChatState.current_tool_args,
-                lambda arg: rx.box(
-                    rx.text(
-                        arg.name,
-                        asi_="div",
-                        mb="1",
-                        size="2",
-                        weight="bold",
-                    ),
-                    code_editor(
-                        value=arg.value,
-                        on_change=lambda x: ChatState.update_current_tool_arg(arg.name, x),
-                        width="100%",
-                        min_height="20e",
-                        language="python",
-                        theme="material",
-                        font_size="1em",
-                        padding="4px",
-                    ),
-                    padding="6px",
-                ),
-            ),
-        ),
-        border_radius=styles.border_radius,
-        direction="column",
-    )
-
-
-def tool_panel() -> rx.Component:
-    return rx.flex(
-        rx.flex(
-            rx.select.root(
-                rx.select.trigger(),
-                rx.select.content(
-                    rx.select.group(
-                        rx.select.label("Select a tool"),
-                        rx.foreach(
-                            ChatState.current_tools_as_list,
-                            lambda x: rx.select.item(x.id, value=x.id),
-                        ),
-                    ),
-                ),
-                value=ChatState.current_tool_id,
-                on_change=ChatState.set_current_tool_by_id,
-                padding="10px",
-            ),
-            rx.select.root(
-                rx.select.trigger(),
-                rx.select.content(
-                    rx.select.group(
-                        rx.select.label("Tool Name"),
-                        rx.foreach(
-                            ChatState.current_tools_as_list,
-                            lambda x: rx.select.item(x.name, value=x.name),
-                        ),
-                    ),
-                ),
-                value=ChatState.current_tool_name,
-                on_change=ChatState.set_current_tool_by_name,
-                padding="10px",
-            ),
-            rx.chakra.button(
-                rx.icon(tag="play"),
-                size="xs",
-                on_click=ChatState.run_tool,
-            ),
-            rx.chakra.button(
-                rx.icon(tag="circle_stop"),
-                size="xs",
-                on_click=ChatState.cancel_tool,
-            ),
-            align="center",
-            spacing="2",
-            width="100%",
-            padding="8px",
-        ),
-        rx.divider(),
-        tool_args(),
-        spacing="1",
-        direction="column",
-        background_color=rx.color("mauve", 3),
-    )
-
-
-def tool_kernel() -> rx.Component:
-    """The code editor wrapper for running tools."""
-    return rx.vstack(
-        rx.chakra.heading(
-            "Tool Kernel",
-            size="md",
-        ),
-        tool_panel(),
-        tool_output(),
-        width="40em",
-        height="85vh",
-        padding="10px",
-        gap="2",
-        align_items="stretch",
-        background_color=rx.color("mauve", 2),
-        color=rx.color("mauve", 12),
-        border=f"1px solid {rx.color('accent', 10)}",
-        border_radius=styles.border_radius,
-    )
-
-
-def tool_output() -> rx.Component:
-    return rx.box(
-        rx.cond(
-            ChatState.run_tool_output.show,
-            rx.box(
-                rx.badge(
-                    "Output",
-                    asi_="div",
-                    mb="1",
-                    size="3",
-                    weight="bold",
-                    padding="4px",
-                ),
-                rx.cond(
-                    ChatState.run_tool_output.show,
-                    rx.data_table(
-                        data=ChatState.run_tool_output.data,
-                        width="38em",
-                        pagination=True,
-                        search=True,
-                        sort=True,
-                        resizable=True,
-                    ),
-                ),
-                width="100%",
-                height="30em",
-            ),
-        ),
-    )
-
 
 @template(
     route="/",
@@ -403,6 +264,7 @@ def tool_output() -> rx.Component:
         PromptTemplateState.on_load,
         AgentState.on_load,
         VectorStoreState.on_load,
+        ToolCallState.on_load,
     ],
 )
 def chat() -> rx.Component:
@@ -441,7 +303,14 @@ def chat() -> rx.Component:
             flex_grow=1,
         ),
         rx.chakra.grid_item(
-            tool_kernel(),
+            notebook(
+                ChatState.current_tool,
+                ChatState.run_tool,
+                ChatState.cancel_tool,
+                ChatState.update_tool_arg,
+                ChatState.tool_output,
+                ToolCallState.tool_calls
+            ),
             width="100%",
         ),
         h="100vh",

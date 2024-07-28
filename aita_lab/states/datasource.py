@@ -6,7 +6,7 @@ import reflex as rx
 from sqlmodel import delete, select
 
 from aita.datasource.factory import DataSourceFactory, DataSourceProvider
-from aita_lab.states.catalog import CatalogState
+from aita.datasource.base import DataSource as DataSourceBase
 
 
 class DataSource(rx.Model, table=True):
@@ -16,6 +16,7 @@ class DataSource(rx.Model, table=True):
     datasource: str
     connection_url: Optional[str]
     attributes: Optional[str]
+    catalog_id: Optional[int] = None
 
     @property
     def attributes_dict(self) -> dict:
@@ -28,6 +29,7 @@ class DataSourceState(rx.State):
     datasource: str
     connection_url: str
     attributes: dict[str, str]
+    catalog_id: int
     sort_value: str
     is_open: bool = False
     allow_crawl_catalog: bool = True
@@ -131,8 +133,6 @@ class DataSourceState(rx.State):
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource}: {e}")
             return
-        if self.allow_crawl_catalog:
-            CatalogState.crawl_data_catalog(self.name, ds)
         with rx.session() as session:
             session.add(
                 DataSource(
@@ -170,7 +170,7 @@ class DataSourceState(rx.State):
             return datasource
 
     @staticmethod
-    def connect(datasource_name: str) -> Optional[DataSource]:
+    def connect(datasource_name: str) -> Optional[DataSourceBase]:
         ds = DataSourceState.get_datasource_by_name(datasource_name)
         if not ds:
             return

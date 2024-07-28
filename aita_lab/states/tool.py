@@ -11,13 +11,13 @@ class ToolArg(rx.Model):
     name: str
     required: Optional[bool]
     description: Optional[str]
-    value: Optional[str]
+    value: Optional[str] = ""
 
 
 class Tool(rx.Model):
     id: Optional[str]
     name: str
-    args: dict[str, ToolArg]
+    args: list[ToolArg] = []
     description: Optional[str]
 
 

@@ -30,23 +30,23 @@ def tool_card(tool: Tool):
             rx.dialog.title(tool.name, size="6"),
             rx.dialog.description(tool.description),
             rx.cond(
-                tool.args is not None,
+                tool.args.length() > 0,
                 rx.vstack(
                     rx.heading("Tool Arguments", size="4"),
                     rx.foreach(
                         tool.args,
-                        lambda arg_pair: rx.flex(
+                        lambda arg: rx.flex(
                             rx.text(
-                                arg_pair[0],
+                                arg.name,
                                 as_="div",
                                 size="2",
                                 mb="1",
                                 weight="bold",
                             ),
                             rx.cond(
-                                arg_pair[1].description is not None,
+                                arg.description is not None,
                                 rx.text(
-                                    arg_pair[1].description,
+                                    arg.description,
                                 ),
                             ),
                             direction="column",
