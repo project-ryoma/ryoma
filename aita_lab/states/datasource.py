@@ -65,6 +65,13 @@ class DataSourceState(rx.State):
         else:
             return []
 
+    @staticmethod
+    def get_configs(ds: DataSource):
+        if ds.connection_url:
+            return {"connection_url": ds.connection_url}
+        else:
+            return ds.attributes
+
     @rx.var
     def missing_configs(self) -> bool:
         # Required by all data sources

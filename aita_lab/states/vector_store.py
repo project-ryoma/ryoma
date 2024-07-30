@@ -18,6 +18,30 @@ from feast.types import Array, Float32
 from sqlmodel import select
 
 from aita_lab.states.base import BaseState
+from aita_lab.states.datasource import DataSourceState
+
+
+class VectorStoreConfig(rx.Base):
+    """
+    VectorStoreConfig is a model that holds the configuration for storying the registry data.
+    It will be used by feast to apply the feature store.
+    """
+
+    registry_type: str
+    path: str
+
+
+def get_vector_store_config():
+    rx_config = rx.config.get_config()
+    if "vector_store_config" in rx_config:
+        return rx_config["vector_store_config"]
+    else:
+
+        # default config
+        return VectorStoreConfig(**{
+            "registry_type": "file",
+            "path": "data/vector.db"
+        })
 
 
 class VectorStore(rx.Model, table=True):
@@ -37,13 +61,12 @@ class FeastFeatureView(rx.Model):
 
 class VectorStoreState(BaseState):
     projects: list[VectorStore] = []
-    project_names: list[str] = []
 
     project_name: str
     online_store_type: str
     offline_store_type: Optional[str] = ""
-    online_store_configs: str
-    offline_store_configs: Optional[str] = ""
+    online_store_configs: Optional[dict[str, str]] = {}
+    offline_store_configs: Optional[dict[str, str]] = {}
 
     feature_view_name: str
     feature_name: str
@@ -58,11 +81,26 @@ class VectorStoreState(BaseState):
     _fs: Optional[FeatureStore] = None
 
     files: list[str] = []
+    vector_store_config: VectorStoreConfig = get_vector_store_config()
+
+    def set_online_store_type(self, ds: str):
+        self.online_store_type = ds
+        ds = DataSourceState.get_datasource_by_name(ds)
+        configs = DataSourceState.get_configs(ds)
+        if "connection_url" in configs:
+            configs = {
+                "path": configs["connection_url"],
+            }
+        self.online_store_configs = {
+            "type": self.online_store_type,
+            **configs,
+        }
+        logging.info(f"Online store type set to {self.online_store_type} with configs {self.online_store_configs}")
 
     def open_feature_dialog(self):
         self.feature_dialog_open = not self.feature_dialog_open
 
-    def open_store_dialog(self):
+    def toggle_store_dialog(self):
         self.store_dialog_open = not self.store_dialog_open
 
     def set_project(self, project_name: str):
@@ -75,41 +113,46 @@ class VectorStoreState(BaseState):
             None,
         )
         if project:
-            repo_config = self._get_feast_repo_config(
+            repo_config = self._build_feast_repo_config(
                 project_name=project.project_name,
                 online_store_type=project.online_store_type,
-                online_store_configs=project.online_store_configs,
+                online_store_configs=json.loads(project.online_store_configs if project.online_store_configs else "{}"),
                 offline_store_type=project.offline_store_type,
-                offline_store_configs=project.offline_store_configs,
+                offline_store_configs=json.loads(project.offline_store_configs if project.offline_store_configs else "{}"),
             )
             self._fs = FeatureStore(config=repo_config)
             self.vector_feature_views = self._get_feature_views()
 
-    def _get_feast_repo_config(
-        self,
-        project_name,
-        online_store_type,
-        online_store_configs,
-        offline_store_type: Optional[str] = None,
-        offline_store_configs: Optional[str] = None,
+    def _build_feast_repo_config(
+            self,
+            project_name,
+            online_store_type: str,
+            online_store_configs: dict[str, str],
+            offline_store_type: Optional[str] = None,
+            offline_store_configs: dict[str, str] = None,
     ):
         return RepoConfig(
             project=project_name,
-            registry="data/vector.db",
+            registry={
+                "type": self.vector_store_config.registry_type,
+                "path": self.vector_store_config.path,
+            },
             provider="local",
             online_config={
-                **json.loads(online_store_configs),
                 "type": online_store_type,
+                **online_store_configs,
             },
             offline_config={
-                **(json.loads(offline_store_configs) if offline_store_configs else {}),
                 "type": offline_store_type,
+                **(offline_store_configs if offline_store_configs else {}),
             },
             entity_key_serialization_version=3,
         )
 
     def create_store(self):
-        repo_config = self._get_feast_repo_config(
+        logging.info("Creating feature store with the following configurations:")
+
+        repo_config = self._build_feast_repo_config(
             project_name=self.project_name,
             online_store_type=self.online_store_type,
             online_store_configs=self.online_store_configs,
@@ -122,6 +165,11 @@ class VectorStoreState(BaseState):
             apply_total_with_repo_instance(store, project, registry, repo, True)
             self._fs = FeatureStore(config=repo_config)
 
+            logging.info("Feature store applied successfully.")
+        except Exception as e:
+            logging.error(f"Error creating feature store: {e}")
+            raise e
+        finally:
             # save the project to the database
             with rx.session() as session:
                 session.add(
@@ -134,12 +182,7 @@ class VectorStoreState(BaseState):
                     )
                 )
                 session.commit()
-            logging.info("Feature store created")
-        except Exception as e:
-            logging.error(f"Error creating feature store: {e}")
-            raise e
-        finally:
-            self.open_store_dialog()
+            self.toggle_store_dialog()
 
     def _create_feature_schema(self):
         return [Field(name=self.feature_name, dtype=Array(Float32))]
@@ -183,20 +226,8 @@ class VectorStoreState(BaseState):
     def load_store(self):
         with rx.session() as session:
             self.projects = session.exec(select(VectorStore)).all()
-            self.project_names = [project.project_name for project in self.projects]
 
-        # load the features from the first project
-        if self.projects and len(self.projects) > 0:
-            self.project_name = self.projects[0].project_name
-            repo_config = self._get_feast_repo_config(
-                project_name=self.project_name,
-                online_store_type=self.projects[0].online_store_type,
-                online_store_configs=self.projects[0].online_store_configs,
-                offline_store_type=self.projects[0].offline_store_type,
-                offline_store_configs=self.projects[0].offline_store_configs,
-            )
-            self._fs = FeatureStore(config=repo_config)
-            self.vector_feature_views = self._get_feature_views()
+        self._load_project()
 
         logging.info("Feature store loaded")
 

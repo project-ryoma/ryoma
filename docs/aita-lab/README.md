@@ -3,8 +3,23 @@
 Welcome to Aita Lab! Aita lab is an interactive platform where you can ask questions, run code, and explore data using Aita AI.
 
 ## How to get started?
-After installing Aita, you can start using Aita Lab by running the following command:
+1. Before you start, make sure you have aita installed by running the following command:
+```text
+pip install aita
+```
+2. Once installed, you can setup configuration file `rxconfig.py` in your project:
+```python
+import reflex as rx
+from reflex.constants import LogLevel
 
+config = rx.Config(
+    app_name="aita_lab",
+    loglevel=LogLevel.INFO,
+)
+```
+more information on configuration can be found [Reflex config](https://reflex.dev/docs/getting-started/configuration/).
+
+3. Now you can run the following command to start Aita Lab:
 ```bash
 aita_lab run
 ```

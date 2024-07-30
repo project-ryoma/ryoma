@@ -4,6 +4,7 @@ import reflex as rx
 
 from aita_lab import styles
 from aita_lab.components.upload import upload_render
+from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.templates import ThemeState, template
 
@@ -84,7 +85,7 @@ def setup_store():
                 rx.flex("Setup Store", rx.icon(tag="plus", width=24, height=24), spacing="3"),
                 size="4",
                 radius="full",
-                on_click=VectorStoreState.open_store_dialog,
+                on_click=VectorStoreState.toggle_store_dialog,
             ),
         ),
         rx.dialog.content(
@@ -107,22 +108,46 @@ def setup_store():
                     on_blur=VectorStoreState.set_project_name,
                     required=True,
                 ),
-                rx.chakra.heading("Online Store Type *", size="sm"),
-                rx.select(
-                    ["Postgresql", "Sqlite", "Elasticsearch"],
-                    placeholder="Select the online store type",
-                    on_change=VectorStoreState.set_online_store_type,
+                rx.chakra.heading("Vector Store *", size="sm"),
+                rx.select.root(
+                    rx.select.trigger(
+                        placeholder="Select the data source as the vector store",
+                    ),
+                    rx.select.content(
+                        rx.select.group(
+                            rx.foreach(
+                                DataSourceState.datasources,
+                                lambda ds: rx.select.item(
+                                    ds.name, value=ds.name
+                                ),
+                            ),
+                        ),
+                    ),
+                    value=VectorStoreState.online_store_type,
+                    on_change=lambda ds: VectorStoreState.set_online_store_type(ds),
                 ),
-                rx.chakra.heading("Online Store Configs", size="sm"),
+                rx.chakra.heading("Vector Store Configs", size="sm"),
                 rx.input(
-                    placeholder="Enter the online store configs",
+                    placeholder="Enter the vector store configs",
                     on_blur=VectorStoreState.set_online_store_configs,
                 ),
-                rx.chakra.heading("Offline Store Type", size="sm"),
-                rx.select(
-                    ["file", "Sqlite", "Elasticsearch"],
-                    placeholder="Select the offline store type",
-                    on_change=VectorStoreState.set_offline_store_type,
+                rx.chakra.heading("Offline Store", size="sm"),
+                rx.select.root(
+                    rx.select.trigger(
+                        placeholder="Select the data source as the offline store",
+                    ),
+                    rx.select.content(
+                        rx.select.group(
+                            rx.foreach(
+                                DataSourceState.datasources,
+                                lambda ds: rx.select.item(
+                                    ds.name, value=ds.name
+                                ),
+                            ),
+                        ),
+                    ),
+                    value=VectorStoreState.offline_store_type,
+                    on_change=lambda ds: VectorStoreState.set_offline_store_type(ds),
                 ),
                 rx.chakra.heading("Offline Store Configs", size="sm"),
                 rx.input(
@@ -131,11 +156,22 @@ def setup_store():
                 ),
                 rx.flex(
                     rx.dialog.close(
-                        rx.chakra.button(
+                        rx.button(
                             "Create Store",
+                            size="2",
                             on_click=VectorStoreState.create_store,
                         ),
                     ),
+                    rx.dialog.close(
+                        rx.button(
+                            "Cancel",
+                            variant="soft",
+                            color_scheme="gray",
+                        )
+                    ),
+                    padding_top="1em",
+                    spacing="3",
+                    mt="4",
                     justify="end",
                 ),
                 direction="column",
@@ -198,10 +234,10 @@ def show_store():
         rx.tabs.root(
             rx.tabs.list(
                 rx.foreach(
-                    VectorStoreState.project_names,
-                    lambda project_name: rx.tabs.trigger(
-                        project_name,
-                        value=project_name,
+                    VectorStoreState.projects,
+                    lambda project: rx.tabs.trigger(
+                        project.project_name,
+                        value=project.project_name,
                         cursor="pointer",
                     ),
                 ),
@@ -223,7 +259,10 @@ def show_store():
     )
 
 
-@template(route="/vector_store", title="Vector Store", on_load=[VectorStoreState.on_load()])
+@template(route="/vector_store", title="Vector Store", on_load=[
+    VectorStoreState.on_load(),
+    DataSourceState.on_load()
+])
 def vector_store() -> rx.Component:
     """The Vector Store page.
 
