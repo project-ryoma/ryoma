@@ -21,7 +21,7 @@ RUN pip install poetry
 COPY . /app
 
 # Install the dependencies
-RUN poetry install --with dev,aita_lab --all-extras
+RUN poetry install --with dev --all-extras
 
 # Deploy templates and prepare app
 RUN poetry run reflex init
