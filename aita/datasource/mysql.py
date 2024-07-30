@@ -8,7 +8,7 @@ from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
-from pydantic import Field
+from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from aita.datasource.base import IbisDataSource

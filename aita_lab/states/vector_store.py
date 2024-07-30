@@ -38,10 +38,7 @@ def get_vector_store_config():
     else:
 
         # default config
-        return VectorStoreConfig(**{
-            "registry_type": "file",
-            "path": "data/vector.db"
-        })
+        return VectorStoreConfig(**{"registry_type": "file", "path": "data/vector.db"})
 
 
 class VectorStore(rx.Model, table=True):
@@ -95,7 +92,9 @@ class VectorStoreState(BaseState):
             "type": self.online_store_type,
             **configs,
         }
-        logging.info(f"Online store type set to {self.online_store_type} with configs {self.online_store_configs}")
+        logging.info(
+            f"Online store type set to {self.online_store_type} with configs {self.online_store_configs}"
+        )
 
     def open_feature_dialog(self):
         self.feature_dialog_open = not self.feature_dialog_open
@@ -116,20 +115,24 @@ class VectorStoreState(BaseState):
             repo_config = self._build_feast_repo_config(
                 project_name=project.project_name,
                 online_store_type=project.online_store_type,
-                online_store_configs=json.loads(project.online_store_configs if project.online_store_configs else "{}"),
+                online_store_configs=json.loads(
+                    project.online_store_configs if project.online_store_configs else "{}"
+                ),
                 offline_store_type=project.offline_store_type,
-                offline_store_configs=json.loads(project.offline_store_configs if project.offline_store_configs else "{}"),
+                offline_store_configs=json.loads(
+                    project.offline_store_configs if project.offline_store_configs else "{}"
+                ),
             )
             self._fs = FeatureStore(config=repo_config)
             self.vector_feature_views = self._get_feature_views()
 
     def _build_feast_repo_config(
-            self,
-            project_name,
-            online_store_type: str,
-            online_store_configs: dict[str, str],
-            offline_store_type: Optional[str] = None,
-            offline_store_configs: dict[str, str] = None,
+        self,
+        project_name,
+        online_store_type: str,
+        online_store_configs: dict[str, str],
+        offline_store_type: Optional[str] = None,
+        offline_store_configs: dict[str, str] = None,
     ):
         return RepoConfig(
             project=project_name,

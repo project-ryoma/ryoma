@@ -117,9 +117,7 @@ def setup_store():
                         rx.select.group(
                             rx.foreach(
                                 DataSourceState.datasources,
-                                lambda ds: rx.select.item(
-                                    ds.name, value=ds.name
-                                ),
+                                lambda ds: rx.select.item(ds.name, value=ds.name),
                             ),
                         ),
                     ),
@@ -140,9 +138,7 @@ def setup_store():
                         rx.select.group(
                             rx.foreach(
                                 DataSourceState.datasources,
-                                lambda ds: rx.select.item(
-                                    ds.name, value=ds.name
-                                ),
+                                lambda ds: rx.select.item(ds.name, value=ds.name),
                             ),
                         ),
                     ),
@@ -259,10 +255,11 @@ def show_store():
     )
 
 
-@template(route="/vector_store", title="Vector Store", on_load=[
-    VectorStoreState.on_load(),
-    DataSourceState.on_load()
-])
+@template(
+    route="/vector_store",
+    title="Vector Store",
+    on_load=[VectorStoreState.on_load(), DataSourceState.on_load()],
+)
 def vector_store() -> rx.Component:
     """The Vector Store page.
 

@@ -7,8 +7,8 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
-from ibis.backends.postgres import Backend
-from pydantic import Field
+from ibis import BaseBackend
+from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from aita.datasource.base import IbisDataSource
@@ -24,15 +24,21 @@ class PostgreSqlDataSource(IbisDataSource):
     database: Optional[str] = Field(None, description="Database name")
     db_schema: Optional[str] = Field(None, description="Schema name")
 
-    def connect(self) -> Backend:
-        return ibis.postgres.coonect(
-            user=self.username,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            database=self.database,
-            schema=self.db_schema,
-        )
+    def connect(self) -> BaseBackend:
+        logging.info("Connecting to Postgres")
+        if self.connection_url is not None:
+            logging.info("Connection URL provided, using it to connect")
+            return ibis.connect(self.connection_url)
+        else:
+            logging.info("Connection URL not provided, using individual parameters")
+            return ibis.postgres.connect(
+                user=self.username,
+                password=self.password,
+                host=self.host,
+                port=self.port,
+                database=self.database,
+                schema=self.db_schema,
+            )
 
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
         logging.info("Getting metadata from Postgres")

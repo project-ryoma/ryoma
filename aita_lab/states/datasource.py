@@ -86,7 +86,7 @@ class DataSourceState(rx.State):
             # Required by the data source
             model_fields = self._datasource_fields(self.datasource)
             for key in model_fields:
-                if not self.attributes.get(key):
+                if model_fields[key].required and not self.attributes.get(key):
                     return True
         return False
 

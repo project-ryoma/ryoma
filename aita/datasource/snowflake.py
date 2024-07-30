@@ -26,7 +26,6 @@ class SnowflakeDataSource(IbisDataSource):
 
     def connect(self, **kwargs) -> BaseBackend:
         logging.info("Connecting to Snowflake")
-        logging.info(f"Connection URL: {self.connection_url}")
         try:
             if self.connection_url:
                 logging.info("Connection URL provided, using it to connect")
