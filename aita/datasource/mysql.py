@@ -63,6 +63,7 @@ class MySqlDataSource(IbisDataSource):
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
+
         logging.info("Crawling data catalog from Mysql")
         job_config = ConfigFactory.from_dict(
             {

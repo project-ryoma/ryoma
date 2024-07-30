@@ -50,6 +50,7 @@ class BigqueryDataSource(IbisDataSource):
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.bigquery_metadata_extractor import BigQueryMetadataExtractor
+
         logging.info("Crawling data catalog from Bigquery")
         job_config = ConfigFactory.from_dict(
             {

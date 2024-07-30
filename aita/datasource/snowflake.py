@@ -84,6 +84,7 @@ class SnowflakeDataSource(IbisDataSource):
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
+
         logging.info("Running Snowflake metadata extraction job")
         job_config = ConfigFactory.from_dict(
             {
