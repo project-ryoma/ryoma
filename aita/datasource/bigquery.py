@@ -3,7 +3,6 @@ from typing import Optional, Union
 import logging
 
 import ibis
-from databuilder.extractor.bigquery_metadata_extractor import BigQueryMetadataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
@@ -50,6 +49,7 @@ class BigqueryDataSource(IbisDataSource):
         return Database(database_name=self.dataset_id, tables=tables)
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        from databuilder.extractor.bigquery_metadata_extractor import BigQueryMetadataExtractor
         logging.info("Crawling data catalog from Bigquery")
         job_config = ConfigFactory.from_dict(
             {

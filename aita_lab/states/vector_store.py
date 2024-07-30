@@ -67,7 +67,6 @@ class VectorStoreState(BaseState):
 
     def set_project(self, project_name: str):
         self.project_name = project_name
-        print(f"Project name: {self.project_name}")
         self._load_project()
 
     def _load_project(self):

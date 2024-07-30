@@ -3,7 +3,6 @@ from typing import Optional, Union
 import logging
 
 import ibis
-from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
@@ -84,6 +83,7 @@ class SnowflakeDataSource(IbisDataSource):
         return f"snowflake://{self.user}:{self.password}@{self.account}/{self.database}/{self.db_schema}"
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
         logging.info("Running Snowflake metadata extraction job")
         job_config = ConfigFactory.from_dict(
             {

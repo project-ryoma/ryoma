@@ -113,7 +113,7 @@ Model provider are supported by jupyter ai magics. Ensure the corresponding envi
 
 ## Supported Engines
 - [x] Apache Spark
-- [ ] Apache Flink
+- [x] Apache Flink
 - [ ] Presto
 
 ## 🛡 License

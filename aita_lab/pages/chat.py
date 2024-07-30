@@ -209,11 +209,25 @@ def prompt_template_selector() -> rx.Component:
                             value=ChatState.current_vector_feature,
                             on_change=ChatState.set_current_vector_feature,
                         ),
-                        rx.dialog.close(
-                            rx.button(
-                                "Confirm",
-                                on_click=ChatState.close_vector_feature_dialog,
-                            )
+                        rx.flex(
+                            rx.dialog.close(
+                                rx.button(
+                                    "Confirm",
+                                    on_click=ChatState.close_vector_feature_dialog,
+                                )
+                            ),
+                            rx.dialog.close(
+                                rx.button(
+                                    "Cancel",
+                                    variant="soft",
+                                    color_scheme="gray",
+                                    on_click=ChatState.close_vector_feature_dialog,
+                                )
+                            ),
+                            padding_top="1em",
+                            spacing="3",
+                            mt="4",
+                            justify="end",
                         ),
                         spacing="2",
                         direction="column",

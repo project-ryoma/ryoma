@@ -3,7 +3,6 @@ from typing import Optional, Union
 import logging
 
 import ibis
-from databuilder.extractor.postgres_metadata_extractor import PostgresMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
@@ -72,6 +71,7 @@ class PostgreSqlDataSource(IbisDataSource):
         return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}/{self.db_schema}"
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        from databuilder.extractor.postgres_metadata_extractor import PostgresMetadataExtractor
         logging.info("Crawling data catalog from Postgres")
         job_config = ConfigFactory.from_dict(
             {

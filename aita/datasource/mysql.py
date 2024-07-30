@@ -3,7 +3,6 @@ from typing import Optional, Union
 import logging
 
 import ibis
-from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
@@ -63,6 +62,7 @@ class MySqlDataSource(IbisDataSource):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+        from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
         logging.info("Crawling data catalog from Mysql")
         job_config = ConfigFactory.from_dict(
             {

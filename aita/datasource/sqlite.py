@@ -41,3 +41,6 @@ class SqliteDataSource(IbisDataSource):
             database_name=self.connection_url,
             tables=tables,
         )
+
+    def crawl_data_catalog(self, **kwargs):
+        pass

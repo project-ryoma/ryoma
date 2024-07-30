@@ -195,7 +195,7 @@ class CatalogState(rx.State):
 
             # reload the catalog entries
             self.load_entries()
-        except NotImplementedError as e:
+        except Exception as e:
             rx.toast(e)
 
     def on_load(self):
