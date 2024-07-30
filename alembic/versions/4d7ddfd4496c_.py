@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b30afbbbc57c
+Revision ID: 4d7ddfd4496c
 Revises: 
-Create Date: 2024-07-29 22:53:51.449242
+Create Date: 2024-07-30 15:52:17.906365
 
 """
 
@@ -14,7 +14,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "b30afbbbc57c"
+revision: str = "4d7ddfd4496c"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -63,7 +63,7 @@ def upgrade() -> None:
         "vectorstore",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("project_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("online_store_type", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("online_store", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("offline_store_type", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("online_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("offline_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),

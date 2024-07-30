@@ -121,8 +121,8 @@ def setup_store():
                             ),
                         ),
                     ),
-                    value=VectorStoreState.online_store_type,
-                    on_change=lambda ds: VectorStoreState.set_online_store_type(ds),
+                    value=VectorStoreState.online_store,
+                    on_change=lambda ds: VectorStoreState.set_online_store(ds),
                 ),
                 rx.chakra.heading("Vector Store Configs", size="sm"),
                 rx.input(
@@ -142,8 +142,8 @@ def setup_store():
                             ),
                         ),
                     ),
-                    value=VectorStoreState.offline_store_type,
-                    on_change=lambda ds: VectorStoreState.set_offline_store_type(ds),
+                    value=VectorStoreState.offline_store,
+                    on_change=lambda ds: VectorStoreState.set_offline_store(ds),
                 ),
                 rx.chakra.heading("Offline Store Configs", size="sm"),
                 rx.input(

@@ -52,7 +52,37 @@ datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbn
 sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
 
 # ask question to the agent
-sql_agent.stream("What is the total number of orders?")
+sql_agent.stream("I want to get the top 5 customers which making the most purchases", display=True)
+```
+
+The Sql agent will try to run the tool as shown below:
+```text
+================================ Human Message =================================
+
+I want to get the top 5 customers which making the most purchases
+================================== Ai Message ==================================
+Tool Calls:
+  sql_database_query (call_mWCPB3GQGOTLYsvp21DGlpOb)
+ Call ID: call_mWCPB3GQGOTLYsvp21DGlpOb
+  Args:
+    query: SELECT C.C_NAME, SUM(L.L_EXTENDEDPRICE) AS TOTAL_PURCHASES FROM CUSTOMER C JOIN ORDERS O ON C.C_CUSTKEY = O.O_CUSTKEY JOIN LINEITEM L ON O.O_ORDERKEY = L.L_ORDERKEY GROUP BY C.C_NAME ORDER BY TOTAL_PURCHASES DESC LIMIT 5
+    result_format: pandas
+```
+Continue to run the tool with the following code:
+```python
+sql_agent.stream(tool_mode=ToolMode.ONCE)
+```
+Output will look like after running the tool:
+```text
+================================== Ai Message ==================================
+
+The top 5 customers who have made the most purchases are as follows:
+
+1. Customer#000143500 - Total Purchases: $7,154,828.98
+2. Customer#000095257 - Total Purchases: $6,645,071.02
+3. Customer#000087115 - Total Purchases: $6,528,332.52
+4. Customer#000134380 - Total Purchases: $6,405,556.97
+5. Customer#000103834 - Total Purchases: $6,397,480.12
 ```
 
 ## Use Aita Lab
@@ -79,7 +109,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 ```shell
 aita_lab run
 ```
-
+the aita lab will be available at `http://localhost:3000`.
+![ui.png](assets%2Fui.png)
 
 ## Supported Models
 Model provider are supported by jupyter ai magics. Ensure the corresponding environment variables are set before using the Aita agent.

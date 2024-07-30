@@ -43,8 +43,8 @@ def get_vector_store_config():
 
 class VectorStore(rx.Model, table=True):
     project_name: str
-    online_store_type: str
-    offline_store_type: Optional[str]
+    online_store: str
+    offline_store: Optional[str]
     online_store_configs: Optional[str]
     offline_store_configs: Optional[str]
 
@@ -60,8 +60,8 @@ class VectorStoreState(BaseState):
     projects: list[VectorStore] = []
 
     project_name: str
-    online_store_type: str
-    offline_store_type: Optional[str] = ""
+    online_store: str
+    offline_store: Optional[str] = ""
     online_store_configs: Optional[dict[str, str]] = {}
     offline_store_configs: Optional[dict[str, str]] = {}
 
@@ -80,20 +80,21 @@ class VectorStoreState(BaseState):
     files: list[str] = []
     vector_store_config: VectorStoreConfig = get_vector_store_config()
 
-    def set_online_store_type(self, ds: str):
-        self.online_store_type = ds
+    def set_online_store(self, ds: str):
+        self.online_store = ds
         ds = DataSourceState.get_datasource_by_name(ds)
         configs = DataSourceState.get_configs(ds)
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],
             }
+        print(configs, self.online_store)
         self.online_store_configs = {
-            "type": self.online_store_type,
-            **configs,
+            "type": self.online_store,
+            **eval(configs),
         }
         logging.info(
-            f"Online store type set to {self.online_store_type} with configs {self.online_store_configs}"
+            f"Online store type set to {self.online_store} with configs {self.online_store_configs}"
         )
 
     def open_feature_dialog(self):
@@ -114,11 +115,11 @@ class VectorStoreState(BaseState):
         if project:
             repo_config = self._build_feast_repo_config(
                 project_name=project.project_name,
-                online_store_type=project.online_store_type,
+                online_store=project.online_store,
                 online_store_configs=json.loads(
                     project.online_store_configs if project.online_store_configs else "{}"
                 ),
-                offline_store_type=project.offline_store_type,
+                offline_store=project.offline_store,
                 offline_store_configs=json.loads(
                     project.offline_store_configs if project.offline_store_configs else "{}"
                 ),
@@ -129,9 +130,9 @@ class VectorStoreState(BaseState):
     def _build_feast_repo_config(
         self,
         project_name,
-        online_store_type: str,
+        online_store: str,
         online_store_configs: dict[str, str],
-        offline_store_type: Optional[str] = None,
+        offline_store: Optional[str] = None,
         offline_store_configs: dict[str, str] = None,
     ):
         return RepoConfig(
@@ -142,11 +143,11 @@ class VectorStoreState(BaseState):
             },
             provider="local",
             online_config={
-                "type": online_store_type,
+                "type": online_store,
                 **online_store_configs,
             },
             offline_config={
-                "type": offline_store_type,
+                "type": offline_store,
                 **(offline_store_configs if offline_store_configs else {}),
             },
             entity_key_serialization_version=3,
@@ -157,9 +158,9 @@ class VectorStoreState(BaseState):
 
         repo_config = self._build_feast_repo_config(
             project_name=self.project_name,
-            online_store_type=self.online_store_type,
+            online_store=self.online_store,
             online_store_configs=self.online_store_configs,
-            offline_store_type=self.offline_store_type,
+            offline_store=self.offline_store,
             offline_store_configs=self.offline_store_configs,
         )
         repo_path = Path(os.path.join(Path.cwd(), "data"))
@@ -178,8 +179,8 @@ class VectorStoreState(BaseState):
                 session.add(
                     VectorStore(
                         project_name=self.project_name,
-                        online_store_type=self.online_store_type,
-                        offline_store_type=self.offline_store_type,
+                        online_store=self.online_store,
+                        offline_store=self.offline_store,
                         online_store_configs=self.online_store_configs,
                         offline_store_configs=self.offline_store_configs,
                     )
