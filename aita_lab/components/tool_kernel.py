@@ -90,20 +90,12 @@ def render_tool_panel(
             ),
             rx.cond(
                 not render_only,
-                rx.chakra.button(
-                    rx.icon(tag="play"),
-                    size="xs",
-                    on_click=run_tool,
-                    height="100%"
-                ),
+                rx.chakra.button(rx.icon(tag="play"), size="xs", on_click=run_tool, height="100%"),
             ),
             rx.cond(
                 not render_only,
                 rx.chakra.button(
-                    rx.icon(tag="circle_stop"),
-                    size="xs",
-                    on_click=cancel_tool,
-                    height="100%"
+                    rx.icon(tag="circle_stop"), size="xs", on_click=cancel_tool, height="100%"
                 ),
             ),
             align="center",

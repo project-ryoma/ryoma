@@ -1,13 +1,14 @@
+from typing import Any, Dict, List, Optional
+
 import logging
-from typing import Optional, Any, Dict, List
 
 import reflex as rx
-from sqlalchemy.orm import joinedload
-from sqlmodel import Field, select, Relationship, Session
 from databuilder.loader.base_loader import Loader
 from databuilder.loader.generic_loader import GenericLoader
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 from pyhocon import ConfigTree
+from sqlalchemy.orm import joinedload
+from sqlmodel import Field, Relationship, Session, select
 
 from aita_lab.states.datasource import DataSourceState
 
@@ -84,21 +85,18 @@ class CatalogState(rx.State):
     def load_entries(self):
         with rx.session() as session:
             result = session.exec(
-                select(Catalog)
-                .options(
-                    joinedload(Catalog.schemas).joinedload(Schema.tables)
-                )
+                select(Catalog).options(joinedload(Catalog.schemas).joinedload(Schema.tables))
             ).unique()
             self.catalogs = result.all()
 
     def _commit_catalog_record(
-            self,
-            table: str,
-            columns: List[ColumnMetadata],
-            description: Optional[str] = None,
-            is_view: Optional[bool] = False,
-            attrs: Optional[str] = None,
-            **kwargs,
+        self,
+        table: str,
+        columns: List[ColumnMetadata],
+        description: Optional[str] = None,
+        is_view: Optional[bool] = False,
+        attrs: Optional[str] = None,
+        **kwargs,
     ):
         with rx.session() as session:
             _table = session.exec(

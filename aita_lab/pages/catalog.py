@@ -2,10 +2,10 @@
 
 import reflex as rx
 
+from aita_lab import styles
 from aita_lab.states.catalog import CatalogState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.templates import template
-from aita_lab import styles
 
 
 def catalog_search():
@@ -27,7 +27,9 @@ def add_data_catalog():
         rx.dialog.root(
             rx.dialog.trigger(
                 rx.button(
-                    rx.flex("Add Data Catalog", rx.icon(tag="plus", width=24, height=24), spacing="3"),
+                    rx.flex(
+                        "Add Data Catalog", rx.icon(tag="plus", width=24, height=24), spacing="3"
+                    ),
                     size="4",
                     radius="full",
                 ),
@@ -40,8 +42,8 @@ def add_data_catalog():
                     padding_top="1em",
                 ),
                 rx.dialog.description(
-                    "Currently only support adding catalogs from data sources. " +
-                    "Please select a data source to crawl the catalog.",
+                    "Currently only support adding catalogs from data sources. "
+                    + "Please select a data source to crawl the catalog.",
                     size="2",
                     mb="4",
                     padding_bottom="1em",
@@ -100,14 +102,15 @@ def catalog_list():
                                                     rx.chakra.accordion_button(
                                                         rx.chakra.text(table.name, font_size="xs"),
                                                         on_click=lambda: CatalogState.set_selected_table(
-                                                            table.name),
+                                                            table.name
+                                                        ),
                                                     ),
-                                                )
+                                                ),
                                             ),
                                             allow_multiple=True,
                                         )
                                     ),
-                                )
+                                ),
                             ),
                             allow_multiple=True,
                         )
@@ -142,7 +145,7 @@ def render_metadata_content():
                     lambda column: rx.chakra.tr(
                         rx.chakra.td(column.name),
                         rx.chakra.td(column.type),
-                        rx.chakra.td(column.description)
+                        rx.chakra.td(column.description),
                     ),
                 ),
                 background_color=rx.color("mauve", 3),
@@ -153,7 +156,7 @@ def render_metadata_content():
         spacing="3",
         border=styles.border,
         border_radius=styles.border_radius,
-        padding="1em"
+        padding="1em",
     )
 
 
