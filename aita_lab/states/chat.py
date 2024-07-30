@@ -82,20 +82,14 @@ class ChatState(BaseState):
     _current_embedding_agent_state_change: bool = False
 
     # tool states
-    current_tool: Optional[Tool] = None
+    current_tool: Tool = None
 
-    tool_output: Optional[ToolOutput] = None
+    tool_output: ToolOutput = None
 
     # Whether we are processing the question.
     processing: bool = False
 
     vector_feature_dialog_open: bool = False
-
-    @rx.var
-    def current_tool_name(self) -> str:
-        if self.current_tool:
-            return self.current_tool.name
-        return ""
 
     def close_vector_feature_dialog(self):
         self.vector_feature_dialog_open = False

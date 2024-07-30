@@ -86,7 +86,7 @@ def render_tool_panel(
                 mb="1",
                 size="3",
                 weight="bold",
-                padding="4px",
+                height="100%",
             ),
             rx.cond(
                 not render_only,
@@ -94,6 +94,7 @@ def render_tool_panel(
                     rx.icon(tag="play"),
                     size="xs",
                     on_click=run_tool,
+                    height="100%"
                 ),
             ),
             rx.cond(
@@ -102,13 +103,16 @@ def render_tool_panel(
                     rx.icon(tag="circle_stop"),
                     size="xs",
                     on_click=cancel_tool,
+                    height="100%"
                 ),
             ),
             align="center",
             spacing="2",
             width="100%",
+            height="3em",
             padding="8px",
             background_color=rx.color("mauve", 5),
+            align_items="center",
         ),
         tool_args(tool, update_tool_args, render_only),
         spacing="1",
@@ -168,13 +172,17 @@ def tool_kernel(
 ) -> rx.Component:
     return rx.flex(
         rx.cond(
-            tool is not None,
-            rx.badge("Tool Kernel"),
-            render_tool_panel(tool, run_tool, cancel_tool, update_tool_args, render_only),
+            tool,
+            rx.flex(
+                rx.badge("Tool Kernel"),
+                render_tool_panel(tool, run_tool, cancel_tool, update_tool_args, render_only),
+                direction="column",
+                width="100%",
+            ),
         ),
         rx.divider(),
         rx.cond(
-            tool_output is not None and tool_output.show,
+            tool_output & tool_output.show,
             render_tool_output(tool_output),
         ),
         direction="column",

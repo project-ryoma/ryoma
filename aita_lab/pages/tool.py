@@ -29,33 +29,30 @@ def tool_card(tool: Tool):
         rx.dialog.content(
             rx.dialog.title(tool.name, size="6"),
             rx.dialog.description(tool.description),
-            rx.cond(
-                tool.args.length() > 0,
-                rx.vstack(
-                    rx.heading("Tool Arguments", size="4"),
-                    rx.foreach(
-                        tool.args,
-                        lambda arg: rx.flex(
-                            rx.text(
-                                arg.name,
-                                as_="div",
-                                size="2",
-                                mb="1",
-                                weight="bold",
-                            ),
-                            rx.cond(
-                                arg.description is not None,
-                                rx.text(
-                                    arg.description,
-                                ),
-                            ),
-                            direction="column",
-                            spacing="3",
+            rx.vstack(
+                rx.heading("Tool Arguments", size="4"),
+                rx.foreach(
+                    tool.args,
+                    lambda arg: rx.flex(
+                        rx.text(
+                            arg.name,
+                            as_="div",
+                            size="2",
+                            mb="1",
+                            weight="bold",
                         ),
+                        rx.cond(
+                            arg.description is not None,
+                            rx.text(
+                                arg.description,
+                            ),
+                        ),
+                        direction="column",
+                        spacing="3",
                     ),
-                    margin_top="20px",
-                    width="100%",
                 ),
+                margin_top="20px",
+                width="100%",
             ),
             rx.flex(
                 rx.dialog.close(

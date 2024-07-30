@@ -13,6 +13,7 @@ from aita.datasource.metadata import Catalog, Database
 
 class DataSource(BaseModel, ABC):
     type: str = Field(..., description="Type of the data source")
+    database: Optional[str] = Field(None, description="Database name")
 
     @abstractmethod
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:

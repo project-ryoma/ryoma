@@ -10,7 +10,6 @@ from aita_lab.templates import template
 def show_datasource(datasource: DataSource):
     return rx.table.row(
         rx.table.cell(datasource.name),
-        rx.table.cell(datasource.connection_url),
         rx.table.cell(update_datasource(datasource)),
         rx.table.cell(
             rx.button(
@@ -60,7 +59,7 @@ def show_datasource_configs():
                         rx.input(
                             placeholder=f"Enter the {attribute_name} for the data source",
                             value=DataSourceState.attributes[attribute_name],
-                            on_blur=lambda value: DataSourceState.set_datasource_attributes(
+                            on_change=lambda value: DataSourceState.set_datasource_attributes(
                                 attribute_name, value
                             ),
                             width="100%",
@@ -85,7 +84,6 @@ def add_datasource():
                 rx.flex("Add Data Source", rx.icon(tag="plus", width=24, height=24), spacing="3"),
                 size="4",
                 radius="full",
-                on_click=DataSourceState.toggle_dialog,
             ),
         ),
         rx.dialog.content(
@@ -124,6 +122,7 @@ def add_datasource():
                 rx.select(
                     datasources,
                     placeholder="Select the data source",
+                    value=DataSourceState.datasource,
                     on_change=DataSourceState.set_datasource,
                 ),
                 rx.cond(DataSourceState.datasource, show_datasource_configs()),
@@ -145,17 +144,16 @@ def add_datasource():
             rx.flex(
                 rx.dialog.close(
                     rx.button(
-                        "Cancel",
-                        variant="soft",
-                        color_scheme="gray",
-                        on_click=DataSourceState.toggle_dialog,
+                        "Connect",
+                        on_click=DataSourceState.connect_and_add_datasource,
+                        variant="solid",
                     )
                 ),
                 rx.dialog.close(
                     rx.button(
-                        "Connect",
-                        on_click=DataSourceState.connect_and_add_datasource,
-                        variant="solid",
+                        "Cancel",
+                        variant="soft",
+                        color_scheme="gray",
                     )
                 ),
                 padding_top="1em",
@@ -169,7 +167,6 @@ def add_datasource():
             border_radius="25px",
             font_family="Inter",
         ),
-        open=DataSourceState.is_open,
     )
 
 
@@ -263,7 +260,6 @@ def content_grid():
                 rx.table.header(
                     rx.table.row(
                         rx.table.column_header_cell("Name"),
-                        rx.table.column_header_cell("Catalog"),
                         rx.table.column_header_cell("Edit"),
                         rx.table.column_header_cell("Delete"),
                     ),

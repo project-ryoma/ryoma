@@ -26,9 +26,9 @@ class DataSource(rx.Model, table=True):
 class DataSourceState(rx.State):
     id: int
     name: str
-    datasource: str
+    datasource: Optional[str] = ""
     connection_url: str
-    attributes: dict[str, str]
+    attributes: dict[str, str] = {}
     catalog_id: int
     sort_value: str
     is_open: bool = False
@@ -38,9 +38,6 @@ class DataSourceState(rx.State):
 
     datasources: list[DataSource] = []
     open_alert: bool = False
-
-    def toggle_dialog(self):
-        self.is_open = not self.is_open
 
     def change_crawl_catalog(self, value: bool):
         self.allow_crawl_catalog = value
@@ -144,7 +141,6 @@ class DataSourceState(rx.State):
             )
             session.commit()
         self.load_entries()
-        self.toggle_dialog()
 
     def update_datasource(self):
         with rx.session() as session:

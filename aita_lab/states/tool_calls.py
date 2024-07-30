@@ -5,9 +5,9 @@ import reflex as rx
 from aita_lab.states.tool import Tool, ToolOutput
 
 
-class ToolCall(rx.Model):
-    tool: Optional[Tool] = None
-    tool_output: Optional[ToolOutput] = None
+class ToolCall(rx.Base):
+    tool: Tool = None
+    tool_output: ToolOutput = None
 
 
 class ToolCallState(rx.State):

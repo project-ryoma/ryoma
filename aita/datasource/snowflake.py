@@ -23,7 +23,6 @@ class SnowflakeDataSource(IbisDataSource):
     account: Optional[str] = Field(None, description="Account name")
     warehouse: Optional[str] = Field("COMPUTE_WH", description="Warehouse name")
     role: Optional[str] = Field("PUBLIC_ROLE", description="Role name")
-    database: Optional[str] = Field(None, description="Database name")
     db_schema: Optional[str] = Field(None, description="Schema name")
 
     def connect(self, **kwargs) -> BaseBackend:

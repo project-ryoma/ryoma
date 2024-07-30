@@ -7,14 +7,14 @@ from aita import tool
 from aita_lab.states.utils import get_model_classes, get_model_fields, get_model_fields_as_dict
 
 
-class ToolArg(rx.Model):
+class ToolArg(rx.Base):
     name: str
     required: Optional[bool]
     description: Optional[str]
     value: Optional[str] = ""
 
 
-class Tool(rx.Model):
+class Tool(rx.Base):
     id: Optional[str]
     name: str
     args: list[ToolArg] = []
@@ -44,14 +44,14 @@ class ToolState(rx.State):
                 Tool(
                     name=name,
                     description=description,
-                    args={
-                        arg["name"]: ToolArg(
+                    args=[
+                        ToolArg(
                             name=arg["name"],
                             required=arg["required"],
                             description=arg["description"],
                         )
                         for arg in args.values()
-                    },
+                    ],
                 )
             )
 
