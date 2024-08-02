@@ -4,11 +4,11 @@ import ibis
 from ibis import BaseBackend
 from langchain_core.pydantic_v1 import Field
 
-from aita.datasource.base import IbisDataSource
+from aita.datasource.base import SqlDataSource
 from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
-class SqliteDataSource(IbisDataSource):
+class SqliteDataSource(SqlDataSource):
     connection_url: str = Field(..., description="Connection URL")
 
     def __init__(

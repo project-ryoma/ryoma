@@ -1,14 +1,15 @@
-"""The chat page."""
+"""The playground page."""
 
 import reflex as rx
 
 from aita_lab import styles
 from aita_lab.components.loading_icon import loading_icon
-from aita_lab.components.model_selector import select_chat_model, select_embedding_model
+from aita_lab.components.model_selector import select_model
 from aita_lab.components.tool_kernel import notebook
 from aita_lab.states.agent import AgentState
-from aita_lab.states.chat import QA, ChatState
+from aita_lab.states.playground import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
@@ -139,11 +140,12 @@ def datasource_selector() -> rx.Component:
                 value=ChatState.current_datasource,
                 placeholder="Select a datasource",
                 on_change=ChatState.set_current_datasource,
-                width="12em",
+                width="100%",
             ),
             label="Datasource",
             width="100%",
         ),
+        width="100%",
     )
 
 
@@ -158,86 +160,111 @@ def prompt_template_selector() -> rx.Component:
                 size="2",
                 weight="bold",
             ),
-            rx.select(
-                PromptTemplateState.prompt_template_names,
+            rx.select.root(
+                rx.select.trigger(
+                    placeholder="Select a prompt template",
+                    width="100%",
+                ),
+                rx.select.content(
+                    rx.select.group(
+                        rx.select.label("Prompt templates"),
+                        rx.foreach(
+                            PromptTemplateState.prompt_templates,
+                            lambda pt:
+                            rx.cond(
+                                pt.prompt_template_type == "builtin",
+                                rx.select.item(pt.prompt_template_name, value=pt.prompt_template_name)
+                            )
+                        ),
+                    ),
+                    rx.select.group(
+                        rx.select.label("Custom prompt"),
+                        rx.foreach(
+                            PromptTemplateState.prompt_templates,
+                            lambda pt:
+                            rx.cond(
+                                pt.prompt_template_type == "custom",
+                                rx.select.item(pt.prompt_template_name, value=pt.prompt_template_name)
+                            )
+                        ),
+                        rx.chakra.button(
+                            rx.flex("Create new prompt +", spacing="3"),
+                            size="sm",
+                            width="100%",
+                            on_click=rx.redirect("/prompt_template"),
+                        ),
+                    ),
+                ),
                 value=ChatState.current_prompt_template.prompt_template_name,
                 on_change=ChatState.set_current_prompt_template,
-                width="14em",
-                placeholder="Select a prompt template",
+                width="100%",
             ),
-            rx.dialog.root(
-                rx.dialog.content(
-                    rx.flex(
-                        select_embedding_model(
-                            ChatState.current_embedding_model, ChatState.set_current_embedding_model
-                        ),
-                        rx.text(
-                            "K-Shot",
-                            asi_="div",
-                            mb="1",
-                            size="2",
-                            weight="bold",
-                        ),
-                        rx.input(
-                            placeholder="Enter the number of examples",
-                            width="100%",
-                            on_blur=ChatState.set_current_k_shot,
-                            padding_top="2",
-                        ),
-                        rx.text(
-                            "Vector Feature *",
-                            asi_="div",
-                            mb="1",
-                            size="2",
-                            weight="bold",
-                        ),
-                        rx.select.root(
-                            rx.select.trigger(
-                                placeholder="Select your feature",
+            rx.cond(
+                ChatState.vector_feature_dialog_open,
+                rx.flex(
+                    rx.form(
+                        rx.chakra.form_control(
+                            rx.text(
+                                "Embedding Model *",
+                                asi_="div",
+                                mb="1",
+                                size="2",
+                                weight="bold",
                             ),
-                            rx.select.content(
-                                rx.select.group(
-                                    rx.select.label("Select your feature"),
-                                    rx.foreach(
-                                        VectorStoreState.vector_feature_views,
-                                        lambda x: rx.select.item(
-                                            x.name, value=f"{x.name}:{x.feature}"
-                                        ),
+                            select_model(
+                                EmbeddingModelProvider,
+                                ChatState.current_embedding_model,
+                                ChatState.set_current_embedding_model
+                            ),
+                            label="Model",
+                            width="100%",
+                        ),
+                        width="100%",
+                    ),
+                    rx.text(
+                        "K-Shot",
+                        asi_="div",
+                        mb="1",
+                        size="2",
+                        weight="bold",
+                    ),
+                    rx.input(
+                        placeholder="Enter the number of examples",
+                        width="100%",
+                        on_blur=ChatState.set_current_k_shot,
+                        padding_top="2",
+                    ),
+                    rx.text(
+                        "Vector Feature *",
+                        asi_="div",
+                        mb="1",
+                        size="2",
+                        weight="bold",
+                    ),
+                    rx.select.root(
+                        rx.select.trigger(
+                            placeholder="Select your feature",
+                        ),
+                        rx.select.content(
+                            rx.select.group(
+                                rx.select.label("Select your feature"),
+                                rx.foreach(
+                                    VectorStoreState.vector_feature_views,
+                                    lambda x: rx.select.item(
+                                        x.name, value=f"{x.name}:{x.feature}"
                                     ),
                                 ),
                             ),
-                            value=ChatState.current_vector_feature,
-                            on_change=ChatState.set_current_vector_feature,
                         ),
-                        rx.flex(
-                            rx.dialog.close(
-                                rx.button(
-                                    "Confirm",
-                                    on_click=ChatState.close_vector_feature_dialog,
-                                )
-                            ),
-                            rx.dialog.close(
-                                rx.button(
-                                    "Cancel",
-                                    variant="soft",
-                                    color_scheme="gray",
-                                    on_click=ChatState.close_vector_feature_dialog,
-                                )
-                            ),
-                            padding_top="1em",
-                            spacing="3",
-                            mt="4",
-                            justify="end",
-                        ),
-                        spacing="2",
-                        direction="column",
+                        value=ChatState.current_vector_feature,
+                        on_change=ChatState.set_current_vector_feature,
                     ),
-                    padding="3",
-                    margin_top="3",
+                    spacing="2",
+                    direction="column",
+                    margin_top="1em",
+                    padding="1em",
                     border=styles.border,
-                    border_radius=styles.border_radius,
                 ),
-                open=ChatState.vector_feature_dialog_open,
             ),
             label="Prompt Template",
             width="100%",
@@ -259,7 +286,7 @@ def agent_selector() -> rx.Component:
                 AgentState.agent_names,
                 value=ChatState.current_chat_agent_type,
                 on_change=ChatState.set_current_chat_agent_type,
-                width="14em",
+                width="100%",
                 placeholder="Select an agent type",
             ),
             label="Agent Type",
@@ -270,7 +297,7 @@ def agent_selector() -> rx.Component:
 
 @template(
     route="/",
-    title="Chat",
+    title="Playground",
     on_load=[
         ChatState.on_load,
         DataSourceState.on_load,
@@ -280,40 +307,89 @@ def agent_selector() -> rx.Component:
         ToolCallState.on_load,
     ],
 )
-def chat() -> rx.Component:
+def playground() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
-        rx.chakra.box(
+        rx.chakra.flex(
             rx.chakra.hstack(
-                select_chat_model(
-                    ChatState.current_chat_model,
-                    ChatState.set_current_chat_model,
-                    style={"width": "12em"},
+                rx.box(
+                    rx.text(
+                        "Chat Model *",
+                        asi_="div",
+                        mb="1",
+                        size="1",
+                        weight="bold",
+                        color_scheme="gray",
+                        padding_left="1px"
+                    ),
+                    select_model(
+                        ChatModelProvider,
+                        ChatState.current_chat_model,
+                        ChatState.set_current_chat_model
+                    ),
                 ),
-                prompt_template_selector(),
-                datasource_selector(),
-                agent_selector(),
+                rx.dialog.root(
+                    rx.dialog.trigger(rx.chakra.button(
+                        rx.chakra.text("Advanced Settings", padding_right="2px"),
+                        rx.icon("settings", variant="solid"),
+                        height="100%"
+                    ), ),
+                    rx.dialog.content(
+                        rx.dialog.title("Advanced Settings"),
+                        rx.dialog.description(
+                            "Advanced settings for AI playground, including data source, prompt template, and agent type."
+                        ),
+                        rx.flex(
+                            datasource_selector(),
+                            prompt_template_selector(),
+                            agent_selector(),
+                            direction="column",
+                            spacing="4",
+                            padding_y="1em",
+                            width="100%",
+                        ),
+                        rx.flex(
+                            rx.dialog.close(
+                                rx.button("Confirm"),
+                            ),
+                            rx.dialog.close(
+                                rx.button(
+                                    "Close",
+                                    variant="soft",
+                                    color_scheme="gray",
+                                ),
+                            ),
+                            justify="end",
+                            spacing="3",
+                        ),
+                    ),
+                ),
+
+                direction="row",
                 padding="4",
-                width="100%",
-                background_color=rx.color("mauve", 2),
+                background_color=rx.color("mauve", 3),
                 color=rx.color("mauve", 12),
-                border_left=f"1px solid {rx.color('mauve', 3)}",
                 top="0",
                 spacing="4",
-                align_items="stretch",
+                align_items="start",
             ),
             rx.chakra.vstack(
                 chat_history(),
                 action_bar(),
-                background_color=rx.color("mauve", 1),
+                background_color=rx.color("mauve", 2),
                 color=rx.color("mauve", 12),
-                height="80vh",
+                height="100%",
                 align_items="stretch",
                 spacing="0",
                 padding="20px",
                 overflow_y="scroll",
+                flex_grow=0,
             ),
-            flex_grow=1,
+            direction="column",
+            width="100%",
+            border=styles.border,
+            border_radius=styles.border_radius,
+            background_color=rx.color("mauve", 2),
         ),
         rx.chakra.grid_item(
             notebook(
@@ -326,7 +402,7 @@ def chat() -> rx.Component:
             ),
             width="100%",
         ),
-        h="100vh",
+        h="85vh",
         width="100%",
         gap="2",
         direction="row",

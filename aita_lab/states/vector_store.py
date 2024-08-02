@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 import json
@@ -11,6 +12,12 @@ from feast import FeatureView, FileSource
 from feast.data_format import ParquetFormat
 from feast.data_source import PushSource
 from feast.feature_store import FeatureStore
+from feast.data_source import DataSource as FeastDataSource
+from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import PostgreSQLSource
+from feast import SnowflakeSource
+from feast import BigQuerySource
+from feast import RedshiftSource
+
 from feast.field import Field
 from feast.repo_config import RepoConfig
 from feast.repo_operations import _prepare_registry_and_repo, apply_total_with_repo_instance
@@ -18,7 +25,15 @@ from feast.types import Array, Float32
 from sqlmodel import select
 
 from aita_lab.states.base import BaseState
-from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.datasource import DataSourceState, DataSource
+
+
+FEAST_DATASOURCE_MAP = {
+    "postgresql": PostgreSQLSource,
+    "snowflake": SnowflakeSource,
+    "bigquery": BigQuerySource,
+    "redshift": RedshiftSource,
+}
 
 
 class VectorStoreConfig(rx.Base):
@@ -58,17 +73,19 @@ class FeastFeatureView(rx.Model):
 
 class VectorStoreState(BaseState):
     projects: list[VectorStore] = []
+    project: Optional[VectorStore] = None
 
     project_name: str
     online_store: str
     offline_store: Optional[str] = ""
+    offline_store_source: Optional[DataSource] = None
     online_store_configs: Optional[dict[str, str]] = {}
     offline_store_configs: Optional[dict[str, str]] = {}
 
     feature_view_name: str
     feature_name: str
     feature_entities: Optional[str] = None
-    data_source_type: Optional[str] = ""
+    feature_datasource: Optional[str] = None
 
     vector_feature_views: list[FeastFeatureView] = []
 
@@ -79,22 +96,40 @@ class VectorStoreState(BaseState):
 
     files: list[str] = []
     vector_store_config: VectorStoreConfig = get_vector_store_config()
+    feature_source_configs: dict[str, str] = {}
 
-    def set_online_store(self, ds: str):
-        self.online_store = ds
+    def set_feature_source_config(self, key: str, value: str):
+        self.feature_source_configs[key] = value
+
+    def _get_datasource_configs(self, ds: str) -> dict[str, str]:
         ds = DataSourceState.get_datasource_by_name(ds)
         configs = DataSourceState.get_configs(ds)
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],
             }
-        print(configs, self.online_store)
+        return configs
+
+    def set_online_store(self, ds: str):
+        self.online_store = ds
+        configs = self._get_datasource_configs(ds)
         self.online_store_configs = {
             "type": self.online_store,
-            **eval(configs),
+            **configs,
         }
         logging.info(
             f"Online store type set to {self.online_store} with configs {self.online_store_configs}"
+        )
+
+    def set_offline_store(self, ds: str):
+        self.offline_store = ds
+        configs = self._get_datasource_configs(ds)
+        self.offline_store_configs = {
+            "type": self.offline_store,
+            **configs,
+        }
+        logging.info(
+            f"Offline store type set to {self.offline_store} with configs {self.offline_store_configs}"
         )
 
     def open_feature_dialog(self):
@@ -105,14 +140,19 @@ class VectorStoreState(BaseState):
 
     def set_project(self, project_name: str):
         self.project_name = project_name
-        self._load_project()
+        self._reload_project(self.project_name)
 
-    def _load_project(self):
-        project = next(
-            (project for project in self.projects if project.project_name == self.project_name),
-            None,
-        )
+    def _reload_project(self, project_name: Optional[str] = None):
+        project = None
+        if project_name:
+            project = next(
+                (project for project in self.projects if project.project_name == project_name),
+                None,
+            )
+        elif self.projects:
+            project = self.projects[0]
         if project:
+            self.project = project
             repo_config = self._build_feast_repo_config(
                 project_name=project.project_name,
                 online_store=project.online_store,
@@ -128,12 +168,12 @@ class VectorStoreState(BaseState):
             self.vector_feature_views = self._get_feature_views()
 
     def _build_feast_repo_config(
-        self,
-        project_name,
-        online_store: str,
-        online_store_configs: dict[str, str],
-        offline_store: Optional[str] = None,
-        offline_store_configs: dict[str, str] = None,
+            self,
+            project_name,
+            online_store: str,
+            online_store_configs: dict[str, str],
+            offline_store: Optional[str] = None,
+            offline_store_configs: dict[str, str] = None,
     ):
         return RepoConfig(
             project=project_name,
@@ -170,10 +210,7 @@ class VectorStoreState(BaseState):
             self._fs = FeatureStore(config=repo_config)
 
             logging.info("Feature store applied successfully.")
-        except Exception as e:
-            logging.error(f"Error creating feature store: {e}")
-            raise e
-        finally:
+
             # save the project to the database
             with rx.session() as session:
                 session.add(
@@ -186,20 +223,38 @@ class VectorStoreState(BaseState):
                     )
                 )
                 session.commit()
+            self.load_store()
+        except Exception as e:
+            logging.error(f"Error creating feature store: {e}")
+            raise e
+        finally:
+
             self.toggle_store_dialog()
 
     def _create_feature_schema(self):
         return [Field(name=self.feature_name, dtype=Array(Float32))]
 
-    def _create_feature_source(self):
-        return PushSource(
-            name=self.feature_view_name,  # feature view name is used to reference the source
-            batch_source=FileSource(
-                file_format=ParquetFormat(),
-                path="data/feature.parquet",
-                timestamp_field="event_timestamp",
-            ),
-        )
+    def _create_feature_source(self) -> FeastDataSource:
+        if self.feature_datasource == "file":
+            return PushSource(
+                name=self.feature_view_name,  # feature view name is used to reference the source
+                batch_source=FileSource(
+                    file_format=ParquetFormat(),
+                    path="data/feature.parquet",
+                    timestamp_field="event_timestamp",
+                ),
+            )
+        else:
+            ds = DataSourceState.get_datasource_by_name(self.feature_datasource)
+            print("here", ds)
+            if ds.datasource in FEAST_DATASOURCE_MAP:
+                return FEAST_DATASOURCE_MAP[ds.datasource](
+                    name=self.feature_view_name,
+                    **self.feature_source_configs
+                )
+            else:
+                logging.error(f"Data source for {self.feature_datasource} not supported")
+            raise ValueError(f"Data source for {self.feature_datasource} not supported")
 
     def create_vector_feature(self):
         self._fs.apply(
@@ -231,11 +286,17 @@ class VectorStoreState(BaseState):
         with rx.session() as session:
             self.projects = session.exec(select(VectorStore)).all()
 
-        self._load_project()
+        self._reload_project()
 
         logging.info("Feature store loaded")
 
-    def push_source_to_feature(self, feature_view: dict):
+    def load_feature_views(self, feature_view: FeastFeatureView):
+        if isinstance(feature_view.source, PushSource):
+            self._push_source_to_feature(feature_view)
+        else:
+            logging.info("Not supported")
+
+    def _push_source_to_feature(self, feature_view: FeastFeatureView):
         (name, entities, feature, source) = (
             feature_view["name"],
             feature_view["entities"],

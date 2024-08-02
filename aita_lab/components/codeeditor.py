@@ -14,8 +14,19 @@ class CodeEditor(rx.Component):
 
     height: rx.Var[str]
 
-    extension: rx.Var[dict]
+    minHeight: rx.Var[str]
+
+    width: rx.Var[str]
+
+    minWidth: rx.Var[str]
+
+    theme: rx.Var[str]
+
+    extensions: rx.Var[str] = rx.Var.create('[loadLanguage("sql"), loadLanguage("python")]', _var_is_local=False),
     on_change: rx.EventHandler[lambda value: [value]]
+
+    def add_imports(self):
+        return {"@uiw/codemirror-extensions-langs": "loadLanguage"}
 
 
 code_editor = CodeEditor.create

@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+import json
 
 import logging
 
@@ -66,11 +67,11 @@ class DataSourceState(rx.State):
             return []
 
     @staticmethod
-    def get_configs(ds: DataSource):
+    def get_configs(ds: DataSource) -> dict[str, str]:
         if ds.connection_url:
             return {"connection_url": ds.connection_url}
         else:
-            return ds.attributes
+            return eval(ds.attributes)
 
     @rx.var
     def missing_configs(self) -> bool:
@@ -175,11 +176,12 @@ class DataSourceState(rx.State):
     @staticmethod
     def connect(datasource_name: str) -> Optional[DataSourceBase]:
         ds = DataSourceState.get_datasource_by_name(datasource_name)
+        configs = DataSourceState.get_configs(ds)
         if not ds:
             return
         try:
             source = DataSourceFactory.create_datasource(
-                ds.datasource, connection_url=ds.connection_url, **ds.attributes_dict
+                ds.datasource, **configs
             )
             source.connect()
             logging.info(f"Connected to {ds.datasource}")

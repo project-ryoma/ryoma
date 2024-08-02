@@ -12,17 +12,17 @@ and currently supported models are:
 |---------------------|----------------------|----------------------------|---------------------------------|
 | AI21                | `ai21`               | `AI21_API_KEY`             | `ai21`                          |
 | Anthropic           | `anthropic`          | `ANTHROPIC_API_KEY`        | `langchain-anthropic`           |
-| Anthropic (chat)    | `anthropic-chat`     | `ANTHROPIC_API_KEY`        | `langchain-anthropic`           |
+| Anthropic (playground)    | `anthropic-playground`     | `ANTHROPIC_API_KEY`        | `langchain-anthropic`           |
 | Bedrock             | `bedrock`            | N/A                        | `boto3`                         |
-| Bedrock (chat)      | `bedrock-chat`       | N/A                        | `boto3`                         |
+| Bedrock (playground)      | `bedrock-playground`       | N/A                        | `boto3`                         |
 | Cohere              | `cohere`             | `COHERE_API_KEY`           | `cohere`                        |
 | ERNIE-Bot           | `qianfan`            | `QIANFAN_AK`, `QIANFAN_SK` | `qianfan`                       |
 | Gemini              | `gemini`             | `GOOGLE_API_KEY`           | `langchain-google-genai`        |
 | GPT4All             | `gpt4all`            | N/A                        | `gpt4all`                       |
 | Hugging Face Hub    | `huggingface_hub`    | `HUGGINGFACEHUB_API_TOKEN` | `huggingface_hub`, `ipywidgets`, `pillow` |
-| NVIDIA              | `nvidia-chat`        | `NVIDIA_API_KEY`           | `langchain_nvidia_ai_endpoints` |
+| NVIDIA              | `nvidia-playground`        | `NVIDIA_API_KEY`           | `langchain_nvidia_ai_endpoints` |
 | OpenAI              | `openai`             | `OPENAI_API_KEY`           | `langchain-openai`              |
-| OpenAI (chat)       | `openai-chat`        | `OPENAI_API_KEY`           | `langchain-openai`              |
+| OpenAI (playground)       | `openai-playground`        | `OPENAI_API_KEY`           | `langchain-openai`              |
 | SageMaker           | `sagemaker-endpoint` | N/A                        | `boto3`                         |
 
 

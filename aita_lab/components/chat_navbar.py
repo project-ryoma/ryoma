@@ -1,13 +1,13 @@
 import reflex as rx
 
-from aita_lab.states.chat import ChatState
+from aita_lab.states.playground import ChatState
 
 
 def chat_history_item(chat: str) -> rx.Component:
-    """A sidebar_chat_history chat item.
+    """A sidebar_chat_history playground item.
 
     Args:
-        chat: The chat item.
+        chat: The playground item.
     """
     return rx.drawer.close(
         rx.hstack(
@@ -57,19 +57,19 @@ def sidebar_chat_history(trigger) -> rx.Component:
 
 
 def create_chat_modal(trigger) -> rx.Component:
-    """A modal to create a new chat."""
+    """A modal to create a new playground."""
     return rx.dialog.root(
         rx.dialog.trigger(trigger),
         rx.dialog.content(
             rx.hstack(
                 rx.input(
-                    placeholder="Create a new chat with title...",
+                    placeholder="Create a new playground with title...",
                     on_blur=ChatState.set_new_chat_title,
                     width=["15em", "20em", "30em", "30em", "30em", "30em"],
                 ),
                 rx.dialog.close(
                     rx.button(
-                        "Create chat",
+                        "Create playground",
                         on_click=ChatState.create_chat,
                     ),
                 ),
@@ -85,7 +85,7 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                create_chat_modal(rx.button("+ New chat", variant="solid")),
+                create_chat_modal(rx.button("+ New playground", variant="solid")),
                 sidebar_chat_history(
                     rx.button(
                         rx.icon(

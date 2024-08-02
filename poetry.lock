@@ -5005,7 +5005,7 @@ test = ["pretend", "pytest (>=3.0.1)", "pytest-rerunfailures"]
 [[package]]
 name = "pyparsing"
 version = "3.1.2"
-description = "pyparsing module - Classes and methods to define and execute parsing grammars"
+description = "pyparsing module - Classes and methods to define and query parsing grammars"
 optional = false
 python-versions = ">=3.6.8"
 files = [

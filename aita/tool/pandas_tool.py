@@ -1,7 +1,8 @@
-from typing import Type
+from typing import Type, Optional
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 
+from aita.datasource.base import SqlDataSource
 from aita.tool.python_tool import PythonTool
 
 
@@ -19,5 +20,6 @@ class PandasTool(PythonTool):
 
     Pandas dataframes are stored in the script context.
     """
+    datasource: Optional[SqlDataSource] = Field(None, exclude=True, description="SQL data source")
 
     args_schema: Type[BaseModel] = PandasInput

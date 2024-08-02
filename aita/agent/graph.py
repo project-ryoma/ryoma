@@ -249,6 +249,8 @@ class GraphAgent(AitaAgent):
         pass
 
     def call_model(self, state: MessageState, config: RunnableConfig):
+        print("Calling the model.")
+        print(self.prompt_template)
         chain = self.prompt_template | self._bind_tools()
         response = chain.invoke(state, self.config)
         return {"messages": [response]}

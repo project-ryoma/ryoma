@@ -17,5 +17,6 @@ class PythonAgent(GraphAgent):
 
     def add_script_context(self, script_context):
         for tool in self.tools:
-            tool.update_script_context(script_context=script_context)
+            if isinstance(tool, PythonTool):
+                tool.update_script_context(script_context=script_context)
         return self

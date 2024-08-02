@@ -10,11 +10,11 @@ from ibis import BaseBackend, Table
 from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
-from aita.datasource.base import IbisDataSource
+from aita.datasource.base import SqlDataSource
 from aita.datasource.metadata import Catalog, Column, Database
 
 
-class BigqueryDataSource(IbisDataSource):
+class BigqueryDataSource(SqlDataSource):
     project_id: str = Field(..., description="Bigquery project ID")
     dataset_id: str = Field(..., description="Bigquery dataset ID")
     credentials: Optional[str] = Field(None, description="Path to the credentials file")

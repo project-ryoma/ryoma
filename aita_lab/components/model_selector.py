@@ -1,20 +1,18 @@
-from typing import Any, Optional
-
 import reflex as rx
 
-from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
+from aita_lab.states.llm_providers import EmbeddingModelProvider
 
 
 def select_model(
-    model_provider,
-    model_value,
-    on_model_value_change,
-    style: Optional[dict] = None,
+        model_provider,
+        model_value,
+        on_model_value_change,
 ) -> rx.Component:
     return rx.select.root(
         rx.select.trigger(
             placeholder="Select a model",
-            style=style if style else {"width": "100%"},
+            width="100%",
+            min_width="12em",
         ),
         rx.select.content(
             *[
@@ -24,7 +22,6 @@ def select_model(
                         p.value.models,
                         lambda x: rx.select.item(x, value=f"{p.value.id}:{x}"),
                     ),
-                    width="100%",
                 )
                 for p in list(model_provider)
             ],
@@ -32,29 +29,6 @@ def select_model(
         value=model_value,
         on_change=on_model_value_change,
         default_value="gpt-3.5-turbo",
-    )
-
-
-def select_chat_model(
-    model: str,
-    set_model: Any,
-    style: Optional[dict] = None,
-) -> rx.Component:
-    """The model selector."""
-    return rx.form(
-        rx.chakra.form_control(
-            rx.text(
-                "Chat Model *",
-                asi_="div",
-                mb="1",
-                size="2",
-                weight="bold",
-            ),
-            select_model(ChatModelProvider, model, set_model, style),
-            label="Model",
-            width="100%",
-        ),
-        width="100%",
     )
 
 

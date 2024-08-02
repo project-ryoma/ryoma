@@ -62,6 +62,11 @@ def show_datasource_configs():
                             on_change=lambda value: DataSourceState.set_datasource_attributes(
                                 attribute_name, value
                             ),
+                            type=rx.cond(
+                                attribute_name.contains("password"),
+                                "password",
+                                "text"
+                            ),
                             width="100%",
                         ),
                         width="100%",

@@ -8,7 +8,7 @@ from aita_lab.states.base import BaseState
 
 # Icons for the sidebar
 ICONS = {
-    "Chat": "message-square-more",
+    "Playground": "message-square-more",
     "Data Catalog": "library",
     "Data Source": "database",
     "Document": "file-code",

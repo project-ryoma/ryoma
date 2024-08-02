@@ -11,11 +11,11 @@ from ibis import BaseBackend
 from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
-from aita.datasource.base import IbisDataSource
+from aita.datasource.base import SqlDataSource
 from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
-class SnowflakeDataSource(IbisDataSource):
+class SnowflakeDataSource(SqlDataSource):
     connection_url: Optional[str] = Field(None, description="Connection URL")
     user: Optional[str] = Field(Nscription="User name")
     password: Optional[str] = Field(None, description="Password")

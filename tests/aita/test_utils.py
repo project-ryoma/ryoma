@@ -18,7 +18,7 @@ def mock_chat_response(content: str, additional_kwargs: Dict = None):
     return ChatCompletion(
         id="foo",
         model="gpt-4",
-        object="chat.completion",
+        object="playground.completion",
         choices=[
             Choice(
                 finish_reason="stop",
@@ -40,7 +40,7 @@ class CreateChatCompletionEventStream(EventStream):  #
         chunk = ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
-                "object": "chat.completion.chunk",
+                "object": "playground.completion.chunk",
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",
@@ -59,7 +59,7 @@ class CreateChatCompletionEventStream(EventStream):  #
         chunk = ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
-                "object": "chat.completion.chunk",
+                "object": "playground.completion.chunk",
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",
@@ -78,7 +78,7 @@ class CreateChatCompletionEventStream(EventStream):  #
         chunk = ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
-                "object": "chat.completion.chunk",
+                "object": "playground.completion.chunk",
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",
@@ -94,7 +94,7 @@ class CreateChatCompletionEventStreamWithToolCall(EventStream):
         chunk = ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
-                "object": "chat.completion.chunk",
+                "object": "playground.completion.chunk",
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",

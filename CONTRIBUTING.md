@@ -225,7 +225,7 @@ GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Dep
 
 ## Codestyle
 
-After installation you may execute code formatting.
+After installation you may query code formatting.
 
 ```bash
 make codestyle

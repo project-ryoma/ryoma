@@ -47,7 +47,7 @@ DEFAULT_CHATS = {
 class ChatState(BaseState):
     """The app state."""
 
-    # chat states
+    # playground states
     chats: dict[str, list[QA]] = DEFAULT_CHATS
 
     current_chat = "Intros"
@@ -161,8 +161,8 @@ class ChatState(BaseState):
         self._current_chat_agent.cancel_tool(self.current_tool_id)
 
     def create_chat(self):
-        """Create a new chat."""
-        # Add the new chat to the list of chats.
+        """Create a new playground."""
+        # Add the new playground to the list of chats.
         self.current_chat = self.new_chat_title
         self.chats[self.new_chat_title] = []
         with rx.session() as session:
@@ -180,7 +180,7 @@ class ChatState(BaseState):
             session.commit()
 
     def delete_chat(self):
-        """Delete the current chat."""
+        """Delete the current playground."""
         with rx.session() as session:
             session.exec(delete(Chat).where(Chat.title == self.current_chat))
             session.commit()
@@ -189,19 +189,19 @@ class ChatState(BaseState):
         self.current_chat = list(self.chats.keys())[0]
 
     def set_chat(self, chat_title: str):
-        """Set the title of the current chat.
+        """Set the title of the current playground.
 
         Args:
-            chat_title: The name of the chat.
+            chat_title: The name of the playground.
         """
         self.current_chat = chat_title
 
     @rx.var
     def chat_titles(self) -> list[str]:
-        """Get the list of chat titles.
+        """Get the list of playground titles.
 
         Returns:
-            The list of chat names.
+            The list of playground names.
         """
         return list(self.chats.keys())
 
@@ -235,12 +235,15 @@ class ChatState(BaseState):
                     result = pickle.loads(artifact)
                     if isinstance(result, DataFrame):
                         self.tool_output = ToolOutput(data=result, show=True)
+
+                        # add tool call to history
+                        ToolCallState.add_tool_call(self.current_tool, self.tool_output)
             yield
 
     def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
         if chat_state and chat_state.next:
-            # having an action to execute
+            # having an action to query
             tool_call = self._current_chat_agent.get_current_tool_calls()[0]
             self.current_tool = Tool(
                 id=tool_call["id"],
@@ -279,10 +282,7 @@ class ChatState(BaseState):
         # Toggle the processing flag.
         self.processing = False
 
-        # add tool call to history
-        ToolCallState.add_tool_call(self.current_tool, self.tool_output)
-
-        # commit the chat to the database
+        # commit the playground to the database
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,
@@ -292,7 +292,7 @@ class ChatState(BaseState):
     async def process_question(self, form_data: dict[str, str]):
 
         if not self.current_chat_model:
-            yield rx.toast.error("Please select a chat model.")
+            yield rx.toast.error("Please select a playground model.")
             return
 
         # Clear the input and start the processing.
@@ -313,7 +313,7 @@ class ChatState(BaseState):
 
         logging.info(f"Processing question: {question}")
 
-        # init the chat agent
+        # init the playground agent
         self._create_chat_agent()
 
         # init the embedding agent
@@ -337,7 +337,7 @@ class ChatState(BaseState):
         # Toggle the processing flag.
         self.processing = False
 
-        # commit the chat to the database
+        # commit the playground to the database
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,

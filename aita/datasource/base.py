@@ -24,7 +24,7 @@ class DataSource(BaseModel, ABC):
         raise NotImplementedError("crawl_data_catalog is not implemented for this data source")
 
 
-class IbisDataSource(DataSource):
+class SqlDataSource(DataSource):
     type: str = "ibis"
     connection_url: Optional[str] = Field(None, description="Connection URL")
 
@@ -34,7 +34,7 @@ class IbisDataSource(DataSource):
         except Exception as e:
             raise Exception(f"Failed to connect to ibis: {e}")
 
-    def execute(self, query, result_format="pandas", **kwargs) -> Table:
+    def query(self, query, result_format="pandas", **kwargs) -> Table:
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
             raise Exception("Ibis connection is not a SQLBackend")

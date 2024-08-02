@@ -32,7 +32,7 @@ def get_tables(path_db):
 
         # data
         data = None
-        # data = cur.execute(f"SELECT * FROM {table_name} LIMIT 5").fetchall()
+        # data = cur.query(f"SELECT * FROM {table_name} LIMIT 5").fetchall()
 
         # append table
         res.append(

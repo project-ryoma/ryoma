@@ -9,6 +9,31 @@ from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.templates import ThemeState, template
 
 
+def render_feature_source_configs():
+    return rx.flex(
+        rx.chakra.heading("Feature Source Configs", size="sm"),
+        rx.foreach(
+            ["database", "table", "column", "query"],
+            lambda attribute: rx.flex(
+                rx.chakra.text(attribute, size="md"),
+                rx.input(
+                    placeholder=f"Enter the {attribute}",
+                    on_blur=lambda x: VectorStoreState.set_feature_source_config(attribute, x),
+                ),
+                direction="column",
+                spacing="2",
+            ),
+        ),
+        direction="column",
+        spacing="4",
+        border=styles.border,
+        border_radius=styles.border_radius,
+        width="100%",
+        padding="1em",
+        background_color=styles.accent_color,
+    )
+
+
 def add_feature():
     return rx.dialog.root(
         rx.dialog.trigger(
@@ -51,16 +76,35 @@ def add_feature():
                     on_blur=VectorStoreState.set_feature_entities,
                     required=False,
                 ),
-                rx.chakra.heading("Data Source", size="sm"),
-                rx.select(
-                    ["files", "postgres", "elasticsearch"],
-                    placeholder="Select the data source type",
-                    value=VectorStoreState.data_source_type,
-                    on_change=VectorStoreState.set_data_source_type,
+                rx.chakra.heading("Feature Data Source", size="sm"),
+                rx.select.root(
+                    rx.select.trigger("Select the data source for the feature"),
+                    rx.select.content(
+                        rx.select.group(
+                            rx.select.item("Upload files", value="files"),
+                            rx.cond(
+                                VectorStoreState.project & VectorStoreState.project.offline_store,
+                                rx.select.item(
+                                    VectorStoreState.project.offline_store,
+                                    value=VectorStoreState.project.offline_store,
+                                ),
+                            ),
+                            # rx.foreach(
+                            #     DataSourceState.datasources,
+                            #     lambda ds: rx.select.item(ds.name, value=ds.name),
+                            # ),
+                        ),
+                    ),
+                    value=VectorStoreState.feature_datasource,
+                    on_change=VectorStoreState.set_feature_datasource,
                 ),
                 rx.cond(
-                    VectorStoreState.data_source_type == "files",
-                    upload_render(VectorStoreState.files, VectorStoreState.handle_upload),
+                    VectorStoreState.feature_datasource,
+                    rx.cond(
+                        VectorStoreState.feature_datasource == "files",
+                        upload_render(VectorStoreState.files, VectorStoreState.handle_upload),
+                        render_feature_source_configs(),
+                    ),
                 ),
                 rx.flex(
                     rx.dialog.close(
@@ -204,7 +248,7 @@ def show_features():
                             rx.chakra.td(
                                 rx.chakra.button(
                                     "Load",
-                                    on_click=lambda: VectorStoreState.push_source_to_feature(
+                                    on_click=lambda: VectorStoreState.load_feature_views(
                                         feature_view
                                     ),
                                 )
@@ -240,10 +284,10 @@ def show_store():
             ),
             rx.tabs.content(
                 show_features(),
-                value=VectorStoreState.project_name,
+                value=VectorStoreState.project.project_name,
                 width="100%",
             ),
-            value=VectorStoreState.project_name,
+            value=VectorStoreState.project.project_name,
             on_change=VectorStoreState.set_project,
             orientation="horizontal",
             height="100vh",
@@ -267,7 +311,7 @@ def vector_store() -> rx.Component:
         The UI for the Vector Store page.
     """
     return rx.vstack(
-        rx.chakra.heading("Vector Store"),
+        rx.chakra.heading("Vector Store [Beta]"),
         rx.chakra.text("Create a vector store to store your embedding features"),
         setup_store(),
         show_store(),

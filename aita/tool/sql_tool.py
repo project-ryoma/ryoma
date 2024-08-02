@@ -9,11 +9,11 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
 
-from aita.datasource.base import IbisDataSource
+from aita.datasource.base import SqlDataSource
 
 
 class SqlDataSourceTool(BaseTool, ABC):
-    datasource: Optional[IbisDataSource] = Field(None, exclude=True)
+    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
 
     class Config(BaseTool.Config):
         pass
@@ -46,7 +46,7 @@ class SqlQueryTool(SqlDataSourceTool):
     ) -> (str, str):
         """Execute the query, return the results or an error message."""
         try:
-            result = self.datasource.execute(query, result_format=result_format)
+            result = self.datasource.query(query, result_format=result_format)
 
             # Serialize the result to a base64 encoded string as the artifact
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")
@@ -71,7 +71,7 @@ class Table(BaseModel):
 class CreateTableTool(SqlDataSourceTool):
     """Tool for creating a table in a SQL database."""
 
-    datasource: Optional[IbisDataSource] = Field(None, exclude=True)
+    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
     name: str = "create_table"
     description: str = """
     Create a table in the database.
@@ -90,7 +90,7 @@ class CreateTableTool(SqlDataSourceTool):
         columns = ",\n".join(
             f'{column.column_name} "{column.column_type}"' for column in table_columns
         )
-        return self.datasource.execute(
+        return self.datasource.query(
             "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns)
         )
 

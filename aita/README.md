@@ -18,9 +18,9 @@ from aita.datasource.postgresql import PostgreSqlDataSource
 from aita.agent.sql import SqlAgent
 
 datasource = PostgreSqlDataSource("postgresql://user:password@localhost/db")
-sql_agent = SqlAgent("gpt-3.5-turbo") \
+sql_agent = SqlAgent("gpt-3.5-turbo")
     .add_datasource(datasource)
-sql_agent.chat("Get the top 10 rows from the data source")
+sql_agent.playground("Get the top 10 rows from the data source")
 ```
 
 ## Documentation
