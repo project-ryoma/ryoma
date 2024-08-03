@@ -58,7 +58,7 @@ class OpenAIProvider:
 
 class ChatOpenAIProvider:
     name = "OpenAIChat"
-    id = "openai-playground"
+    id = "openai-chat"
     models = [
         "gpt-3.5-turbo",
         "gpt-3.5-turbo-0125",
@@ -78,13 +78,13 @@ class ChatOpenAIProvider:
 
 
 class AzureChatOpenAIProvider:
-    id = "azure-playground-openai"
+    id = "azure-chat-openai"
     name = "Azure OpenAI"
     models = ["*"]
 
 
 class ChatNVIDIAProvider:
-    id = "nvidia-playground"
+    id = "nvidia-chat"
     name = "NVIDIA"
     models = [
         "playground_llama2_70b",
@@ -130,7 +130,7 @@ class AnthropicProvider:
 
 
 class ChatAnthropicProvider:
-    id = "anthropic-playground"
+    id = "anthropic"
     name = "ChatAnthropic"
     models = [
         "claude-2.0",

@@ -1,32 +1,29 @@
-from enum import Enum
 from typing import Optional
 
 import json
 import logging
 import os
+from enum import Enum
 from pathlib import Path
 
 import pandas as pd
 import reflex as rx
-from feast import FeatureView, FileSource
+from feast import BigQuerySource, FeatureView, FileSource, RedshiftSource, SnowflakeSource
 from feast.data_format import ParquetFormat
+from feast.data_source import DataSource as FeastDataSource
 from feast.data_source import PushSource
 from feast.feature_store import FeatureStore
-from feast.data_source import DataSource as FeastDataSource
-from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import PostgreSQLSource
-from feast import SnowflakeSource
-from feast import BigQuerySource
-from feast import RedshiftSource
-
 from feast.field import Field
+from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import (
+    PostgreSQLSource,
+)
 from feast.repo_config import RepoConfig
 from feast.repo_operations import _prepare_registry_and_repo, apply_total_with_repo_instance
 from feast.types import Array, Float32
 from sqlmodel import select
 
 from aita_lab.states.base import BaseState
-from aita_lab.states.datasource import DataSourceState, DataSource
-
+from aita_lab.states.datasource import DataSource, DataSourceState
 
 FEAST_DATASOURCE_MAP = {
     "postgresql": PostgreSQLSource,
@@ -168,12 +165,12 @@ class VectorStoreState(BaseState):
             self.vector_feature_views = self._get_feature_views()
 
     def _build_feast_repo_config(
-            self,
-            project_name,
-            online_store: str,
-            online_store_configs: dict[str, str],
-            offline_store: Optional[str] = None,
-            offline_store_configs: dict[str, str] = None,
+        self,
+        project_name,
+        online_store: str,
+        online_store_configs: dict[str, str],
+        offline_store: Optional[str] = None,
+        offline_store_configs: dict[str, str] = None,
     ):
         return RepoConfig(
             project=project_name,
@@ -249,8 +246,7 @@ class VectorStoreState(BaseState):
             print("here", ds)
             if ds.datasource in FEAST_DATASOURCE_MAP:
                 return FEAST_DATASOURCE_MAP[ds.datasource](
-                    name=self.feature_view_name,
-                    **self.feature_source_configs
+                    name=self.feature_view_name, **self.feature_source_configs
                 )
             else:
                 logging.error(f"Data source for {self.feature_datasource} not supported")

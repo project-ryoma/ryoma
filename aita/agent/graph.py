@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 
 from IPython.display import Image, display
@@ -50,18 +51,36 @@ class GraphAgent(AitaAgent):
         model: Union[RunnableSerializable, str],
         model_parameters: Optional[Dict] = None,
         graph: Optional[StateGraph] = None,
+        base_prompt_template: Optional[PromptTemplate] = None,
+        context_prompt_templates: Optional[list[PromptTemplate]] = None,
+        output_prompt_template: Optional[PromptTemplate] = None,
+        output_parser: Optional[BaseModel] = None,
         **kwargs,
     ):
-        self.tools = tools
+        # initialize the agent with model, prompt, and output parser
+        super().__init__(
+            model,
+            model_parameters,
+            base_prompt_template,
+            context_prompt_templates,
+            output_prompt_template,
+            output_parser,
+            **kwargs,
+        )
 
-        super().__init__(model, model_parameters, **kwargs)
+        # tools
+        self.tools = tools
+        if self.tools:
+            self.model = self._bind_tools()
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
         self.compiled_graph = self._build_graph(graph)
 
     def _bind_tools(self):
+        logging.info("Binding tools {} to model".format(self.tools))
         if hasattr(self.model, "bind_tools"):
+            print("here", self.model)
             return self.model.bind_tools(self.tools)
         else:
             rendered_tools = render_text_description(self.tools)
@@ -71,7 +90,8 @@ class GraphAgent(AitaAgent):
             {rendered_tools}
 
             """
-            self.base_prompt.append(("system", tool_prompt))
+            tool_prompt_template = ChatPromptTemplate.from_messages([("system", tool_prompt)])
+            self.prompt_template_factory.add_context_prompt(tool_prompt_template)
             return self.model
 
     def _build_graph(self, graph: StateGraph) -> CompiledGraph:
@@ -137,9 +157,8 @@ class GraphAgent(AitaAgent):
                 ]
             }
         else:
-            self.prompt_template = ChatPromptTemplate.from_messages(self.base_prompt.messages)
-            self.prompt_template.extend(self.context_prompt_template)
-            self.prompt_template.append(
+            self.final_prompt_template = self.prompt_template_factory.build_prompt()
+            self.final_prompt_template.append(
                 MessagesPlaceholder(variable_name="messages", optional=True)
             )
             return {"messages": [HumanMessage(content=question)]}
@@ -249,10 +268,7 @@ class GraphAgent(AitaAgent):
         pass
 
     def call_model(self, state: MessageState, config: RunnableConfig):
-        print("Calling the model.")
-        print(self.prompt_template)
-        chain = self.prompt_template | self._bind_tools()
-        response = chain.invoke(state, self.config)
+        response = self.model.invoke(state["messages"], self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):

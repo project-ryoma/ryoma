@@ -4,7 +4,7 @@ import json
 import os
 
 import reflex as rx
-from sqlmodel import select, Field
+from sqlmodel import Field, select
 
 from aita.prompt.prompt_builder import prompt_factory
 

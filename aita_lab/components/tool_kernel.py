@@ -3,7 +3,7 @@ from typing import Optional
 import reflex as rx
 
 from aita_lab import styles
-from aita_lab.components.codeeditor import code_editor
+from aita_lab.components.code_editor import codeeditor
 from aita_lab.states.tool import Tool, ToolOutput
 from aita_lab.states.tool_calls import ToolCall
 
@@ -25,7 +25,7 @@ def tool_args(
                     rx.cond(
                         render_only,
                         rx.text(arg.value, asi_="div", mb="1", size="2", padding_left="4px"),
-                        code_editor(
+                        codeeditor(
                             value=arg.value,
                             on_change=lambda x: update_tool_args(x),
                             width="100%",

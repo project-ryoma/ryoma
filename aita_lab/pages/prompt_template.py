@@ -2,9 +2,9 @@
 
 import reflex as rx
 
+from aita_lab.components.code_editor import codeeditor
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from aita_lab.templates import template
-from aita_lab.components.codeeditor import code_editor
 
 
 def prompt_card(pt: PromptTemplate):
@@ -13,7 +13,10 @@ def prompt_card(pt: PromptTemplate):
         rx.dialog.trigger(
             rx.chakra.card(
                 rx.chakra.vstack(
-                    rx.foreach(pt.prompt_lines.split("\n"), lambda line: rx.chakra.text(line, padding="2px")),
+                    rx.foreach(
+                        pt.prompt_lines.split("\n"),
+                        lambda line: rx.chakra.text(line, padding="2px"),
+                    ),
                     align_items="flex-start",
                 ),
                 header=rx.chakra.heading(pt.prompt_template_name, size="md"),
@@ -58,7 +61,7 @@ def render_question():
             "Question: " + PromptTemplateState.question,
             margin_top="10px",
             font_size="md",
-            padding="2px"
+            padding="2px",
         ),
     )
 
@@ -70,11 +73,10 @@ def render_builtin_prompt_templates() -> rx.Component:
             rx.chakra.flex(
                 rx.foreach(
                     PromptTemplateState.prompt_templates,
-                    lambda pt:
-                    rx.cond(
+                    lambda pt: rx.cond(
                         pt.prompt_template_type == "builtin",
                         prompt_card(pt),
-                    )
+                    ),
                 )
             ),
             margin_top="20px",
@@ -95,11 +97,10 @@ def render_custom_prompt_templates() -> rx.Component:
             rx.chakra.flex(
                 rx.foreach(
                     PromptTemplateState.prompt_templates,
-                    lambda pt:
-                    rx.cond(
+                    lambda pt: rx.cond(
                         pt.prompt_template_type == "custom",
                         prompt_card(pt),
-                    )
+                    ),
                 )
             ),
             margin_top="20px",
@@ -145,12 +146,13 @@ def render_create_prompt_template() -> rx.Component:
                                 rx.foreach(
                                     PromptTemplateState.prompt_templates,
                                     lambda pt: rx.select.item(
-                                        pt.prompt_template_name,
-                                        value=pt.prompt_template_name
-                                    )
+                                        pt.prompt_template_name, value=pt.prompt_template_name
+                                    ),
                                 ),
                             ),
-                            on_change=lambda x: PromptTemplateState.copy_to_current_prompt_template(x),
+                            on_change=lambda x: PromptTemplateState.copy_to_current_prompt_template(
+                                x
+                            ),
                         ),
                         width="100%",
                     ),
@@ -177,11 +179,10 @@ def render_create_prompt_template() -> rx.Component:
                     ),
                     rx.box(
                         rx.heading("Template", size="2"),
-                        code_editor(
+                        codeeditor(
                             value=PromptTemplateState.prompt_template_lines,
                             width="100%",
                             min_height="20em",
-                            minHeight="20em",
                             theme="light",
                             on_change=PromptTemplateState.set_prompt_template_lines,
                         ),
@@ -198,7 +199,8 @@ def render_create_prompt_template() -> rx.Component:
                     ),
                     rx.dialog.close(
                         rx.button(
-                            "Cancel", size="2",
+                            "Cancel",
+                            size="2",
                             variant="soft",
                             color_scheme="gray",
                             on_click=PromptTemplateState.toggle_create_prompt_template_dialog,
@@ -209,7 +211,6 @@ def render_create_prompt_template() -> rx.Component:
                 ),
                 on_escape_key_down=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
                 on_interact_outside=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
-
             ),
             open=PromptTemplateState.create_prompt_template_dialog_open,
         ),

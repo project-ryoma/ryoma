@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
-import json
 
+import json
 import logging
 
 import reflex as rx
@@ -180,9 +180,7 @@ class DataSourceState(rx.State):
         if not ds:
             return
         try:
-            source = DataSourceFactory.create_datasource(
-                ds.datasource, **configs
-            )
+            source = DataSourceFactory.create_datasource(ds.datasource, **configs)
             source.connect()
             logging.info(f"Connected to {ds.datasource}")
             return source

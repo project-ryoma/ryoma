@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from jupyter_ai_magics.providers import *
@@ -9,7 +10,7 @@ from langchain_core.runnables import RunnableSerializable
 from aita.agent.utils import get_model
 from aita.datasource.base import DataSource
 from aita.datasource.metadata import Catalog
-from aita.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
+from aita.prompt.prompt_template import PromptTemplateFactory
 
 
 class AitaAgent:
@@ -18,18 +19,22 @@ class AitaAgent:
     config: Dict[str, Any]
     model: RunnableSerializable
     model_parameters: Optional[Dict]
-    prompt_template: Optional[ChatPromptTemplate]
-    context_prompt: Optional[ChatPromptTemplate]
-    context_prompt_template: List[ChatPromptTemplate]
-    output_prompt: Optional[PromptTemplate]
+    prompt_template_factory: PromptTemplateFactory
+    final_prompt_template: Optional[Union[PromptTemplate, ChatPromptTemplate]]
     output_parser: Optional[PydanticOutputParser]
 
     def __init__(
         self,
         model: Union[str, RunnableSerializable],
         model_parameters: Optional[Dict] = None,
+        base_prompt_template: Optional[PromptTemplate] = None,
+        context_prompt_templates: Optional[list[PromptTemplate]] = None,
+        output_prompt_template: Optional[PromptTemplate] = None,
+        output_parser: Optional[BaseModel] = None,
         **kwargs,
     ):
+        logging.info(f"Initializing Agent with model: {model}")
+
         # configs
         self.config = {
             "configurable": {
@@ -45,54 +50,36 @@ class AitaAgent:
         else:
             self.model = model
 
+        if not self.model:
+            raise ValueError(
+                f"Failed to load model with model name: {model} and parameters: {model_parameters}"
+            )
+
         # prompt
-        self.prompt_template = None
-        self.base_prompt = self._set_base_prompt()
-        self.context_prompt_template = []
-        self.context_prompt = self._set_context_prompt()
-        self.output_prompt = None
-        self.output_parser = None
+        self.prompt_template_factory = PromptTemplateFactory(
+            base_prompt_template,
+            context_prompt_templates,
+            output_prompt_template,
+        )
+        self.final_prompt_template = None
+        self.output_parser = output_parser
 
     def _create_chain(self, **kwargs) -> RunnableSerializable:
         if self.output_parser:
             return self.output_prompt | self.model | self.output_parser
-        return self.prompt_template | self.model
-
-    @staticmethod
-    def _set_base_prompt(base_prompt: Optional[Union[str, ChatPromptTemplate]] = None):
-        if not base_prompt:
-            base_prompt = BasePromptTemplate
-        if isinstance(base_prompt, str):
-            base_prompt = ChatPromptTemplate.from_messages(
-                [
-                    ("system", base_prompt),
-                ]
-            )
-        return base_prompt
+        return self.final_prompt_template | self.model
 
     def set_base_prompt(self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None):
-        self.base_prompt = self._set_base_prompt(base_prompt)
+        self.prompt_template_factory.set_base_prompt(base_prompt)
         return self
 
-    @staticmethod
-    def _set_context_prompt(context_prompt: Optional[Union[str, ChatPromptTemplate]] = None):
-        if not context_prompt:
-            context_prompt = BasicContextPromptTemplate
-        if isinstance(context_prompt, str):
-            context_prompt = ChatPromptTemplate.from_messages(
-                [
-                    ("system", context_prompt),
-                ]
-            )
-        return context_prompt
-
-    def set_context_prompt(self, context_prompt: Optional[Union[str, ChatPromptTemplate]] = None):
-        self.context_prompt = self._set_context_prompt(context_prompt)
+    def set_context_prompt(self, context: Optional[Union[str, ChatPromptTemplate]] = None):
+        self.prompt_template_factory.add_context_prompt(context)
         return self
 
     def add_prompt_context(self, prompt_context: str):
-        context_prompt = self.context_prompt.partial(prompt_context=prompt_context)
-        self.context_prompt_template.append(context_prompt)
+        self.prompt_template_factory.add_context_prompt(prompt_context)
+        return self
 
     def add_datasource(self, datasource: DataSource):
         self.add_prompt_context(str(datasource.get_metadata()))
@@ -103,9 +90,8 @@ class AitaAgent:
         return self
 
     def _build_prompt(self, question: str):
-        self.prompt_template = ChatPromptTemplate.from_messages(self.base_prompt.messages)
-        self.prompt_template.extend(self.context_prompt_template)
-        self.prompt_template.append(("user", question))
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
+        self.final_prompt_template.append(("user", question))
 
     def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
         self._build_prompt(question)

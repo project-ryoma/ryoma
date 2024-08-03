@@ -7,9 +7,9 @@ from aita_lab.components.loading_icon import loading_icon
 from aita_lab.components.model_selector import select_model
 from aita_lab.components.tool_kernel import notebook
 from aita_lab.states.agent import AgentState
-from aita_lab.states.playground import QA, ChatState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
+from aita_lab.states.playground import QA, ChatState
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
@@ -170,22 +170,24 @@ def prompt_template_selector() -> rx.Component:
                         rx.select.label("Prompt templates"),
                         rx.foreach(
                             PromptTemplateState.prompt_templates,
-                            lambda pt:
-                            rx.cond(
+                            lambda pt: rx.cond(
                                 pt.prompt_template_type == "builtin",
-                                rx.select.item(pt.prompt_template_name, value=pt.prompt_template_name)
-                            )
+                                rx.select.item(
+                                    pt.prompt_template_name, value=pt.prompt_template_name
+                                ),
+                            ),
                         ),
                     ),
                     rx.select.group(
                         rx.select.label("Custom prompt"),
                         rx.foreach(
                             PromptTemplateState.prompt_templates,
-                            lambda pt:
-                            rx.cond(
+                            lambda pt: rx.cond(
                                 pt.prompt_template_type == "custom",
-                                rx.select.item(pt.prompt_template_name, value=pt.prompt_template_name)
-                            )
+                                rx.select.item(
+                                    pt.prompt_template_name, value=pt.prompt_template_name
+                                ),
+                            ),
                         ),
                         rx.chakra.button(
                             rx.flex("Create new prompt +", spacing="3"),
@@ -214,7 +216,7 @@ def prompt_template_selector() -> rx.Component:
                             select_model(
                                 EmbeddingModelProvider,
                                 ChatState.current_embedding_model,
-                                ChatState.set_current_embedding_model
+                                ChatState.set_current_embedding_model,
                             ),
                             label="Model",
                             width="100%",
@@ -250,9 +252,7 @@ def prompt_template_selector() -> rx.Component:
                                 rx.select.label("Select your feature"),
                                 rx.foreach(
                                     VectorStoreState.vector_feature_views,
-                                    lambda x: rx.select.item(
-                                        x.name, value=f"{x.name}:{x.feature}"
-                                    ),
+                                    lambda x: rx.select.item(x.name, value=f"{x.name}:{x.feature}"),
                                 ),
                             ),
                         ),
@@ -320,20 +320,22 @@ def playground() -> rx.Component:
                         size="1",
                         weight="bold",
                         color_scheme="gray",
-                        padding_left="1px"
+                        padding_left="1px",
                     ),
                     select_model(
                         ChatModelProvider,
                         ChatState.current_chat_model,
-                        ChatState.set_current_chat_model
+                        ChatState.set_current_chat_model,
                     ),
                 ),
                 rx.dialog.root(
-                    rx.dialog.trigger(rx.chakra.button(
-                        rx.chakra.text("Advanced Settings", padding_right="2px"),
-                        rx.icon("settings", variant="solid"),
-                        height="100%"
-                    ), ),
+                    rx.dialog.trigger(
+                        rx.chakra.button(
+                            rx.chakra.text("Advanced Settings", padding_right="2px"),
+                            rx.icon("settings", variant="solid"),
+                            height="100%",
+                        ),
+                    ),
                     rx.dialog.content(
                         rx.dialog.title("Advanced Settings"),
                         rx.dialog.description(
@@ -364,7 +366,6 @@ def playground() -> rx.Component:
                         ),
                     ),
                 ),
-
                 direction="row",
                 padding="4",
                 background_color=rx.color("mauve", 3),

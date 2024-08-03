@@ -1,4 +1,4 @@
-from typing import Type, Optional
+from typing import Optional, Type
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 
