@@ -15,6 +15,6 @@ def test_prompt_template():
     template = aita_prompt.build_prompt()
     messages = template.format_messages(prompt_context="This is a test context.")
     assert (
-        messages[0].content
+        messages[1].content
         == "You are provided with the following context: This is a test context."
     )
