@@ -31,9 +31,12 @@ def tool_args(
                             width="100%",
                             min_height="20e",
                             language="python",
-                            theme="material",
                             font_size="1em",
                             padding="4px",
+                            extensions=rx.Var.create(
+                                '[loadLanguage("sql"), loadLanguage("python")]',
+                                _var_is_local=False,
+                            ),
                         ),
                     ),
                 ),

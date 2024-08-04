@@ -183,7 +183,10 @@ def render_create_prompt_template() -> rx.Component:
                             value=PromptTemplateState.prompt_template_lines,
                             width="100%",
                             min_height="20em",
-                            theme="light",
+                            extensions=rx.Var.create(
+                                '[loadLanguage("sql"), loadLanguage("python")]',
+                                _var_is_local=False,
+                            ),
                             on_change=PromptTemplateState.set_prompt_template_lines,
                         ),
                     ),
