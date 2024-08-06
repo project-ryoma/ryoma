@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita.tool.python_tool import PythonTool
 
 

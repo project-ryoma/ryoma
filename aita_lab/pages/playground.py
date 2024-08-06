@@ -152,12 +152,13 @@ def datasource_selector() -> rx.Component:
                                 lambda ds: rx.select.item(ds, value=ds),
                             ),
                         ),
-                        rx.button(
-                            "Create new datasource +",
-                            on_click=rx.redirect("/datasource"),
-                            width="100%",
-                        ),
                         width="100%",
+                    ),
+                    rx.select.group(
+                        rx.select.item(
+                            "Create new datasource + ",
+                            value="custom"
+                        ),
                     ),
                     width="100%",
                 ),
@@ -165,13 +166,6 @@ def datasource_selector() -> rx.Component:
                 on_change=ChatState.set_current_datasource,
                 width="100%",
             ),
-            # rx.select(
-            #     items=DataSourceState.datasource_names,
-            #     value=ChatState.current_datasource,
-            #     placeholder="Select a datasource",
-            #     on_change=ChatState.set_current_datasource,
-            #     width="100%",
-            # ),
             label="Datasource",
             width="100%",
         ),
@@ -247,6 +241,7 @@ def prompt_template_selector() -> rx.Component:
                                 EmbeddingModelProvider,
                                 ChatState.current_embedding_model,
                                 ChatState.set_current_embedding_model,
+                                trigger_width="100%",
                             ),
                             label="Model",
                             width="100%",
@@ -284,6 +279,10 @@ def prompt_template_selector() -> rx.Component:
                                     VectorStoreState.vector_feature_views,
                                     lambda x: rx.select.item(x.name, value=f"{x.name}:{x.feature}"),
                                 ),
+                                rx.select.item(
+                                    "Create new feature +",
+                                    value="new",
+                                )
                             ),
                         ),
                         value=ChatState.current_vector_feature,
@@ -314,12 +313,30 @@ def agent_selector() -> rx.Component:
                 color_scheme="gray",
                 padding_left="1px",
             ),
-            rx.select(
-                AgentState.agent_names,
+            rx.select.root(
+                rx.select.trigger(
+                    placeholder="Select an agent",
+                    width="100%",
+                ),
+                rx.select.content(
+                    rx.select.group(
+                        rx.foreach(
+                            AgentState.agent_names,
+                            lambda agent_name: rx.select.item(agent_name, value=agent_name),
+                        ),
+                        rx.chakra.button(
+                            "Create new agent +",
+                            on_click=lambda: rx.redirect("/agent"),
+                            size="sm",
+                            width="100%",
+                            justify="start",
+                        ),
+                        width="100%",
+                    )
+                ),
                 value=ChatState.current_chat_agent_type,
                 on_change=ChatState.set_current_chat_agent_type,
                 width="100%",
-                placeholder="Select an agent type",
             ),
             label="Agent Type",
             width="100%",

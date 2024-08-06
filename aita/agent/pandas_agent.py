@@ -2,7 +2,7 @@ from typing import Dict
 
 from pandas import DataFrame
 
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita.tool.pandas_tool import PandasTool
 from aita.tool.python_tool import PythonTool
 from aita.tool.sql_tool import ConvertToPandasTool

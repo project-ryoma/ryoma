@@ -2,7 +2,7 @@ from typing import Dict
 
 import pyarrow as pa
 
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita.tool.pyarrow_tool import ArrowTool
 from aita.tool.python_tool import PythonTool
 from aita.tool.sql_tool import ConvertToArrowTool

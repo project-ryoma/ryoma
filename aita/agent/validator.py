@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnableSerializable
 from langchain_core.runnables.config import RunnableConfig
 from langgraph.graph import END, StateGraph
 
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita.states import MessageState
 
 

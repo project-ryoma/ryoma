@@ -11,7 +11,7 @@ from sqlmodel import delete, select
 
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
-from aita.agent.graph import ToolMode, WorkflowAgent
+from aita.agent.workflow import ToolMode, WorkflowAgent
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
@@ -100,6 +100,8 @@ class ChatState(BaseState):
             self._current_chat_agent_state_change = True
 
     def set_current_datasource(self, datasource: str):
+        if datasource == "custom":
+            return rx.redirect("/datasource")
         if self.current_datasource != datasource:
             self.current_datasource = datasource
             self._current_chat_agent_state_change = True
@@ -111,8 +113,9 @@ class ChatState(BaseState):
 
     def set_current_prompt_template(self, prompt_template_name: str):
         self.current_prompt_template = PromptTemplateState.get_prompt_template(prompt_template_name)
-        if self.current_prompt_template and self.current_prompt_template.k_shot > 0:
-            self.vector_feature_dialog_open = True
+        self.vector_feature_dialog_open = (
+                self.current_prompt_template and self.current_prompt_template.k_shot > 0
+        )
 
     def _create_chat_agent(self, **kwargs):
         if not self._current_chat_agent or self._current_chat_agent_state_change:
@@ -146,6 +149,11 @@ class ChatState(BaseState):
                 agent_type="embedding", model=self.current_embedding_model
             )
             self._current_embedding_agent_state_change = False
+
+    def set_current_vector_feature(self, vector_feature: str):
+        if vector_feature == "new":
+            return rx.redirect("/vector_store")
+        self.current_vector_feature = vector_feature
 
     def should_create_embedding_agent(self):
         if self.current_prompt_template and self.current_prompt_template.k_shot > 0:

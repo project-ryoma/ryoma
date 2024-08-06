@@ -4,11 +4,11 @@ from enum import Enum
 
 from aita.agent.arrow_agent import ArrowAgent
 from aita.agent.base import AitaAgent
-from aita.agent.graph import WorkflowAgent
 from aita.agent.pandas_agent import PandasAgent
 from aita.agent.python_agent import PythonAgent
 from aita.agent.spark_agent import SparkAgent
 from aita.agent.sql import SqlAgent
+from aita.agent.workflow import WorkflowAgent
 
 
 class AgentProvider(Enum):

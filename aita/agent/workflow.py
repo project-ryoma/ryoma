@@ -232,19 +232,14 @@ class WorkflowAgent(AitaAgent):
             [RunnableLambda(handle_tool_error)], exception_key="error"
         )
 
-    def call_tool(self, tool_name: str, tool_id: Optional[str] = None, **kwargs):
-        if not tool_name:
-            raise ValueError("Tool name is required.")
+    def call_tool(self, tool_id: str, **kwargs):
+        if not tool_id:
+            raise ValueError("Tool id is required.")
         curr_tool_calls = self.get_current_tool_calls()
-        if tool_id:
-            tool_call = next((tc for tc in curr_tool_calls if tc["id"] == tool_id), None)
-        else:
-            tool_call = next((tc for tc in curr_tool_calls if tc["name"] == tool_name), None)
+        tool_call = next((tc for tc in curr_tool_calls if tc["id"] == tool_id), None)
         if not tool_call:
-            raise ValueError(f"Tool call {tool_name} not found in current state.")
-        tool = next((t for t in self.tools if t.name == tool_name), None)
-        if not tool:
-            raise ValueError(f"Tool {tool_name} not found in the tool sets.")
+            raise ValueError(f"Unable to find tool call {tool_id} in the current state.")
+        tool = next((t for t in self.tools if t.name == tool_call["name"]), None)
         if kwargs.get("args"):
             tool_call["args"].update(kwargs["args"])
         res = tool.invoke(tool_call["args"], self.config)

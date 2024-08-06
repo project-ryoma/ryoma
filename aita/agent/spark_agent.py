@@ -1,6 +1,6 @@
 import pandas as pd
 
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita.tool.python_tool import PythonTool
 from aita.tool.spark_tool import ConvertPandasToSparkTool, SparkTool
 

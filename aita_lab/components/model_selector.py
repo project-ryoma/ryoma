@@ -2,14 +2,15 @@ import reflex as rx
 
 
 def select_model(
-    model_provider,
-    model_value,
-    on_model_value_change,
+        model_provider,
+        model_value,
+        on_model_value_change,
+        trigger_width: str = "12em",
 ) -> rx.Component:
     return rx.select.root(
         rx.select.trigger(
             placeholder="Select a model",
-            min_width="12em",
+            width=trigger_width,
         ),
         rx.select.content(
             *[

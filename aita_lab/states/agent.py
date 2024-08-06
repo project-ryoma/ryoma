@@ -11,7 +11,7 @@ from langchain_core.runnables.graph import Edge, Node
 from sqlmodel import Field, select
 
 from aita.agent.factory import AgentFactory, get_builtin_agents
-from aita.agent.graph import WorkflowAgent
+from aita.agent.workflow import WorkflowAgent
 from aita_lab.states.graph import Graph
 
 
