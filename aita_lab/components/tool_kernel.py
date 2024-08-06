@@ -90,6 +90,8 @@ def render_tool_panel(
                 size="3",
                 weight="bold",
                 height="100%",
+                align_content="center",
+                margin="0"
             ),
             rx.cond(
                 not render_only,

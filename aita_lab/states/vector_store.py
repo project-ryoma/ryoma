@@ -243,7 +243,6 @@ class VectorStoreState(BaseState):
             )
         else:
             ds = DataSourceState.get_datasource_by_name(self.feature_datasource)
-            print("here", ds)
             if ds.datasource in FEAST_DATASOURCE_MAP:
                 return FEAST_DATASOURCE_MAP[ds.datasource](
                     name=self.feature_view_name, **self.feature_source_configs

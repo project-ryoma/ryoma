@@ -1,11 +1,10 @@
 from typing import Dict, Optional
 
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import WorkflowAgent
 from aita.tool.python_tool import PythonTool
 
 
-class PythonAgent(GraphAgent):
-    type: str = "python"
+class PythonAgent(WorkflowAgent):
     description: str = "A Python agent that can use Python tools to run python scripts."
 
     def __init__(

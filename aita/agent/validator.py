@@ -8,11 +8,11 @@ from langchain_core.runnables import RunnableSerializable
 from langchain_core.runnables.config import RunnableConfig
 from langgraph.graph import END, StateGraph
 
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import WorkflowAgent
 from aita.states import MessageState
 
 
-class ValidatorAgent(GraphAgent):
+class ValidatorAgent(WorkflowAgent):
     validator: BaseModel
     validator_chain: RunnableSerializable
 
@@ -53,7 +53,7 @@ class ValidatorAgent(GraphAgent):
             ]
             return state
 
-    def _build_graph(self):
+    def _build_workflow(self):
 
         workflow = StateGraph(MessageState)
 

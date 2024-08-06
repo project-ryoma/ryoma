@@ -11,7 +11,7 @@ from sqlmodel import delete, select
 
 from aita.agent.base import AitaAgent
 from aita.agent.factory import AgentFactory
-from aita.agent.graph import GraphAgent, ToolMode
+from aita.agent.graph import WorkflowAgent, ToolMode
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
@@ -73,7 +73,7 @@ class ChatState(BaseState):
     # agent states
     current_chat_agent_type: str = ""
 
-    _current_chat_agent: Optional[Union[AitaAgent, GraphAgent]] = None
+    _current_chat_agent: Optional[Union[AitaAgent, WorkflowAgent]] = None
 
     _current_embedding_agent: Optional[AitaAgent] = None
 

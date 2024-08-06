@@ -40,10 +40,11 @@ def handle_tool_error(state) -> dict:
     }
 
 
-class GraphAgent(AitaAgent):
+class WorkflowAgent(AitaAgent):
     tools: List[BaseTool]
     graph: StateGraph
-    compiled_graph: CompiledGraph
+    workflow: CompiledGraph
+    type: str = "workflow"
 
     def __init__(
         self,
@@ -75,12 +76,11 @@ class GraphAgent(AitaAgent):
 
         # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
-        self.compiled_graph = self._build_graph(graph)
+        self.workflow = self._build_workflow(graph)
 
     def _bind_tools(self):
         logging.info("Binding tools {} to model".format(self.tools))
         if hasattr(self.model, "bind_tools"):
-            print("here", self.model)
             return self.model.bind_tools(self.tools)
         else:
             rendered_tools = render_text_description(self.tools)
@@ -94,7 +94,7 @@ class GraphAgent(AitaAgent):
             self.prompt_template_factory.add_context_prompt(tool_prompt_template)
             return self.model
 
-    def _build_graph(self, graph: StateGraph) -> CompiledGraph:
+    def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         if graph:
             return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
         workflow = StateGraph(MessageState)
@@ -114,14 +114,14 @@ class GraphAgent(AitaAgent):
         return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
 
     @staticmethod
-    def init_state_graph():
+    def init_state():
         return StateGraph(MessageState)
 
     def get_graph(self):
-        return self.compiled_graph.get_graph(self.config)
+        return self.workflow.get_graph(self.config)
 
     def get_current_state(self) -> Optional[StateSnapshot]:
-        return self.compiled_graph.get_state(self.config)
+        return self.workflow.get_state(self.config)
 
     def get_current_state_messages(self):
         current_state = self.get_current_state()
@@ -174,7 +174,7 @@ class GraphAgent(AitaAgent):
             messages = None
         else:
             messages = self._build_prompt(question)
-        events = self.compiled_graph.stream(messages, config=self.config, stream_mode="values")
+        events = self.workflow.stream(messages, config=self.config, stream_mode="values")
         if display:
             _printed = set()
             self._print_graph_events(events, _printed)
@@ -184,9 +184,9 @@ class GraphAgent(AitaAgent):
             iterations = 0
             while current_state.next and iterations < max_iterations:
                 iterations += 1
-                events = self.compiled_graph.stream(None, config=self.config)
+                events = self.workflow.stream(None, config=self.config)
                 if display:
-                    print(f"Iteration {iterations}")
+                    logging.info(f"Iteration {iterations}")
                     self._print_graph_events(events, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
@@ -205,20 +205,20 @@ class GraphAgent(AitaAgent):
             messages = None
         else:
             messages = self._build_prompt(question)
-        result = self.compiled_graph.invoke(messages, config=self.config)
+        result = self.workflow.invoke(messages, config=self.config)
         if display:
             _printed = set()
             self._print_graph_events(result, _printed)
 
         if tool_mode == ToolMode.CONTINUOUS:
-            print("Starting the iterative invocation process.")
+            logging.info("Starting the iterative invocation process.")
             current_state = self.get_current_state()
             iterations = 0
             while current_state.next and iterations < max_iterations:
                 iterations += 1
-                result = self.compiled_graph.invoke(None, config=self.config)
+                result = self.workflow.invoke(None, config=self.config)
                 if display:
-                    print(f"Iteration {iterations}")
+                    logging.info(f"Iteration {iterations}")
                     self._print_graph_events(result, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
@@ -262,7 +262,7 @@ class GraphAgent(AitaAgent):
             raise ValueError(f"Tool call {tool_id} not found in current state.")
         current_state_messages[-1].tool_calls[tool_call_index]["args"] = tool_args
         new_state = {"messages": [current_state_messages[-1]]}
-        self.compiled_graph.update_state(self.config, new_state)
+        self.workflow.update_state(self.config, new_state)
 
     def cancel_tool(self, tool_id: str):
         pass
@@ -294,4 +294,4 @@ class GraphAgent(AitaAgent):
         return event
 
     def display_graph(self):
-        display(Image(self.compiled_graph.get_graph().draw_mermaid_png()))
+        display(Image(self.workflow.get_graph().draw_mermaid_png()))

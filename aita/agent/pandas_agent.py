@@ -2,14 +2,13 @@ from typing import Dict
 
 from pandas import DataFrame
 
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import WorkflowAgent
 from aita.tool.pandas_tool import PandasTool
 from aita.tool.python_tool import PythonTool
 from aita.tool.sql_tool import ConvertToPandasTool
 
 
-class PandasAgent(GraphAgent):
-    type: str = "pandas"
+class PandasAgent(WorkflowAgent):
     description: str = (
         "A pandas agent that can use pandas tools to interact with pandas DataFrames."
     )

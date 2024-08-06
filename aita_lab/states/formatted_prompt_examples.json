@@ -2,12 +2,13 @@
     "question": "What are the average and minimum price (in Euro) of all products?",
     "templates": [
         {
+            "name": "Sql with RAG template",
             "args": {
                 "data_type": "spider",
                 "split": "test",
                 "k_shot": 1,
                 "prompt_repr": "SQL",
-                "example_type": "QA",
+                "example_format": "QA",
                 "selector_type": "EUCDISQUESTIONMASK",
                 "max_seq_len": 4096,
                 "max_ans_len": 200,
@@ -32,12 +33,13 @@
             }
         },
         {
+            "name": "Basic Sql template",
             "args": {
                 "data_type": "spider",
                 "split": "test",
                 "k_shot": 0,
                 "prompt_repr": "SQL",
-                "example_type": "QA",
+                "example_format": "QA",
                 "selector_type": "EUCDISQUESTIONMASK",
                 "max_seq_len": 4096,
                 "max_ans_len": 200,

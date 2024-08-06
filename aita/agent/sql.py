@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import WorkflowAgent
 from aita.tool.sql_tool import (
     ConvertToArrowTool,
     ConvertToPandasTool,
@@ -9,8 +9,7 @@ from aita.tool.sql_tool import (
 )
 
 
-class SqlAgent(GraphAgent):
-    type: str = "sql"
+class SqlAgent(WorkflowAgent):
     description: str = "A SQL agent that can use SQL Tools to interact with SQL databases."
 
     def __init__(

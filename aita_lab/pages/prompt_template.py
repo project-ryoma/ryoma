@@ -32,11 +32,15 @@ def prompt_card(pt: PromptTemplate):
         ),
         rx.dialog.content(
             rx.dialog.title(pt.prompt_template_name, size="6"),
-            rx.chakra.flex(
-                rx.chakra.badge(f"k_shot: {pt.k_shot}"),
-                justify="start",
+            rx.flex(
+                rx.chakra.badge(f"Representation: {pt.prompt_repr}"),
+                rx.chakra.badge(f"k_shot: {pt.k_shot}", color_scheme="purple"),
+                rx.chakra.badge(f"Type: {pt.selector_type}", color_scheme="blue"),
+                rx.chakra.badge(f"Type: {pt.prompt_template_type}", color_scheme="green"),
+                justify="between",
+                spacing="2",
                 direction="row",
-                padding="4px",
+                padding="2px",
             ),
             rx.chakra.vstack(
                 rx.foreach(pt.prompt_lines.split("\n"), lambda line: rx.text(line)),
@@ -57,10 +61,11 @@ def prompt_card(pt: PromptTemplate):
 def render_question():
     return rx.box(
         rx.chakra.text("A list of built-in prompt templates for you to choose from."),
-        rx.chakra.badge(
+        rx.badge(
             "Question: " + PromptTemplateState.question,
+            variant="outline",
             margin_top="10px",
-            font_size="md",
+            size="3",
             padding="2px",
         ),
     )
@@ -176,6 +181,14 @@ def render_create_prompt_template() -> rx.Component:
                             type="number",
                         ),
                         width="100%",
+                    ),
+                    rx.box(
+                      rx.heading("Example Format", size="2"),
+                        rx.input(
+                            placeholder="Enter the Example Format, e.g, {{context}}",
+                            value=PromptTemplateState.example_format,
+                            on_change=PromptTemplateState.set_example_format,
+                        ),
                     ),
                     rx.box(
                         rx.heading("Template", size="2"),

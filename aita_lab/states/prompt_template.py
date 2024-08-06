@@ -60,11 +60,11 @@ class PromptTemplateState(rx.State):
         question = data["question"]
         prompt_templates = []
         for template in data["templates"]:
+            prompt_template_name = template["name"]
             prompt_repr = template["args"]["prompt_repr"]
             k_shot = template["args"]["k_shot"]
-            example_format = template["args"]["example_type"]
+            example_format = template["args"]["example_format"]
             selector_type = template["args"]["selector_type"]
-            prompt_template_name = f"{prompt_repr}_{k_shot}-SHOT_{selector_type}_{example_format}"
             prompt_lines = template["formatted_question"]["prompt"]
             prompt_template = PromptTemplate(
                 prompt_repr=prompt_repr,

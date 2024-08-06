@@ -4,10 +4,10 @@ from aita_lab.states.playground import ChatState
 
 
 def chat_history_item(chat: str) -> rx.Component:
-    """A sidebar_chat_history playground item.
+    """A sidebar_chat_history chat item.
 
     Args:
-        chat: The playground item.
+        chat: The chat item.
     """
     return rx.drawer.close(
         rx.hstack(
@@ -57,19 +57,19 @@ def sidebar_chat_history(trigger) -> rx.Component:
 
 
 def create_chat_modal(trigger) -> rx.Component:
-    """A modal to create a new playground."""
+    """A modal to create a new chat."""
     return rx.dialog.root(
         rx.dialog.trigger(trigger),
         rx.dialog.content(
             rx.hstack(
                 rx.input(
-                    placeholder="Create a new playground with title...",
+                    placeholder="Create a new chat with title...",
                     on_blur=ChatState.set_new_chat_title,
                     width=["15em", "20em", "30em", "30em", "30em", "30em"],
                 ),
                 rx.dialog.close(
                     rx.button(
-                        "Create playground",
+                        "Create chat",
                         on_click=ChatState.create_chat,
                     ),
                 ),
@@ -85,7 +85,7 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                create_chat_modal(rx.button("+ New playground", variant="solid")),
+                create_chat_modal(rx.button("+ New chat", variant="solid")),
                 sidebar_chat_history(
                     rx.button(
                         rx.icon(

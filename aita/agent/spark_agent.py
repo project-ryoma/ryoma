@@ -1,12 +1,11 @@
 import pandas as pd
 
-from aita.agent.graph import GraphAgent
+from aita.agent.graph import WorkflowAgent
 from aita.tool.python_tool import PythonTool
 from aita.tool.spark_tool import ConvertPandasToSparkTool, SparkTool
 
 
-class SparkAgent(GraphAgent):
-    type: str = "pyspark"
+class SparkAgent(WorkflowAgent):
     description: str = "A PySpark agent that can use PySpark tools to run PySpark scripts."
 
     def __init__(self, spark_configs: dict[str, str], model: str, model_parameters=None):

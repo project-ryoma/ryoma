@@ -1,3 +1,6 @@
+import json
+import logging
+import uuid
 from typing import Optional
 
 import importlib
@@ -5,9 +8,10 @@ import random
 
 import reflex as rx
 from langchain_core.runnables.graph import Edge, Node
+from sqlmodel import select, Field
 
-from aita.agent.factory import AgentFactory, get_supported_agents
-from aita.agent.graph import GraphAgent
+from aita.agent.factory import AgentFactory, get_builtin_agents
+from aita.agent.graph import WorkflowAgent
 from aita_lab.states.graph import Graph
 
 
@@ -36,53 +40,95 @@ def create_agent_graph_edge(id, edge: Edge):
     return {"id": id, "source": edge.source, "target": edge.target, "animated": True}
 
 
-class Agent(rx.Model):
-    id: Optional[str]
+class Agent(rx.Model, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True)
     name: str
     description: Optional[str]
-    tools: Optional[list[str]]
+    type: Optional[str] = Field(default="builtin")
+    workflow: Optional[str]
 
 
 class AgentState(rx.State):
     agents: list[Agent] = []
     is_open: bool = False
-    current_agent: Optional[Agent] = None
+    current_agent_name: Optional[str] = None
+    current_agent_description: Optional[str] = None
     current_agent_graph: Optional[Graph] = None
 
     def open_agent(self, is_open: bool, agent: Agent):
         self.is_open = is_open
-        passthrough_agent = AgentFactory.create_agent(agent["name"], model="")
-        if isinstance(passthrough_agent, GraphAgent):
+        logging.info("Opening agent %s", agent)
+        if agent["type"] == "workflow":
+            passthrough_agent = AgentFactory.create_agent(agent["name"], model="")
             graph = passthrough_agent.get_graph()
             self.current_agent_graph = Graph(
                 nodes=[create_agent_graph_node(node) for _, node in graph.nodes.items()],
                 edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)],
             )
+        elif agent["type"] == "custom":
+            workflow = json.loads(agent["workflow"])
+            self.current_agent_graph = Graph(**workflow)
 
     @rx.var
     def agent_names(self) -> list[str]:
         return [agent.name for agent in self.agents]
 
-    def get_custom_agents(self):
-        return []
-
-    def on_load(self):
-        self.agents = [
-            Agent(name=agent.name, description=agent.value.description)
-            for agent in get_supported_agents() + self.get_custom_agents()
-        ]
-
-    def create_agent(self, graph: Graph):
-        state_graph = GraphAgent.init_state_graph()
+    def _build_workflow(self, graph: Graph):
+        workflow_state = WorkflowAgent.init_state()
         tools = []
         for node in graph.nodes:
-            if node["type"] == "tool":
+            if "type" in node and node["type"] == "tool":
                 tool_name = node["data"]["label"]
                 tool_cls = importlib.import_module(f"aita.tool.{tool_name}")
                 tools.append(tool_cls)
 
-        state_graph.set_entry_point("agent")
-        state_graph.add_edge("tools", "agent")
+        workflow_state.set_entry_point("agent")
+        workflow_state.add_edge("tools", "agent")
 
-        agent = GraphAgent(type="custom", tools=tools, model=self.current_model, graph=state_graph)
+        agent = WorkflowAgent(type="custom", tools=tools, model="", graph=workflow_state)
+
+    def create_agent(self, graph: Graph):
+        if not self.current_agent_name:
+            return rx.toast.error("Please enter a name for the agent.")
+        logging.info("Creating agent with graph %s", graph)
+        description = self.current_agent_description or "A custom agent created by the user."
+
+        with rx.session() as session:
+            agent = Agent(
+                id=str(uuid.uuid4()),
+                name=self.current_agent_name,
+                type="custom",
+                description=description,
+                workflow=json.dumps(graph),
+            )
+            session.add(agent)
+            session.commit()
+        self._load_agents()
         return
+
+    def _load_custom_agents(self):
+        with rx.session() as session:
+            return session.exec(select(Agent)).all()
+
+    def _load_agents(self):
+        builtin_agents = [
+            Agent(
+                name=agent.name,
+                description=agent.value.description,
+                type=agent.value.type,
+            )
+            for agent in get_builtin_agents()
+        ]
+        custom_agents = [
+            Agent(
+                id=agent.id,
+                name=agent.name,
+                description=agent.description,
+                type=agent.type,
+                workflow=agent.workflow,
+            ) for agent in self._load_custom_agents()
+        ]
+        self.agents = builtin_agents + custom_agents
+
+    def on_load(self):
+        self._load_agents()

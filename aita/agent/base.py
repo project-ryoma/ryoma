@@ -50,11 +50,6 @@ class AitaAgent:
         else:
             self.model = model
 
-        if not self.model:
-            raise ValueError(
-                f"Failed to load model with model name: {model} and parameters: {model_parameters}"
-            )
-
         # prompt
         self.prompt_template_factory = PromptTemplateFactory(
             base_prompt_template,

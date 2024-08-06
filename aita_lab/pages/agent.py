@@ -23,6 +23,7 @@ def agent_card(agent: Agent):
                 overflow="auto",
                 height="300px",
                 width="50%",
+                min_width="12em",
                 margin_right="20px",
                 cursor="pointer",
                 _hover={"background_color": rx.color("gray", 2)},
@@ -60,11 +61,13 @@ def agent_card(agent: Agent):
     )
 
 
-def content_grid():
+def show_agent_grid():
     """Create a content grid."""
     return rx.vstack(
         rx.chakra.text("Click on an agent to view its flow", width="100", padding_y="4"),
         rx.chakra.flex(rx.foreach(AgentState.agents, agent_card, width="100"), width="100%"),
+        width="100%",
+        overflow_x="scroll",
     )
 
 
@@ -72,6 +75,16 @@ def create_agent_flow():
     return rx.vstack(
         rx.heading("Create your own agent", size="6"),
         rx.hstack(
+            rx.input(
+                placeholder="Agent Name",
+                on_blur=AgentState.set_current_agent_name,
+                required=True,
+            ),
+            rx.input(
+                placeholder="Describe your agent",
+                on_blur=AgentState.set_current_agent_description,
+                required=True,
+            ),
             rx.select(
                 ToolState.tool_names,
                 placeholder="Select a tool to add",
@@ -119,7 +132,7 @@ def agent() -> rx.Component:
     return rx.vstack(
         rx.heading("Agent", size="8"),
         rx.box(
-            content_grid(),
+            show_agent_grid(),
             margin_top="20px",
             width="100%",
         ),
