@@ -143,7 +143,6 @@ def datasource_selector() -> rx.Component:
                     width="100%",
                 ),
                 rx.select.content(
-
                     rx.select.group(
                         rx.select.label("Connected Data Source"),
                         rx.cond(
@@ -371,7 +370,7 @@ def playground() -> rx.Component:
                     datasource_selector(),
                     agent_selector(),
                     direction="row",
-                    spacing="3"
+                    spacing="3",
                 ),
                 rx.dialog.root(
                     rx.dialog.trigger(

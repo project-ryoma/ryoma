@@ -1,14 +1,14 @@
-import json
-import logging
-import uuid
 from typing import Optional
 
 import importlib
+import json
+import logging
 import random
+import uuid
 
 import reflex as rx
 from langchain_core.runnables.graph import Edge, Node
-from sqlmodel import select, Field
+from sqlmodel import Field, select
 
 from aita.agent.factory import AgentFactory, get_builtin_agents
 from aita.agent.graph import WorkflowAgent
@@ -126,7 +126,8 @@ class AgentState(rx.State):
                 description=agent.description,
                 type=agent.type,
                 workflow=agent.workflow,
-            ) for agent in self._load_custom_agents()
+            )
+            for agent in self._load_custom_agents()
         ]
         self.agents = builtin_agents + custom_agents
 

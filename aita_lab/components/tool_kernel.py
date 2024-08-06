@@ -91,7 +91,7 @@ def render_tool_panel(
                 weight="bold",
                 height="100%",
                 align_content="center",
-                margin="0"
+                margin="0",
             ),
             rx.cond(
                 not render_only,

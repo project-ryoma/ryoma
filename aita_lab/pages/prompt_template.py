@@ -183,7 +183,7 @@ def render_create_prompt_template() -> rx.Component:
                         width="100%",
                     ),
                     rx.box(
-                      rx.heading("Example Format", size="2"),
+                        rx.heading("Example Format", size="2"),
                         rx.input(
                             placeholder="Enter the Example Format, e.g, {{context}}",
                             value=PromptTemplateState.example_format,

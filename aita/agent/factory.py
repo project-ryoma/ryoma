@@ -1,5 +1,6 @@
-from enum import Enum
 from typing import Union
+
+from enum import Enum
 
 from aita.agent.arrow_agent import ArrowAgent
 from aita.agent.base import AitaAgent
