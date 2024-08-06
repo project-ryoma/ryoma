@@ -114,7 +114,7 @@ class ChatState(BaseState):
     def set_current_prompt_template(self, prompt_template_name: str):
         self.current_prompt_template = PromptTemplateState.get_prompt_template(prompt_template_name)
         self.vector_feature_dialog_open = (
-                self.current_prompt_template and self.current_prompt_template.k_shot > 0
+            self.current_prompt_template and self.current_prompt_template.k_shot > 0
         )
 
     def _create_chat_agent(self, **kwargs):

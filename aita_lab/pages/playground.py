@@ -155,10 +155,7 @@ def datasource_selector() -> rx.Component:
                         width="100%",
                     ),
                     rx.select.group(
-                        rx.select.item(
-                            "Create new datasource + ",
-                            value="custom"
-                        ),
+                        rx.select.item("Create new datasource + ", value="custom"),
                     ),
                     width="100%",
                 ),
@@ -282,7 +279,7 @@ def prompt_template_selector() -> rx.Component:
                                 rx.select.item(
                                     "Create new feature +",
                                     value="new",
-                                )
+                                ),
                             ),
                         ),
                         value=ChatState.current_vector_feature,
