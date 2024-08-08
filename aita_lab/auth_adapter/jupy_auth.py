@@ -1,29 +1,29 @@
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
 import contextlib
 import json
 import logging
 import random
-from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select  # type: ignore
-
+from fps_auth.backends import get_backend
+from fps_auth.config import _AuthConfig
+from fps_auth.models import UserCreate, UserRead, UserUpdate
 from jupyverse_api import Router
 from jupyverse_api.app import App
 from jupyverse_api.auth import Auth
 from jupyverse_api.frontend import FrontendConfig
+from sqlalchemy import select  # type: ignore
 
-from fps_auth.backends import get_backend
-from fps_auth.config import _AuthConfig
 from .utils import get_db
-from fps_auth.models import UserCreate, UserRead, UserUpdate
 
 logger = logging.getLogger("auth")
 
 
 def auth_factory(
-        app: App,
-        auth_config: _AuthConfig,
-        frontend_config: FrontendConfig,
+    app: App,
+    auth_config: _AuthConfig,
+    frontend_config: FrontendConfig,
 ):
     db = get_db(auth_config)
     backend = get_backend(auth_config, frontend_config, db)
@@ -61,7 +61,7 @@ def auth_factory(
 
             @router.get("/auth/users")
             async def get_users(
-                    user: UserRead = Depends(backend.current_user(permissions={"admin": ["read"]})),
+                user: UserRead = Depends(backend.current_user(permissions={"admin": ["read"]})),
             ):
                 async with db.async_session_maker() as session:
                     statement = select(db.User)
@@ -70,9 +70,9 @@ def auth_factory(
 
             @router.get("/api/me")
             async def get_api_me(
-                    permissions: Optional[str] = None,
-                    user: UserRead = Depends(backend.current_user()),
-                    update_user=Depends(backend.update_user),
+                permissions: Optional[str] = None,
+                user: UserRead = Depends(backend.current_user()),
+                update_user=Depends(backend.update_user),
             ):
                 checked_permissions: Dict[str, List[str]] = {}
                 if permissions is None:
@@ -117,7 +117,7 @@ def auth_factory(
 
             @users_router.get("/me")
             async def get_me(
-                    user: UserRead = Depends(backend.current_user(permissions={"admin": ["read"]})),
+                user: UserRead = Depends(backend.current_user(permissions={"admin": ["read"]})),
             ):
                 return user
 
@@ -157,8 +157,8 @@ def auth_factory(
             return update_user
 
         def websocket_auth(
-                self,
-                permissions: Optional[Dict[str, List[str]]] = None,
+            self,
+            permissions: Optional[Dict[str, List[str]]] = None,
         ) -> Callable[[], Tuple[Any, Dict[str, List[str]]]]:
             return backend.websocket_auth(permissions)
 

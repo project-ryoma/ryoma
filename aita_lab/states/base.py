@@ -3,12 +3,9 @@
 from typing import List, Optional
 
 import reflex as rx
-from fastapi_users.db import (
-    SQLAlchemyBaseOAuthAccountTableUUID,
-    SQLAlchemyBaseUserTableUUID,
-)
-from sqlmodel import Field, Relationship, select
+from fastapi_users.db import SQLAlchemyBaseOAuthAccountTableUUID, SQLAlchemyBaseUserTableUUID
 from sqlalchemy import JSON, Column
+from sqlmodel import Field, Relationship, select
 
 
 class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, rx.Model, table=True):

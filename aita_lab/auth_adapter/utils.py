@@ -1,20 +1,18 @@
+from typing import Any, AsyncGenerator
+
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, AsyncGenerator
-
-from fastapi import Depends, FastAPI
-from fastapi_users.db import (
-    SQLAlchemyUserDatabase,
-)
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import reflex as rx
-from aita_lab.states.base import User, OAuthAccount
+from fastapi import Depends, FastAPI
+from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from aita_lab.states.base import OAuthAccount, User
 
 rx_config = rx.config.get_config()
 from fps_auth.config import _AuthConfig
-
 
 
 @dataclass
@@ -73,4 +71,3 @@ def get_db(auth_config: _AuthConfig) -> Res:
         get_user_db=get_user_db,
         secret=secret,
     )
-
