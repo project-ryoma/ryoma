@@ -150,6 +150,7 @@ pytest-cov = "^3.0.0"
 openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
 azure-identity = "^1.16.0"
+jupyterlab-server = "^2.27.3"
 
 
 [tool.black]

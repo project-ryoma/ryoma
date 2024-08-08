@@ -177,7 +177,7 @@ class ChatState(BaseState):
             session.add(
                 Chat(
                     title=self.new_chat_title,
-                    user=self.user.name,
+                    user=self.user.username,
                     question=None,
                     answer=None,
                     description=None,
@@ -218,7 +218,7 @@ class ChatState(BaseState):
             session.add(
                 Chat(
                     title=title,
-                    user=self.user.name,
+                    user=self.user.username,
                     question=question,
                     answer=answer,
                     description=None,
@@ -369,7 +369,7 @@ class ChatState(BaseState):
     def load_chats(self):
         """Load the chats from the database."""
         with rx.session() as session:
-            chats = session.exec(select(Chat).where(Chat.user == self.user.name)).all()
+            chats = session.exec(select(Chat).where(Chat.user == self.user.username)).all()
             for chat in chats:
                 self.chats[chat.title] = [QA(question=chat.question, answer=chat.answer)]
             if not self.chats:

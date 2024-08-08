@@ -1,22 +1,42 @@
 """Base state for the app."""
 
-from typing import Optional
+from typing import List, Optional
 
 import reflex as rx
+from fastapi_users.db import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
+from sqlmodel import Field, Relationship, select
+from sqlalchemy import JSON, Column
 
 
-class User(rx.Model, table=True):
-    """User Model"""
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, rx.Model, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True)
 
-    name: str
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    user_id: Optional[str] = Field(default=None, foreign_key="user.id")
+    user: "User" = Relationship(back_populates="oauth_accounts")
+
+
+class User(SQLAlchemyBaseUserTableUUID, rx.Model, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True)
+    anonymous: bool = Field(default=True)
+    username: str = Field(nullable=False, unique=True)
+    name: str = Field(default="")
+    display_name: str = Field(default="")
+    initials: str = Field(nullable=True)
+    color: str = Field(nullable=True)
+    avatar_url: str = Field(nullable=True)
+    workspace: str = Field(default="{}", nullable=False)
+    settings: str = Field(default="{}", nullable=False)
+    permissions: str = Field(sa_column=Column(JSON), default={})
+    oauth_accounts: List[OAuthAccount] = Relationship(back_populates="user")
 
 
 class BaseState(rx.State):
     """State for the app."""
 
-    user: User = User(name="User")
+    user: Optional[User] = None
 
     sidebar_displayed: bool = True
 
@@ -36,7 +56,7 @@ class BaseState(rx.State):
     def load_user(self) -> None:
         """Load the user."""
         with rx.session() as session:
-            self.user = session.exec(rx.select(User).where(User.name == "User")).first()
+            self.user = session.exec(select(User).where(User.username == "admin")).first()
 
     def on_load(self) -> None:
         """Load the state."""

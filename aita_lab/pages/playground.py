@@ -7,6 +7,7 @@ from aita_lab.components.loading_icon import loading_icon
 from aita_lab.components.model_selector import select_model
 from aita_lab.components.tool_kernel import notebook
 from aita_lab.states.agent import AgentState
+from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from aita_lab.states.playground import QA, ChatState
@@ -366,6 +367,7 @@ def chat_model_selector() -> rx.Component:
     route="/",
     title="Playground",
     on_load=[
+        BaseState.on_load,
         ChatState.on_load,
         DataSourceState.on_load,
         PromptTemplateState.on_load,

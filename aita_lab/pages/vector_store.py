@@ -4,6 +4,7 @@ import reflex as rx
 
 from aita_lab import styles
 from aita_lab.components.upload import upload_render
+from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.templates import ThemeState, template
@@ -302,7 +303,7 @@ def show_store():
 @template(
     route="/vector_store",
     title="Vector Store",
-    on_load=[VectorStoreState.on_load(), DataSourceState.on_load()],
+    on_load=[BaseState.on_load, VectorStoreState.on_load, DataSourceState.on_load],
 )
 def vector_store() -> rx.Component:
     """The Vector Store page.
