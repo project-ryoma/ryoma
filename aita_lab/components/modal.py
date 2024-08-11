@@ -1,16 +1,16 @@
 import reflex as rx
 
-from aita_lab.states.chat import ChatState, DataSourceState
+from aita_lab.states.workspace import ChatState, DataSourceState
 
 
 def modal() -> rx.Component:
-    """A modal to create a new playground."""
+    """A modal to create a new workspace."""
     return rx.chakra.modal(
         rx.chakra.modal_overlay(
             rx.chakra.modal_content(
                 rx.chakra.modal_header(
                     rx.chakra.hstack(
-                        rx.chakra.text("Create new playground"),
+                        rx.chakra.text("Create new workspace"),
                         rx.chakra.icon(
                             tag="close",
                             font_size="sm",

@@ -9,9 +9,9 @@ from aita_lab.states.tool_calls import ToolCall
 
 
 def tool_args(
-    tool: Tool,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    render_only: bool = False,
+        tool: Tool,
+        update_tool_args: Optional[rx.event.EventHandler] = None,
+        render_only: bool = False,
 ) -> rx.Component:
     return rx.flex(
         rx.cond(
@@ -75,11 +75,11 @@ def render_tool_output(tool_output: ToolOutput) -> rx.Component:
 
 
 def render_tool_panel(
-    tool: Tool,
-    run_tool: Optional[rx.event.EventHandler] = None,
-    cancel_tool: Optional[rx.event.EventHandler] = None,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    render_only: bool = False,
+        tool: Tool,
+        run_tool: Optional[rx.event.EventHandler] = None,
+        cancel_tool: Optional[rx.event.EventHandler] = None,
+        update_tool_args: Optional[rx.event.EventHandler] = None,
+        render_only: bool = False,
 ) -> rx.Component:
     return rx.flex(
         rx.flex(
@@ -118,10 +118,10 @@ def render_tool_panel(
 
 
 def tool_history(
-    tool_calls: list[ToolCall],
-    run_tool: rx.event.EventHandler,
-    cancel_tool: rx.event.EventHandler,
-    update_tool_args: rx.event.EventHandler,
+        tool_calls: list[ToolCall],
+        run_tool: rx.event.EventHandler,
+        cancel_tool: rx.event.EventHandler,
+        update_tool_args: rx.event.EventHandler,
 ) -> rx.Component:
     return rx.box(
         rx.cond(
@@ -160,12 +160,12 @@ def tool_history(
 
 
 def tool_kernel(
-    tool: Optional[Tool] = None,
-    run_tool: Optional[rx.event.EventHandler] = None,
-    cancel_tool: Optional[rx.event.EventHandler] = None,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    tool_output: Optional[ToolOutput] = None,
-    render_only: bool = False,
+        tool: Optional[Tool] = None,
+        run_tool: Optional[rx.event.EventHandler] = None,
+        cancel_tool: Optional[rx.event.EventHandler] = None,
+        update_tool_args: Optional[rx.event.EventHandler] = None,
+        tool_output: Optional[ToolOutput] = None,
+        render_only: bool = False,
 ) -> rx.Component:
     return rx.flex(
         rx.cond(
@@ -188,12 +188,12 @@ def tool_kernel(
 
 
 def notebook(
-    tool: Tool,
-    run_tool: rx.event.EventHandler,
-    cancel_tool: rx.event.EventHandler,
-    update_tool_args: rx.event.EventHandler,
-    tool_output: ToolOutput,
-    tool_calls: list[ToolCall] = None,
+        tool: Tool,
+        run_tool: rx.event.EventHandler,
+        cancel_tool: rx.event.EventHandler,
+        update_tool_args: rx.event.EventHandler,
+        tool_output: ToolOutput,
+        tool_calls: list[ToolCall] = None,
 ) -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(

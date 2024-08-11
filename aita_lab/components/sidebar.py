@@ -8,7 +8,7 @@ from aita_lab.states.base import BaseState
 
 # Icons for the sidebar
 ICONS = {
-    "Playground": "message-square-more",
+    "Workspace": "message-square-more",
     "Data Catalog": "library",
     "Data Source": "database",
     "Document": "file-code",
@@ -130,7 +130,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             width="100%",
             padding="1em",
         ),
-        rx.cond(BaseState.sidebar_displayed, rx.cond(text == "Playground" and active, navbar())),
+        rx.cond(BaseState.sidebar_displayed, rx.cond(text == "Workspace" and active, navbar())),
         href=url,
         width="100%",
     )

@@ -8,7 +8,7 @@ class ReactCodeMirror(rx.Component):
 
     lib_dependencies: list[str] = ["@uiw/codemirror-extensions-langs"]
 
-    tag = "CodeEditor"
+    tag = "CodeMirror"
 
     is_default = True
 

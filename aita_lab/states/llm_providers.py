@@ -2,20 +2,82 @@ from enum import Enum
 
 # get embedding models
 from jupyter_ai_magics.embedding_providers import (
-    BedrockEmbeddingsProvider,
     GPT4AllEmbeddingsProvider,
     HfHubEmbeddingsProvider,
 )
 from jupyter_ai_magics.providers import (
     AI21Provider,
-    BedrockChatProvider,
-    BedrockProvider,
     GPT4AllProvider,
     HfHubProvider,
     QianfanProvider,
-    SmEndpointProvider,
     TogetherAIProvider,
 )
+
+
+class BedrockProvider:
+    id = "bedrock"
+    name = "Amazon Bedrock"
+    models = [
+        "amazon.titan-text-express-v1",
+        "amazon.titan-text-lite-v1",
+        "ai21.j2-ultra-v1",
+        "ai21.j2-mid-v1",
+        "cohere.command-light-text-v14",
+        "cohere.command-text-v14",
+        "cohere.command-r-v1:0",
+        "cohere.command-r-plus-v1:0",
+        "meta.llama2-13b-chat-v1",
+        "meta.llama2-70b-chat-v1",
+        "meta.llama3-8b-instruct-v1:0",
+        "meta.llama3-70b-instruct-v1:0",
+        "meta.llama3-1-8b-instruct-v1:0",
+        "meta.llama3-1-70b-instruct-v1:0",
+        "mistral.mistral-7b-instruct-v0:2",
+        "mistral.mixtral-8x7b-instruct-v0:1",
+        "mistral.mistral-large-2402-v1:0",
+    ]
+
+
+class BedrockChatProvider:
+    id = "bedrock-chat"
+    name = "Amazon Bedrock Chat"
+    models = [
+        "amazon.titan-text-express-v1",
+        "amazon.titan-text-lite-v1",
+        "anthropic.claude-v2",
+        "anthropic.claude-v2:1",
+        "anthropic.claude-instant-v1",
+        "anthropic.claude-3-sonnet-20240229-v1:0",
+        "anthropic.claude-3-haiku-20240307-v1:0",
+        "anthropic.claude-3-opus-20240229-v1:0",
+        "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "meta.llama2-13b-chat-v1",
+        "meta.llama2-70b-chat-v1",
+        "meta.llama3-8b-instruct-v1:0",
+        "meta.llama3-70b-instruct-v1:0",
+        "meta.llama3-1-8b-instruct-v1:0",
+        "meta.llama3-1-70b-instruct-v1:0",
+        "mistral.mistral-7b-instruct-v0:2",
+        "mistral.mixtral-8x7b-instruct-v0:1",
+        "mistral.mistral-large-2402-v1:0",
+    ]
+
+
+class SmEndpointProvider:
+    id = "sagemaker-endpoint"
+    name = "SageMaker endpoint"
+    models = ["*"]
+
+
+class BedrockEmbeddingsProvider:
+    id = "bedrock"
+    name = "Bedrock"
+    models = [
+        "amazon.titan-embed-text-v1",
+        "amazon.titan-embed-text-v2:0",
+        "cohere.embed-english-v3",
+        "cohere.embed-multilingual-v3",
+    ]
 
 
 class OpenAIEmbeddingsProvider:
@@ -87,17 +149,17 @@ class ChatNVIDIAProvider:
     id = "nvidia-chat"
     name = "NVIDIA"
     models = [
-        "playground_llama2_70b",
-        "playground_nemotron_steerlm_8b",
-        "playground_mistral_7b",
-        "playground_nv_llama2_rlhf_70b",
-        "playground_llama2_13b",
-        "playground_steerlm_llama_70b",
-        "playground_llama2_code_13b",
-        "playground_yi_34b",
-        "playground_mixtral_8x7b",
-        "playground_neva_22b",
-        "playground_llama2_code_34b",
+        "chat_llama2_70b",
+        "chat_nemotron_steerlm_8b",
+        "chat_mistral_7b",
+        "chat_nv_llama2_rlhf_70b",
+        "chat_llama2_13b",
+        "chat_steerlm_llama_70b",
+        "chat_llama2_code_13b",
+        "chat_yi_34b",
+        "chat_mixtral_8x7b",
+        "chat_neva_22b",
+        "chat_llama2_code_34b",
     ]
 
 

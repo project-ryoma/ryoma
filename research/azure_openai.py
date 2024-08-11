@@ -19,7 +19,7 @@ client = AzureOpenAI(
     api_version="2024-02-01",
 )
 
-# completion = client.playground.completions.create(
+# completion = client.chat.completions.create(
 #     model=deployment,
 #     messages=[
 #         {

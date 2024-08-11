@@ -1,4 +1,4 @@
-"""The playground page."""
+"""The workspace page."""
 
 import reflex as rx
 
@@ -10,7 +10,7 @@ from aita_lab.states.agent import AgentState
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
 from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
-from aita_lab.states.playground import QA, ChatState
+from aita_lab.states.workspace import QA, ChatState
 from aita_lab.states.prompt_template import PromptTemplateState
 from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
@@ -365,7 +365,7 @@ def chat_model_selector() -> rx.Component:
 
 @template(
     route="/",
-    title="Playground",
+    title="Workspace",
     on_load=[
         BaseState.on_load,
         ChatState.on_load,
@@ -376,7 +376,7 @@ def chat_model_selector() -> rx.Component:
         ToolCallState.on_load,
     ],
 )
-def playground() -> rx.Component:
+def workspace() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
         rx.chakra.flex(
@@ -403,7 +403,7 @@ def playground() -> rx.Component:
                     rx.dialog.content(
                         rx.dialog.title("Advanced Settings"),
                         rx.dialog.description(
-                            "Advanced settings for AI playground, including data source, prompt template, and agent type."
+                            "Advanced settings for AI agent, including data source, prompt template, and agent type."
                         ),
                         rx.flex(
                             prompt_template_selector(),

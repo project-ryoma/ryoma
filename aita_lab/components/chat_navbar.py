@@ -1,6 +1,6 @@
 import reflex as rx
 
-from aita_lab.states.playground import ChatState
+from aita_lab.states.workspace import ChatState
 
 
 def chat_history_item(chat: str) -> rx.Component:

@@ -47,7 +47,7 @@ DEFAULT_CHATS = {
 class ChatState(BaseState):
     """The app state."""
 
-    # playground states
+    # chat states
     chats: dict[str, list[QA]] = DEFAULT_CHATS
 
     current_chat = "Intros"
@@ -169,8 +169,8 @@ class ChatState(BaseState):
         self._current_chat_agent.cancel_tool(self.current_tool_id)
 
     def create_chat(self):
-        """Create a new playground."""
-        # Add the new playground to the list of chats.
+        """Create a new chat."""
+        # Add the new chat to the list of chats.
         self.current_chat = self.new_chat_title
         self.chats[self.new_chat_title] = []
         with rx.session() as session:
@@ -188,7 +188,7 @@ class ChatState(BaseState):
             session.commit()
 
     def delete_chat(self):
-        """Delete the current playground."""
+        """Delete the current chat."""
         with rx.session() as session:
             session.exec(delete(Chat).where(Chat.title == self.current_chat))
             session.commit()
@@ -197,19 +197,19 @@ class ChatState(BaseState):
         self.current_chat = list(self.chats.keys())[0]
 
     def set_chat(self, chat_title: str):
-        """Set the title of the current playground.
+        """Set the title of the current chat.
 
         Args:
-            chat_title: The name of the playground.
+            chat_title: The name of the chat.
         """
         self.current_chat = chat_title
 
     @rx.var
     def chat_titles(self) -> list[str]:
-        """Get the list of playground titles.
+        """Get the list of chat titles.
 
         Returns:
-            The list of playground names.
+            The list of chat names.
         """
         return list(self.chats.keys())
 
@@ -290,7 +290,7 @@ class ChatState(BaseState):
         # Toggle the processing flag.
         self.processing = False
 
-        # commit the playground to the database
+        # commit the chat to the database
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,
@@ -300,7 +300,7 @@ class ChatState(BaseState):
     async def process_question(self, form_data: dict[str, str]):
 
         if not self.current_chat_model:
-            yield rx.toast.error("Please select a playground model.")
+            yield rx.toast.error("Please select a chat model.")
             return
 
         # Clear the input and start the processing.
@@ -321,7 +321,7 @@ class ChatState(BaseState):
 
         logging.info(f"Processing question: {question}")
 
-        # init the playground agent
+        # init the chat agent
         self._create_chat_agent()
 
         # init the embedding agent
@@ -345,7 +345,7 @@ class ChatState(BaseState):
         # Toggle the processing flag.
         self.processing = False
 
-        # commit the playground to the database
+        # commit the chat to the database
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,

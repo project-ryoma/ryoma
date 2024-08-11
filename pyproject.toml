@@ -58,6 +58,7 @@ sql-metadata = "^2.11.0"
 feast = "^0.39.1"
 amundsen-databuilder = "^7.5.0"
 ibis-framework = "^9.0.0"
+jupyverse = "^0.6.0"
 
 # extra dependency group for different databases
 [tool.poetry.group.snowflake]
@@ -131,7 +132,6 @@ pyspark = "^3.2.0"
 
 # dev dependencies
 [tool.poetry.group.dev.dependencies]
-jupyter = "^1.0.0"
 bandit = "^1.7.1"
 black = "^24.2.0"
 darglint = "^1.8.1"
@@ -151,6 +151,8 @@ openai-responses = "^0.6.0"
 typing-extensions = "^4.12.1"
 azure-identity = "^1.16.0"
 jupyterlab-server = "^2.27.3"
+torch = "^2.4.0"
+jupyterlab = "^4.2.4"
 
 
 [tool.black]
