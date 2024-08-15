@@ -1,5 +1,5 @@
 # Create a decoder only transformer classifier.
-from typing import Dict, Any
+from typing import Any, Dict
 
 import torch
 from torch import nn

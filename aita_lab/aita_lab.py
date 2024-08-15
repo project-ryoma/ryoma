@@ -2,9 +2,10 @@
 
 import reflex as rx
 
+from aita_lab.apps.app_factory import create_marimo_app
+
 # Import all the pages.
 from aita_lab.pages import *
-from aita_lab.apps.app_factory import create_marimo_app
 
 
 class State(rx.State):

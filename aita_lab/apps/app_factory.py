@@ -1,26 +1,26 @@
 from __future__ import annotations
 
-import os
 from typing import List, Optional, Tuple
 
-from marimo._cli.cli import DEVELOPMENT_MODE
-from marimo._server.asgi import ASGIAppBuilder
-from starlette.applications import Starlette
+import os
 
 import marimo._server.api.lifespans as lifespans
+from marimo._cli.cli import DEVELOPMENT_MODE
 from marimo._config.manager import UserConfigManager
+from marimo._server.asgi import ASGIAppBuilder
 from marimo._server.file_router import AppFileRouter
 from marimo._server.main import create_starlette_app
 from marimo._server.model import SessionMode
 from marimo._server.sessions import NoopLspServer, SessionManager
 from marimo._server.tokens import AuthToken
+from starlette.applications import Starlette
 
 
 def create_marimo_app(
-        *,
-        quiet: bool = False,
-        include_code: bool = False,
-        token: Optional[str] = None,
+    *,
+    quiet: bool = False,
+    include_code: bool = False,
+    token: Optional[str] = None,
 ) -> ASGIAppBuilder:
     user_config_mgr = UserConfigManager()
 
