@@ -150,6 +150,7 @@ class CatalogState(rx.State):
         return SessionLoader(self._load_catalog_record)
 
     def _commit_catalog(self, session: Session, datasource: str, database: str, schema: str):
+        logging.info(f"Committing catalog: {datasource} {database} {schema}")
 
         # check if catalog already exists
         _catalog = session.exec(

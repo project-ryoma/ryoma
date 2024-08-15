@@ -1,16 +1,10 @@
-"""Welcome to Reflex!."""
-
-import os
+"""Welcome to Aita!."""
 
 import reflex as rx
-from fps_auth.config import _AuthConfig
-from jupyverse_api.frontend import FrontendConfig
-from jupyverse_api.kernels import KernelsConfig
-
-from aita_lab.apis.jupyter import mount_jupyter_api
 
 # Import all the pages.
 from aita_lab.pages import *
+from aita_lab.apps.app_factory import create_marimo_app
 
 
 class State(rx.State):
@@ -19,26 +13,10 @@ class State(rx.State):
 
 # Create the app.
 app = rx.App()
+marimo_app = create_marimo_app(
+    quiet=True,
+    include_code=True,
+    token="",
+).build()
 
-
-def enable_jupyter():
-    """Enable Jupyter."""
-    frontend_config = FrontendConfig()
-    auth_config = _AuthConfig(
-        **{
-            "mode": "token",
-            "directory": None,
-            "clear_users": False,
-            "test": False,
-            "global_email": "admin@aita.com",
-            "cookie_secure": False,
-        }
-    )
-    kernel_config = KernelsConfig()
-
-    mount_jupyter_api(app.api, auth_config, frontend_config, kernel_config)
-
-
-ENABLE_JUPYTER = os.environ.get("ENABLE_JUPYTER", "false").lower() == "true"
-if ENABLE_JUPYTER:
-    enable_jupyter()
+app.api.mount("/_marimo", marimo_app)
