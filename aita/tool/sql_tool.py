@@ -21,9 +21,6 @@ class SqlDataSourceTool(BaseTool, ABC):
 
 class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql database.")
-    result_format: Optional[Literal["pandas", "arrow", "polars"]] = Field(
-        description="Format of the result, currently supports pandas, arrow, and polars. Default is pandas."
-    )
 
 
 class SqlQueryTool(SqlDataSourceTool):
@@ -41,12 +38,11 @@ class SqlQueryTool(SqlDataSourceTool):
     def _run(
         self,
         query,
-        result_format: Optional[Literal["pandas", "arrow", "polars"]] = "pandas",
         **kwargs,
     ) -> (str, str):
         """Execute the query, return the results or an error message."""
         try:
-            result = self.datasource.query(query, result_format=result_format)
+            result = self.datasource.query(query)
 
             # Serialize the result to a base64 encoded string as the artifact
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")
@@ -93,6 +89,44 @@ class CreateTableTool(SqlDataSourceTool):
         return self.datasource.query(
             "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns)
         )
+
+
+class QueryPlanTool(SqlDataSourceTool):
+    """Tool for getting the query plan of a SQL query."""
+
+    name: str = "query_plan"
+    description: str = """
+    Get the query plan of a SQL query.
+    If the query is not correct, an error message will be returned.
+    """
+    args_schema: Type[BaseModel] = QueryInput
+
+    def _run(
+        self,
+        query: str,
+        **kwargs,
+    ) -> str:
+        """Execute the query, return the results or an error message."""
+        return self.datasource.get_query_plan(query)
+
+
+class QueryProfileTool(SqlDataSourceTool):
+    """Tool for getting the query profile of a SQL query."""
+
+    name: str = "query_profile"
+    description: str = """
+    Get the query profile of a SQL query.
+    If the query is not correct, an error message will be returned.
+    """
+    args_schema: Type[BaseModel] = QueryInput
+
+    def _run(
+        self,
+        query: str,
+        **kwargs,
+    ) -> str:
+        """Execute the query, return the results or an error message."""
+        return self.datasource.get_query_profile(query)
 
 
 class ConvertToPandasTool(SqlDataSourceTool):

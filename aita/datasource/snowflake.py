@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import logging
 
@@ -16,6 +16,7 @@ from aita.datasource.metadata import Catalog, Column, Database, Table
 
 
 class SnowflakeDataSource(SqlDataSource):
+
     connection_url: Optional[str] = Field(None, description="Connection URL")
     user: Optional[str] = Field(Nscription="User name")
     password: Optional[str] = Field(None, description="Password")
@@ -107,3 +108,8 @@ class SnowflakeDataSource(SqlDataSource):
         )
 
         job.launch()
+
+    def get_query_plan(self, query: str) -> Any:
+        conn = self.connect()
+        explain_query = f"EXPLAIN USING JSON {query}"
+        return conn.sql(explain_query)

@@ -1,12 +1,11 @@
 from typing import Optional
 
-import httpx
 import reflex as rx
 
 from aita_lab import styles
 from aita_lab.components.code_editor import codeeditor
+from aita_lab.states.kernel import ToolKernel
 from aita_lab.states.tool import Tool, ToolOutput
-from aita_lab.states.tool_calls import ToolCall
 
 
 def tool_args(
@@ -118,32 +117,32 @@ def render_tool_panel(
     )
 
 
-def tool_history(
-    tool_calls: list[ToolCall],
+def history_render(
+    tool_kernels: list[ToolKernel],
     run_tool: rx.event.EventHandler,
     cancel_tool: rx.event.EventHandler,
     update_tool_args: rx.event.EventHandler,
 ) -> rx.Component:
     return rx.box(
         rx.cond(
-            tool_calls.length() > 0,
+            tool_kernels.length() > 0,
             rx.flex(
                 rx.badge("Tool Call History"),
                 rx.chakra.accordion(
                     rx.foreach(
-                        tool_calls,
-                        lambda tool_call: rx.chakra.accordion_item(
+                        tool_kernels,
+                        lambda kernel_run: rx.chakra.accordion_item(
                             rx.chakra.accordion_button(
-                                rx.chakra.text(tool_call.tool.name),
+                                rx.chakra.text(kernel_run.tool.name),
                                 rx.chakra.accordion_icon(),
                             ),
                             rx.chakra.accordion_panel(
-                                tool_kernel(
-                                    tool_call.tool,
+                                kernel_render(
+                                    kernel_run.tool,
                                     run_tool,
                                     cancel_tool,
                                     update_tool_args,
-                                    tool_call.tool_output,
+                                    kernel_run.output,
                                     render_only=True,
                                 )
                             ),
@@ -160,7 +159,7 @@ def tool_history(
     )
 
 
-def tool_kernel(
+def kernel_render(
     tool: Optional[Tool] = None,
     run_tool: Optional[rx.event.EventHandler] = None,
     cancel_tool: Optional[rx.event.EventHandler] = None,
@@ -188,23 +187,13 @@ def tool_kernel(
     )
 
 
-class KernelState(rx.State):
-    notebook_html = ""
-
-    async def load_notebook(self):
-        async with httpx.AsyncClient() as client:
-            response = await client.get("http://localhost:8000/_marimo/?file=__new__s_a0rle1")
-            response.raise_for_status()
-            self.notebook_html = response["content"]
-
-
 def notebook(
     tool: Tool,
     run_tool: rx.event.EventHandler,
     cancel_tool: rx.event.EventHandler,
     update_tool_args: rx.event.EventHandler,
     tool_output: ToolOutput,
-    tool_calls: list[ToolCall] = None,
+    tool_kernels: list[ToolKernel] = None,
 ) -> rx.Component:
     """The code editor wrapper for running tools."""
     return rx.vstack(
@@ -212,9 +201,8 @@ def notebook(
             "Notebook",
             size="md",
         ),
-        tool_history(tool_calls, run_tool, cancel_tool, update_tool_args),
-        tool_kernel(tool, run_tool, cancel_tool, update_tool_args, tool_output),
-        rx.html(KernelState.notebook_html),
+        history_render(tool_kernels, run_tool, cancel_tool, update_tool_args),
+        kernel_render(tool, run_tool, cancel_tool, update_tool_args, tool_output),
         width="40em",
         height="85vh",
         padding="10px",

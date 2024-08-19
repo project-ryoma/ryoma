@@ -17,7 +17,7 @@ def chat_history_item(chat: str) -> rx.Component:
             rx.button(
                 rx.icon(
                     tag="trash",
-                    on_click=ChatState.delete_chat,
+                    on_click=lambda: ChatState.delete_chat(chat),
                     stroke_width=1,
                 ),
                 width="20%",

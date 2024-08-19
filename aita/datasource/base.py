@@ -1,5 +1,6 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
+import logging
 from abc import ABC, abstractmethod
 
 import ibis
@@ -29,12 +30,14 @@ class SqlDataSource(DataSource):
     connection_url: Optional[str] = Field(None, description="Connection URL")
 
     def connect(self, **kwargs) -> BaseBackend:
+        logging.info("Connecting to ibis data source")
         try:
             return ibis.connect(self.connection_url, **kwargs)
         except Exception as e:
             raise Exception(f"Failed to connect to ibis: {e}")
 
     def query(self, query, result_format="pandas", **kwargs) -> Table:
+        logging.info("Executing query: {}".format(query))
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
             raise Exception("Ibis connection is not a SQLBackend")
@@ -52,3 +55,6 @@ class SqlDataSource(DataSource):
 
     def crawl_data_catalog(self, **kwargs):
         raise NotImplementedError("crawl_data_catalog is not implemented for this data source")
+
+    def get_query_plan(self, query: str) -> Any:
+        raise NotImplementedError("get_query_plan is not implemented for this data source.")

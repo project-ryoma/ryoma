@@ -1,9 +1,10 @@
-from typing import Optional, Union
+from typing import Any, Iterator, Optional, Union
 
 import base64
 import logging
 import pickle
 
+import httpx
 import reflex as rx
 from langchain_core.messages import AIMessage, ToolMessage
 from pandas import DataFrame
@@ -14,9 +15,9 @@ from aita.agent.factory import AgentFactory
 from aita.agent.workflow import ToolMode, WorkflowAgent
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.kernel import KernelState
 from aita_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from aita_lab.states.tool import Tool, ToolArg, ToolOutput
-from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
 
 
@@ -82,14 +83,16 @@ class ChatState(BaseState):
     _current_embedding_agent_state_change: bool = False
 
     # tool states
-    current_tool: Tool = None
+    current_tool: Optional[Tool] = None
 
-    tool_output: ToolOutput = None
+    current_tool_output: Optional[ToolOutput] = None
 
     # Whether we are processing the question.
     processing: bool = False
 
     vector_feature_dialog_open: bool = False
+
+    notebook_html: str = ""
 
     def close_vector_feature_dialog(self):
         self.vector_feature_dialog_open = False
@@ -187,12 +190,12 @@ class ChatState(BaseState):
             )
             session.commit()
 
-    def delete_chat(self):
+    def delete_chat(self, chat_title: str):
         """Delete the current chat."""
         with rx.session() as session:
-            session.exec(delete(Chat).where(Chat.title == self.current_chat))
+            session.exec(delete(Chat).where(Chat.title == chat_title))
             session.commit()
-        del self.chats[self.current_chat]
+        del self.chats[chat_title]
         self.load_chats()
         self.current_chat = list(self.chats.keys())[0]
 
@@ -228,7 +231,7 @@ class ChatState(BaseState):
             )
             session.commit()
 
-    def _process_agent_response(self, events: list[dict]):
+    def _process_agent_response(self, events: Iterator[Any]):
         for event in events:
             if hasattr(event, "content"):
                 message = event
@@ -236,17 +239,13 @@ class ChatState(BaseState):
                 message = event["messages"][-1]
             if isinstance(message, AIMessage):
                 self.chats[self.current_chat][-1].answer += message.content
-            if isinstance(message, ToolMessage):
-                if message.artifact is not None:
+                yield
+            elif isinstance(message, ToolMessage):
+                if message.artifact is not None and message.artifact != "":
                     encoded_artifact = message.artifact.encode("utf-8")
                     artifact = base64.b64decode(encoded_artifact)
                     result = pickle.loads(artifact)
-                    if isinstance(result, DataFrame):
-                        self.tool_output = ToolOutput(data=result, show=True)
-
-                        # add tool call to history
-                        ToolCallState.add_tool_call(self.current_tool, self.tool_output)
-            yield
+                    self.current_tool_output = ToolOutput(data=result, show=True)
 
     def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
@@ -282,7 +281,7 @@ class ChatState(BaseState):
         self.chats[self.current_chat].append(qa)
 
         events = self._current_chat_agent.stream(tool_mode=ToolMode.ONCE, display=False)
-        for event in self._process_agent_response(events):
+        for _ in self._process_agent_response(events):
             yield
 
         self._process_agent_state()
@@ -320,6 +319,13 @@ class ChatState(BaseState):
         yield
 
         logging.info(f"Processing question: {question}")
+
+        if self.current_tool_output:
+            logging.info("Adding last tool run to history")
+            KernelState.add_tool_run(self.current_tool, self.current_tool_output)
+            self.current_tool = None
+            self.current_tool_output = None
+            yield
 
         # init the chat agent
         self._create_chat_agent()
@@ -361,7 +367,7 @@ class ChatState(BaseState):
 
         # Get the response and add it to the answer.
         events = self._current_chat_agent.stream(question, display=False)
-        for event in self._process_agent_response(events):
+        for _ in self._process_agent_response(events):
             yield
 
         self._process_agent_state()
@@ -371,9 +377,22 @@ class ChatState(BaseState):
         with rx.session() as session:
             chats = session.exec(select(Chat).where(Chat.user == self.user.username)).all()
             for chat in chats:
-                self.chats[chat.title] = [QA(question=chat.question, answer=chat.answer)]
+                if chat.title not in self.chats:
+                    self.chats[chat.title] = []
+                self.chats[chat.title].append(QA(question=chat.question, answer=chat.answer))
             if not self.chats:
                 self.chats = DEFAULT_CHATS
+
+    @rx.background
+    async def load_notebook(self):
+        logging.info("Loading notebook")
+        async with self:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:8000/_marimo/")
+                response.raise_for_status()
+                logging.info(response.text)
+                self.notebook_html = response.text
+                return
 
     def on_load(self):
         self.load_chats()

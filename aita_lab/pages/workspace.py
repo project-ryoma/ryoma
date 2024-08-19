@@ -9,9 +9,9 @@ from aita_lab.components.tool_kernel import notebook
 from aita_lab.states.agent import AgentState
 from aita_lab.states.base import BaseState
 from aita_lab.states.datasource import DataSourceState
+from aita_lab.states.kernel import KernelState
 from aita_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from aita_lab.states.prompt_template import PromptTemplateState
-from aita_lab.states.tool_calls import ToolCallState
 from aita_lab.states.vector_store import VectorStoreState
 from aita_lab.states.workspace import QA, ChatState
 from aita_lab.styles import markdown_style, message_style
@@ -358,6 +358,7 @@ def chat_model_selector() -> rx.Component:
             ChatModelProvider,
             ChatState.current_chat_model,
             ChatState.set_current_chat_model,
+            trigger_width="100%",
         ),
         width="100%",
     )
@@ -373,7 +374,7 @@ def chat_model_selector() -> rx.Component:
         PromptTemplateState.on_load,
         AgentState.on_load,
         VectorStoreState.on_load,
-        ToolCallState.on_load,
+        KernelState.on_load,
     ],
 )
 def workspace() -> rx.Component:
@@ -387,6 +388,7 @@ def workspace() -> rx.Component:
                     agent_selector(),
                     direction="row",
                     spacing="3",
+                    flex_grow=1,
                 ),
                 rx.dialog.root(
                     rx.dialog.trigger(
@@ -460,8 +462,8 @@ def workspace() -> rx.Component:
                 ChatState.run_tool,
                 ChatState.cancel_tool,
                 ChatState.update_tool_arg,
-                ChatState.tool_output,
-                ToolCallState.tool_calls,
+                ChatState.current_tool_output,
+                KernelState.tool_kernels,
             ),
             width="100%",
         ),

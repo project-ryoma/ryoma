@@ -97,3 +97,8 @@ class PostgreSqlDataSource(SqlDataSource):
             conf=job_config, task=DefaultTask(extractor=PostgresMetadataExtractor(), loader=loader)
         )
         job.launch()
+
+    def get_query_plan(self, query: str) -> str:
+        conn = self.connect()
+        explain_query = f"EXPLAIN {query}"
+        return conn.sql(explain_query)
