@@ -1,13 +1,13 @@
 # Pyarrow Agent
 
-The Pyarrow agent is an Aita agent that runs on the Pyarrow library.
+The Pyarrow agent is an Ryoma agent that runs on the Pyarrow library.
 The Pyarrow agent can be used to ask questions in natural language and interact with Pyarrow Tables.
 
 ## Example
 
 {% code title="python" %}
 ```python
-from aita.agent.pyarrow import PyArrowAgent 
+from ryoma.agent.pyarrow import PyArrowAgent 
 import pyarrow as pa
 
 table = pa.table({

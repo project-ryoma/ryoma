@@ -1,4 +1,4 @@
-from aita.datasource.metadata import Catalog
+from ryoma.datasource.metadata import Catalog
 
 data = {
     "catalog_name": "main",

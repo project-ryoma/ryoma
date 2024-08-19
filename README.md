@@ -1,16 +1,16 @@
-# Aita
+# Ryoma
 AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization. 
 
 
-[![Build status](https://github.com/project-aita/aita/workflows/build/badge.svg)](https://github.com/project-aita/aita/actions/workflows/build.yml?query=workflow%3Abuild)
-[![Python Version](https://img.shields.io/pypi/pyversions/aita.svg)](https://pypi.org/project/aita/)
-[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/project-aita/aita/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot)
+[![Build status](https://github.com/project-ryoma/ryoma/workflows/build/badge.svg)](https://github.com/project-ryoma/ryoma/actions/workflows/build.yml?query=workflow%3Abuild)
+[![Python Version](https://img.shields.io/pypi/pyversions/ryoma.svg)](https://pypi.org/project/ryoma/)
+[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/project-ryoma/ryoma/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/project-aita/aita/blob/main/.pre-commit-config.yaml)
-[![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
-[![Coverage Report](assets/images/coverage.svg)](https://github.com/project-aita/aita/blob/main/assets/images/coverage.svg)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/project-ryoma/ryoma/blob/main/.pre-commit-config.yaml)
+[![License](https://img.shields.io/github/license/project-ryoma/ryoma)](https://github.com/project-ryoma/ryoma/blob/main/LICENSE)
+[![Coverage Report](assets/images/coverage.svg)](https://github.com/project-ryoma/ryoma/blob/main/assets/images/coverage.svg)
 
 
 ## Tech Stack
@@ -29,21 +29,21 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 Simply install the package using pip:
 
 ```shell
-pip install aita
+pip install ryoma
 ```
 Or with extra dependencies:
 
 ```shell
-pip install aita[snowflake]
+pip install ryoma[snowflake]
 ```
 
 ## Basic Example
 Below is an example of using SqlAgent to connect to a PostgreSQL database and ask a question.
-You can read more details in the [documentation](https://aita-1.gitbook.io/aita/).
+You can read more details in the [documentation](https://ryoma-1.gitbook.io/ryoma/).
 
 ```python
-from aita.agent.sql import SqlAgent
-from aita.datasource.postgresql import PostgreSqlDataSource
+from ryoma.agent.sql import SqlAgent
+from ryoma.datasource.postgresql import PostgreSqlDataSource
 
 # Connect to a PostgreSQL database
 datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")
@@ -85,11 +85,11 @@ The top 5 customers who have made the most purchases are as follows:
 5. Customer#000103834 - Total Purchases: $6,397,480.12
 ```
 
-## Use Aita Lab
-Aita lab is an application that allows you to interact with your data and AI models in UI.
-The aita lab is built with [Reflex](https://reflex.dev/).
+## Use Ryoma Lab
+Ryoma lab is an application that allows you to interact with your data and AI models in UI.
+The ryoma lab is built with [Reflex](https://reflex.dev/).
 
-1. Create Aita lab configuration file `rxconfig.py` in your project:
+1. Create Ryoma lab configuration file `rxconfig.py` in your project:
 ```python
 import logging
 
@@ -97,7 +97,7 @@ import reflex as rx
 from reflex.constants import LogLevel
 
 config = rx.Config(
-    app_name="aita_lab",
+    app_name="ryoma_lab",
     loglevel=LogLevel.INFO,
 )
 
@@ -105,15 +105,15 @@ config = rx.Config(
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 ```
 
-2. You can start the aita lab by running the following command:
+2. You can start the ryoma lab by running the following command:
 ```shell
-aita_lab run
+ryoma_lab run
 ```
-the aita lab will be available at `http://localhost:3000`.
+the ryoma lab will be available at `http://localhost:3000`.
 ![ui.png](assets%2Fui.png)
 
 ## Supported Models
-Model provider are supported by jupyter ai magics. Ensure the corresponding environment variables are set before using the Aita agent.
+Model provider are supported by jupyter ai magics. Ensure the corresponding environment variables are set before using the Ryoma agent.
 
 | Provider            | Provider ID          | Environment variable(s)    | Python package(s)               |
 |---------------------|----------------------|----------------------------|---------------------------------|
@@ -149,6 +149,6 @@ Model provider are supported by jupyter ai magics. Ensure the corresponding envi
 
 ## 🛡 License
 
-[![License](https://img.shields.io/github/license/project-aita/aita)](https://github.com/project-aita/aita/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/project-ryoma/ryoma)](https://github.com/project-ryoma/ryoma/blob/main/LICENSE)
 
-This project is licensed under the terms of the `Apache Software License 2.0` license. See [LICENSE](https://github.com/aita/aita/blob/master/LICENSE) for more details.
+This project is licensed under the terms of the `Apache Software License 2.0` license. See [LICENSE](https://github.com/ryoma/ryoma/blob/master/LICENSE) for more details.

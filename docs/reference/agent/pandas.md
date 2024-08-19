@@ -1,6 +1,6 @@
 # Pandas Agent
 
-The Pandas agent is an Aita agent that runs on the Pandas library.
+The Pandas agent is an Ryoma agent that runs on the Pandas library.
 The Pandas agent can be used to ask questions in natural language and interact with Pandas DataFrames.
 
 ## Example
@@ -10,9 +10,9 @@ pass Data Source to Pandas Agent and return result as a dataframe.
 {% code title="python" %}
 
 ```python
-from aita.agent.pandas_agent import PandasAgent
-from aita.datasource.sqlite import SqliteDataSource
-from aita.prompt.base import BasicContextPromptTemplate
+from ryoma.agent.pandas_agent import PandasAgent
+from ryoma.datasource.sqlite import SqliteDataSource
+from ryoma.prompt.base import BasicContextPromptTemplate
 
 datasource = SqliteDataSource("sqlite:///data.db")
 pandas_agent = PandasAgent("gpt-3.5-turbo")
@@ -26,7 +26,7 @@ add a DataFrame to the Pandas Agent, ask the agent to analyze the data.
 
 {% code title="python" %}
 ```python
-from aita.agent.pandas_agent import PandasAgent
+from ryoma.agent.pandas_agent import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({

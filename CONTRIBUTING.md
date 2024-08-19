@@ -7,7 +7,7 @@ If you dont have `poetry`, you should install with `make poetry-download`.
 
 ## Project Startup
 
-[`Makefile`](https://github.com/aita/aita/blob/master/Makefile) contains a lot of functions for faster development.
+[`Makefile`](https://github.com/ryoma/ryoma/blob/master/Makefile) contains a lot of functions for faster development.
 
 <details>
 <summary>1. Download and remove Poetry</summary>
@@ -159,7 +159,7 @@ Remove docker image with
 make docker-remove
 ```
 
-More information [about docker](https://github.com/aita/aita/tree/master/docker).
+More information [about docker](https://github.com/ryoma/ryoma/tree/master/docker).
 
 </p>
 </details>
@@ -202,7 +202,7 @@ make cleanup
 
 ## 📈 Releases
 
-You can see the list of available releases on the [GitHub Releases](https://github.com/aita/aita/releases) page.
+You can see the list of available releases on the [GitHub Releases](https://github.com/ryoma/ryoma/releases) page.
 
 We follow [Semantic Versions](https://semver.org/) specification.
 
@@ -219,7 +219,7 @@ We use [`Release Drafter`](https://github.com/marketplace/actions/release-drafte
 |            `documentation`            |    📝 Documentation     |
 |            `dependencies`             | ⬆️ Dependencies updates |
 
-You can update it in [`release-drafter.yml`](https://github.com/aita/aita/blob/master/.github/release-drafter.yml).
+You can update it in [`release-drafter.yml`](https://github.com/ryoma/ryoma/blob/master/.github/release-drafter.yml).
 
 GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Dependabot creates the `dependencies` label. Create the remaining labels on the Issues tab of your GitHub repository, when you need them.
 

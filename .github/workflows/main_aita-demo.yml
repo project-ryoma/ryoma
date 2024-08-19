@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy aita api  
+name: Build and deploy ryoma api
 
 on:
   push:
@@ -10,9 +10,9 @@ on:
       - main
     paths:
       - 'Dockerfile'
-      - 'aita/**'
-      - 'aita-lab/**'
-      - '.github/workflows/main_aita-demo.yml'
+      - 'ryoma/**'
+      - 'ryoma-lab/**'
+      - '.github/workflows/main_ryoma-demo.yml'
   workflow_dispatch:
 
 env:
@@ -34,21 +34,21 @@ jobs:
       - name: Login to Azure Container Registry
         uses: docker/login-action@v3
         with:
-          registry: aitaregistry.azurecr.io
-          username: aitaregistry
+          registry: ryomaregistry.azurecr.io
+          username: ryomaregistry
           password: ${{ secrets.AZURE_CR_PASSWORD }}
 
       - name: docker build image
         run: |
-            docker build --platform linux/amd64 ./ -t aita-api --build-arg APP_ENV=production
+            docker build --platform linux/amd64 ./ -t ryoma-api --build-arg APP_ENV=production
   
       - name: Set up Docker Build
         run: |
-          docker tag aita-api aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }}
+          docker tag ryoma-api ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
   
       - name: Publish to Azure Container Registry
         run: |
-          docker push aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }}
+          docker push ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
       - name: deploy Container App
         uses: azure/container-apps-deploy-action@v2
         with:
-          acrName: aitaregistry
-          containerAppName: aita-dataapp
-          resourceGroup: aita
-          imageToDeploy: aitaregistry.azurecr.io/aita-dataapp:${{ env.COMMIT_SHA }} 
+          acrName: ryomaregistry
+          containerAppName: ryoma-dataapp
+          resourceGroup: ryoma
+          imageToDeploy: ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}

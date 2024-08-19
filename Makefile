@@ -4,7 +4,7 @@ PYTHON := python
 PYTHONPATH := '.'
 
 #* Docker variables
-IMAGE := aita
+IMAGE := ryoma
 VERSION := latest
 
 .PHONY: poetry-download
@@ -35,14 +35,14 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=aita tests/
+	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=ryoma tests/
 	poetry run coverage-badge -o assets/images/coverage.svg -f
 
 .PHONY: check-codestyle
 check-codestyle:
 	poetry run isort --diff --check-only --settings-path pyproject.toml ./
 	poetry run black --diff --check --config pyproject.toml ./
-	poetry run darglint --verbosity 2 aita tests
+	poetry run darglint --verbosity 2 ryoma tests
 
 .PHONY: mypy
 mypy:
@@ -52,7 +52,7 @@ mypy:
 check-safety:
 	poetry check
 	poetry run safety check --full-report
-	poetry run bandit -ll --recursive aita tests
+	poetry run bandit -ll --recursive ryoma tests
 
 .PHONY: lint
 lint: test check-codestyle mypy check-safety
@@ -112,8 +112,8 @@ build-remove:
 .PHONY: cleanup
 cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
 
-.PHONY: start-aita-lab
-start-aita-lab:
+.PHONY: start-ryoma-lab
+start-ryoma-lab:
 	poetry run reflex run
 
 .PHONY: build

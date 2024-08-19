@@ -2,4 +2,4 @@
 Pyspark Tools are used by PysparkAgent to interact with the data leveraging Pyspark API. 
 
 ## Source
-* [pyspark tool](../../../aita/tool/pyspark.py)
+* [pyspark tool](../../../ryoma/tool/pyspark.py)

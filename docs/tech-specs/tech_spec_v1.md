@@ -1,5 +1,5 @@
 
-# Aita tech spec v1
+# Ryoma tech spec v1
 
 This document describes the technical specifications of the project.
 

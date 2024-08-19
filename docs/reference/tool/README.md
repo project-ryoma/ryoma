@@ -1,7 +1,7 @@
-# Aita tool
-Aita tool is an interface that can be used by AI agents to interact with the data platform.
+# Ryoma tool
+Ryoma tool is an interface that can be used by AI agents to interact with the data platform.
 
-Currently supported aita tools are:
+Currently supported ryoma tools are:
 
 - [SqlTool](sql.md)
 - [PandasTool](pandas.md)

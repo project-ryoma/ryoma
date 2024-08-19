@@ -1,23 +1,23 @@
 
 # Roadmap
 
-The list below contains the functionality that contributors are planning to develop for Aita.
+The list below contains the functionality that contributors are planning to develop for Ryoma.
 
 * We welcome contribution to all items in the roadmap!
 
 * **Data Sources**
-  * [x] [Snowflake source](https://docs.aita.dev/reference/data-sources/snowflake)
-  * [ ] [BigQuery source](https://docs.aita.dev/reference/data-sources/bigquery)
-  * [x] [Parquet file source](https://docs.aita.dev/reference/data-sources/file)
-  * [x] [Postgresql (contrib plugin)](https://docs.aita.dev/reference/data-sources/postgresql)
+  * [x] [Snowflake source](https://docs.ryoma.dev/reference/data-sources/snowflake)
+  * [ ] [BigQuery source](https://docs.ryoma.dev/reference/data-sources/bigquery)
+  * [x] [Parquet file source](https://docs.ryoma.dev/reference/data-sources/file)
+  * [x] [Postgresql (contrib plugin)](https://docs.ryoma.dev/reference/data-sources/postgresql)
 
 * **Agents**
-  * [x] [Python Agent](https://docs.aita.dev/reference/agents/python-agent)
-  * [ ] [Java Agent](https://docs.aita.dev/reference/agents/java-agent)
-  * [ ] [Go Agent](https://docs.aita.dev/reference/agents/go-agent)
+  * [x] [Python Agent](https://docs.ryoma.dev/reference/agents/python-agent)
+  * [ ] [Java Agent](https://docs.ryoma.dev/reference/agents/java-agent)
+  * [ ] [Go Agent](https://docs.ryoma.dev/reference/agents/go-agent)
 
 * **Tools**
-  * [x] [Python tool](https://docs.aita.dev/reference/tools/python)
-  * [x] [Pandas tool](https://docs.aita.dev/reference/tools/pandas)
-  * [x] [Sql tool](https://docs.aita.dev/reference/tools/sql)
-  * [ ] [Spark tool](https://docs.aita.dev/reference/tools/spark)
+  * [x] [Python tool](https://docs.ryoma.dev/reference/tools/python)
+  * [x] [Pandas tool](https://docs.ryoma.dev/reference/tools/pandas)
+  * [x] [Sql tool](https://docs.ryoma.dev/reference/tools/sql)
+  * [ ] [Spark tool](https://docs.ryoma.dev/reference/tools/spark)

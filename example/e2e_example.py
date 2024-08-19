@@ -1,10 +1,10 @@
 import os
 
-from aita.agent.pandas import PandasAgent
-from aita.agent.python import PythonAgent
-from aita.agent.sql import SqlAgent
-from aita.datasource.postgresql import PostgreSqlDataSource
-from aita.datasource.snowflake import SnowflakeDataSource
+from ryoma.agent.pandas import PandasAgent
+from ryoma.agent.python import PythonAgent
+from ryoma.agent.sql import SqlAgent
+from ryoma.datasource.postgresql import PostgreSqlDataSource
+from ryoma.datasource.snowflake import SnowflakeDataSource
 
 # Snowflake
 

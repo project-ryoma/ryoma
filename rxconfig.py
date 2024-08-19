@@ -4,7 +4,7 @@ import reflex as rx
 from reflex.constants import LogLevel
 
 config = rx.Config(
-    app_name="aita_lab",
+    app_name="ryoma_lab",
     loglevel=LogLevel.INFO,
 )
 

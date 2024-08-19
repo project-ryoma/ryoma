@@ -1,4 +1,4 @@
-from aita.datasource.file import FileDataSource
+from ryoma.datasource.file import FileDataSource
 
 f = FileDataSource("./creditcard.csv")
 

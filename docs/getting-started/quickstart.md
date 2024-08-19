@@ -1,7 +1,7 @@
 
 # Quick Start
 
-This guide will walk you through setting up Aita and start coding with Aita.
+This guide will walk you through setting up Ryoma and start coding with Ryoma.
 
 ## Prerequisites
 
@@ -11,22 +11,22 @@ Before you start, make sure you have the following installed:
 
 ## Installation
 
-To install Aita, run the following command:
+To install Ryoma, run the following command:
 
 {% code title="bash" %}
 ```bash
-pip install aita
+pip install ryoma
 ```
 {% endcode %}
 
 ## Getting Started
 
-To start using Aita, you can run the following code:
+To start using Ryoma, you can run the following code:
 
 {% code title="python" %}
 ```python
 
-from aita.agent.pandas import PandasAgent
+from ryoma.agent.pandas import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({
@@ -44,4 +44,4 @@ This code will create a new agent that uses the GPT-3.5-turbo model and has a co
 
 ## Next Steps
 
-Now that you have successfully set up Aita, you can start exploring more features and functionalities. Check out the [documentation](https://docs.aita.dev) for more information.
+Now that you have successfully set up Ryoma, you can start exploring more features and functionalities. Check out the [documentation](https://docs.ryoma.dev) for more information.

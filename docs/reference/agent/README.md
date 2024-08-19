@@ -1,11 +1,11 @@
 
-# Aita agent
+# Ryoma agent
 
-Aita agent is an AI agent that runs on LLM (Large Language Model), and can be used to ask questions in natural language.
-Aita agent can also use tools (refer to [Aita tool](tools.md)) to let agent to run on various data APIs such as Pandas, Pyarrow, Spark, Pytorch etc.
+Ryoma agent is an AI agent that runs on LLM (Large Language Model), and can be used to ask questions in natural language.
+Ryoma agent can also use tools (refer to [Ryoma tool](tools.md)) to let agent to run on various data APIs such as Pandas, Pyarrow, Spark, Pytorch etc.
 
 ## Models
-Aita model providers are inspired by [jupyter-ai-magic](https://jupyter-ai.readthedocs.io/en/latest/users/index.html#model-providers),
+Ryoma model providers are inspired by [jupyter-ai-magic](https://jupyter-ai.readthedocs.io/en/latest/users/index.html#model-providers),
 and currently supported models are:
 
 | Provider            | Provider ID          | Environment variable(s)    | Python package(s)               |
@@ -30,7 +30,7 @@ and currently supported models are:
 
 {% code title="python" %}
 ```python
-from aita.agent.pandas import PandasAgent
+from ryoma.agent.pandas import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({
