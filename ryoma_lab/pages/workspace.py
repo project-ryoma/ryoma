@@ -4,13 +4,12 @@ import reflex as rx
 
 from ryoma_lab import styles
 from ryoma_lab.components.loading_icon import loading_icon
-from ryoma_lab.components.model_selector import select_model
-from ryoma_lab.components.tool_kernel import notebook
+from ryoma_lab.components.model_selector import chat_model_selector, embedding_model_selector
+from ryoma_lab.components.notebook import notebook
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
-from ryoma_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.states.workspace import QA, ChatState
@@ -235,8 +234,7 @@ def prompt_template_selector() -> rx.Component:
                                 size="2",
                                 weight="bold",
                             ),
-                            select_model(
-                                EmbeddingModelProvider,
+                            embedding_model_selector(
                                 ChatState.current_embedding_model,
                                 ChatState.set_current_embedding_model,
                                 trigger_width="100%",
@@ -343,7 +341,7 @@ def agent_selector() -> rx.Component:
     )
 
 
-def chat_model_selector() -> rx.Component:
+def chat_model_selector_render() -> rx.Component:
     return rx.box(
         rx.text(
             "Chat Model *",
@@ -354,8 +352,7 @@ def chat_model_selector() -> rx.Component:
             color_scheme="gray",
             padding_left="1px",
         ),
-        select_model(
-            ChatModelProvider,
+        chat_model_selector(
             ChatState.current_chat_model,
             ChatState.set_current_chat_model,
             trigger_width="100%",
@@ -383,7 +380,7 @@ def workspace() -> rx.Component:
         rx.chakra.flex(
             rx.chakra.hstack(
                 rx.flex(
-                    chat_model_selector(),
+                    chat_model_selector_render(),
                     datasource_selector(),
                     agent_selector(),
                     direction="row",

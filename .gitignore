@@ -134,3 +134,4 @@ var/
 venv.bak/
 venv/
 wheels/
+uploaded_files

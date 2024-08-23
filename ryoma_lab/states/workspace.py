@@ -250,7 +250,7 @@ class ChatState(BaseState):
     def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
         if chat_state and chat_state.next:
-            # having an action to query
+            # having an action/tool to run
             tool_call = self._current_chat_agent.get_current_tool_calls()[0]
             self.current_tool = Tool(
                 id=tool_call["id"],

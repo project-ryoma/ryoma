@@ -1,5 +1,4 @@
 from .agent import agent
-from .catalog import catalog
 from .datasource import datasource
 from .prompt_template import prompt_template
 from .settings import settings

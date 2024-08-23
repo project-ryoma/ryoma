@@ -3,16 +3,24 @@
 import reflex as rx
 
 from ryoma.datasource.factory import get_supported_datasources
+from ryoma_lab import styles
+from ryoma_lab.components.catalog import (
+    catalog_search,
+    render_catalog_body,
+    sync_data_catalog_render,
+)
+from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
 from ryoma_lab.templates import template
 
 
 def show_datasource(datasource: DataSource):
-    return rx.table.row(
-        rx.table.cell(datasource.name),
-        rx.table.cell(update_datasource(datasource)),
-        rx.table.cell(
-            rx.button(
+    return rx.chakra.tr(
+        rx.chakra.td(datasource.name),
+        rx.chakra.td(update_datasource(datasource)),
+        rx.chakra.td(sync_data_catalog_render(datasource)),
+        rx.chakra.td(
+            rx.chakra.button(
                 "Delete",
                 on_click=lambda: DataSourceState.delete_datasource(datasource.id),
             )
@@ -174,7 +182,7 @@ def add_datasource():
 def update_datasource(datasource: DataSource):
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.button(
+            rx.chakra.button(
                 rx.icon("square_pen", width=24, height=24),
                 on_click=DataSourceState.render_update_datasource(datasource),
             ),
@@ -232,64 +240,72 @@ def update_datasource(datasource: DataSource):
     )
 
 
-def content_grid():
-    return rx.fragment(
-        rx.vstack(
-            rx.box(
-                add_datasource(),
+def data_source_table() -> rx.Component:
+    return rx.box(
+        rx.hstack(
+            rx.heading(
+                f"Total: {DataSourceState.num_datasources} datasources",
+                size="5",
+                font_family="Inter",
             ),
-            rx.divider(),
-            rx.hstack(
-                rx.heading(
-                    f"Total: {DataSourceState.num_datasources} datasources",
-                    size="5",
-                    font_family="Inter",
-                ),
-                rx.spacer(),
-                rx.select(
-                    ["name", "type", "connection_url"],
-                    placeholder="Sort By: Name",
-                    size="3",
-                    on_change=lambda sort_value: DataSourceState.sort_values(sort_value),
-                    font_family="Inter",
-                ),
-                width="100%",
-                padding_top="2em",
-                padding_bottom="1em",
-            ),
-            rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        rx.table.column_header_cell("Name"),
-                        rx.table.column_header_cell("Edit"),
-                        rx.table.column_header_cell("Delete"),
-                    ),
-                ),
-                rx.table.body(rx.foreach(DataSourceState.datasources, show_datasource)),
-                # variant="surface",
+            rx.spacer(),
+            rx.select(
+                ["name", "type", "connection_url"],
+                placeholder="Sort By: Name",
                 size="3",
-                width="100%",
-                justify="stretch",
+                on_change=lambda sort_value: DataSourceState.sort_values(sort_value),
+                font_family="Inter",
             ),
+            width="100%",
+            padding_top="2em",
+            padding_bottom="1em",
         ),
+        rx.chakra.table(
+            rx.chakra.thead(
+                rx.chakra.tr(
+                    rx.chakra.th("Name"),
+                    rx.chakra.th("Edit"),
+                    rx.chakra.th("Catalog"),
+                    rx.chakra.th("Delete"),
+                ),
+            ),
+            rx.chakra.tbody(rx.foreach(DataSourceState.datasources, show_datasource)),
+            size="4",
+            width="100%",
+            justify="stretch",
+            variant="striped",
+        ),
+        width="100%",
+        border=styles.border,
+        border_radius=styles.border_radius,
+        padding="1em",
     )
 
 
-@template(route="/datasource", title="Data Source", on_load=DataSourceState.on_load())
+@template(
+    route="/datasource",
+    title="Data Source",
+    on_load=[DataSourceState.on_load(), CatalogState.on_load()],
+)
 def datasource() -> rx.Component:
-    """The home page.
+    """The Data Source page.
 
     Returns:
-        The UI for the home page.
+        The UI for the Data Source page.
     """
     return rx.vstack(
         rx.heading("Data Source", size="8"),
         rx.text("Connect to your data source"),
         rx.box(
-            content_grid(),
+            rx.vstack(
+                add_datasource(),
+                catalog_search(),
+                rx.divider(),
+                data_source_table(),
+                render_catalog_body(),
+            ),
             margin_top="20px",
             width="100%",
         ),
-        # make the page full width
         width="100%",
     )

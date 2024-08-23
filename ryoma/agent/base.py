@@ -1,11 +1,15 @@
+from typing import Any, Dict, Optional, Union
+
 import logging
 import uuid
 
-from jupyter_ai_magics.providers import *
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
+from langgraph.prebuilt import create_react_agent
+from pydantic import BaseModel
 
 from ryoma.agent.utils import get_model
 from ryoma.datasource.base import DataSource
@@ -56,10 +60,11 @@ class RyomaAgent:
             context_prompt_templates,
             output_prompt_template,
         )
-        self.final_prompt_template = None
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.output_parser = output_parser
 
-    def _create_chain(self, **kwargs) -> RunnableSerializable:
+    def _build_chain(self, **kwargs) -> RunnableSerializable:
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         if self.output_parser:
             return self.output_prompt | self.model | self.output_parser
         return self.final_prompt_template | self.model
@@ -84,14 +89,13 @@ class RyomaAgent:
         self.add_prompt_context(str(catalog))
         return self
 
-    def _build_prompt(self, question: str):
-        self.final_prompt_template = self.prompt_template_factory.build_prompt()
-        self.final_prompt_template.append(("user", question))
+    def _format_messages(self, messages: str):
+        return {"messages": [HumanMessage(content=messages)]}
 
     def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
-        self._build_prompt(question)
-        chain = self._create_chain()
-        events = chain.stream(self.config)
+        messages = self._format_messages(question)
+        chain = self._build_chain()
+        events = chain.stream(messages, self.config)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
@@ -101,9 +105,9 @@ class RyomaAgent:
         return events
 
     def invoke(self, question: Optional[str] = "", display: Optional[bool] = True):
-        self._build_prompt(question)
-        chain = self._create_chain()
-        results = chain.invoke(self.config)
+        messages = self._format_messages(question)
+        chain = self._build_chain()
+        results = chain.invoke(messages, self.config)
         if display:
             for result in results:
                 print(result.content, end="", flush=True)
@@ -111,10 +115,6 @@ class RyomaAgent:
             chain = self.output_prompt | self.model | self.output_parser
             results = self._parse_output(chain, results)
         return results
-
-    def embed(self, query: str) -> list:
-        assert hasattr(self.model, "embed"), "Model does not support embedding"
-        return self.model.embed(query)
 
     def get_current_state(self) -> None:
         return None

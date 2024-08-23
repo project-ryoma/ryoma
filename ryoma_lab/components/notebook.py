@@ -27,7 +27,7 @@ def tool_args(
                         rx.text(arg.value, asi_="div", mb="1", size="2", padding_left="4px"),
                         codeeditor(
                             value=arg.value,
-                            on_change=lambda x: update_tool_args(x),
+                            on_change=lambda x: update_tool_args(arg.name, x),
                             width="100%",
                             min_height="20e",
                             language="python",
@@ -48,7 +48,7 @@ def tool_args(
     )
 
 
-def render_tool_output(tool_output: ToolOutput) -> rx.Component:
+def output_render(tool_output: ToolOutput) -> rx.Component:
     return rx.box(
         rx.chakra.badge(
             "Output",
@@ -74,7 +74,7 @@ def render_tool_output(tool_output: ToolOutput) -> rx.Component:
     )
 
 
-def render_tool_panel(
+def panel_render(
     tool: Tool,
     run_tool: Optional[rx.event.EventHandler] = None,
     cancel_tool: Optional[rx.event.EventHandler] = None,
@@ -117,7 +117,7 @@ def render_tool_panel(
     )
 
 
-def history_render(
+def kernel_history_render(
     tool_kernels: list[ToolKernel],
     run_tool: rx.event.EventHandler,
     cancel_tool: rx.event.EventHandler,
@@ -127,13 +127,22 @@ def history_render(
         rx.cond(
             tool_kernels.length() > 0,
             rx.flex(
-                rx.badge("Tool Call History"),
+                rx.badge("Kernel History"),
                 rx.chakra.accordion(
                     rx.foreach(
                         tool_kernels,
                         lambda kernel_run: rx.chakra.accordion_item(
                             rx.chakra.accordion_button(
-                                rx.chakra.text(kernel_run.tool.name),
+                                rx.flex(
+                                    rx.chakra.badge(kernel_run.tool.name),
+                                    rx.chakra.text(
+                                        kernel_run.tool.id,
+                                        min_width="10em",
+                                    ),
+                                    spacing="2",
+                                    direction="row",
+                                    align="center",
+                                ),
                                 rx.chakra.accordion_icon(),
                             ),
                             rx.chakra.accordion_panel(
@@ -156,6 +165,8 @@ def history_render(
                 overflow="auto",
             ),
         ),
+        border_radius=styles.border_radius,
+        border=styles.border,
     )
 
 
@@ -171,8 +182,8 @@ def kernel_render(
         rx.cond(
             tool,
             rx.flex(
-                rx.badge("Tool Kernel"),
-                render_tool_panel(tool, run_tool, cancel_tool, update_tool_args, render_only),
+                rx.badge("Cell"),
+                panel_render(tool, run_tool, cancel_tool, update_tool_args, render_only),
                 direction="column",
                 width="100%",
             ),
@@ -180,7 +191,7 @@ def kernel_render(
         rx.divider(),
         rx.cond(
             tool_output & tool_output.show,
-            render_tool_output(tool_output),
+            output_render(tool_output),
         ),
         direction="column",
         background_color=rx.color("mauve", 3),
@@ -201,7 +212,7 @@ def notebook(
             "Notebook",
             size="md",
         ),
-        history_render(tool_kernels, run_tool, cancel_tool, update_tool_args),
+        kernel_history_render(tool_kernels, run_tool, cancel_tool, update_tool_args),
         kernel_render(tool, run_tool, cancel_tool, update_tool_args, tool_output),
         width="40em",
         height="85vh",

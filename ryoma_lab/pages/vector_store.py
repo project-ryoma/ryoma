@@ -3,6 +3,7 @@
 import reflex as rx
 
 from ryoma_lab import styles
+from ryoma_lab.components.model_selector import embedding_model_selector
 from ryoma_lab.components.upload import upload_render
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -42,7 +43,7 @@ def add_feature():
                 rx.flex("Add Feature +", spacing="3"),
                 size="sm",
                 width="100%",
-                on_click=VectorStoreState.open_feature_dialog,
+                on_click=VectorStoreState.toggle_create_feature_dialog,
             ),
         ),
         rx.dialog.content(
@@ -130,7 +131,7 @@ def setup_store():
                 rx.flex("Setup Store", rx.icon(tag="plus", width=24, height=24), spacing="3"),
                 size="4",
                 radius="full",
-                on_click=VectorStoreState.toggle_store_dialog,
+                on_click=VectorStoreState.toggle_create_store_dialog,
             ),
         ),
         rx.dialog.content(
@@ -153,10 +154,10 @@ def setup_store():
                     on_blur=VectorStoreState.set_project_name,
                     required=True,
                 ),
-                rx.chakra.heading("Vector Store *", size="sm"),
+                rx.chakra.heading("Online Store *", size="sm"),
                 rx.select.root(
                     rx.select.trigger(
-                        placeholder="Select the data source as the vector store",
+                        placeholder="Select the data source as the online store for the embeddings",
                     ),
                     rx.select.content(
                         rx.select.group(
@@ -169,9 +170,9 @@ def setup_store():
                     value=VectorStoreState.online_store,
                     on_change=lambda ds: VectorStoreState.set_online_store(ds),
                 ),
-                rx.chakra.heading("Vector Store Configs", size="sm"),
+                rx.chakra.heading("Online Store Configs", size="sm"),
                 rx.input(
-                    placeholder="Enter the vector store configs",
+                    placeholder="Enter the online vector store configs",
                     on_blur=VectorStoreState.set_online_store_configs,
                 ),
                 rx.chakra.heading("Offline Store", size="sm"),
@@ -218,7 +219,63 @@ def setup_store():
                 direction="column",
                 spacing="4",
             ),
-            open=VectorStoreState.store_dialog_open,
+            open=VectorStoreState.create_store_dialog_open,
+        ),
+    )
+
+
+def materialize_feature_render(feature_view) -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.chakra.button(
+                "Materialize",
+                on_click=VectorStoreState.toggle_materialize_feature_dialog,
+            ),
+        ),
+        rx.dialog.content(
+            rx.dialog.title(
+                "Materialize Feature",
+                size="1",
+                font_family="Inter",
+                padding_top="1em",
+            ),
+            rx.dialog.description(
+                "Materialize the feature data into the vector store.",
+                size="2",
+                mb="4",
+                padding_bottom="1em",
+            ),
+            rx.vstack(
+                rx.chakra.heading("Embeddings", size="sm"),
+                embedding_model_selector(
+                    VectorStoreState.materialize_embedding_model,
+                    VectorStoreState.set_materialize_embedding_model,
+                    trigger_width="100%",
+                ),
+                width="100%",
+                border=styles.border,
+                border_radius=styles.border_radius,
+                padding="1em",
+            ),
+            rx.flex(
+                rx.dialog.close(
+                    rx.button(
+                        "Confirm",
+                        on_click=lambda: VectorStoreState.materialize_feature(feature_view),
+                    ),
+                ),
+                rx.dialog.close(
+                    rx.button(
+                        "Cancel",
+                        variant="soft",
+                        color_scheme="gray",
+                    ),
+                ),
+                padding_top="1em",
+                spacing="3",
+                justify="end",
+            ),
+            open=VectorStoreState.materialize_feature_dialog_open,
         ),
     )
 
@@ -235,7 +292,7 @@ def show_features():
                         rx.chakra.th("Entities"),
                         rx.chakra.th("Feature"),
                         rx.chakra.th("Source"),
-                        rx.chakra.th("Load"),
+                        rx.chakra.th("Materialize"),
                     )
                 ),
                 rx.chakra.tbody(
@@ -246,14 +303,7 @@ def show_features():
                             rx.chakra.td(feature_view.entities),
                             rx.chakra.td(feature_view.feature),
                             rx.chakra.td(feature_view.source),
-                            rx.chakra.td(
-                                rx.chakra.button(
-                                    "Load",
-                                    on_click=lambda: VectorStoreState.load_feature_views(
-                                        feature_view
-                                    ),
-                                )
-                            ),
+                            rx.chakra.td(materialize_feature_render(feature_view)),
                         ),
                     ),
                     width="100%",

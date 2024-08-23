@@ -5,7 +5,6 @@ from pandas import DataFrame
 from ryoma.agent.workflow import WorkflowAgent
 from ryoma.tool.pandas_tool import PandasTool
 from ryoma.tool.python_tool import PythonTool
-from ryoma.tool.sql_tool import ConvertToPandasTool
 
 
 class PandasAgent(WorkflowAgent):
@@ -17,7 +16,6 @@ class PandasAgent(WorkflowAgent):
         super().__init__(
             [
                 PandasTool(),
-                ConvertToPandasTool(),
             ],
             model,
             model_parameters,

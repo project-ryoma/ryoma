@@ -1,12 +1,7 @@
 from typing import Dict, Optional
 
 from ryoma.agent.workflow import WorkflowAgent
-from ryoma.tool.sql_tool import (
-    ConvertToArrowTool,
-    ConvertToPandasTool,
-    CreateTableTool,
-    SqlQueryTool,
-)
+from ryoma.tool.sql_tool import CreateTableTool, QueryProfileTool, SqlQueryTool
 
 
 class SqlAgent(WorkflowAgent):
@@ -18,7 +13,7 @@ class SqlAgent(WorkflowAgent):
         model_parameters: Optional[Dict] = None,
     ):
         super().__init__(
-            [SqlQueryTool(), CreateTableTool(), ConvertToArrowTool()],
+            [SqlQueryTool(), CreateTableTool(), QueryProfileTool()],
             model,
             model_parameters,
         )

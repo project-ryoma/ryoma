@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ryoma"
-version = "0.1.1"
+version = "0.0.1"
 description = "AI Powered Data Platform"
 readme = "README.md"
 authors = ["ryoma <contact@project-ryoma.com>"]
@@ -61,6 +61,8 @@ ibis-framework = "^9.0.0"
 fastapi-users = { version = "^13.0.0", extras = ["sqlalchemy", "oauth"] }
 
 # extra dependency group for different databases
+marimo = "^0.8.2"
+pypdf = "^4.3.1"
 [tool.poetry.group.snowflake]
 optional = true
 
@@ -80,6 +82,7 @@ feast = { version = "^0.39.1", extras = ["sqlite"] }
 optional = true
 
 [tool.poetry.group.postgresql.dependencies]
+psycopg2 = { version = "^2.9.2", optional = true }
 ibis-framework = { version = "^9.0.0", extras = ["postgres"] }
 amundsen-databuilder = { version = "^7.5.0", extras = ["postgres"] }
 feast = { version = "^0.39.1", extras = ["postgres"] }

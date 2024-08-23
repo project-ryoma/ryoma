@@ -142,7 +142,7 @@ class WorkflowAgent(RyomaAgent):
                 tool.datasource = datasource
         return self
 
-    def _build_prompt(self, question: str):
+    def _format_messages(self, question: str):
         current_state = self.get_current_state()
         if current_state.next and current_state.next[0] == "tools":
             # We are in the tool node, but the user has asked a new question
@@ -157,10 +157,6 @@ class WorkflowAgent(RyomaAgent):
                 ]
             }
         else:
-            self.final_prompt_template = self.prompt_template_factory.build_prompt()
-            self.final_prompt_template.append(
-                MessagesPlaceholder(variable_name="messages", optional=True)
-            )
             return {"messages": [HumanMessage(content=question)]}
 
     def stream(
@@ -173,7 +169,7 @@ class WorkflowAgent(RyomaAgent):
         if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
-            messages = self._build_prompt(question)
+            messages = self._format_messages(question)
         events = self.workflow.stream(messages, config=self.config, stream_mode="values")
         if display:
             _printed = set()
@@ -204,7 +200,7 @@ class WorkflowAgent(RyomaAgent):
         if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
             messages = None
         else:
-            messages = self._build_prompt(question)
+            messages = self._format_messages(question)
         result = self.workflow.invoke(messages, config=self.config)
         if display:
             _printed = set()
@@ -262,8 +258,15 @@ class WorkflowAgent(RyomaAgent):
     def cancel_tool(self, tool_id: str):
         pass
 
+    def _build_chain(self):
+        self.final_prompt_template.append(
+            MessagesPlaceholder(variable_name="messages", optional=True)
+        )
+        return self.final_prompt_template | self.model
+
     def call_model(self, state: MessageState, config: RunnableConfig):
-        response = self.model.invoke(state["messages"], self.config)
+        chain = self._build_chain()
+        response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):

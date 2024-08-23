@@ -4,7 +4,7 @@ import base64
 import pickle
 from abc import ABC
 
-import pandas as pd
+from langchain_community.vectorstores import FAISS
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from sqlalchemy.engine import Result
@@ -127,42 +127,3 @@ class QueryProfileTool(SqlDataSourceTool):
     ) -> str:
         """Execute the query, return the results or an error message."""
         return self.datasource.get_query_profile(query)
-
-
-class ConvertToPandasTool(SqlDataSourceTool):
-    """Tool for converting a SQL query result to a pandas dataframe."""
-
-    name: str = "convert_to_pandas"
-    description: str = """
-    Convert a SQL query result to a pandas dataframe.
-    The tool can only be used if the data source is provided.
-    If the query result is not correct, an error message will be returned.
-    """
-    args_schema: Type[BaseModel] = QueryInput
-
-    def _run(
-        self,
-        query: str,
-        **kwargs,
-    ) -> pd.DataFrame:
-        """Execute the query, return the result as pandas or an error message."""
-        return self.datasource.to_pandas(query)
-
-
-class ConvertToArrowTool(SqlDataSourceTool):
-    """Tool for converting a SQL query result to a PyArrow Table."""
-
-    name: str = "convert_to_arrow"
-    description: str = """
-    Convert a SQL query result to a PyArrow Table.
-    If the query result is not correct, an error message will be returned.
-    """
-    args_schema: Type[BaseModel] = QueryInput
-
-    def _run(
-        self,
-        query: str,
-        **kwargs,
-    ) -> Table:
-        """Execute the query, return the results or an error message."""
-        return self.datasource.to_arrow(query)

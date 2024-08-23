@@ -137,7 +137,7 @@ class DataSourceState(rx.State):
             logging.info(f"Connected to {self.datasource}")
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource}: {e}")
-            return
+            return rx.toast.error(f"Failed to connect to {self.datasource}: {e}")
         with rx.session() as session:
             session.add(
                 DataSource(

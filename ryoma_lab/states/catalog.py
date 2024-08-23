@@ -61,7 +61,6 @@ class Column(rx.Model, table=True):
 
 
 class CatalogState(rx.State):
-    current_datasource: Optional[str] = None
     current_catalog_id: Optional[int] = None
     current_schema_id: Optional[int] = None
     catalogs: List[Catalog] = []
@@ -182,13 +181,13 @@ class CatalogState(rx.State):
             session.refresh(_schema)
         self.current_schema_id = _schema.id
 
-    def crawl_data_catalog(self):
-        datasource = DataSourceState.connect(self.current_datasource)
+    def crawl_data_catalog(self, datasource_name: Optional[str] = None):
+        datasource = DataSourceState.connect(datasource_name)
         try:
             with rx.session() as session:
                 self._commit_catalog(
                     session,
-                    self.current_datasource,
+                    datasource_name,
                     datasource.database,
                     datasource.db_schema,
                 )
@@ -200,7 +199,6 @@ class CatalogState(rx.State):
             rx.toast(e)
 
     def on_load(self):
-        self.current_datasource = None
         self.current_catalog_id = None
         self.current_schema_id = None
         self.catalogs = []
