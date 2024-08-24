@@ -7,6 +7,8 @@ from fastapi_users.db import SQLAlchemyBaseOAuthAccountTableUUID, SQLAlchemyBase
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, select
 
+from ryoma_lab.models.vector_store import VectorStoreConfig, get_vector_store_config
+
 
 class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, rx.Model, table=True):
     id: Optional[str] = Field(default=None, primary_key=True)
@@ -36,6 +38,8 @@ class BaseState(rx.State):
     user: Optional[User] = None
 
     sidebar_displayed: bool = True
+
+    vector_store_config: VectorStoreConfig = get_vector_store_config()
 
     @rx.var
     def origin_url(self) -> str:

@@ -302,7 +302,7 @@ def show_features():
                 ),
                 rx.chakra.tbody(
                     rx.foreach(
-                        VectorStoreState.vector_feature_views,
+                        VectorStoreState.current_feature_views,
                         lambda feature_view: rx.chakra.tr(
                             rx.chakra.td(feature_view.name),
                             rx.chakra.td(feature_view.entities),

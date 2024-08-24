@@ -1,7 +1,6 @@
 from typing import Optional
 
 import datetime
-import json
 import logging
 import os
 import pathlib
@@ -15,7 +14,6 @@ from feast.data_source import DataSource as FeastDataSource
 from feast.data_source import PushSource
 from feast.feature_store import FeatureStore
 from feast.field import Field
-from feast.repo_config import RepoConfig
 from feast.repo_operations import _prepare_registry_and_repo, apply_total_with_repo_instance
 from feast.types import Array, Float32
 from langchain_community.document_loaders import PyPDFLoader
@@ -23,63 +21,23 @@ from langchain_core.documents import Document
 from sqlmodel import select
 
 from ryoma.agent.embedding import EmbeddingAgent
-from ryoma.agent.factory import AgentFactory, AgentProvider
+from ryoma.agent.factory import AgentFactory
+from ryoma_lab.apis.datasource import get_datasource_by_name, get_datasource_configs
+from ryoma_lab.apis.vector_store import get_feature_stores
+from ryoma_lab.models.vector_store import (
+    FeastFeatureView,
+    VectorStore,
+    VectorStoreConfig,
+    get_vector_store_config,
+)
+from ryoma_lab.services.vector_store import (
+    build_feast_repo_config,
+    get_feast_datasource_by_name,
+    get_feature_store,
+    get_feature_views,
+)
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
-
-
-def get_feast_datasource_by_name(ds: str) -> Optional[FeastDataSource]:
-    from feast import BigQuerySource, RedshiftSource, SnowflakeSource
-    from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import (
-        PostgreSQLSource,
-    )
-
-    feast_datasource_map = {
-        "postgresql": PostgreSQLSource,
-        "snowflake": SnowflakeSource,
-        "bigquery": BigQuerySource,
-        "redshift": RedshiftSource,
-    }
-    if ds not in feast_datasource_map:
-        return None
-    return feast_datasource_map[ds]
-
-
-class VectorStoreConfig(rx.Base):
-    """
-    VectorStoreConfig is a model that holds the configuration for storying the registry data.
-    It will be used by feast to apply the feature store.
-    """
-
-    registry_type: str
-    path: str
-
-
-def get_vector_store_config():
-    rx_config = rx.config.get_config()
-    if "vector_store_config" in rx_config:
-        return rx_config["vector_store_config"]
-    else:
-
-        # default config
-        return VectorStoreConfig(**{"registry_type": "file", "path": "data/vector.db"})
-
-
-class VectorStore(rx.Model, table=True):
-    project_name: str
-    online_store: str
-    offline_store: Optional[str]
-    online_store_configs: Optional[str]
-    offline_store_configs: Optional[str]
-
-
-class FeastFeatureView(rx.Model):
-    name: str
-    feature: str
-    entities: Optional[str] = ""
-    source: str = ""
-    source_type: str = ""
-    push_source_type: str = ""
 
 
 class VectorStoreState(BaseState):
@@ -98,16 +56,14 @@ class VectorStoreState(BaseState):
     feature_entities: Optional[str] = None
     feature_datasource: Optional[str] = None
 
-    vector_feature_views: list[FeastFeatureView] = []
+    _current_fs: Optional[FeatureStore] = None
+    current_feature_views: list[FeastFeatureView] = []
 
     create_store_dialog_open: bool = False
     create_feature_dialog_open: bool = False
     materialize_feature_dialog_open: bool = False
 
-    _fs: Optional[FeatureStore] = None
-
     files: list[str] = []
-    vector_store_config: VectorStoreConfig = get_vector_store_config()
     feature_source_configs: dict[str, str] = {}
 
     materialize_embedding_model: Optional[str] = None
@@ -117,8 +73,8 @@ class VectorStoreState(BaseState):
         self.feature_source_configs[key] = value
 
     def _get_datasource_configs(self, ds: str) -> dict[str, str]:
-        ds = DataSourceState.get_datasource_by_name(ds)
-        configs = DataSourceState.get_configs(ds)
+        ds = get_datasource_by_name(ds)
+        configs = get_datasource_configs(ds)
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],
@@ -171,50 +127,14 @@ class VectorStoreState(BaseState):
             project = self.projects[0]
         if project:
             self.project = project
-            repo_config = self._build_feast_repo_config(
-                project_name=project.project_name,
-                online_store=project.online_store,
-                online_store_configs=json.loads(
-                    project.online_store_configs if project.online_store_configs else "{}"
-                ),
-                offline_store=project.offline_store,
-                offline_store_configs=json.loads(
-                    project.offline_store_configs if project.offline_store_configs else "{}"
-                ),
-            )
-            self._fs = FeatureStore(config=repo_config)
-            self.vector_feature_views = self._get_feature_views()
-
-    def _build_feast_repo_config(
-        self,
-        project_name,
-        online_store: str,
-        online_store_configs: dict[str, str],
-        offline_store: Optional[str] = None,
-        offline_store_configs: dict[str, str] = None,
-    ):
-        return RepoConfig(
-            project=project_name,
-            registry={
-                "type": self.vector_store_config.registry_type,
-                "path": self.vector_store_config.path,
-            },
-            provider="local",
-            online_config={
-                "type": online_store,
-                **online_store_configs,
-            },
-            offline_config={
-                "type": offline_store,
-                **(offline_store_configs if offline_store_configs else {}),
-            },
-            entity_key_serialization_version=3,
-        )
+            self._current_fs = get_feature_store(project, self.vector_store_config)
+            self.current_feature_views = get_feature_views(self._current_fs)
 
     def create_store(self):
 
         repo_config_input = {
             "project_name": self.project_name,
+            "vector_store_config": self.vector_store_config,
             "online_store": self.online_store,
             "online_store_configs": dict(self.online_store_configs),
             "offline_store": self.offline_store,
@@ -225,12 +145,12 @@ class VectorStoreState(BaseState):
             repo_config_input,
         )
 
-        repo_config = self._build_feast_repo_config(**repo_config_input)
+        repo_config = build_feast_repo_config(**repo_config_input)
         repo_path = Path(os.path.join(Path.cwd(), "data"))
         try:
             project, registry, repo, store = _prepare_registry_and_repo(repo_config, repo_path)
             apply_total_with_repo_instance(store, project, registry, repo, True)
-            self._fs = FeatureStore(config=repo_config)
+            self._current_fs = FeatureStore(config=repo_config)
 
             logging.info("Feature store applied successfully.")
 
@@ -281,7 +201,7 @@ class VectorStoreState(BaseState):
             return {"push_source_type": self._get_file_type(self.files[0])}
 
     def create_vector_feature(self):
-        self._fs.apply(
+        self._current_fs.apply(
             FeatureView(
                 name=self.feature_view_name,
                 entities=self.feature_entities if self.feature_entities else [],
@@ -294,26 +214,8 @@ class VectorStoreState(BaseState):
         self._reload_project()
         self.toggle_create_feature_dialog()
 
-    def _get_feature_views(self) -> list[FeastFeatureView]:
-        vector_feature_views = []
-        for feature_view in self._fs.list_feature_views():
-            feature_spec = self._fs.get_feature_view(feature_view.name)
-            vector_feature_views.append(
-                FeastFeatureView(
-                    name=feature_spec.name,
-                    entities=", ".join([entity.name for entity in feature_spec.entity_columns]),
-                    feature=", ".join([feature.name for feature in feature_spec.features]),
-                    source=feature_spec.stream_source.name,
-                    source_type=feature_spec.stream_source.__class__.__name__,
-                    push_source_type=feature_spec.tags.get("push_source_type", ""),
-                )
-            )
-        return vector_feature_views
-
     def load_store(self):
-        with rx.session() as session:
-            self.projects = session.exec(select(VectorStore)).all()
-
+        self.projects = get_feature_stores()
         self._reload_project()
 
         logging.info("Feature store loaded")
@@ -341,7 +243,7 @@ class VectorStoreState(BaseState):
             if self.materialize_embedding_model:
                 feature_df = self._apply_embedding(feature_df)
             self._validate_feature_dataframe(feature_df, feature_view)
-            self._fs.push(feature_view["source"], feature_df)
+            self._current_fs.push(feature_view["source"], feature_df)
             logging.info(f"Source {feature_view['source']} pushed to feature.")
         except Exception as e:
             logging.error(f"Error processing file source: {e}")
@@ -402,13 +304,9 @@ class VectorStoreState(BaseState):
             feature_view["feature"]: embedded_data,
             feature_view["entities"]: [""] * len(embedded_data),
         }
-        self._fs.write_to_online_store(feature_view_name=feature_view["name"], inputs=inputs)
-
-    def _retrieve_vector_features(self, feature: str, query, top_k: int = 3) -> dict:
-        logging.info(f"Retrieving online documents for {feature} with query {query}")
-        response = self._fs.retrieve_online_documents(feature=feature, query=query, top_k=top_k)
-        logging.info(f"Retrieved online documents: {response.to_dict()}")
-        return response.to_dict()
+        self._current_fs.write_to_online_store(
+            feature_view_name=feature_view["name"], inputs=inputs
+        )
 
     async def handle_upload(self, files: list[rx.UploadFile]):
         """Handle the upload of file(s).

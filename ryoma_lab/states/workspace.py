@@ -6,14 +6,20 @@ import pickle
 
 import httpx
 import reflex as rx
+from feast import FeatureStore
 from langchain_core.messages import AIMessage, ToolMessage
-from pandas import DataFrame
 from sqlmodel import delete, select
 
 from ryoma.agent.base import BaseAgent
 from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
 from ryoma.agent.workflow import ToolMode, WorkflowAgent
+from ryoma_lab.apis.vector_store import get_feature_stores
+from ryoma_lab.services.vector_store import (
+    get_feature_store,
+    get_feature_views,
+    retrieve_vector_features,
+)
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
@@ -70,6 +76,10 @@ class ChatState(BaseState):
 
     current_k_shot: int = 0
 
+    current_vector_store: str = ""
+
+    _current_store: Optional[FeatureStore] = None
+
     current_vector_feature: str = ""
 
     # agent states
@@ -95,8 +105,17 @@ class ChatState(BaseState):
 
     notebook_html: str = ""
 
-    def close_vector_feature_dialog(self):
-        self.vector_feature_dialog_open = False
+    @rx.var
+    def current_feature_views(self) -> list[str]:
+        if not self.current_vector_store:
+            return []
+        all_stores = get_feature_stores()
+        current_store = next(
+            (store for store in all_stores if store.project_name == self.current_vector_store), None
+        )
+        self._current_store = get_feature_store(current_store, self.vector_store_config)
+        feature_views = get_feature_views(self._current_store)
+        return [f"{feature_view.name}:{feature_view.feature}" for feature_view in feature_views]
 
     def set_current_chat_model(self, chat_model: str):
         if self.current_chat_model != chat_model:
@@ -340,10 +359,11 @@ class ChatState(BaseState):
             # embed the question
             embedded_question = self._current_embedding_agent.embed_query(question)
 
-            # retrieve similar features
-            vector_store_state = await self.get_state(VectorStoreState)
-            top_k_features = vector_store_state._fs.retrieve_online_documents(
-                self.current_vector_feature, embedded_question, self.current_k_shot
+            top_k_features = retrieve_vector_features(
+                fs=self._current_store,
+                feature=self.current_vector_feature,
+                query=embedded_question,
+                top_k=self.current_k_shot,
             )
 
             # TODO: add similar features to the prompt template

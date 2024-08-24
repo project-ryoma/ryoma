@@ -17,7 +17,7 @@ from ryoma.datasource.metadata import Catalog, Column, Database, Table
 
 class PostgreSqlDataSource(SqlDataSource):
     connection_url: Optional[str] = Field(None, description="Connection URL")
-    username: Optional[str] = Field(None, description="User name")
+    user: Optional[str] = Field(None, description="User name")
     password: Optional[str] = Field(None, description="Password")
     host: Optional[str] = Field(None, description="Host name")
     port: Optional[int] = Field(None, description="Port number")
@@ -32,7 +32,7 @@ class PostgreSqlDataSource(SqlDataSource):
         else:
             logging.info("Connection URL not provided, using individual parameters")
             return ibis.postgres.connect(
-                user=self.username,
+                user=self.user,
                 password=self.password,
                 host=self.host,
                 port=self.port,
@@ -68,7 +68,7 @@ class PostgreSqlDataSource(SqlDataSource):
         return database
 
     def connection_string(self):
-        return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}/{self.db_schema}"
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}/{self.db_schema}"
 
     def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.postgres_metadata_extractor import PostgresMetadataExtractor

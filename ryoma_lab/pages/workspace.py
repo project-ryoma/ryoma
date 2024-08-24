@@ -258,7 +258,7 @@ def prompt_template_selector() -> rx.Component:
                         padding_top="2",
                     ),
                     rx.text(
-                        "Vector Feature *",
+                        "Vector Store *",
                         asi_="div",
                         mb="1",
                         size="2",
@@ -266,14 +266,14 @@ def prompt_template_selector() -> rx.Component:
                     ),
                     rx.select.root(
                         rx.select.trigger(
-                            placeholder="Select your feature",
+                            placeholder="Select your vector store",
                         ),
                         rx.select.content(
                             rx.select.group(
-                                rx.select.label("Select your feature"),
+                                rx.select.label("Select your vector store"),
                                 rx.foreach(
-                                    VectorStoreState.vector_feature_views,
-                                    lambda x: rx.select.item(x.name, value=f"{x.name}:{x.feature}"),
+                                    VectorStoreState.projects,
+                                    lambda x: rx.select.item(x.project_name, value=x.project_name),
                                 ),
                                 rx.select.item(
                                     "Create new feature +",
@@ -281,8 +281,37 @@ def prompt_template_selector() -> rx.Component:
                                 ),
                             ),
                         ),
-                        value=ChatState.current_vector_feature,
-                        on_change=ChatState.set_current_vector_feature,
+                        value=ChatState.current_vector_store,
+                        on_change=ChatState.set_current_vector_store,
+                    ),
+                    rx.cond(
+                        ChatState.current_vector_store,
+                        rx.box(
+                            rx.text(
+                                "Vector Feature *",
+                                asi_="div",
+                                mb="1",
+                                size="2",
+                                weight="bold",
+                            ),
+                            rx.select.root(
+                                rx.select.trigger(
+                                    placeholder="Select your feature",
+                                    width="100%",
+                                ),
+                                rx.select.content(
+                                    rx.select.group(
+                                        rx.select.label("Select your vector feature"),
+                                        rx.foreach(
+                                            ChatState.current_feature_views,
+                                            lambda x: rx.select.item(x, value=x),
+                                        ),
+                                    ),
+                                ),
+                                value=ChatState.current_vector_feature,
+                                on_change=ChatState.set_current_vector_feature,
+                            ),
+                        ),
                     ),
                     spacing="2",
                     direction="column",

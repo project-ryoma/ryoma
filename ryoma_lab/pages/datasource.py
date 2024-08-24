@@ -223,7 +223,7 @@ def update_datasource(datasource: DataSource):
                 rx.dialog.close(
                     rx.button(
                         "Update",
-                        on_click=DataSourceState.update_datasource,
+                        on_click=lambda: DataSourceState.update_datasource(datasource.id),
                         variant="solid",
                     ),
                 ),
