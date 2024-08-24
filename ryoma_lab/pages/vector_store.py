@@ -68,7 +68,7 @@ def add_feature():
                 ),
                 rx.chakra.heading("Feature Name *", size="sm"),
                 rx.input(
-                    placeholder="Enter the feature name",
+                    placeholder="Enter the name for your embedding feature",
                     on_blur=VectorStoreState.set_feature_name,
                     required=True,
                 ),
@@ -251,6 +251,11 @@ def materialize_feature_render(feature_view) -> rx.Component:
                     VectorStoreState.materialize_embedding_model,
                     VectorStoreState.set_materialize_embedding_model,
                     trigger_width="100%",
+                ),
+                rx.chakra.heading("Model Configs", size="sm"),
+                rx.chakra.input(
+                    placeholder="Enter the model configs",
+                    on_blur=VectorStoreState.set_materialize_embedding_model_configs,
                 ),
                 width="100%",
                 border=styles.border,

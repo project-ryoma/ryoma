@@ -8,18 +8,27 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
-from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel
 
-from ryoma.agent.utils import get_model
+from ryoma.agent.utils import load_model_provider
 from ryoma.datasource.base import DataSource
 from ryoma.datasource.metadata import Catalog
+from ryoma.models.agent import AgentType
 from ryoma.prompt.prompt_template import PromptTemplateFactory
 
 
 class RyomaAgent:
-    type: str = "ryoma"
+    """
+    Base class for all agents in Ryoma. Inherits from this class can be used to create custom agents.
+    """
+
+    type: AgentType = AgentType.ryoma
     description: str = "Ryoma Agent is your best friend!"
+
+
+class BaseAgent(RyomaAgent):
+    type: AgentType = AgentType.base
+    description: str = "Base Agent supports all the basic functionalities of a chat agent."
     config: Dict[str, Any]
     model: RunnableSerializable
     model_parameters: Optional[Dict]
@@ -50,7 +59,9 @@ class RyomaAgent:
         # model
         self.model_parameters = model_parameters
         if isinstance(model, str):
-            self.model: RunnableSerializable = get_model(model, model_parameters)
+            self.model: RunnableSerializable = load_model_provider(
+                model, model_parameters=model_parameters
+            )
         else:
             self.model = model
 
@@ -83,10 +94,12 @@ class RyomaAgent:
 
     def add_datasource(self, datasource: DataSource):
         self.add_prompt_context(str(datasource.get_metadata()))
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         return self
 
     def add_data_catalog(self, catalog: Catalog):
         self.add_prompt_context(str(catalog))
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         return self
 
     def _format_messages(self, messages: str):

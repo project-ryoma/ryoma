@@ -13,8 +13,9 @@ from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
 
-from ryoma.agent.base import RyomaAgent
+from ryoma.agent.base import BaseAgent
 from ryoma.datasource.base import DataSource
+from ryoma.models.agent import AgentType
 from ryoma.states import MessageState
 
 
@@ -40,11 +41,11 @@ def handle_tool_error(state) -> dict:
     }
 
 
-class WorkflowAgent(RyomaAgent):
+class WorkflowAgent(BaseAgent):
     tools: List[BaseTool]
     graph: StateGraph
     workflow: CompiledGraph
-    type: str = "workflow"
+    type: AgentType = AgentType.workflow
 
     def __init__(
         self,
@@ -58,6 +59,7 @@ class WorkflowAgent(RyomaAgent):
         output_parser: Optional[BaseModel] = None,
         **kwargs,
     ):
+        logging.info(f"Initializing Workflow Agent with model: {model}")
         # initialize the agent with model, prompt, and output parser
         super().__init__(
             model,

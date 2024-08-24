@@ -52,17 +52,16 @@ types-setuptools = "^70.0.0.20240524"
 
 # ryoma lab dependencies
 alembic = "^1.13.1"
-reflex = "^0.5.5"
+reflex = "^0.5.9"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
 feast = "^0.39.1"
 amundsen-databuilder = "^7.5.0"
 ibis-framework = "^9.0.0"
 fastapi-users = { version = "^13.0.0", extras = ["sqlalchemy", "oauth"] }
+pypdf = "^4.3.1"
 
 # extra dependency group for different databases
-marimo = "^0.8.2"
-pypdf = "^4.3.1"
 [tool.poetry.group.snowflake]
 optional = true
 

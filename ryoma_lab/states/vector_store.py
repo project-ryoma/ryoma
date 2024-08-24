@@ -111,6 +111,7 @@ class VectorStoreState(BaseState):
     feature_source_configs: dict[str, str] = {}
 
     materialize_embedding_model: Optional[str] = None
+    materialize_embedding_model_configs: Optional[str] = None
 
     def set_feature_source_config(self, key: str, value: str):
         self.feature_source_configs[key] = value
@@ -350,9 +351,7 @@ class VectorStoreState(BaseState):
         try:
             docs = PyPDFLoader(source_dir).load()
             if self.materialize_embedding_model:
-                embedding_agent = AgentFactory.create_agent(
-                    "embedding", model=self.materialize_embedding_model
-                )
+                embedding_agent = self._create_embedding_agent()
                 self._process_pdf_document(docs, embedding_agent, feature_view)
         except Exception as e:
             logging.error(f"Error processing PDF source: {e}")
@@ -364,13 +363,21 @@ class VectorStoreState(BaseState):
         # Add support for other file types (csv, json, txt) if needed
         raise ValueError(f"Unsupported file type: {file_type}")
 
+    def _create_embedding_agent(
+        self,
+    ) -> EmbeddingAgent:
+        return AgentFactory.create_agent(
+            "embedding",
+            model=self.materialize_embedding_model,
+            model_parameters=self.materialize_embedding_model_configs,
+        )
+
     def _apply_embedding(self, feature_df):
         logging.info("Run embedding before materializing feature")
-        embedding_agent = AgentFactory.create_agent(
-            "embedding", model=self.materialize_embedding_model
-        )
+        embedding_agent = self._create_embedding_agent()
+
         feature_df["feature"] = feature_df["feature"].apply(
-            lambda x: embedding_agent.embed(x) if isinstance(x, str) else x
+            lambda x: embedding_agent.embed_query(x) if isinstance(x, str) else x
         )
         return feature_df
 
@@ -400,6 +407,7 @@ class VectorStoreState(BaseState):
     def _retrieve_vector_features(self, feature: str, query, top_k: int = 3) -> dict:
         logging.info(f"Retrieving online documents for {feature} with query {query}")
         response = self._fs.retrieve_online_documents(feature=feature, query=query, top_k=top_k)
+        logging.info(f"Retrieved online documents: {response.to_dict()}")
         return response.to_dict()
 
     async def handle_upload(self, files: list[rx.UploadFile]):
@@ -435,6 +443,12 @@ class VectorStoreState(BaseState):
         }
         file_type = pathlib.Path(file).suffix
         return supported_file_types.get(file_type, "txt")
+
+    def delete_project(self, project_name):
+        with rx.session() as session:
+            session.query(VectorStore).filter_by(project_name=project_name).delete()
+            session.commit()
+        self.load_store()
 
     def on_load(self) -> None:
         self.load_store()

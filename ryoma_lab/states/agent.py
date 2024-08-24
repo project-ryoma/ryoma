@@ -12,6 +12,7 @@ from sqlmodel import Field, select
 
 from ryoma.agent.factory import AgentFactory, get_builtin_agents
 from ryoma.agent.workflow import WorkflowAgent
+from ryoma.models.agent import AgentType
 from ryoma_lab.states.graph import Graph
 
 
@@ -44,7 +45,7 @@ class Agent(rx.Model, table=True):
     id: Optional[str] = Field(default=None, primary_key=True)
     name: str
     description: Optional[str]
-    type: Optional[str] = Field(default="builtin")
+    type: Optional[AgentType] = Field(default=AgentType.ryoma)
     workflow: Optional[str]
 
 
@@ -57,15 +58,14 @@ class AgentState(rx.State):
 
     def open_agent(self, is_open: bool, agent: Agent):
         self.is_open = is_open
-        logging.info("Opening agent %s", agent)
-        if agent["type"] == "workflow":
+        if agent["type"] == AgentType.workflow.value:
             passthrough_agent = AgentFactory.create_agent(agent["name"], model="")
             graph = passthrough_agent.get_graph()
             self.current_agent_graph = Graph(
                 nodes=[create_agent_graph_node(node) for _, node in graph.nodes.items()],
                 edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)],
             )
-        elif agent["type"] == "custom":
+        elif agent["type"] == AgentType.custom.value:
             workflow = json.loads(agent["workflow"])
             self.current_agent_graph = Graph(**workflow)
 
@@ -85,7 +85,7 @@ class AgentState(rx.State):
         workflow_state.set_entry_point("agent")
         workflow_state.add_edge("tools", "agent")
 
-        agent = WorkflowAgent(type="custom", tools=tools, model="", graph=workflow_state)
+        agent = WorkflowAgent(type=AgentType.custom, tools=tools, model="", graph=workflow_state)
 
     def create_agent(self, graph: Graph):
         if not self.current_agent_name:
@@ -97,7 +97,7 @@ class AgentState(rx.State):
             agent = Agent(
                 id=str(uuid.uuid4()),
                 name=self.current_agent_name,
-                type="custom",
+                type=AgentType.custom,
                 description=description,
                 workflow=json.dumps(graph),
             )

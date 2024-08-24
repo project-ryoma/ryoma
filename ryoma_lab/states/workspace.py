@@ -10,7 +10,8 @@ from langchain_core.messages import AIMessage, ToolMessage
 from pandas import DataFrame
 from sqlmodel import delete, select
 
-from ryoma.agent.base import RyomaAgent
+from ryoma.agent.base import BaseAgent
+from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
 from ryoma.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.states.base import BaseState
@@ -74,9 +75,9 @@ class ChatState(BaseState):
     # agent states
     current_chat_agent_type: str = ""
 
-    _current_chat_agent: Optional[Union[RyomaAgent, WorkflowAgent]] = None
+    _current_chat_agent: Optional[Union[BaseAgent, WorkflowAgent]] = None
 
-    _current_embedding_agent: Optional[RyomaAgent] = None
+    _current_embedding_agent: Optional[EmbeddingAgent] = None
 
     _current_chat_agent_state_change: bool = False
 
@@ -149,7 +150,9 @@ class ChatState(BaseState):
         if not self._current_embedding_agent or self._current_embedding_agent_state_change:
             logging.info(f"Creating embedding agent with model {self.current_embedding_model}")
             self._current_embedding_agent = AgentFactory.create_agent(
-                agent_type="embedding", model=self.current_embedding_model
+                agent_type="embedding",
+                model=self.current_embedding_model,
+                model_parameters=None,
             )
             self._current_embedding_agent_state_change = False
 
@@ -335,10 +338,11 @@ class ChatState(BaseState):
             self._create_embedding_agent()
 
             # embed the question
-            embedded_question = self._current_embedding_agent.embed(question)
+            embedded_question = self._current_embedding_agent.embed_query(question)
 
             # retrieve similar features
-            top_k_features = VectorStoreState._retrieve_vector_features(
+            vector_store_state = await self.get_state(VectorStoreState)
+            top_k_features = vector_store_state._fs.retrieve_online_documents(
                 self.current_vector_feature, embedded_question, self.current_k_shot
             )
 
