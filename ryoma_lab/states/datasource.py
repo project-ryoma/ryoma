@@ -125,7 +125,7 @@ class DataSourceState(rx.State):
             session.commit()
         self.load_entries()
 
-    def build_datasource(self, datasource: Optional[DataSource]):
+    def build_datasource(self, datasource: Optional[DataSource] = None):
         datasource_attrs = self.get_datasource_attributes()
 
         datasource_params = {

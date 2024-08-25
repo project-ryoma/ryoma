@@ -4,8 +4,8 @@ import reflex as rx
 
 from ryoma_lab import styles
 from ryoma_lab.components.code_editor import codeeditor
+from ryoma_lab.models.tool import Tool, ToolOutput
 from ryoma_lab.states.kernel import ToolKernel
-from ryoma_lab.states.tool import Tool, ToolOutput
 
 
 def tool_args(
@@ -62,6 +62,7 @@ def output_render(tool_output: ToolOutput) -> rx.Component:
             tool_output.show,
             rx.data_table(
                 data=tool_output.data,
+                class_name="cell_output",
                 width="38em",
                 pagination=True,
                 search=True,

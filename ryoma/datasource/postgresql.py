@@ -31,7 +31,7 @@ class PostgreSqlDataSource(SqlDataSource):
             return ibis.connect(self.connection_url)
         else:
             logging.info("Connection URL not provided, using individual parameters")
-            return ibis.postgres.connect(
+            conn = ibis.postgres.connect(
                 user=self.user,
                 password=self.password,
                 host=self.host,
@@ -39,6 +39,8 @@ class PostgreSqlDataSource(SqlDataSource):
                 database=self.database,
                 schema=self.db_schema,
             )
+            logging.info("Connected to Postgres")
+            return conn
 
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
         logging.info("Getting metadata from Postgres")

@@ -390,6 +390,86 @@ def chat_model_selector_render() -> rx.Component:
     )
 
 
+def chatbox_render() -> rx.Component:
+    return rx.chakra.flex(
+        rx.chakra.hstack(
+            rx.flex(
+                chat_model_selector_render(),
+                datasource_selector(),
+                agent_selector(),
+                direction="row",
+                spacing="3",
+                flex_grow=1,
+            ),
+            rx.dialog.root(
+                rx.dialog.trigger(
+                    rx.chakra.button(
+                        rx.tooltip(
+                            rx.icon("settings"),
+                            content="Try advanced settings!",
+                        ),
+                        color=rx.color("accent", 12),
+                        size="md",
+                        align_self="center",
+                    )
+                ),
+                rx.dialog.content(
+                    rx.dialog.title("Advanced Settings"),
+                    rx.dialog.description(
+                        "Advanced settings for AI agent, including data source, prompt template, and agent type."
+                    ),
+                    rx.flex(
+                        prompt_template_selector(),
+                        direction="column",
+                        spacing="4",
+                        padding_y="1em",
+                        width="100%",
+                    ),
+                    rx.flex(
+                        rx.dialog.close(
+                            rx.button("Confirm"),
+                        ),
+                        rx.dialog.close(
+                            rx.button(
+                                "Close",
+                                variant="soft",
+                                color_scheme="gray",
+                            ),
+                        ),
+                        justify="end",
+                        spacing="3",
+                    ),
+                ),
+            ),
+            direction="row",
+            padding="4",
+            background_color=rx.color("mauve", 3),
+            color=rx.color("mauve", 12),
+            top="0",
+            spacing="4",
+            align_items="start",
+        ),
+        rx.chakra.vstack(
+            chat_history(),
+            action_bar(),
+            background_color=rx.color("mauve", 2),
+            color=rx.color("mauve", 12),
+            height="100%",
+            align_items="stretch",
+            spacing="0",
+            padding="20px",
+            overflow_y="scroll",
+            flex_grow=0,
+        ),
+        direction="column",
+        width="100%",
+        border=styles.border,
+        border_radius=styles.border_radius,
+        background_color=rx.color("mauve", 2),
+        overflow_y="scroll",
+    )
+
+
 @template(
     route="/",
     title="Workspace",
@@ -406,83 +486,8 @@ def chat_model_selector_render() -> rx.Component:
 def workspace() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
-        rx.chakra.flex(
-            rx.chakra.hstack(
-                rx.flex(
-                    chat_model_selector_render(),
-                    datasource_selector(),
-                    agent_selector(),
-                    direction="row",
-                    spacing="3",
-                    flex_grow=1,
-                ),
-                rx.dialog.root(
-                    rx.dialog.trigger(
-                        rx.chakra.button(
-                            rx.tooltip(
-                                rx.icon("settings"),
-                                content="Try advanced settings!",
-                            ),
-                            color=rx.color("accent", 12),
-                            size="md",
-                            align_self="center",
-                        )
-                    ),
-                    rx.dialog.content(
-                        rx.dialog.title("Advanced Settings"),
-                        rx.dialog.description(
-                            "Advanced settings for AI agent, including data source, prompt template, and agent type."
-                        ),
-                        rx.flex(
-                            prompt_template_selector(),
-                            direction="column",
-                            spacing="4",
-                            padding_y="1em",
-                            width="100%",
-                        ),
-                        rx.flex(
-                            rx.dialog.close(
-                                rx.button("Confirm"),
-                            ),
-                            rx.dialog.close(
-                                rx.button(
-                                    "Close",
-                                    variant="soft",
-                                    color_scheme="gray",
-                                ),
-                            ),
-                            justify="end",
-                            spacing="3",
-                        ),
-                    ),
-                ),
-                direction="row",
-                padding="4",
-                background_color=rx.color("mauve", 3),
-                color=rx.color("mauve", 12),
-                top="0",
-                spacing="4",
-                align_items="start",
-            ),
-            rx.chakra.vstack(
-                chat_history(),
-                action_bar(),
-                background_color=rx.color("mauve", 2),
-                color=rx.color("mauve", 12),
-                height="100%",
-                align_items="stretch",
-                spacing="0",
-                padding="20px",
-                overflow_y="scroll",
-                flex_grow=0,
-            ),
-            direction="column",
-            width="100%",
-            border=styles.border,
-            border_radius=styles.border_radius,
-            background_color=rx.color("mauve", 2),
-        ),
-        rx.chakra.grid_item(
+        rx.grid(
+            chatbox_render(),
             notebook(
                 ChatState.current_tool,
                 ChatState.run_tool,
@@ -491,7 +496,8 @@ def workspace() -> rx.Component:
                 ChatState.current_tool_output,
                 KernelState.tool_kernels,
             ),
-            width="100%",
+            columns="2",
+            spacing="4",
         ),
         h="85vh",
         width="100%",

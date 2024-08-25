@@ -2,6 +2,11 @@
 
 import reflex as rx
 
+global_style = {
+    ".gridjs-container": {
+        "font_size": "12px",
+    }
+}
 border_radius = "0.375rem"
 border = f"1px solid {rx.color('gray', 6)}"
 text_color = rx.color("gray", 11)

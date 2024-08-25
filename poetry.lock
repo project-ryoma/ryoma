@@ -768,8 +768,8 @@ files = [
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
 urllib3 = [
-    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
     {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
+    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
 ]
 
 [package.extras]
@@ -1919,12 +1919,12 @@ files = [
 google-auth = ">=2.14.1,<3.0.dev0"
 googleapis-common-protos = ">=1.56.2,<2.0.dev0"
 grpcio = [
-    {version = ">=1.49.1,<2.0dev", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""},
     {version = ">=1.33.2,<2.0dev", optional = true, markers = "python_version < \"3.11\" and extra == \"grpc\""},
+    {version = ">=1.49.1,<2.0dev", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""},
 ]
 grpcio-status = [
-    {version = ">=1.49.1,<2.0.dev0", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""},
     {version = ">=1.33.2,<2.0.dev0", optional = true, markers = "python_version < \"3.11\" and extra == \"grpc\""},
+    {version = ">=1.49.1,<2.0.dev0", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""},
 ]
 proto-plus = ">=1.22.3,<2.0.0dev"
 protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<6.0.0.dev0"
@@ -2056,8 +2056,8 @@ files = [
 google-api-core = {version = ">=1.34.0,<2.0.dev0 || >=2.11.dev0,<3.0.0dev", extras = ["grpc"]}
 google-auth = ">=2.14.1,<3.0.0dev"
 proto-plus = [
-    {version = ">=1.22.2,<2.0.0dev", markers = "python_version >= \"3.11\""},
     {version = ">=1.22.0,<2.0.0dev", markers = "python_version < \"3.11\""},
+    {version = ">=1.22.2,<2.0.0dev", markers = "python_version >= \"3.11\""},
 ]
 protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
 
@@ -4581,9 +4581,9 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -5417,9 +5417,9 @@ files = [
 astroid = ">=3.2.4,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
-    {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
     {version = ">=0.2", markers = "python_version < \"3.11\""},
+    {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
@@ -6052,8 +6052,8 @@ watchdog = ">=2.3.1,<5.0"
 watchfiles = ">=0.19.0,<1.0"
 wheel = ">=0.42.0,<1.0"
 wrapt = [
-    {version = ">=1.14.0,<2.0", markers = "python_version >= \"3.11\""},
     {version = ">=1.11.0,<2.0", markers = "python_version < \"3.11\""},
+    {version = ">=1.14.0,<2.0", markers = "python_version >= \"3.11\""},
 ]
 
 [[package]]
@@ -6078,6 +6078,23 @@ rich = ">=13.0.0,<14.0"
 tabulate = ">=0.9.0,<0.10.0"
 typer = ">=0.4.2,<1"
 websockets = ">=10.4"
+
+[[package]]
+name = "reflex-resizable-panels"
+version = "0.0.1"
+description = "A component for resizable panels"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "reflex_resizable_panels-0.0.1-py3-none-any.whl", hash = "sha256:d6f8c3f66fa39efb29cf2b85445694c9b1f09461ce153ef97cd9a41e34a686d7"},
+    {file = "reflex_resizable_panels-0.0.1.tar.gz", hash = "sha256:0c1401ce949b0c4a49b781bb138ecbd34d329dc399ecddd523238ba977dbfe1f"},
+]
+
+[package.dependencies]
+reflex = ">=0.5.0"
+
+[package.extras]
+dev = ["build", "twine"]
 
 [[package]]
 name = "regex"
@@ -8409,4 +8426,4 @@ sqlite = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "5d1cdda8f605718535211327bd7512c7cc989961b76c86d4c5bd8c488194caf2"
+content-hash = "88ede4e56d4b4bb92445e2992a164d7432ce2ad431216015c44320fc2a608b5a"

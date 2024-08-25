@@ -69,7 +69,6 @@ def render_catalog_list():
             allow_multiple=True,
             min_width="300px",
         ),
-        margin_top="20px",
         border=styles.border,
         min_height="40vh",
     )

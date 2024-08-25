@@ -14,7 +14,9 @@ from ryoma.agent.base import BaseAgent
 from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
 from ryoma.agent.workflow import ToolMode, WorkflowAgent
+from ryoma_lab.apis.kernel import clear_kernels
 from ryoma_lab.apis.vector_store import get_feature_stores
+from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
 from ryoma_lab.services.vector_store import (
     get_feature_store,
     get_feature_views,
@@ -24,8 +26,6 @@ from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
 from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
-from ryoma_lab.states.tool import Tool, ToolArg, ToolOutput
-from ryoma_lab.states.vector_store import VectorStoreState
 
 
 class QA(rx.Base):
@@ -220,6 +220,9 @@ class ChatState(BaseState):
         del self.chats[chat_title]
         self.load_chats()
         self.current_chat = list(self.chats.keys())[0]
+
+        # delete the kernel history
+        clear_kernels()
 
     def set_chat(self, chat_title: str):
         """Set the title of the current chat.

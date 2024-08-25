@@ -2,19 +2,10 @@ import json
 
 import pandas as pd
 import reflex as rx
-from sqlmodel import delete, select
+from sqlmodel import select
 
-from ryoma_lab.states.tool import Tool, ToolOutput
-
-
-class Kernel(rx.Model, table=True):
-    tool: str = None
-    output: str = None
-
-
-class ToolKernel(rx.Base):
-    tool: Tool
-    output: ToolOutput
+from ryoma_lab.models.kernel import Kernel, ToolKernel
+from ryoma_lab.models.tool import Tool, ToolOutput
 
 
 class KernelState(rx.State):
@@ -46,13 +37,6 @@ class KernelState(rx.State):
     def load_kernels(self):
         with rx.session() as session:
             self.kernels = session.exec(select(Kernel)).all()
-
-    def clear_kernels(self):
-        with rx.session() as session:
-            session.exec(delete(Kernel))
-            session.commit()
-        self.kernels = []
-        self.load_kernel_history()
 
     def on_load(self):
         self.load_kernels()
