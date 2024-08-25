@@ -188,7 +188,7 @@ class VectorStoreState(BaseState):
                 ),
             )
         else:
-            ds = DataSourceState.get_datasource_by_name(self.feature_datasource)
+            ds = get_datasource_by_name(self.feature_datasource)
             datasource_cls = get_feast_datasource_by_name(ds.datasource)
             if datasource_cls:
                 return datasource_cls(name=self.feature_view_name, **self.feature_source_configs)
@@ -223,7 +223,7 @@ class VectorStoreState(BaseState):
     def materialize_feature(self, feature_view: FeastFeatureView):
         logging.info(f"Loading feature view {feature_view}")
         if feature_view["source_type"] != "PushSource":
-            rx.toast.error("Feature source type not supported")
+            self._materialize_offline_feature_view(feature_view)
             return
 
         root_dir = rx.get_upload_dir()
@@ -236,6 +236,10 @@ class VectorStoreState(BaseState):
             self._process_pdf_source(feature_view, source_dir)
         else:
             logging.error(f"Unsupported source type: {push_source_type}")
+
+    def _materialize_offline_feature_view(self, feature_view: FeastFeatureView):
+        logging.info(f"Materializing offline feature view {feature_view}")
+        self._current_fs.materialize_incremental(datetime.datetime.now(), [feature_view["name"]])
 
     def _process_file_source(self, feature_view: FeastFeatureView, source_dir: str, file_type: str):
         try:

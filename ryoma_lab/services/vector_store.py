@@ -36,19 +36,21 @@ def build_feast_repo_config(
             "type": vector_store_config.registry_type,
             "path": vector_store_config.path,
         },
-        "entity_key_serialization_version": 3,
-    }
-    if online_store:
-        configs["online_store"] = {
+        "online_store": {
             "type": online_store,
             **online_store_configs,
             "pgvector_enabled": "true",
-        }
+        },
+        "entity_key_serialization_version": 3,
+    }
+
     if offline_store:
         configs["offline_store"] = {
             "type": offline_store,
             **offline_store_configs,
         }
+    else:
+        configs["offline_config"] = {}
     return RepoConfig(**configs)
 
 
@@ -92,13 +94,17 @@ def get_feature_views(
     vector_feature_views = []
     for feature_view in fs.list_feature_views():
         feature_spec = fs.get_feature_view(feature_view.name)
+        if feature_spec.stream_source is not None:
+            source = feature_spec.stream_source
+        else:
+            source = feature_spec.batch_source
         vector_feature_views.append(
             FeastFeatureView(
                 name=feature_spec.name,
                 entities=", ".join([entity.name for entity in feature_spec.entity_columns]),
                 feature=", ".join([feature.name for feature in feature_spec.features]),
-                source=feature_spec.stream_source.name,
-                source_type=feature_spec.stream_source.__class__.__name__,
+                source=source.name,
+                source_type=source.__class__.__name__,
                 push_source_type=feature_spec.tags.get("push_source_type", ""),
             )
         )

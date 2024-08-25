@@ -15,7 +15,7 @@ def render_feature_source_configs():
     return rx.flex(
         rx.chakra.heading("Feature Source Configs", size="sm"),
         rx.foreach(
-            ["database", "table", "column", "query"],
+            ["table", "query", "timestamp_field"],
             lambda attribute: rx.flex(
                 rx.chakra.text(attribute, size="md"),
                 rx.input(
