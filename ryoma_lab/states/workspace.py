@@ -17,6 +17,7 @@ from ryoma.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.apis.kernel import clear_kernels
 from ryoma_lab.apis.vector_store import get_feature_stores
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
+from ryoma_lab.services.kernel import format_code
 from ryoma_lab.services.vector_store import (
     get_feature_store,
     get_feature_views,
@@ -281,7 +282,7 @@ class ChatState(BaseState):
                 id=tool_call["id"],
                 name=tool_call["name"],
                 args=[
-                    ToolArg(name=key, value=str(value))  # TODO handle other types
+                    ToolArg(name=key, value=format_code(value))  # TODO handle other types
                     for key, value in tool_call["args"].items()
                 ],
             )
@@ -409,17 +410,6 @@ class ChatState(BaseState):
                 self.chats[chat.title].append(QA(question=chat.question, answer=chat.answer))
             if not self.chats:
                 self.chats = DEFAULT_CHATS
-
-    @rx.background
-    async def load_notebook(self):
-        logging.info("Loading notebook")
-        async with self:
-            async with httpx.AsyncClient() as client:
-                response = await client.get("http://localhost:8000/_marimo/")
-                response.raise_for_status()
-                logging.info(response.text)
-                self.notebook_html = response.text
-                return
 
     def on_load(self):
         self.load_chats()

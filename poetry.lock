@@ -6844,6 +6844,17 @@ files = [
 ]
 
 [[package]]
+name = "sql-formatter"
+version = "0.6.2"
+description = "A SQL formatter"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "sql_formatter-0.6.2-py3-none-any.whl", hash = "sha256:5c38651a93031b2ea96c977309d38bba94ad77e8f2dcae7b1b6b71e116423c33"},
+    {file = "sql_formatter-0.6.2.tar.gz", hash = "sha256:98b83810e42ba989073c9ea5d53ddda45c36e91004904ca2916fc5fc13373c10"},
+]
+
+[[package]]
 name = "sql-metadata"
 version = "2.12.0"
 description = "Uses tokenized query returned by python-sqlparse and generates query metadata"
@@ -8426,4 +8437,4 @@ sqlite = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "88ede4e56d4b4bb92445e2992a164d7432ce2ad431216015c44320fc2a608b5a"
+content-hash = "807ac259f61329b408fee56f3efa87da794af255dfb044a151f2eb94444960a5"

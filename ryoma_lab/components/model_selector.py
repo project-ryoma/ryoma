@@ -3,7 +3,7 @@ import reflex as rx
 from ryoma_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
 
 
-def select_model_render(
+def model_selector(
     model_provider,
     model_value,
     on_model_value_change,
@@ -37,7 +37,14 @@ def embedding_model_selector(
     on_model_value_change,
     trigger_width: str = "12em",
 ) -> rx.Component:
-    return select_model_render(
+    """
+    Embedding model selector.
+    @param model_value: model value selected.
+    @param on_model_value_change: on model value change.
+    @param trigger_width: change trigger width.
+    @return: Embedding model selector component.
+    """
+    return model_selector(
         EmbeddingModelProvider,
         model_value,
         on_model_value_change,
@@ -50,7 +57,14 @@ def chat_model_selector(
     on_model_value_change,
     trigger_width: str = "12em",
 ) -> rx.Component:
-    return select_model_render(
+    """
+    Chat model selector.
+    @param model_value: model value selected.
+    @param on_model_value_change: On model value change.
+    @param trigger_width: change trigger width.
+    @return: the chat model selector component.
+    """
+    return model_selector(
         ChatModelProvider,
         model_value,
         on_model_value_change,

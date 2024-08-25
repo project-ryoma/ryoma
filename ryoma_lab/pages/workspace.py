@@ -126,46 +126,43 @@ def action_bar() -> rx.Component:
 
 def datasource_selector() -> rx.Component:
     """The datasource selector."""
-    return rx.chakra.form(
-        rx.chakra.form_control(
-            rx.text(
-                "Data Source",
-                asi_="div",
-                mb="1",
-                size="1",
-                weight="bold",
-                color_scheme="gray",
-                padding_left="1px",
-            ),
-            rx.select.root(
-                rx.select.trigger(
-                    placeholder="Select a datasource",
-                    width="100%",
-                ),
-                rx.select.content(
-                    rx.select.group(
-                        rx.select.label("Connected Data Source"),
-                        rx.cond(
-                            DataSourceState.datasource_names,
-                            rx.foreach(
-                                DataSourceState.datasource_names,
-                                lambda ds: rx.select.item(ds, value=ds),
-                            ),
-                        ),
-                        width="100%",
-                    ),
-                    rx.select.group(
-                        rx.select.item("Create new datasource + ", value="custom"),
-                    ),
-                    width="100%",
-                ),
-                value=ChatState.current_datasource,
-                on_change=ChatState.set_current_datasource,
+    return rx.box(
+        rx.text(
+            "Data Source",
+            asi_="div",
+            mb="1",
+            size="1",
+            weight="bold",
+            color_scheme="gray",
+            padding_left="1px",
+        ),
+        rx.select.root(
+            rx.select.trigger(
+                placeholder="Select a datasource",
                 width="100%",
             ),
-            label="Datasource",
+            rx.select.content(
+                rx.select.group(
+                    rx.select.label("Connected Data Source"),
+                    rx.cond(
+                        DataSourceState.datasource_names,
+                        rx.foreach(
+                            DataSourceState.datasource_names,
+                            lambda ds: rx.select.item(ds, value=ds),
+                        ),
+                    ),
+                    width="100%",
+                ),
+                rx.select.group(
+                    rx.select.item("Create new datasource + ", value="custom"),
+                ),
+                width="100%",
+            ),
+            value=ChatState.current_datasource,
+            on_change=ChatState.set_current_datasource,
             width="100%",
         ),
+        label="Datasource",
         width="100%",
     )
 
@@ -327,46 +324,44 @@ def prompt_template_selector() -> rx.Component:
 
 
 def agent_selector() -> rx.Component:
-    return rx.chakra.form(
-        rx.chakra.form_control(
-            rx.text(
-                "Agent Type",
-                asi_="div",
-                mb="1",
-                size="1",
-                weight="bold",
-                color_scheme="gray",
-                padding_left="1px",
-            ),
-            rx.select.root(
-                rx.select.trigger(
-                    placeholder="Select an agent",
-                    width="100%",
-                ),
-                rx.select.content(
-                    rx.select.group(
-                        rx.foreach(
-                            AgentState.agent_names,
-                            lambda agent_name: rx.select.item(agent_name, value=agent_name),
-                        ),
-                        rx.chakra.button(
-                            "Create new agent +",
-                            on_click=lambda: rx.redirect("/agent"),
-                            size="sm",
-                            width="100%",
-                            justify="start",
-                        ),
-                        width="100%",
-                    )
-                ),
-                value=ChatState.current_chat_agent_type,
-                on_change=ChatState.set_current_chat_agent_type,
+    return rx.box(
+        rx.text(
+            "Agent Type",
+            asi_="div",
+            mb="1",
+            size="1",
+            weight="bold",
+            color_scheme="gray",
+            padding_left="1px",
+        ),
+        rx.select.root(
+            rx.select.trigger(
+                placeholder="Select an agent",
                 width="100%",
             ),
-            label="Agent Type",
+            rx.select.content(
+                rx.select.group(
+                    rx.foreach(
+                        AgentState.agent_names,
+                        lambda agent_name: rx.select.item(agent_name, value=agent_name),
+                    ),
+                    rx.chakra.button(
+                        "Create new agent +",
+                        on_click=lambda: rx.redirect("/agent"),
+                        size="sm",
+                        width="100%",
+                        justify="start",
+                    ),
+                    width="100%",
+                )
+            ),
+            value=ChatState.current_chat_agent_type,
+            on_change=ChatState.set_current_chat_agent_type,
             width="100%",
-            min_width="12em",
-        )
+        ),
+        label="Agent Type",
+        width="100%",
+        min_width="12em",
     )
 
 

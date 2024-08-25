@@ -127,7 +127,7 @@ def sync_data_catalog_render(
     return rx.vstack(
         rx.dialog.root(
             rx.dialog.trigger(
-                rx.chakra.button("Sync"),
+                rx.button("Sync"),
             ),
             rx.dialog.content(
                 rx.dialog.title(

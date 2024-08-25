@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 from ryoma.tool.pandas_tool import PandasTool
 from ryoma.tool.spark_tool import SparkTool
 from ryoma.tool.sql_tool import SqlQueryTool
-from tests.ryoma.test_datasource import MockSqlDataSource
+from tests.unit_test.test_datasource import MockSqlDataSource
 
 
 @pytest.fixture

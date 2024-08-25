@@ -20,7 +20,7 @@ def show_datasource(datasource: DataSource):
         rx.chakra.td(update_datasource(datasource)),
         rx.chakra.td(sync_data_catalog_render(datasource)),
         rx.chakra.td(
-            rx.chakra.button(
+            rx.button(
                 "Delete",
                 on_click=lambda: DataSourceState.delete_datasource(datasource.id),
             )
@@ -182,7 +182,7 @@ def add_datasource():
 def update_datasource(datasource: DataSource):
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.chakra.button(
+            rx.button(
                 rx.icon("square_pen", width=24, height=24),
                 on_click=DataSourceState.render_update_datasource(datasource),
             ),
@@ -270,7 +270,7 @@ def data_source_table() -> rx.Component:
                 ),
             ),
             rx.chakra.tbody(rx.foreach(DataSourceState.datasources, show_datasource)),
-            size="4",
+            size="6",
             width="100%",
             justify="stretch",
             variant="striped",
@@ -304,7 +304,7 @@ def datasource() -> rx.Component:
                 data_source_table(),
                 render_catalog_body(),
             ),
-            margin_top="20px",
+            margin_top="10px",
             width="100%",
         ),
         width="100%",

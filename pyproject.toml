@@ -63,6 +63,7 @@ pypdf = "^4.3.1"
 
 # extra dependency group for different databases
 reflex-resizable-panels = "^0.0.1"
+sql-formatter = "^0.6.2"
 [tool.poetry.group.snowflake]
 optional = true
 
