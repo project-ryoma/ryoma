@@ -1,6 +1,16 @@
 from ryoma.agent.base import BaseAgent
 from ryoma.agent.sql import SqlAgent
 
+import os
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def setup_openai_api_key():
+    # Check if OPENAI_API_KEY is set in the environment
+    if "OPENAI_API_KEY" not in os.environ:
+        pytest.skip("OPENAI_API_KEY not set in environment variables")
+
 
 def test_base_agent():
     # Create an simple ryoma Agent with GPT-3.5-turbo model

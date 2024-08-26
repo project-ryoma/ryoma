@@ -5,7 +5,7 @@ from typing import Dict, Generator
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai_responses.ext.httpx import Request, Response
-from openai_responses.streaming import Event, EventStream
+from openai_responses.streaming import EventStream
 from typing_extensions import override
 
 os.environ["OPENAI_API_KEY"] = "foo"
@@ -35,8 +35,8 @@ def mock_chat_response(content: str, additional_kwargs: Dict = None):
 
 class CreateChatCompletionEventStream(EventStream):  #
     @override
-    def generate(self) -> Generator[Event, None, None]:  #
-        chunk = ChatCompletionChunk.model_validate(
+    def generate(self) -> Generator[ChatCompletionChunk, None, None]:  #
+        yield ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
                 "object": "chat.completion.chunk",
@@ -53,9 +53,8 @@ class CreateChatCompletionEventStream(EventStream):  #
                 ],
             }
         )
-        yield self.event(None, chunk)  #
 
-        chunk = ChatCompletionChunk.model_validate(
+        yield ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
                 "object": "chat.completion.chunk",
@@ -72,9 +71,8 @@ class CreateChatCompletionEventStream(EventStream):  #
                 ],
             }
         )
-        yield self.event(None, chunk)
 
-        chunk = ChatCompletionChunk.model_validate(
+        yield ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
                 "object": "chat.completion.chunk",
@@ -86,13 +84,12 @@ class CreateChatCompletionEventStream(EventStream):  #
                 ],
             }
         )
-        yield self.event(None, chunk)
 
 
 class CreateChatCompletionEventStreamWithToolCall(EventStream):
     @override
-    def generate(self) -> Generator[Event, None, None]:
-        chunk = ChatCompletionChunk.model_validate(
+    def generate(self) -> Generator[ChatCompletionChunk, None, None]:
+        yield ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-123",
                 "object": "chat.completion.chunk",
@@ -121,7 +118,6 @@ class CreateChatCompletionEventStreamWithToolCall(EventStream):
                 },
             }
         )
-        yield self.event(None, chunk)
 
 
 def create_chat_completion_response_stream(request: Request) -> Response:

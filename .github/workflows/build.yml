@@ -37,9 +37,9 @@ jobs:
       run: |
         make check-codestyle
 
-    - name: Run tests
+    - name: Run unit tests
       run: |
-        make test
+        make unit-test
 
     # - name: Run safety checks
     #   run: |
