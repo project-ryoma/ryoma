@@ -54,7 +54,6 @@ class ValidatorAgent(WorkflowAgent):
             return state
 
     def _build_workflow(self):
-
         workflow = StateGraph(MessageState)
 
         workflow.add_node("agent", self.call_model)

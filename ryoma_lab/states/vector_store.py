@@ -137,7 +137,6 @@ class VectorStoreState(BaseState):
             self.current_feature_views = get_feature_views(self._current_fs)
 
     def create_store(self):
-
         repo_config_input = {
             "project_name": self.project_name,
             "vector_store_config": self.vector_store_config,
@@ -179,7 +178,6 @@ class VectorStoreState(BaseState):
             logging.error(f"Error creating feature store: {e}")
             raise e
         finally:
-
             self.toggle_create_store_dialog()
 
     def _create_feature_schema(self):

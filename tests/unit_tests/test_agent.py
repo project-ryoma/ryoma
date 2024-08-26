@@ -11,7 +11,6 @@ from tests.unit_tests.test_utils import (
     mock_chat_response,
 )
 
-import pytest
 
 @pytest.fixture(autouse=True)
 def mock_openai_api_key(monkeypatch):

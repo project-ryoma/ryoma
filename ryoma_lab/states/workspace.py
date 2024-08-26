@@ -346,7 +346,6 @@ class ChatState(BaseState):
         )
 
     async def process_question(self, form_data: dict[str, str]):
-
         if not self.current_chat_model:
             yield rx.toast.error("Please select a chat model.")
             return

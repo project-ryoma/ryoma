@@ -26,7 +26,6 @@ def get_builtin_agents():
 
 
 class AgentFactory:
-
     @staticmethod
     def create_agent(
         agent_type: str, *args, **kwargs

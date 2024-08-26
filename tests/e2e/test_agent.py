@@ -1,8 +1,9 @@
+import os
+
+import pytest
+
 from ryoma.agent.base import BaseAgent
 from ryoma.agent.sql import SqlAgent
-
-import os
-import pytest
 
 
 @pytest.fixture(autouse=True)
