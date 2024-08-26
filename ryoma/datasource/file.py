@@ -16,7 +16,13 @@ class FileDataSource(DataSource):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, file_path: str, file_format: str, file_name: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        file_path: str,
+        file_format: str,
+        file_name: Optional[str] = None,
+        **kwargs,
+    ):
         if not file_name:
             file_name = file_path
         super().__init__(

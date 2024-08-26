@@ -1,6 +1,5 @@
-from typing import Any, Dict, List, Tuple
-
 import math
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
@@ -24,7 +23,9 @@ def test_calculate_entropy():
     assert calculate_entropy(np.array(probs)) == calculate_entropy_list(probs)
 
 
-def find_best_split(data: np.ndarray, labels: np.array, feature_idx: int) -> Tuple[float, float]:
+def find_best_split(
+    data: np.ndarray, labels: np.array, feature_idx: int
+) -> Tuple[float, float]:
     # get the unique values of the feature
     unique_values = np.unique(data[:, feature_idx])
     best_entropy = math.inf
@@ -38,12 +39,18 @@ def find_best_split(data: np.ndarray, labels: np.array, feature_idx: int) -> Tup
 
         left_entropy = calculate_entropy(
             np.array(
-                [np.sum(left_labels == label) / len(left_labels) for label in np.unique(labels)]
+                [
+                    np.sum(left_labels == label) / len(left_labels)
+                    for label in np.unique(labels)
+                ]
             )
         )
         right_entropy = calculate_entropy(
             np.array(
-                [np.sum(right_labels == label) / len(right_labels) for label in np.unique(labels)]
+                [
+                    np.sum(right_labels == label) / len(right_labels)
+                    for label in np.unique(labels)
+                ]
             )
         )
 
@@ -73,7 +80,9 @@ def test_find_best_split():
 
 
 # get the splitted datasets by the best split value
-def split_datasets(data: np.ndarray, split_value: float, feature_idx: int) -> List[np.ndarray]:
+def split_datasets(
+    data: np.ndarray, split_value: float, feature_idx: int
+) -> List[np.ndarray]:
     max_threshold = data[:, feature_idx] < split_value
     left_indices = np.where(max_threshold)
     right_indices = np.where(~max_threshold)

@@ -1,7 +1,6 @@
-from typing import Any, Optional, Union
-
 import logging
 from abc import ABC, abstractmethod
+from typing import Any, Optional, Union
 
 import ibis
 from ibis import BaseBackend, Table
@@ -22,7 +21,9 @@ class DataSource(BaseModel, ABC):
 
     @abstractmethod
     def crawl_data_catalog(self, **kwargs):
-        raise NotImplementedError("crawl_data_catalog is not implemented for this data source")
+        raise NotImplementedError(
+            "crawl_data_catalog is not implemented for this data source"
+        )
 
 
 class SqlDataSource(DataSource):
@@ -51,10 +52,16 @@ class SqlDataSource(DataSource):
         return result
 
     def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
-        raise NotImplementedError("metadata function needs to be implemented for the data source.")
+        raise NotImplementedError(
+            "metadata function needs to be implemented for the data source."
+        )
 
     def crawl_data_catalog(self, **kwargs):
-        raise NotImplementedError("crawl_data_catalog is not implemented for this data source")
+        raise NotImplementedError(
+            "crawl_data_catalog is not implemented for this data source"
+        )
 
     def get_query_plan(self, query: str) -> Any:
-        raise NotImplementedError("get_query_plan is not implemented for this data source.")
+        raise NotImplementedError(
+            "get_query_plan is not implemented for this data source."
+        )

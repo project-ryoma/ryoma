@@ -1,7 +1,6 @@
-from typing import List, Optional
-
 import json
 import os
+from typing import List, Optional
 
 import reflex as rx
 from sqlmodel import Field, select
@@ -49,7 +48,9 @@ class PromptTemplateState(rx.State):
         self.prompt_template_lines = pt.prompt_lines
 
     def toggle_create_prompt_template_dialog(self):
-        self.create_prompt_template_dialog_open = not self.create_prompt_template_dialog_open
+        self.create_prompt_template_dialog_open = (
+            not self.create_prompt_template_dialog_open
+        )
 
     @rx.var
     def prompt_template_names(self) -> List[str]:
@@ -90,7 +91,12 @@ class PromptTemplateState(rx.State):
     def get_prompt_template(prompt_template_name: str) -> Optional[PromptTemplate]:
         _, prompt_templates = PromptTemplateState.load_builtin_prompt_templates()
         return next(
-            (pt for pt in prompt_templates if pt.prompt_template_name == prompt_template_name), None
+            (
+                pt
+                for pt in prompt_templates
+                if pt.prompt_template_name == prompt_template_name
+            ),
+            None,
         )
 
     @staticmethod
@@ -119,7 +125,9 @@ class PromptTemplateState(rx.State):
             session.commit()
 
         self.load_prompt_templates()
-        self.create_prompt_template_dialog_open = not self.create_prompt_template_dialog_open
+        self.create_prompt_template_dialog_open = (
+            not self.create_prompt_template_dialog_open
+        )
         return
 
     def on_load(self):

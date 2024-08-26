@@ -5,7 +5,9 @@ from ryoma.tool.sql_tool import CreateTableTool, QueryProfileTool, SqlQueryTool
 
 
 class SqlAgent(WorkflowAgent):
-    description: str = "A SQL agent that can use SQL Tools to interact with SQL databases."
+    description: str = (
+        "A SQL agent that can use SQL Tools to interact with SQL databases."
+    )
 
     def __init__(
         self,

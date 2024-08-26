@@ -12,7 +12,10 @@ def chat_history_item(chat: str) -> rx.Component:
     return rx.drawer.close(
         rx.hstack(
             rx.button(
-                chat, on_click=lambda: ChatState.set_chat(chat), width="80%", variant="surface"
+                chat,
+                on_click=lambda: ChatState.set_chat(chat),
+                width="80%",
+                variant="surface",
             ),
             rx.button(
                 rx.icon(
@@ -39,7 +42,9 @@ def sidebar_chat_history(trigger) -> rx.Component:
                 rx.vstack(
                     rx.heading("Chat history", color=rx.color("mauve", 11)),
                     rx.divider(),
-                    rx.foreach(ChatState.chat_titles, lambda chat: chat_history_item(chat)),
+                    rx.foreach(
+                        ChatState.chat_titles, lambda chat: chat_history_item(chat)
+                    ),
                     align_items="stretch",
                     width="100%",
                 ),

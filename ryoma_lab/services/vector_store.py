@@ -1,16 +1,23 @@
-from typing import Optional
-
 import json
 import logging
+from typing import Optional
 
 from feast import FeatureStore, RepoConfig
 from feast.data_source import DataSource as FeastDataSource
 
-from ryoma_lab.models.vector_store import FeastFeatureView, VectorStore, VectorStoreConfig
+from ryoma_lab.models.vector_store import (
+    FeastFeatureView,
+    VectorStore,
+    VectorStoreConfig,
+)
 
 
 def retrieve_vector_features(
-    fs: FeatureStore, feature: str, query: list[float], top_k: int = 3, distance_metric: str = "L2"
+    fs: FeatureStore,
+    feature: str,
+    query: list[float],
+    top_k: int = 3,
+    distance_metric: str = "L2",
 ) -> dict:
     logging.info(f"Retrieving online documents for {feature} with vector")
     response = fs.retrieve_online_documents(
@@ -71,7 +78,9 @@ def get_feast_datasource_by_name(ds: str) -> Optional[FeastDataSource]:
     return feast_datasource_map[ds]
 
 
-def get_feature_store(store: VectorStore, vector_store_config: VectorStoreConfig) -> FeatureStore:
+def get_feature_store(
+    store: VectorStore, vector_store_config: VectorStoreConfig
+) -> FeatureStore:
     logging.info(f"Getting feature store with store: {store.project_name}")
     repo_config = build_feast_repo_config(
         project_name=store.project_name,
@@ -101,7 +110,9 @@ def get_feature_views(
         vector_feature_views.append(
             FeastFeatureView(
                 name=feature_spec.name,
-                entities=", ".join([entity.name for entity in feature_spec.entity_columns]),
+                entities=", ".join(
+                    [entity.name for entity in feature_spec.entity_columns]
+                ),
                 feature=", ".join([feature.name for feature in feature_spec.features]),
                 source=source.name,
                 source_type=source.__class__.__name__,

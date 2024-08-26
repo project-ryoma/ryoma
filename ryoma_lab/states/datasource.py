@@ -1,6 +1,5 @@
-from typing import Any, List, Optional
-
 import logging
+from typing import Any, List, Optional
 
 import reflex as rx
 from sqlmodel import delete, select
@@ -145,7 +144,9 @@ class DataSourceState(rx.State):
 
     def update_datasource(self, ds_id: str):
         with rx.session() as session:
-            datasource = session.exec(select(DataSource).where(DataSource.id == ds_id)).first()
+            datasource = session.exec(
+                select(DataSource).where(DataSource.id == ds_id)
+            ).first()
             datasource = self.build_datasource(datasource)
             session.add(datasource)
             session.commit()

@@ -1,6 +1,10 @@
 from typing import Optional, Union
 
-from langchain_core.prompts import ChatPromptTemplate, FewShotPromptTemplate, PromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    FewShotPromptTemplate,
+    PromptTemplate,
+)
 
 from ryoma.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
 
@@ -30,7 +34,9 @@ class PromptTemplateFactory:
             )
         self.prompt_templates[0] = base_prompt_template
 
-    def add_context_prompt(self, context_prompt_template: Union[str, ChatPromptTemplate]):
+    def add_context_prompt(
+        self, context_prompt_template: Union[str, ChatPromptTemplate]
+    ):
         if isinstance(context_prompt_template, str):
             context_prompt_template = ChatPromptTemplate.from_messages(
                 [("system", context_prompt_template)]

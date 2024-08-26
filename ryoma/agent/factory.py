@@ -1,6 +1,5 @@
-from typing import Union
-
 from enum import Enum
+from typing import Union
 
 from ryoma.agent.arrow_agent import ArrowAgent
 from ryoma.agent.base import BaseAgent

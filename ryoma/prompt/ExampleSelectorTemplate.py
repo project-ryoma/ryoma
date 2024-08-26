@@ -22,7 +22,9 @@ class BasicExampleSelector(object):
         return cross_domain_candidates
 
     def retrieve_index(self, indexes: list, db_id):
-        cross_domain_indexes = [i for i in range(len(self.db_ids)) if self.db_ids[i] != db_id]
+        cross_domain_indexes = [
+            i for i in range(len(self.db_ids)) if self.db_ids[i] != db_id
+        ]
         retrieved_indexes = [cross_domain_indexes[i] for i in indexes]
         return retrieved_indexes
 
@@ -66,7 +68,8 @@ class CosineSimilarExampleSelector(BasicExampleSelector):
             cosine_similarity(target_embedding, self.train_embeddings)
         ).tolist()
         pairs = [
-            (similarity, index) for similarity, index in zip(similarities, range(len(similarities)))
+            (similarity, index)
+            for similarity, index in zip(similarities, range(len(similarities)))
         ]
 
         train_json = self.train_json
@@ -105,7 +108,10 @@ class EuclideanDistanceExampleSelector(BasicExampleSelector):
         distances = np.squeeze(
             euclidean_distances(target_embedding, self.train_embeddings)
         ).tolist()
-        pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
+        pairs = [
+            (distance, index)
+            for distance, index in zip(distances, range(len(distances)))
+        ]
 
         train_json = self.train_json
         pairs_sorted = sorted(pairs, key=lambda x: x[0])
@@ -143,14 +149,19 @@ class EuclideanDistanceThresholdExampleSelector(BasicExampleSelector):
         distances = np.squeeze(
             euclidean_distances(target_embedding, self.train_embeddings)
         ).tolist()
-        pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
+        pairs = [
+            (distance, index)
+            for distance, index in zip(distances, range(len(distances)))
+        ]
 
         train_json = self.train_json
         pairs_sorted = sorted(pairs, key=lambda x: x[0])
         top_pairs = list()
         for d, index in pairs_sorted:
             similar_db_id = train_json[index]["db_id"]
-            if (cross_domain and similar_db_id == target["db_id"]) or d > self.threshold:
+            if (
+                cross_domain and similar_db_id == target["db_id"]
+            ) or d > self.threshold:
                 continue
             top_pairs.append((index, d))
             # self.top_distances.append(d)
@@ -184,7 +195,10 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
         distances = np.squeeze(
             euclidean_distances(target_embedding, self.train_embeddings)
         ).tolist()
-        pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
+        pairs = [
+            (distance, index)
+            for distance, index in zip(distances, range(len(distances)))
+        ]
 
         train_json = self.train_json
         pairs_sorted = sorted(pairs, key=lambda x: x[0])
@@ -195,7 +209,9 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
                 continue
             # Skeleton similarity
             if (
-                jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"])
+                jaccard_similarity(
+                    train_json[index]["pre_skeleton"], target["pre_skeleton"]
+                )
                 < self.threshold
             ):
                 continue
@@ -210,7 +226,9 @@ class EuclideanDistancePreSkeletonSimilarThresholdSelector(BasicExampleSelector)
                     continue
                 # Skeleton similarity
                 if (
-                    jaccard_similarity(train_json[index]["pre_skeleton"], target["pre_skeleton"])
+                    jaccard_similarity(
+                        train_json[index]["pre_skeleton"], target["pre_skeleton"]
+                    )
                     >= self.threshold
                 ):
                     continue
@@ -246,7 +264,10 @@ class EuclideanDistancePreSkeletonSimilarPlusSelector(BasicExampleSelector):
             distances[i] -= jaccard_similarity(
                 train_json[i]["pre_skeleton"], target["pre_skeleton"]
             )
-        pairs = [(distance, index) for distance, index in zip(distances, range(len(distances)))]
+        pairs = [
+            (distance, index)
+            for distance, index in zip(distances, range(len(distances)))
+        ]
         pairs_sorted = sorted(pairs, key=lambda x: x[0])
         top_pairs = list()
         for d, index in pairs_sorted:

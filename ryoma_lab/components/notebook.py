@@ -1,228 +1,183 @@
-from typing import Optional
-
 import reflex as rx
 
 from ryoma_lab import styles
 from ryoma_lab.components.code_editor import codeeditor
-from ryoma_lab.models.tool import Tool, ToolOutput
-from ryoma_lab.states.kernel import ToolKernel
+from ryoma_lab.states.notebook import Cell, CellOutput, NotebookState
 
 
-def tool_args(
-    tool: Tool,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    render_only: bool = False,
-) -> rx.Component:
+def notebook_panel() -> rx.Component:
     return rx.flex(
-        rx.cond(
-            tool.args & tool.args.length() > 0,
-            rx.foreach(
-                tool.args,
-                lambda arg: rx.box(
-                    rx.text(
-                        arg.name, asi_="div", mb="1", size="2", weight="bold", padding_left="4px"
-                    ),
-                    rx.cond(
-                        render_only,
-                        rx.text(arg.value, asi_="div", mb="1", size="2", padding_left="4px"),
-                        codeeditor(
-                            value=arg.value,
-                            on_change=lambda x: update_tool_args(arg.name, x),
-                            width="100%",
-                            min_height="20e",
-                            language="python",
-                            font_size="1em",
-                            padding="4px",
-                            extensions=rx.Var.create(
-                                '[loadLanguage("sql"), loadLanguage("python")]',
-                                _var_is_local=False,
-                            ),
-                        ),
-                    ),
-                ),
-            ),
+        rx.select(
+            ["Python 3", "SQL"],  # Add more kernel options as needed
+            placeholder="Select Kernel",
+            on_change=NotebookState.set_kernel,
+            size="2",
         ),
-        border_radius=styles.border_radius,
-        direction="column",
-        padding="8px",
-    )
-
-
-def output_render(tool_output: ToolOutput) -> rx.Component:
-    return rx.box(
-        rx.chakra.badge(
-            "Output",
-            asi_="div",
-            mb="1",
-            size="3",
-            weight="bold",
-            padding="4px",
+        rx.button(
+            "Run All",
+            on_click=NotebookState.run_all_cells,
+            variant="outline",
+            size="2",
         ),
-        rx.cond(
-            tool_output.show,
-            rx.data_table(
-                data=tool_output.data,
-                class_name="cell_output",
-                width="38em",
-                pagination=True,
-                search=True,
-                sort=True,
-                resizable=True,
-            ),
+        rx.button(
+            "Restart Kernel",
+            on_click=NotebookState.restart_kernel,
+            variant="outline",
+            size="2",
         ),
+        rx.button(
+            "Clear All Outputs",
+            on_click=NotebookState.clear_all_outputs,
+            variant="outline",
+            size="2",
+        ),
+        justify="start",
+        spacing="2",
         width="100%",
-        padding="8px",
+        border_radius=styles.border_radius,
     )
 
 
-def panel_render(
-    tool: Tool,
-    run_tool: Optional[rx.event.EventHandler] = None,
-    cancel_tool: Optional[rx.event.EventHandler] = None,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    render_only: bool = False,
-) -> rx.Component:
-    return rx.flex(
-        rx.flex(
-            rx.chakra.badge(
-                tool.name,
-                asi_="div",
-                mb="1",
-                size="3",
-                weight="bold",
-                height="100%",
-                align_content="center",
-                margin="0",
-            ),
+def add_cell_button(index: int, position: str) -> rx.Component:
+    return rx.button(
+        rx.icon("circle_plus", size=18),
+        on_click=lambda: NotebookState.add_cell_at(index, position),
+        variant="ghost",
+        padding="0",
+        min_width="20px",
+        height="20px",
+    )
+
+
+def render_output_item(item: CellOutput) -> rx.Component:
+    return rx.cond(
+        item.output_type == "stream",
+        rx.text(item.text),
+        rx.cond(
+            item.output_type == "execute_result",
             rx.cond(
-                not render_only,
-                rx.chakra.button(rx.icon(tag="play"), size="xs", on_click=run_tool, height="100%"),
-            ),
-            rx.cond(
-                not render_only,
-                rx.chakra.button(
-                    rx.icon(tag="circle_stop"), size="xs", on_click=cancel_tool, height="100%"
+                NotebookState.data_contains_html(item),
+                rx.html(f"{NotebookState.get_html_content(item)}"),
+                rx.cond(
+                    NotebookState.data_contains_image(item),
+                    rx.image(
+                        src=f"data:image/png;base64,{NotebookState.get_image_content(item)}"
+                    ),
+                    rx.markdown(f"```{NotebookState.get_plain_text_content(item)}```"),
                 ),
             ),
-            align="center",
-            spacing="2",
-            width="100%",
-            height="3em",
-            padding="8px",
-            background_color=rx.color("mauve", 5),
+            rx.cond(
+                item.output_type == "error",
+                rx.text(f"{item.ename}: {item.evalue}", color="red"),
+                rx.text("Unknown output type"),
+            ),
+        ),
+    )
+
+
+def render_output(output: list[CellOutput]) -> rx.Component:
+    return rx.vstack(rx.foreach(output, render_output_item))
+
+
+def cell_render(cell: Cell, index: int) -> rx.Component:
+    return rx.hstack(
+        rx.vstack(
+            add_cell_button(index, "before"),
+            rx.spacer(),
+            add_cell_button(index + 1, "after"),
+            height="100%",
+            width="12px",
             align_items="center",
         ),
-        tool_args(tool, update_tool_args, render_only),
-        spacing="1",
-        direction="column",
-    )
-
-
-def kernel_history_render(
-    tool_kernels: list[ToolKernel],
-    run_tool: rx.event.EventHandler,
-    cancel_tool: rx.event.EventHandler,
-    update_tool_args: rx.event.EventHandler,
-) -> rx.Component:
-    return rx.box(
-        rx.cond(
-            tool_kernels.length() > 0,
+        rx.box(
             rx.flex(
-                rx.badge("Kernel History"),
-                rx.chakra.accordion(
-                    rx.foreach(
-                        tool_kernels,
-                        lambda kernel_run: rx.chakra.accordion_item(
-                            rx.chakra.accordion_button(
-                                rx.flex(
-                                    rx.chakra.badge(kernel_run.tool.name),
-                                    rx.chakra.text(
-                                        kernel_run.tool.id,
-                                        min_width="10em",
-                                    ),
-                                    spacing="2",
-                                    direction="row",
-                                    align="center",
-                                ),
-                                rx.chakra.accordion_icon(),
-                            ),
-                            rx.chakra.accordion_panel(
-                                kernel_render(
-                                    kernel_run.tool,
-                                    run_tool,
-                                    cancel_tool,
-                                    update_tool_args,
-                                    kernel_run.output,
-                                    render_only=True,
-                                )
-                            ),
-                        ),
-                    ),
-                    allow_multiple=True,
-                    width="100%",
+                rx.select(
+                    ["code", "markdown"],
+                    value=cell.cell_type,
+                    on_change=lambda x: NotebookState.set_cell_type(index, x),
+                    size="2",
                 ),
-                direction="column",
+                rx.button(
+                    "Run",
+                    on_click=lambda: NotebookState.run_cell(index),
+                    variant="solid",
+                    size="2",
+                ),
+                rx.button(
+                    "Delete",
+                    on_click=lambda: NotebookState.delete_cell(index),
+                    variant="outline",
+                    size="2",
+                ),
+                justify="start",
+                spacing="2",
                 width="100%",
-                overflow="auto",
+                padding_y="0.5em",
             ),
-        ),
-        border_radius=styles.border_radius,
-        border=styles.border,
-    )
-
-
-def kernel_render(
-    tool: Optional[Tool] = None,
-    run_tool: Optional[rx.event.EventHandler] = None,
-    cancel_tool: Optional[rx.event.EventHandler] = None,
-    update_tool_args: Optional[rx.event.EventHandler] = None,
-    tool_output: Optional[ToolOutput] = None,
-    render_only: bool = False,
-) -> rx.Component:
-    return rx.flex(
-        rx.cond(
-            tool,
-            rx.flex(
-                rx.badge("Cell"),
-                panel_render(tool, run_tool, cancel_tool, update_tool_args, render_only),
-                direction="column",
-                width="100%",
+            rx.cond(
+                cell.cell_type == "code",
+                codeeditor(
+                    value=cell.content,
+                    on_change=lambda x: NotebookState.update_cell_content(index, x),
+                    language="python",
+                    min_height="10em",
+                    extensions=rx.Var.create(
+                        '[loadLanguage("sql"), loadLanguage("python")]',
+                        _var_is_local=False,
+                    ),
+                ),
+                codeeditor(
+                    value=cell.content,
+                    on_change=lambda x: NotebookState.update_cell_content(index, x),
+                    language="markdown",
+                    min_height="10em",
+                ),
             ),
+            rx.cond(
+                cell.output,
+                render_output(cell.output),
+            ),
+            border="1px solid",
+            border_color=rx.color("gray", 3),
+            border_radius="0.5em",
+            padding="0.5em",
+            width="100%",
         ),
-        rx.divider(),
-        rx.cond(
-            tool_output & tool_output.show,
-            output_render(tool_output),
-        ),
-        direction="column",
-        background_color=rx.color("mauve", 3),
-    )
-
-
-def notebook(
-    tool: Tool,
-    run_tool: rx.event.EventHandler,
-    cancel_tool: rx.event.EventHandler,
-    update_tool_args: rx.event.EventHandler,
-    tool_output: ToolOutput,
-    tool_kernels: list[ToolKernel] = None,
-) -> rx.Component:
-    """The code editor wrapper for running tools."""
-    return rx.vstack(
-        rx.chakra.heading(
-            "Notebook",
-            size="md",
-        ),
-        kernel_history_render(tool_kernels, run_tool, cancel_tool, update_tool_args),
-        kernel_render(tool, run_tool, cancel_tool, update_tool_args, tool_output),
-        width="40em",
-        height="85vh",
-        padding="10px",
-        gap="2",
+        rx.spacer(),
+        width="100%",
         align_items="stretch",
-        background_color=rx.color("mauve", 2),
-        color=rx.color("mauve", 12),
-        border=f"1px solid {rx.color('accent', 10)}",
+        padding="1em",
+    )
+
+
+def notebook() -> rx.Component:
+    """The notebook component."""
+    return rx.vstack(
+        rx.box(
+            rx.heading(
+                "Notebook",
+                width="100%",
+                size="4",
+                padding_y="5px",
+            ),
+            notebook_panel(),
+            background_color=rx.color("gray", 3),
+            padding="0.5em",
+        ),
+        rx.cond(
+            NotebookState.cells.length() == 0,
+            add_cell_button(0, "only"),
+        ),
+        rx.foreach(
+            NotebookState.cells,
+            lambda cell, index: cell_render(cell, index),
+        ),
+        width="100%",
+        align_items="stretch",
+        background_color=rx.color("white"),
+        border=styles.border,
         border_radius=styles.border_radius,
+        box_shadow="0 0 10px rgba(0,0,0,0.1)",
         overflow="auto",
+        height="85vh",
     )

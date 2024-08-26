@@ -5,11 +5,15 @@ from pydantic import BaseModel, Field
 
 class Column(BaseModel):
     name: str = Field(..., description="Name of the column")
-    type: Optional[str] = Field(None, description="Type of the column", alias="column_type")
+    type: Optional[str] = Field(
+        None, description="Type of the column", alias="column_type"
+    )
     nullable: Optional[bool] = Field(
         None, description="Whether the column is nullable", alias="nullable"
     )
-    primary_key: Optional[bool] = Field(None, description="Whether the column is a primary key")
+    primary_key: Optional[bool] = Field(
+        None, description="Whether the column is a primary key"
+    )
 
     class Config:
         populate_by_name = True
@@ -24,7 +28,9 @@ class Table(BaseModel):
 
 
 class Database(BaseModel):
-    database_name: str = Field(..., description="Name of the database", alias="schema_name")
+    database_name: str = Field(
+        ..., description="Name of the database", alias="schema_name"
+    )
     tables: List[Table] = Field(..., description="List of tables in the database")
 
     class Config:

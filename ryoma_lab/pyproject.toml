@@ -1,0 +1,84 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ryoma_lab"
+version = "0.0.1"
+description = "Interactive UI for Ryoma AI Platform"
+readme = "README.md"
+authors = ["ryoma <contact@project-ryoma.com>"]
+license = "Apache Software License 2.0"
+repository = "https://github.com/project-ryoma/ryoma"
+homepage = "https://www.project-ryoma.com"
+
+packages = [
+    { include = "ryoma_lab" }
+]
+
+[tool.poetry.scripts]
+ryoma = "ryoma_lab.cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+ryoma = {path = "../ryoma"}
+alembic = "^1.13.1"
+reflex = "^0.5.9"
+transformers = "^4.40.2"
+sql-metadata = "^2.11.0"
+feast = "^0.39.1"
+amundsen-databuilder = "^7.5.0"
+ibis-framework = "^9.0.0"
+fastapi-users = { version = "^13.0.0", extras = ["sqlalchemy", "oauth"] }
+pypdf = "^4.3.1"
+reflex-resizable-panels = "^0.0.1"
+sql-formatter = "^0.6.2"
+
+[tool.poetry.group.snowflake]
+optional = true
+
+[tool.poetry.group.snowflake.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["snowflake"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["snowflake"] }
+feast = { version = "^0.39.1", extras = ["snowflake"] }
+
+[tool.poetry.group.sqlite]
+optional = true
+
+[tool.poetry.group.sqlite.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["sqlite"] }
+feast = { version = "^0.39.1", extras = ["sqlite"] }
+
+[tool.poetry.group.postgresql]
+optional = true
+
+[tool.poetry.group.postgresql.dependencies]
+psycopg2 = { version = "^2.9.2", optional = true }
+ibis-framework = { version = "^9.0.0", extras = ["postgres"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["postgres"] }
+feast = { version = "^0.39.1", extras = ["postgres"] }
+
+[tool.poetry.group.mysql]
+optional = true
+
+[tool.poetry.group.mysql.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["mysql"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["mysql"] }
+feast = { version = "^0.39.1", extras = ["mysql"] }
+
+[tool.poetry.group.bigquery]
+optional = true
+
+[tool.poetry.group.bigquery.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["bigquery"] }
+amundsen-databuilder = { version = "^7.5.0", extras = ["bigquery"] }
+feast = { version = "^0.39.1", extras = ["bigquery"] }
+
+[tool.poetry.group.pyspark]
+optional = true
+
+[tool.poetry.group.pyspark.dependencies]
+ibis-framework = { version = "^9.0.0", extras = ["pyspark"] }
+pyspark = { version = "^3.2.0", optional = true }
+findspark = { version = "^1.4.2", optional = true }
+feast = { version = "^0.39.1", extras = ["pyspark"] }

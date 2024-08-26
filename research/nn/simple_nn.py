@@ -3,7 +3,9 @@ import numpy as np
 
 class Layer:
     def __init__(self, indim, outdim, activation):
-        self.weight = np.random.randn(indim, outdim) * np.sqrt(2 / indim)  # (input_dim, output_dim)
+        self.weight = np.random.randn(indim, outdim) * np.sqrt(
+            2 / indim
+        )  # (input_dim, output_dim)
         self.bias = np.zeros(outdim)  # (output_dim)
         self.grad_w = None
         self.grad_b = None
@@ -27,14 +29,14 @@ class Layer:
         return dw, db, dx
 
     def call_activation(self, x, method):
-        if method == 'relu':
+        if method == "relu":
             return x * (x > 0)
         if method == "sig":
             return 1 / (np.exp(-x) + 1)
 
     def activation_derivative(self, x, activation):
         if activation == "relu":
-            return (x > 0).astype('float')
+            return (x > 0).astype("float")
         if activation == "sig":
             return x * (1 - x)
 
@@ -88,11 +90,7 @@ if __name__ == "__main__":
     mlp = MLP(learning_rate, input_dim, output_dims, activations)
 
     # Sample data
-    x = np.array([
-        [1, 0, 3, 4],
-        [2, 3, 1, 1],
-        [4, 1, 5, 3]
-    ])
+    x = np.array([[1, 0, 3, 4], [2, 3, 1, 1], [4, 1, 5, 3]])
     y = np.array([[1], [0], [0]])
 
     # Training loop
@@ -102,5 +100,5 @@ if __name__ == "__main__":
         mlp.backward(y)
         if epoch % 100 == 0:
             current_loss = mlp.loss(pred, y)
-            print(f'Epoch {epoch}, Loss: {current_loss}')
+            print(f"Epoch {epoch}, Loss: {current_loss}")
     print(pred)

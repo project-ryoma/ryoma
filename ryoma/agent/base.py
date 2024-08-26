@@ -1,7 +1,6 @@
-from typing import Any, Dict, Optional, Union
-
 import logging
 import uuid
+from typing import Any, Dict, Optional, Union
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import AIMessage, HumanMessage
@@ -28,7 +27,9 @@ class RyomaAgent:
 
 class BaseAgent(RyomaAgent):
     type: AgentType = AgentType.base
-    description: str = "Base Agent supports all the basic functionalities of a chat agent."
+    description: str = (
+        "Base Agent supports all the basic functionalities of a chat agent."
+    )
     config: Dict[str, Any]
     model: RunnableSerializable
     model_parameters: Optional[Dict]
@@ -80,11 +81,15 @@ class BaseAgent(RyomaAgent):
             return self.output_prompt | self.model | self.output_parser
         return self.final_prompt_template | self.model
 
-    def set_base_prompt(self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None):
+    def set_base_prompt(
+        self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None
+    ):
         self.prompt_template_factory.set_base_prompt(base_prompt)
         return self
 
-    def set_context_prompt(self, context: Optional[Union[str, ChatPromptTemplate]] = None):
+    def set_context_prompt(
+        self, context: Optional[Union[str, ChatPromptTemplate]] = None
+    ):
         self.prompt_template_factory.add_context_prompt(context)
         return self
 
@@ -151,6 +156,8 @@ class BaseAgent(RyomaAgent):
         self.output_prompt = PromptTemplate(
             template="Return output in required format with given messages.\n{format_instructions}\n{messages}\n",
             input_variables=["messages"],
-            partial_variables={"format_instructions": self.output_parser.get_format_instructions()},
+            partial_variables={
+                "format_instructions": self.output_parser.get_format_instructions()
+            },
         )
         return self

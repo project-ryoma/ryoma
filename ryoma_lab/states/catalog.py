@@ -1,6 +1,5 @@
-from typing import Any, Dict, List, Optional
-
 import logging
+from typing import Any, Dict, List, Optional
 
 import reflex as rx
 from databuilder.loader.base_loader import Loader
@@ -84,7 +83,9 @@ class CatalogState(rx.State):
     def load_entries(self):
         with rx.session() as session:
             result = session.exec(
-                select(Catalog).options(joinedload(Catalog.schemas).joinedload(Schema.tables))
+                select(Catalog).options(
+                    joinedload(Catalog.schemas).joinedload(Schema.tables)
+                )
             ).unique()
             self.catalogs = result.all()
 
@@ -148,7 +149,9 @@ class CatalogState(rx.State):
 
         return SessionLoader(self._load_catalog_record)
 
-    def _commit_catalog(self, session: Session, datasource: str, database: str, schema: str):
+    def _commit_catalog(
+        self, session: Session, datasource: str, database: str, schema: str
+    ):
         logging.info(f"Committing catalog: {datasource} {database} {schema}")
 
         # check if catalog already exists

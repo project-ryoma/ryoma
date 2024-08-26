@@ -70,7 +70,9 @@ def show_datasource_configs():
                             on_change=lambda value: DataSourceState.set_datasource_attributes(
                                 attribute_name, value
                             ),
-                            type=rx.cond(attribute_name.contains("password"), "password", "text"),
+                            type=rx.cond(
+                                attribute_name.contains("password"), "password", "text"
+                            ),
                             width="100%",
                         ),
                         width="100%",
@@ -90,7 +92,11 @@ def add_datasource():
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
-                rx.flex("Add Data Source", rx.icon(tag="plus", width=24, height=24), spacing="3"),
+                rx.flex(
+                    "Add Data Source",
+                    rx.icon(tag="plus", width=24, height=24),
+                    spacing="3",
+                ),
                 size="4",
                 radius="full",
             ),
@@ -223,7 +229,9 @@ def update_datasource(datasource: DataSource):
                 rx.dialog.close(
                     rx.button(
                         "Update",
-                        on_click=lambda: DataSourceState.update_datasource(datasource.id),
+                        on_click=lambda: DataSourceState.update_datasource(
+                            datasource.id
+                        ),
                         variant="solid",
                     ),
                 ),

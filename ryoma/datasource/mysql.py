@@ -1,6 +1,5 @@
-from typing import Optional, Union
-
 import logging
+from typing import Optional, Union
 
 import ibis
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -61,8 +60,12 @@ class MySqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
-        from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
+    def crawl_data_catalog(
+        self, loader: Loader, where_clause_suffix: Optional[str] = ""
+    ):
+        from databuilder.extractor.mysql_metadata_extractor import (
+            MysqlMetadataExtractor,
+        )
 
         logging.info("Crawling data catalog from Mysql")
         job_config = ConfigFactory.from_dict(
@@ -79,6 +82,7 @@ class MySqlDataSource(SqlDataSource):
             }
         )
         job = DefaultJob(
-            conf=job_config, task=DefaultTask(extractor=MysqlMetadataExtractor(), loader=loader)
+            conf=job_config,
+            task=DefaultTask(extractor=MysqlMetadataExtractor(), loader=loader),
         )
         job.launch()

@@ -20,7 +20,9 @@ def render_feature_source_configs():
                 rx.chakra.text(attribute, size="md"),
                 rx.input(
                     placeholder=f"Enter the {attribute}",
-                    on_blur=lambda x: VectorStoreState.set_feature_source_config(attribute, x),
+                    on_blur=lambda x: VectorStoreState.set_feature_source_config(
+                        attribute, x
+                    ),
                 ),
                 direction="column",
                 spacing="2",
@@ -85,7 +87,8 @@ def add_feature():
                         rx.select.group(
                             rx.select.item("Upload files", value="files"),
                             rx.cond(
-                                VectorStoreState.project & VectorStoreState.project.offline_store,
+                                VectorStoreState.project
+                                & VectorStoreState.project.offline_store,
                                 rx.select.item(
                                     VectorStoreState.project.offline_store,
                                     value=VectorStoreState.project.offline_store,
@@ -104,7 +107,9 @@ def add_feature():
                     VectorStoreState.feature_datasource,
                     rx.cond(
                         VectorStoreState.feature_datasource == "files",
-                        upload_render(VectorStoreState.files, VectorStoreState.handle_upload),
+                        upload_render(
+                            VectorStoreState.files, VectorStoreState.handle_upload
+                        ),
                         render_feature_source_configs(),
                     ),
                 ),
@@ -128,7 +133,9 @@ def setup_store():
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
-                rx.flex("Setup Store", rx.icon(tag="plus", width=24, height=24), spacing="3"),
+                rx.flex(
+                    "Setup Store", rx.icon(tag="plus", width=24, height=24), spacing="3"
+                ),
                 size="4",
                 radius="full",
                 on_click=VectorStoreState.toggle_create_store_dialog,
@@ -266,7 +273,9 @@ def materialize_feature_render(feature_view) -> rx.Component:
                 rx.dialog.close(
                     rx.button(
                         "Confirm",
-                        on_click=lambda: VectorStoreState.materialize_feature(feature_view),
+                        on_click=lambda: VectorStoreState.materialize_feature(
+                            feature_view
+                        ),
                     ),
                 ),
                 rx.dialog.close(

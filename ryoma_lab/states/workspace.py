@@ -1,8 +1,7 @@
-from typing import Any, Iterator, Optional, Union
-
 import base64
 import logging
 import pickle
+from typing import Any, Iterator, Optional, Union
 
 import httpx
 import reflex as rx
@@ -26,6 +25,7 @@ from ryoma_lab.services.vector_store import (
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
+from ryoma_lab.states.notebook import NotebookState  # Added this line
 from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 
 
@@ -112,11 +112,19 @@ class ChatState(BaseState):
             return []
         all_stores = get_feature_stores()
         current_store = next(
-            (store for store in all_stores if store.project_name == self.current_vector_store), None
+            (
+                store
+                for store in all_stores
+                if store.project_name == self.current_vector_store
+            ),
+            None,
         )
         self._current_store = get_feature_store(current_store, self.vector_store_config)
         feature_views = get_feature_views(self._current_store)
-        return [f"{feature_view.name}:{feature_view.feature}" for feature_view in feature_views]
+        return [
+            f"{feature_view.name}:{feature_view.feature}"
+            for feature_view in feature_views
+        ]
 
     def set_current_chat_model(self, chat_model: str):
         if self.current_chat_model != chat_model:
@@ -136,7 +144,9 @@ class ChatState(BaseState):
             self._current_chat_agent_state_change = True
 
     def set_current_prompt_template(self, prompt_template_name: str):
-        self.current_prompt_template = PromptTemplateState.get_prompt_template(prompt_template_name)
+        self.current_prompt_template = PromptTemplateState.get_prompt_template(
+            prompt_template_name
+        )
         self.vector_feature_dialog_open = (
             self.current_prompt_template and self.current_prompt_template.k_shot > 0
         )
@@ -167,8 +177,13 @@ class ChatState(BaseState):
             self._current_embedding_agent_state_change = True
 
     def _create_embedding_agent(self):
-        if not self._current_embedding_agent or self._current_embedding_agent_state_change:
-            logging.info(f"Creating embedding agent with model {self.current_embedding_model}")
+        if (
+            not self._current_embedding_agent
+            or self._current_embedding_agent_state_change
+        ):
+            logging.info(
+                f"Creating embedding agent with model {self.current_embedding_model}"
+            )
             self._current_embedding_agent = AgentFactory.create_agent(
                 agent_type="embedding",
                 model=self.current_embedding_model,
@@ -273,7 +288,7 @@ class ChatState(BaseState):
                     result = pickle.loads(artifact)
                     self.current_tool_output = ToolOutput(data=result, show=True)
 
-    def _process_agent_state(self):
+    async def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
         if chat_state and chat_state.next:
             # having an action/tool to run
@@ -282,7 +297,7 @@ class ChatState(BaseState):
                 id=tool_call["id"],
                 name=tool_call["name"],
                 args=[
-                    ToolArg(name=key, value=format_code(value))  # TODO handle other types
+                    ToolArg(name=key, value=format_code(value))
                     for key, value in tool_call["args"].items()
                 ],
             )
@@ -290,7 +305,14 @@ class ChatState(BaseState):
             # Add the tool call to the answer
             self.chats[self.current_chat][
                 -1
-            ].answer += f"In order to assist you further, I need to run a tool shown in the kernel. Please confirm to run the tool."
+            ].answer += f"\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
+
+            # Add a new cell to the notebook with the tool code
+            await self.add_tool_cell(self.current_tool)
+
+    async def add_tool_cell(self, tool: Tool):
+        notebook_state = await self.get_state(NotebookState)
+        notebook_state.add_tool_cell(tool)
 
     async def run_tool(self):
         if not self.current_tool:
@@ -298,8 +320,9 @@ class ChatState(BaseState):
 
         self.processing = True
 
-        tool_args = {tool_arg.name: tool_arg.value for tool_arg in self.current_tool.args}
-        logging.info("Updating tool args: " + str(tool_args))
+        tool_args = {
+            tool_arg.name: tool_arg.value for tool_arg in self.current_tool.args
+        }
         self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
 
         # Add an empty question to the list of questions.
@@ -310,7 +333,7 @@ class ChatState(BaseState):
         for _ in self._process_agent_response(events):
             yield
 
-        self._process_agent_state()
+        await self._process_agent_state()
 
         # Toggle the processing flag.
         self.processing = False
@@ -398,16 +421,20 @@ class ChatState(BaseState):
         for _ in self._process_agent_response(events):
             yield
 
-        self._process_agent_state()
+        await self._process_agent_state()
 
     def load_chats(self):
         """Load the chats from the database."""
         with rx.session() as session:
-            chats = session.exec(select(Chat).where(Chat.user == self.user.username)).all()
+            chats = session.exec(
+                select(Chat).where(Chat.user == self.user.username)
+            ).all()
             for chat in chats:
                 if chat.title not in self.chats:
                     self.chats[chat.title] = []
-                self.chats[chat.title].append(QA(question=chat.question, answer=chat.answer))
+                self.chats[chat.title].append(
+                    QA(question=chat.question, answer=chat.answer)
+                )
             if not self.chats:
                 self.chats = DEFAULT_CHATS
 

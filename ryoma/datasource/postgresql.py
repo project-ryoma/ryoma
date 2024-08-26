@@ -1,6 +1,5 @@
-from typing import Optional, Union
-
 import logging
+from typing import Optional, Union
 
 import ibis
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -72,8 +71,12 @@ class PostgreSqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}/{self.db_schema}"
 
-    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
-        from databuilder.extractor.postgres_metadata_extractor import PostgresMetadataExtractor
+    def crawl_data_catalog(
+        self, loader: Loader, where_clause_suffix: Optional[str] = ""
+    ):
+        from databuilder.extractor.postgres_metadata_extractor import (
+            PostgresMetadataExtractor,
+        )
 
         logging.info("Started crawling data catalog from Postgres")
         job_config = ConfigFactory.from_dict(
@@ -90,7 +93,8 @@ class PostgreSqlDataSource(SqlDataSource):
             }
         )
         job = DefaultJob(
-            conf=job_config, task=DefaultTask(extractor=PostgresMetadataExtractor(), loader=loader)
+            conf=job_config,
+            task=DefaultTask(extractor=PostgresMetadataExtractor(), loader=loader),
         )
         job.launch()
 

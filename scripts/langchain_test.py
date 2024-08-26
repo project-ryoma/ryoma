@@ -40,9 +40,13 @@ db = SQLDatabase.from_uri("")
 # db.run("SELECT * FROM orders LIMIT 10;")
 
 query_tool = QuerySQLDataBaseTool(db=db)
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0).bind_tools([multiply, query_tool])
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0).bind_tools(
+    [multiply, query_tool]
+)
 chain = create_sql_query_chain(llm, db)
-response = chain.invoke({"question": "the top 10 customers buying the most number of orders"})
+response = chain.invoke(
+    {"question": "the top 10 customers buying the most number of orders"}
+)
 print(response)
 
 print(llm.invoke("the top 10 customers buying the most number of orders"))

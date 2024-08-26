@@ -68,7 +68,9 @@ class ValidatorAgent(WorkflowAgent):
         workflow.add_edge("validation", "validator")
 
         workflow.set_entry_point("agent")
-        return workflow.compile(checkpointer=self.memory, interrupt_before=["validator", "tools"])
+        return workflow.compile(
+            checkpointer=self.memory, interrupt_before=["validator", "tools"]
+        )
 
     def _validate(self, state: list, config: RunnableConfig):
         message = state["messages"][-1]
@@ -100,7 +102,9 @@ class ValidatorAgent(WorkflowAgent):
             return "tools"
         return "validator"
 
-    def _should_validate(self, state: list) -> Literal["agent", "validation", "__end__"]:
+    def _should_validate(
+        self, state: list
+    ) -> Literal["agent", "validation", "__end__"]:
         if (
             state["messages"][-1].tool_calls
             and "validated" not in state["messages"][-1].additional_kwargs

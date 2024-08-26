@@ -11,7 +11,9 @@ def test_base_prompt_template():
 
 def test_prompt_template():
     ryoma_prompt = PromptTemplateFactory()
-    ryoma_prompt.add_context_prompt("You are provided with the following context: {prompt_context}")
+    ryoma_prompt.add_context_prompt(
+        "You are provided with the following context: {prompt_context}"
+    )
     template = ryoma_prompt.build_prompt()
     messages = template.format_messages(prompt_context="This is a test context.")
     assert (

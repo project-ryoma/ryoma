@@ -1,6 +1,5 @@
-from typing import Dict, Optional
-
 import logging
+from typing import Dict, Optional
 
 from jupyter_ai_magics.utils import (
     AnyProvider,
@@ -11,7 +10,9 @@ from jupyter_ai_magics.utils import (
 
 
 def load_model_provider(
-    model_id: str, model_type: Optional[str] = "chat", model_parameters: Optional[Dict] = None
+    model_id: str,
+    model_type: Optional[str] = "chat",
+    model_parameters: Optional[Dict] = None,
 ) -> Optional[AnyProvider]:
     """
     Get a model instance from a model_id string. This is using the jupyter ai magic library to load the
@@ -21,7 +22,9 @@ def load_model_provider(
     @param model_parameters: Optional[Dict]: Additional parameters to pass to the model.
     @return: Optional[AnyProvider]: The model instance.
     """
-    logging.info(f"Loading model provider with model id: {model_id}, model type: {model_type}")
+    logging.info(
+        f"Loading model provider with model id: {model_id}, model type: {model_type}"
+    )
     providers = get_lm_providers() if model_type == "chat" else get_em_providers()
     provider_id, local_model_id = decompose_model_id(model_id, providers)
 

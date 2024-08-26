@@ -1,8 +1,7 @@
-from typing import Any, Dict, List, Optional
-
 import json
 import random
 from functools import reduce
+from typing import Any, Dict, List, Optional
 
 import reflex as rx
 from reflex.state import MutableProxy, serialize_mutable_proxy
@@ -58,7 +57,9 @@ def apply_changes(
         return [c["item"] for c in changes if c["type"] == "reset"]
 
     init_elements = [c["item"] for c in changes if c["type"] == "add"]
-    return reduce(lambda res, item: apply_change(res, item, changes), elements, init_elements)
+    return reduce(
+        lambda res, item: apply_change(res, item, changes), elements, init_elements
+    )
 
 
 def apply_change(

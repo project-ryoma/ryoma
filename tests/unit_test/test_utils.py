@@ -1,13 +1,12 @@
-from typing import Dict, Generator
-from typing_extensions import override
-
 import os
 from datetime import datetime
+from typing import Dict, Generator
 
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai_responses.ext.httpx import Request, Response
 from openai_responses.streaming import Event, EventStream
+from typing_extensions import override
 
 os.environ["OPENAI_API_KEY"] = "foo"
 
@@ -82,7 +81,9 @@ class CreateChatCompletionEventStream(EventStream):  #
                 "created": 1694268190,
                 "model": "gpt-4o",
                 "system_fingerprint": "fp_44709d6fcb",
-                "choices": [{"index": 0, "delta": {}, "logprobs": None, "finish_reason": "stop"}],
+                "choices": [
+                    {"index": 0, "delta": {}, "logprobs": None, "finish_reason": "stop"}
+                ],
             }
         )
         yield self.event(None, chunk)
@@ -111,7 +112,9 @@ class CreateChatCompletionEventStreamWithToolCall(EventStream):
                         {
                             "function": {
                                 "name": "sql_database_query",
-                                "arguments": {"query": "SELECT * FROM customers LIMIT 4"},
+                                "arguments": {
+                                    "query": "SELECT * FROM customers LIMIT 4"
+                                },
                             }
                         }
                     ]

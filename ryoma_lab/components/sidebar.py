@@ -129,7 +129,10 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             width="100%",
             padding="1em",
         ),
-        rx.cond(BaseState.sidebar_displayed, rx.cond(text == "Workspace" and active, navbar())),
+        rx.cond(
+            BaseState.sidebar_displayed,
+            rx.cond(text == "Workspace" and active, navbar()),
+        ),
         href=url,
         width="100%",
     )

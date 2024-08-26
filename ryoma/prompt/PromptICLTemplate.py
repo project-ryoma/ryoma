@@ -36,7 +36,9 @@ class BasicICLPrompt(object):
         similarity_list = []
         for example in examples:
             similarity_list.append(
-                jaccard_similarity(example["question_pattern"], target["question_pattern"])
+                jaccard_similarity(
+                    example["question_pattern"], target["question_pattern"]
+                )
             )
         self.pattern_similarities.append(similarity_list)
 
@@ -80,7 +82,9 @@ class BasicICLPrompt(object):
                 # count tokens and drop the example if exceed max_len
                 forward_tokens = count_tokens(
                     example_prefix
-                    + self.SEP_EXAMPLE.join(prompt_example + [example_format, prompt_target]),
+                    + self.SEP_EXAMPLE.join(
+                        prompt_example + [example_format, prompt_target]
+                    ),
                     tokenizer=self.tokenizer,
                 )
 
@@ -100,7 +104,9 @@ class BasicICLPrompt(object):
 
             n_valid_example = len(prompt_example)
             if len(prompt_example) > 0:
-                prompt = example_prefix + self.SEP_EXAMPLE.join(prompt_example + [prompt_target])
+                prompt = example_prefix + self.SEP_EXAMPLE.join(
+                    prompt_example + [prompt_target]
+                )
             else:
                 prompt = self.SEP_EXAMPLE.join(prompt_example + [prompt_target])
         else:

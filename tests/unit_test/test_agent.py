@@ -6,14 +6,19 @@ import pytest
 from openai_responses import OpenAIMock
 
 from ryoma.agent.base import BaseAgent
-from tests.unit_test.test_utils import create_chat_completion_response_stream, mock_chat_response
+from tests.unit_test.test_utils import (
+    create_chat_completion_response_stream,
+    mock_chat_response,
+)
 
 os.environ["OPENAI_API_KEY"] = "foo"
 
 
 @openai_responses.mock()
 def test_create_chat_completion_stream(openai_mock: OpenAIMock):
-    openai_mock.chat.completions.create.response = create_chat_completion_response_stream
+    openai_mock.chat.completions.create.response = (
+        create_chat_completion_response_stream
+    )
 
     client = openai.Client(api_key="sk-fake123")
     completion = client.chat.completions.create(

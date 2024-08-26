@@ -35,7 +35,9 @@ def pyspark_session():
 
 def test_pyspark_tool(pyspark_session, pandas_dataframe):
     pyspark_tool = SparkTool()
-    pyspark_tool.update_script_context({"spark_session": pyspark_session, "df": pandas_dataframe})
+    pyspark_tool.update_script_context(
+        {"spark_session": pyspark_session, "df": pandas_dataframe}
+    )
     script = """
     spark_session.createDataFrame(df).show()
     """

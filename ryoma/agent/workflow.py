@@ -5,7 +5,11 @@ from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.runnables import RunnableConfig, RunnableLambda, RunnableSerializable
+from langchain_core.runnables import (
+    RunnableConfig,
+    RunnableLambda,
+    RunnableSerializable,
+)
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
@@ -92,7 +96,9 @@ class WorkflowAgent(BaseAgent):
             {rendered_tools}
 
             """
-            tool_prompt_template = ChatPromptTemplate.from_messages([("system", tool_prompt)])
+            tool_prompt_template = ChatPromptTemplate.from_messages(
+                [("system", tool_prompt)]
+            )
             self.prompt_template_factory.add_context_prompt(tool_prompt_template)
             return self.model
 
@@ -168,11 +174,17 @@ class WorkflowAgent(BaseAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
+        if (
+            not question
+            and tool_mode != ToolMode.DISALLOWED
+            and self.get_current_tool_calls()
+        ):
             messages = None
         else:
             messages = self._format_messages(question)
-        events = self.workflow.stream(messages, config=self.config, stream_mode="values")
+        events = self.workflow.stream(
+            messages, config=self.config, stream_mode="values"
+        )
         if display:
             _printed = set()
             self._print_graph_events(events, _printed)
@@ -199,7 +211,11 @@ class WorkflowAgent(BaseAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if not question and tool_mode != ToolMode.DISALLOWED and self.get_current_tool_calls():
+        if (
+            not question
+            and tool_mode != ToolMode.DISALLOWED
+            and self.get_current_tool_calls()
+        ):
             messages = None
         else:
             messages = self._format_messages(question)
@@ -236,7 +252,9 @@ class WorkflowAgent(BaseAgent):
         curr_tool_calls = self.get_current_tool_calls()
         tool_call = next((tc for tc in curr_tool_calls if tc["id"] == tool_id), None)
         if not tool_call:
-            raise ValueError(f"Unable to find tool call {tool_id} in the current state.")
+            raise ValueError(
+                f"Unable to find tool call {tool_id} in the current state."
+            )
         tool = next((t for t in self.tools if t.name == tool_call["name"]), None)
         if kwargs.get("args"):
             tool_call["args"].update(kwargs["args"])
@@ -249,7 +267,12 @@ class WorkflowAgent(BaseAgent):
         current_state_messages = self.get_current_state_messages()
         curr_tool_calls = self.get_current_tool_calls()
         tool_call_index = next(
-            (index for (index, tc) in enumerate(curr_tool_calls) if tc["id"] == tool_id), None
+            (
+                index
+                for (index, tc) in enumerate(curr_tool_calls)
+                if tc["id"] == tool_id
+            ),
+            None,
         )
         if tool_call_index is None:
             raise ValueError(f"Tool call {tool_id} not found in current state.")

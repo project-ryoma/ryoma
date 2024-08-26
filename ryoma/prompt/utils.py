@@ -122,7 +122,9 @@ def get_primary_key(table_name, path_db=None, cur=None):
 def get_table_names(path_db=None, cur=None):
     """Get names of all tables within the database, and reuse cur if it's not None"""
     table_names = execute_query(
-        queries="SELECT name FROM sqlite_master WHERE type='table'", path_db=path_db, cur=cur
+        queries="SELECT name FROM sqlite_master WHERE type='table'",
+        path_db=path_db,
+        cur=cur,
     )
     table_names = [_[0] for _ in table_names]
     return table_names
@@ -149,7 +151,9 @@ def get_sql_for_database(path_db=None, cur=None):
 
     table_names = get_table_names(path_db, cur)
 
-    queries = [f"SELECT sql FROM sqlite_master WHERE tbl_name='{name}'" for name in table_names]
+    queries = [
+        f"SELECT sql FROM sqlite_master WHERE tbl_name='{name}'" for name in table_names
+    ]
 
     sqls = execute_query(queries, path_db, cur)
 
@@ -314,7 +318,11 @@ def sql_normalization(sql):
 def sql2skeleton(sql: str, db_schema):
     sql = sql_normalization(sql)
 
-    table_names_original, table_dot_column_names_original, column_names_original = [], [], []
+    table_names_original, table_dot_column_names_original, column_names_original = (
+        [],
+        [],
+        [],
+    )
     column_names_original.append("*")
     for table_id, table_name_original in enumerate(db_schema["table_names_original"]):
         table_names_original.append(table_name_original.lower())
@@ -334,7 +342,10 @@ def sql2skeleton(sql: str, db_schema):
         if token.value in table_names_original:
             new_sql_tokens.append("_")
         # mask column names
-        elif token.value in column_names_original or token.value in table_dot_column_names_original:
+        elif (
+            token.value in column_names_original
+            or token.value in table_dot_column_names_original
+        ):
             new_sql_tokens.append("_")
         # mask string values
         elif token.value.startswith("'") and token.value.endswith("'"):

@@ -1,8 +1,7 @@
-from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
-
 import base64
 import pickle
 from abc import ABC
+from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
 from langchain_community.vectorstores import FAISS
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -20,7 +19,9 @@ class SqlDataSourceTool(BaseTool, ABC):
 
 
 class QueryInput(BaseModel):
-    query: str = Field(description="sql query that can be executed by the sql database.")
+    query: str = Field(
+        description="sql query that can be executed by the sql database."
+    )
 
 
 class SqlQueryTool(SqlDataSourceTool):
@@ -55,12 +56,16 @@ class Column(BaseModel):
     column_name: str = Field(..., description="Name of the column")
     column_type: str = Field(..., description="Type of the column")
     nullable: Optional[bool] = Field(None, description="Whether the column is nullable")
-    primary_key: Optional[bool] = Field(None, description="Whether the column is a primary key")
+    primary_key: Optional[bool] = Field(
+        None, description="Whether the column is a primary key"
+    )
 
 
 class Table(BaseModel):
     table_name: str = Field(..., description="Name of the table")
-    table_columns: Sequence[Column] = Field(..., description="List of columns in the table")
+    table_columns: Sequence[Column] = Field(
+        ..., description="List of columns in the table"
+    )
     table_type: Optional[str] = Field(..., description="Type of the table")
 
 
@@ -87,7 +92,9 @@ class CreateTableTool(SqlDataSourceTool):
             f'{column.column_name} "{column.column_type}"' for column in table_columns
         )
         return self.datasource.query(
-            "CREATE TABLE {table_name} ({columns})".format(table_name=table_name, columns=columns)
+            "CREATE TABLE {table_name} ({columns})".format(
+                table_name=table_name, columns=columns
+            )
         )
 
 

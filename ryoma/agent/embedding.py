@@ -1,6 +1,5 @@
-from typing import Dict, List, Optional, Union
-
 import logging
+from typing import Dict, List, Optional, Union
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings

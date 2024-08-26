@@ -48,7 +48,9 @@ def render_catalog_list():
                                                 schema.tables,
                                                 lambda table: rx.chakra.accordion_item(
                                                     rx.chakra.accordion_button(
-                                                        rx.chakra.text(table.name, font_size="xs"),
+                                                        rx.chakra.text(
+                                                            table.name, font_size="xs"
+                                                        ),
                                                         on_click=lambda: CatalogState.set_selected_table(
                                                             table.name
                                                         ),
@@ -148,7 +150,9 @@ def sync_data_catalog_render(
                         rx.button(
                             "Sync",
                             size="2",
-                            on_click=lambda: CatalogState.crawl_data_catalog(datasource.name),
+                            on_click=lambda: CatalogState.crawl_data_catalog(
+                                datasource.name
+                            ),
                         ),
                     ),
                     rx.dialog.close(

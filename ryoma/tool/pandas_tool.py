@@ -20,6 +20,8 @@ class PandasTool(PythonTool):
 
     Pandas dataframes are stored in the script context.
     """
-    datasource: Optional[SqlDataSource] = Field(None, exclude=True, description="SQL data source")
+    datasource: Optional[SqlDataSource] = Field(
+        None, exclude=True, description="SQL data source"
+    )
 
     args_schema: Type[BaseModel] = PandasInput

@@ -3,7 +3,10 @@
 from typing import List, Optional
 
 import reflex as rx
-from fastapi_users.db import SQLAlchemyBaseOAuthAccountTableUUID, SQLAlchemyBaseUserTableUUID
+from fastapi_users.db import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, select
 
@@ -57,7 +60,9 @@ class BaseState(rx.State):
     def load_user(self) -> None:
         """Load the user."""
         with rx.session() as session:
-            self.user = session.exec(select(User).where(User.username == "admin")).first()
+            self.user = session.exec(
+                select(User).where(User.username == "admin")
+            ).first()
 
     def on_load(self) -> None:
         """Load the state."""

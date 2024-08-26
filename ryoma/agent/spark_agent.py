@@ -6,9 +6,13 @@ from ryoma.tool.spark_tool import ConvertPandasToSparkTool, SparkTool
 
 
 class SparkAgent(WorkflowAgent):
-    description: str = "A PySpark agent that can use PySpark tools to run PySpark scripts."
+    description: str = (
+        "A PySpark agent that can use PySpark tools to run PySpark scripts."
+    )
 
-    def __init__(self, spark_configs: dict[str, str], model: str, model_parameters=None):
+    def __init__(
+        self, spark_configs: dict[str, str], model: str, model_parameters=None
+    ):
         self.spark_session = None
         self.init_session(spark_configs)
         super().__init__(
@@ -21,7 +25,9 @@ class SparkAgent(WorkflowAgent):
         )
         for tool in self.tools:
             if isinstance(tool, PythonTool):
-                tool.update_script_context(script_context={"spark_session": self.spark_session})
+                tool.update_script_context(
+                    script_context={"spark_session": self.spark_session}
+                )
 
     def init_session(self, spark_configs: dict[str, str]):
         self.spark_session = self.create_spark_session(spark_configs)

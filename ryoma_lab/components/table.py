@@ -14,7 +14,11 @@ def table(tabular_data: list[list]):
             *[
                 rx.table.row(
                     *[
-                        rx.table.row_header_cell(cell) if i == 0 else rx.table.cell(cell)
+                        (
+                            rx.table.row_header_cell(cell)
+                            if i == 0
+                            else rx.table.cell(cell)
+                        )
                         for i, cell in enumerate(row)
                     ],
                 )

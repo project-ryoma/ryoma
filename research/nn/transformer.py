@@ -23,7 +23,7 @@ class SelfAttention(nn.Module):
         attn = torch.matmul(q, k.transpose(-2, -1)) / self.scale
 
         if mask is not None:
-            attn = attn.masked_fill(mask == 0, float('-inf'))
+            attn = attn.masked_fill(mask == 0, float("-inf"))
 
         attn = F.softmax(attn, dim=-1)
         attn = self.dropout(attn)
@@ -45,8 +45,9 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.mask = None
         if mask:
-            self.mask = torch.tril(torch.ones(block_size, block_size)) \
-                .view(1, 1, block_size, block_size)
+            self.mask = torch.tril(torch.ones(block_size, block_size)).view(
+                1, 1, block_size, block_size
+            )
 
     def split_heads(self, x):
         batch_size, block_size, d_model = x.size()
@@ -64,7 +65,7 @@ class MultiHeadAttention(nn.Module):
         attn = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.dk)
 
         if self.mask is not None:
-            attn = attn.masked_fill(self.mask == 0, float('-inf'))
+            attn = attn.masked_fill(self.mask == 0, float("-inf"))
 
         attn = F.softmax(attn, dim=-1)
         attn = self.dropout(attn)
@@ -112,7 +113,9 @@ class EncoderLayer(nn.Module):
 class DecoderLayer(nn.Module):
     def __init__(self, embdim, block_size, d_ff, nh, dropout):
         super().__init__()
-        self.masked_attn = MultiHeadAttention(embdim, block_size, nh, dropout, mask=True)
+        self.masked_attn = MultiHeadAttention(
+            embdim, block_size, nh, dropout, mask=True
+        )
         self.attention = MultiHeadAttention(embdim, block_size, nh, dropout)
         self.ff = PositionwiseFeedForward(embdim, d_ff, dropout)
         self.norm1 = nn.LayerNorm(embdim)
@@ -131,15 +134,25 @@ class DecoderLayer(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, srcvoc_size, tgtvoc_size, block_size, embdim, d_ff, nh, dropout, n_layers):
+    def __init__(
+        self, srcvoc_size, tgtvoc_size, block_size, embdim, d_ff, nh, dropout, n_layers
+    ):
         super().__init__()
         self.encoder_emb = nn.Embedding(srcvoc_size, embdim)
         self.decoder_emb = nn.Embedding(tgtvoc_size, embdim)
         self.pos_emb = nn.Embedding(block_size, embdim)
         self.encoder_layers = nn.ModuleList(
-            [EncoderLayer(embdim, block_size, d_ff, nh, dropout) for _ in range(n_layers)])
+            [
+                EncoderLayer(embdim, block_size, d_ff, nh, dropout)
+                for _ in range(n_layers)
+            ]
+        )
         self.decoder_layers = nn.ModuleList(
-            [DecoderLayer(embdim, block_size-1, d_ff, nh, dropout) for _ in range(n_layers)])
+            [
+                DecoderLayer(embdim, block_size - 1, d_ff, nh, dropout)
+                for _ in range(n_layers)
+            ]
+        )
         self.fc_out = nn.Linear(embdim, tgtvoc_size)
 
     def forward(self, src, tgt):
@@ -175,8 +188,12 @@ def train(transformer, src, tgt, epoch=10, lr=1e-4):
         out = transformer(src, tgt[:, :-1])  # Input sequence (excluding last token)
 
         # Reshape output and target for loss computation
-        out = out.contiguous().view(-1, transformer.fc_out.out_features)  # Flatten output
-        tgt_flat = tgt[:, 1:].contiguous().view(-1)  # Flatten target (excluding first token)
+        out = out.contiguous().view(
+            -1, transformer.fc_out.out_features
+        )  # Flatten output
+        tgt_flat = (
+            tgt[:, 1:].contiguous().view(-1)
+        )  # Flatten target (excluding first token)
 
         # Compute loss
         loss = loss_func(out, tgt_flat)
@@ -187,7 +204,7 @@ def train(transformer, src, tgt, epoch=10, lr=1e-4):
 
         # Print training progress
         if (ep + 1) % 10 == 0 or ep == 0:
-            print(f'Epoch [{ep + 1}/{epoch}], Loss: {loss.item():.4f}')
+            print(f"Epoch [{ep + 1}/{epoch}], Loss: {loss.item():.4f}")
 
 
 # Define the parameters
@@ -203,10 +220,16 @@ n_layer = 2
 lr = 0.001
 
 # Generate random sample data
-src_data = torch.randint(1, src_vocab_size, (64, block_size))  # (batch_size, block_size)
-tgt_data = torch.randint(1, tgt_vocab_size, (64, block_size))  # (batch_size, block_size)
+src_data = torch.randint(
+    1, src_vocab_size, (64, block_size)
+)  # (batch_size, block_size)
+tgt_data = torch.randint(
+    1, tgt_vocab_size, (64, block_size)
+)  # (batch_size, block_size)
 # Instantiate the model
-transformer = Transformer(src_vocab_size, tgt_vocab_size, block_size, embdim, d_ff, nh, dropout, n_layer)
+transformer = Transformer(
+    src_vocab_size, tgt_vocab_size, block_size, embdim, d_ff, nh, dropout, n_layer
+)
 
 # Train the model
 train(transformer, src_data, tgt_data, epoch=epoch, lr=lr)

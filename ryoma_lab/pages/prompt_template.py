@@ -36,7 +36,9 @@ def prompt_card(pt: PromptTemplate):
                 rx.chakra.badge(f"Representation: {pt.prompt_repr}"),
                 rx.chakra.badge(f"k_shot: {pt.k_shot}", color_scheme="purple"),
                 rx.chakra.badge(f"Type: {pt.selector_type}", color_scheme="blue"),
-                rx.chakra.badge(f"Type: {pt.prompt_template_type}", color_scheme="green"),
+                rx.chakra.badge(
+                    f"Type: {pt.prompt_template_type}", color_scheme="green"
+                ),
                 justify="between",
                 spacing="2",
                 direction="row",
@@ -151,7 +153,8 @@ def render_create_prompt_template() -> rx.Component:
                                 rx.foreach(
                                     PromptTemplateState.prompt_templates,
                                     lambda pt: rx.select.item(
-                                        pt.prompt_template_name, value=pt.prompt_template_name
+                                        pt.prompt_template_name,
+                                        value=pt.prompt_template_name,
                                     ),
                                 ),
                             ),
@@ -233,7 +236,11 @@ def render_create_prompt_template() -> rx.Component:
     )
 
 
-@template(route="/prompt_template", title="Prompt Template", on_load=PromptTemplateState.on_load())
+@template(
+    route="/prompt_template",
+    title="Prompt Template",
+    on_load=PromptTemplateState.on_load(),
+)
 def prompt_template() -> rx.Component:
     """The prompt template page.
 

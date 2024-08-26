@@ -34,7 +34,9 @@ class TransformerClassifier(nn.Module):
         """Forward pass."""
         embedded_seq = self.embd(input_ids)
 
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(input_ids.size(1)).to(input_ids.device)
+        tgt_mask = nn.Transformer.generate_square_subsequent_mask(input_ids.size(1)).to(
+            input_ids.device
+        )
 
         x = self.decoder(embedded_seq, embedded_seq, tgt_mask=tgt_mask)
         x = self.classifier(x[:, -1, :])
@@ -56,7 +58,7 @@ model = TransformerClassifier(config, num_labels=2)
 
 # example input and target
 input_ids = torch.randint(0, 1000, (10, 10))
-targets = torch.randint(0, 2, (10, ))
+targets = torch.randint(0, 2, (10,))
 print("input_ids", input_ids.size())
 print("targets", targets.size())
 

@@ -74,9 +74,13 @@ def upgrade() -> None:
         sa.Column("k_shot", sa.Integer(), nullable=False),
         sa.Column("example_format", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("selector_type", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("prompt_template_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column(
+            "prompt_template_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
         sa.Column("prompt_lines", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("prompt_template_type", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+        sa.Column(
+            "prompt_template_type", sqlmodel.sql.sqltypes.AutoString(), nullable=True
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -109,8 +113,12 @@ def upgrade() -> None:
         sa.Column("project_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("online_store", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("offline_store", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("online_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("offline_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+        sa.Column(
+            "online_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True
+        ),
+        sa.Column(
+            "offline_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(

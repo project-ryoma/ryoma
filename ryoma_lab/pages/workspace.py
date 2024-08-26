@@ -4,7 +4,10 @@ import reflex as rx
 
 from ryoma_lab import styles
 from ryoma_lab.components.loading_icon import loading_icon
-from ryoma_lab.components.model_selector import chat_model_selector, embedding_model_selector
+from ryoma_lab.components.model_selector import (
+    chat_model_selector,
+    embedding_model_selector,
+)
 from ryoma_lab.components.notebook import notebook
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState
@@ -57,7 +60,9 @@ def message(qa: QA) -> rx.Component:
 def chat_history() -> rx.Component:
     """List all the messages in a single conversation."""
     return rx.vstack(
-        rx.box(rx.foreach(ChatState.chats[ChatState.current_chat], message), width="100%"),
+        rx.box(
+            rx.foreach(ChatState.chats[ChatState.current_chat], message), width="100%"
+        ),
         py="8",
         flex="1",
         width="100%",
@@ -191,7 +196,8 @@ def prompt_template_selector() -> rx.Component:
                             lambda pt: rx.cond(
                                 pt.prompt_template_type == "builtin",
                                 rx.select.item(
-                                    pt.prompt_template_name, value=pt.prompt_template_name
+                                    pt.prompt_template_name,
+                                    value=pt.prompt_template_name,
                                 ),
                             ),
                         ),
@@ -203,7 +209,8 @@ def prompt_template_selector() -> rx.Component:
                             lambda pt: rx.cond(
                                 pt.prompt_template_type == "custom",
                                 rx.select.item(
-                                    pt.prompt_template_name, value=pt.prompt_template_name
+                                    pt.prompt_template_name,
+                                    value=pt.prompt_template_name,
                                 ),
                             ),
                         ),
@@ -270,7 +277,9 @@ def prompt_template_selector() -> rx.Component:
                                 rx.select.label("Select your vector store"),
                                 rx.foreach(
                                     VectorStoreState.projects,
-                                    lambda x: rx.select.item(x.project_name, value=x.project_name),
+                                    lambda x: rx.select.item(
+                                        x.project_name, value=x.project_name
+                                    ),
                                 ),
                                 rx.select.item(
                                     "Create new feature +",
@@ -483,14 +492,7 @@ def workspace() -> rx.Component:
     return rx.chakra.flex(
         rx.grid(
             chatbox_render(),
-            notebook(
-                ChatState.current_tool,
-                ChatState.run_tool,
-                ChatState.cancel_tool,
-                ChatState.update_tool_arg,
-                ChatState.current_tool_output,
-                KernelState.tool_kernels,
-            ),
+            notebook(),
             columns="2",
             spacing="4",
         ),

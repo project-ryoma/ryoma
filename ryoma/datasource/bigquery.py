@@ -1,6 +1,5 @@
-from typing import Optional, Union
-
 import logging
+from typing import Optional, Union
 
 import ibis
 from databuilder.job.job import DefaultJob
@@ -48,8 +47,12 @@ class BigqueryDataSource(SqlDataSource):
             tables.append(tb)
         return Database(database_name=self.dataset_id, tables=tables)
 
-    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
-        from databuilder.extractor.bigquery_metadata_extractor import BigQueryMetadataExtractor
+    def crawl_data_catalog(
+        self, loader: Loader, where_clause_suffix: Optional[str] = ""
+    ):
+        from databuilder.extractor.bigquery_metadata_extractor import (
+            BigQueryMetadataExtractor,
+        )
 
         logging.info("Crawling data catalog from Bigquery")
         job_config = ConfigFactory.from_dict(
@@ -60,7 +63,8 @@ class BigqueryDataSource(SqlDataSource):
             }
         )
         job = DefaultJob(
-            conf=job_config, task=DefaultTask(extractor=BigQueryMetadataExtractor(), loader=loader)
+            conf=job_config,
+            task=DefaultTask(extractor=BigQueryMetadataExtractor(), loader=loader),
         )
 
         job.launch()

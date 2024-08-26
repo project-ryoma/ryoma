@@ -1,6 +1,5 @@
-from typing import Any, Optional, Union
-
 import logging
+from typing import Any, Optional, Union
 
 import ibis
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -53,7 +52,9 @@ class SnowflakeDataSource(SqlDataSource):
         def get_table_metadata(database: str, schema: str) -> list[Table]:
             tables = []
             for table in conn.list_tables(database=(database, schema)):
-                table_schema = conn.get_schema(table_name=table, catalog=database, database=schema)
+                table_schema = conn.get_schema(
+                    table_name=table, catalog=database, database=schema
+                )
                 tb = Table(
                     table_name=table,
                     columns=[
@@ -82,8 +83,12 @@ class SnowflakeDataSource(SqlDataSource):
     def connection_string(self):
         return f"snowflake://{self.user}:{self.password}@{self.account}/{self.database}/{self.db_schema}"
 
-    def crawl_data_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
-        from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
+    def crawl_data_catalog(
+        self, loader: Loader, where_clause_suffix: Optional[str] = ""
+    ):
+        from databuilder.extractor.snowflake_metadata_extractor import (
+            SnowflakeMetadataExtractor,
+        )
 
         logging.info("Running Snowflake metadata extraction job")
         job_config = ConfigFactory.from_dict(
@@ -104,7 +109,8 @@ class SnowflakeDataSource(SqlDataSource):
         )
 
         job = DefaultJob(
-            conf=job_config, task=DefaultTask(extractor=SnowflakeMetadataExtractor(), loader=loader)
+            conf=job_config,
+            task=DefaultTask(extractor=SnowflakeMetadataExtractor(), loader=loader),
         )
 
         job.launch()

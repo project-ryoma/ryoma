@@ -83,7 +83,9 @@ def get_example_selector(selector_type: str):
     return selector_cls
 
 
-def prompt_factory(repr_type: str, k_shot: int, example_format: str, selector_type: str):
+def prompt_factory(
+    repr_type: str, k_shot: int, example_format: str, selector_type: str
+):
     repr_cls = get_repr_cls(repr_type)
 
     if k_shot == 0:

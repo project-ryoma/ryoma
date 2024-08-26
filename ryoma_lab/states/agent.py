@@ -1,10 +1,9 @@
-from typing import Optional
-
 import importlib
 import json
 import logging
 import random
 import uuid
+from typing import Optional
 
 import reflex as rx
 from langchain_core.runnables.graph import Edge, Node
@@ -62,8 +61,13 @@ class AgentState(rx.State):
             passthrough_agent = AgentFactory.create_agent(agent["name"], model="")
             graph = passthrough_agent.get_graph()
             self.current_agent_graph = Graph(
-                nodes=[create_agent_graph_node(node) for _, node in graph.nodes.items()],
-                edges=[create_agent_graph_edge(id, edge) for id, edge in enumerate(graph.edges)],
+                nodes=[
+                    create_agent_graph_node(node) for _, node in graph.nodes.items()
+                ],
+                edges=[
+                    create_agent_graph_edge(id, edge)
+                    for id, edge in enumerate(graph.edges)
+                ],
             )
         elif agent["type"] == AgentType.custom.value:
             workflow = json.loads(agent["workflow"])
@@ -85,13 +89,17 @@ class AgentState(rx.State):
         workflow_state.set_entry_point("agent")
         workflow_state.add_edge("tools", "agent")
 
-        agent = WorkflowAgent(type=AgentType.custom, tools=tools, model="", graph=workflow_state)
+        agent = WorkflowAgent(
+            type=AgentType.custom, tools=tools, model="", graph=workflow_state
+        )
 
     def create_agent(self, graph: Graph):
         if not self.current_agent_name:
             return rx.toast.error("Please enter a name for the agent.")
         logging.info("Creating agent with graph %s", graph)
-        description = self.current_agent_description or "A custom agent created by the user."
+        description = (
+            self.current_agent_description or "A custom agent created by the user."
+        )
 
         with rx.session() as session:
             agent = Agent(

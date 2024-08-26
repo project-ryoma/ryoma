@@ -8,7 +8,9 @@ from ryoma.tool.python_tool import PythonTool
 
 
 class ArrowAgent(WorkflowAgent):
-    description: str = "An Arrow agent that can use Arrow tools to interact with Arrow Tables."
+    description: str = (
+        "An Arrow agent that can use Arrow tools to interact with Arrow Tables."
+    )
 
     def __init__(self, model: str, model_parameters: Dict = None):
         super().__init__([ArrowTool()], model, model_parameters)
