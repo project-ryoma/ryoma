@@ -64,9 +64,6 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-exclude = [
-    "research",
-]
 
 [tool.pytest.ini_options]
 norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
