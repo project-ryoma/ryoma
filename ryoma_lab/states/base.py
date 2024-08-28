@@ -40,7 +40,7 @@ class BaseState(rx.State):
 
     user: Optional[User] = None
 
-    sidebar_displayed: bool = True
+    sidebar_displayed: bool = False
 
     vector_store_config: VectorStoreConfig = get_vector_store_config()
 

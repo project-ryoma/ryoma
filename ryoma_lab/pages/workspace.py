@@ -3,6 +3,7 @@
 import reflex as rx
 
 from ryoma_lab import styles
+from ryoma_lab.components.file_directory_sidebar import file_directory_sidebar
 from ryoma_lab.components.loading_icon import loading_icon
 from ryoma_lab.components.model_selector import (
     chat_model_selector,
@@ -490,9 +491,10 @@ def chatbox_render() -> rx.Component:
 def workspace() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
+        file_directory_sidebar(),
         rx.grid(
-            chatbox_render(),
             notebook(),
+            chatbox_render(),
             columns="2",
             spacing="4",
         ),

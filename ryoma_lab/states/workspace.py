@@ -13,10 +13,9 @@ from ryoma.agent.base import BaseAgent
 from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
 from ryoma.agent.workflow import ToolMode, WorkflowAgent
-from ryoma_lab.apis.kernel import clear_kernels
+from ryoma_lab.apis.kernel import kernel_api
 from ryoma_lab.apis.vector_store import get_feature_stores
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
-from ryoma_lab.services.kernel import format_code
 from ryoma_lab.services.vector_store import (
     get_feature_store,
     get_feature_views,
@@ -238,7 +237,7 @@ class ChatState(BaseState):
         self.current_chat = list(self.chats.keys())[0]
 
         # delete the kernel history
-        clear_kernels()
+        kernel_api.clear_kernels()
 
     def set_chat(self, chat_title: str):
         """Set the title of the current chat.
@@ -272,7 +271,7 @@ class ChatState(BaseState):
             )
             session.commit()
 
-    def _process_agent_response(self, events: Iterator[Any]):
+    async def _process_agent_response(self, events: Iterator[Any]):
         for event in events:
             if hasattr(event, "content"):
                 message = event
@@ -287,6 +286,7 @@ class ChatState(BaseState):
                     artifact = base64.b64decode(encoded_artifact)
                     result = pickle.loads(artifact)
                     self.current_tool_output = ToolOutput(data=result, show=True)
+                yield
 
     async def _process_agent_state(self):
         chat_state = self._current_chat_agent.get_current_state()
@@ -297,7 +297,7 @@ class ChatState(BaseState):
                 id=tool_call["id"],
                 name=tool_call["name"],
                 args=[
-                    ToolArg(name=key, value=format_code(value))
+                    ToolArg(name=key, value=value)
                     for key, value in tool_call["args"].items()
                 ],
             )
@@ -312,7 +312,41 @@ class ChatState(BaseState):
 
     async def add_tool_cell(self, tool: Tool):
         notebook_state = await self.get_state(NotebookState)
-        notebook_state.add_tool_cell(tool)
+        notebook_state.add_tool_cell(tool, self.execute_tool, self.update_tool)
+
+    async def execute_tool(self, tool_id: str, updated_code: str):
+        if not self.current_tool or self.current_tool.id != tool_id:
+            return
+
+        # Update the tool with the potentially edited code
+        self.update_tool(tool_id, updated_code)
+
+        async for _ in self.run_tool():
+            yield
+
+    def update_tool(self, tool_id: str, updated_code: str):
+        if self.current_tool and self.current_tool.id == tool_id:
+            # Parse the updated code to extract new argument values
+            new_args = self.parse_tool_code(updated_code)
+            for arg in self.current_tool.args:
+                if arg.name in new_args:
+                    arg.value = new_args[arg.name]
+
+            tool_args = {
+                tool_arg.name: tool_arg.value for tool_arg in self.current_tool.args
+            }
+            self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
+
+    def parse_tool_code(self, code: str) -> dict[str, str]:
+        # Implement parsing logic to extract argument values from the code
+        # This is a simple example and might need to be more robust
+        args = {}
+        lines = code.split("\n")
+        for line in lines:
+            if "=" in line:
+                key, value = line.split("=", 1)
+                args[key.strip()] = value.strip()
+        return args
 
     async def run_tool(self):
         if not self.current_tool:
@@ -320,17 +354,12 @@ class ChatState(BaseState):
 
         self.processing = True
 
-        tool_args = {
-            tool_arg.name: tool_arg.value for tool_arg in self.current_tool.args
-        }
-        self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
-
         # Add an empty question to the list of questions.
         qa = QA(question="", answer="")
         self.chats[self.current_chat].append(qa)
 
         events = self._current_chat_agent.stream(tool_mode=ToolMode.ONCE, display=False)
-        for _ in self._process_agent_response(events):
+        async for _ in self._process_agent_response(events):
             yield
 
         await self._process_agent_state()
@@ -417,7 +446,7 @@ class ChatState(BaseState):
 
         # Get the response and add it to the answer.
         events = self._current_chat_agent.stream(question, display=False)
-        for _ in self._process_agent_response(events):
+        async for _ in self._process_agent_response(events):
             yield
 
         await self._process_agent_state()

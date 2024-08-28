@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Callable
 
 from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
@@ -64,7 +65,6 @@ class WorkflowAgent(BaseAgent):
         **kwargs,
     ):
         logging.info(f"Initializing Workflow Agent with model: {model}")
-        # initialize the agent with model, prompt, and output parser
         super().__init__(
             model,
             model_parameters,
@@ -75,12 +75,10 @@ class WorkflowAgent(BaseAgent):
             **kwargs,
         )
 
-        # tools
         self.tools = tools
         if self.tools:
             self.model = self._bind_tools()
 
-        # build the graph, this has to happen after the prompt is built
         self.memory = MemorySaver()
         self.workflow = self._build_workflow(graph)
 
@@ -107,11 +105,9 @@ class WorkflowAgent(BaseAgent):
             return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
         workflow = StateGraph(MessageState)
 
-        # Define the two nodes we will cycle between
         workflow.add_node("agent", self.call_model)
         workflow.add_node("tools", self.build_tool_node(self.tools))
 
-        # We now add a conditional edge
         workflow.add_conditional_edges(
             "agent",
             tools_condition,

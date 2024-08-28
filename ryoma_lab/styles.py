@@ -19,7 +19,7 @@ sidebar_width = "18em"
 
 template_page_style = {
     "padding_top": "5em",
-    "padding_x": ["auto", "2em"],
+    "padding_x": ["auto", "0.5em"],
     "flex": "1",
     "overflow_x": "hidden",
 }

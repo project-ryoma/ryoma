@@ -172,5 +172,12 @@ class DataSourceState(rx.State):
         except Exception as e:
             logging.error(f"Failed to connect to {ds.datasource}: {e}")
 
+    @staticmethod
+    def get_all_datasources():
+        with rx.session() as session:
+            datasources = session.exec(select(DataSource)).all()
+            logging.info(f"Retrieved {len(datasources)} datasources from the database")
+            return {ds.name: ds for ds in datasources}
+
     def on_load(self):
         self.load_entries()

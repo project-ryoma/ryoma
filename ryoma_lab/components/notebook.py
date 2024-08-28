@@ -1,3 +1,4 @@
+import pandas as pd
 import reflex as rx
 
 from ryoma_lab import styles
@@ -8,9 +9,9 @@ from ryoma_lab.states.notebook import Cell, CellOutput, NotebookState
 def notebook_panel() -> rx.Component:
     return rx.flex(
         rx.select(
-            ["Python 3", "SQL"],  # Add more kernel options as needed
+            ["python", "sql"],
             placeholder="Select Kernel",
-            on_change=NotebookState.set_kernel,
+            on_change=NotebookState.set_kernel_type,
             size="2",
         ),
         rx.button(
@@ -67,11 +68,24 @@ def render_output_item(item: CellOutput) -> rx.Component:
                 ),
             ),
             rx.cond(
-                item.output_type == "error",
-                rx.text(f"{item.ename}: {item.evalue}", color="red"),
-                rx.text("Unknown output type"),
+                item.output_type == "dataframe",
+                render_dataframe(item),
+                rx.cond(
+                    item.output_type == "error",
+                    rx.text(f"{item.ename}: {item.evalue}", color="red"),
+                    rx.text("Unknown output type"),
+                ),
             ),
         ),
+    )
+
+
+def render_dataframe(item: CellOutput) -> rx.Component:
+    return rx.data_table(
+        data=item.data,
+        pagination=True,
+        search=True,
+        sort=True,
     )
 
 
@@ -99,7 +113,7 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                 ),
                 rx.button(
                     "Run",
-                    on_click=lambda: NotebookState.run_cell(index),
+                    on_click=lambda: NotebookState.execute_cell(index),
                     variant="solid",
                     size="2",
                 ),
@@ -120,7 +134,6 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                     value=cell.content,
                     on_change=lambda x: NotebookState.update_cell_content(index, x),
                     language="python",
-                    min_height="10em",
                     extensions=rx.Var.create(
                         '[loadLanguage("sql"), loadLanguage("python")]',
                         _var_is_local=False,
@@ -130,7 +143,6 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                     value=cell.content,
                     on_change=lambda x: NotebookState.update_cell_content(index, x),
                     language="markdown",
-                    min_height="10em",
                 ),
             ),
             rx.cond(
