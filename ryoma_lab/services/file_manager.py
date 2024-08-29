@@ -1,6 +1,7 @@
 import os
-from typing import Any, Dict, List
-
+import nbformat
+from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
+from typing import List, Dict, Any
 import reflex as rx
 
 
@@ -12,37 +13,88 @@ class FileNode(rx.Base):
 class FileManager(rx.Base):
     base_directory: str
 
-    def __init__(self, base_directory: str):
+    def __init__(self,
+                 base_directory: str,
+                 ):
         super().__init__(base_directory=base_directory)
         self.base_directory = os.path.abspath(base_directory)
 
-    def list_directory(self, path: str = "") -> List[FileNode]:
-        full_path = os.path.join(self.base_directory, path)
-        if not os.path.exists(full_path) or not os.path.isdir(full_path):
-            return []
-
+    def list_directory(self) -> List[FileNode]:
         items = []
-        for item in os.listdir(full_path):
-            item_path = os.path.join(full_path, item)
+        for item in os.listdir(self.base_directory):
+            item_path = os.path.join(self.base_directory, item)
             is_dir = os.path.isdir(item_path)
             items.append(FileNode(name=item, is_dir=is_dir))
-
         return items
 
-    def read_file(self, filename: str) -> str:
+    def read_file(self,
+                  filename: str) -> str:
         full_path = os.path.join(self.base_directory, filename)
         if not os.path.exists(full_path) or not os.path.isfile(full_path):
             return ""
-
-        with open(full_path, "r") as f:
+        with open(full_path, 'r') as f:
             return f.read()
 
-    def save_file(self, filename: str, content: str):
-        full_path = os.path.join(self.base_directory, filename)
-        with open(full_path, "w") as f:
-            f.write(content)
+    def save_notebook(self,
+                      filename: str,
+                      cells: List[Dict[str, Any]]):
+        nb = new_notebook()
+        for cell in cells:
+            if cell['cell_type'] == "code":
+                nb_cell = new_code_cell(cell['content'])
+                for output in cell.get('output', []):
+                    if output['output_type'] == "stream":
+                        nb_cell.outputs.append(nbformat.v4.new_output("stream", name="stdout", text=output['text']))
+                    elif output['output_type'] == "execute_result":
+                        nb_cell.outputs.append(nbformat.v4.new_output("execute_result", data=output['data']))
+                    elif output['output_type'] == "error":
+                        nb_cell.outputs.append(
+                            nbformat.v4.new_output("error", ename=output['ename'], evalue=output['evalue']))
+            else:
+                nb_cell = new_markdown_cell(cell['content'])
+            nb.cells.append(nb_cell)
 
-    def delete_file(self, filename: str):
         full_path = os.path.join(self.base_directory, filename)
-        if os.path.exists(full_path) and os.path.isfile(full_path):
-            os.remove(full_path)
+        with open(full_path, 'w') as f:
+            nbformat.write(nb, f)
+
+    def load_notebook(self,
+                      filename: str) -> List[Dict[str, Any]]:
+        full_path = os.path.join(self.base_directory, filename)
+        if not os.path.exists(full_path):
+            return []
+
+        with open(full_path, 'r') as f:
+            nb = nbformat.read(f, as_version=4)
+
+        cells = []
+        for nb_cell in nb.cells:
+            cell = {
+                'cell_type': nb_cell.cell_type,
+                'content': nb_cell.source,
+                'output': []
+            }
+            if nb_cell.cell_type == "code" and hasattr(nb_cell, 'outputs'):
+                for output in nb_cell.outputs:
+                    if output.output_type == "stream":
+                        cell['output'].append({'output_type': "stream", 'text': output.text})
+                    elif output.output_type == "execute_result":
+                        cell['output'].append({'output_type': "execute_result", 'data': output.data})
+                    elif output.output_type == "error":
+                        cell['output'].append({'output_type': "error", 'ename': output.ename, 'evalue': output.evalue})
+            cells.append(cell)
+        return cells
+
+    def get_directory_structure(self) -> List[Dict[str, Any]]:
+        structure = []
+        for root, dirs, files in os.walk(self.base_directory):
+            rel_path = os.path.relpath(root, self.base_directory)
+            if rel_path == ".":
+                structure.extend([{"directory": d, "files": []} for d in dirs])
+                structure.append({"directory": "Root", "files": files})
+            else:
+                for item in structure:
+                    if item["directory"] == os.path.dirname(rel_path):
+                        item["files"].extend(files)
+                        break
+        return structure

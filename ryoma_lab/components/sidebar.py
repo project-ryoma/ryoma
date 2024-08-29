@@ -11,10 +11,11 @@ ICONS = {
     "Workspace": "message-square-more",
     "Data Source": "database",
     "Document": "file-code",
-    "Prompt Template": "text",
+    # "Prompt Template": "text",
     "Settings": "settings",
-    "Tool": "hammer",
-    "Agent": "bot",
+    # "Tool": "hammer",
+    # "Agent": "bot",
+    "AI Assistant": "bot",
     "Vector Store": "package",
 }
 

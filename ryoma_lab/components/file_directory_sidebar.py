@@ -17,16 +17,20 @@ def file_item(file: FileNode) -> rx.Component:
             ),
             rx.text(file.name, cursor="pointer", size="1"),
         ),
-        _hover={"background_color": rx.color("gray", 2)},
-        on_click=lambda: NotebookState.open_file(file.name),
+        on_click=lambda: NotebookState.open_file_or_directory(file),
+        _hover={"background_color": rx.color("gray", 3)},
     )
 
 
 def file_directory_sidebar() -> rx.Component:
     return rx.box(
         rx.hstack(
-            rx.heading("File Directory", size="2"),
-            rx.spacer(),
+            rx.heading(
+                "File Directory",
+                size="2",
+                hidden=~NotebookState.is_sidebar_open,
+            ),
+            rx.spacer(hidden=~NotebookState.is_sidebar_open),
             rx.icon(
                 "chevron_left",
                 cursor="pointer",

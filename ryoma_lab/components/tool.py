@@ -75,15 +75,8 @@ def content_grid():
     )
 
 
-@template(route="/tool", title="Tool", on_load=ToolState.on_load())
-def tool() -> rx.Component:
-    """The tool page.
-
-    Returns:
-        The UI for the tool page.
-    """
+def tool_component() -> rx.Component:
     return rx.vstack(
-        rx.chakra.heading("Tool"),
         rx.chakra.text("A suite of tools to help you with analyzing your data."),
         rx.box(
             content_grid(),

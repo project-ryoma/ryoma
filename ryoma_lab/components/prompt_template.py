@@ -236,23 +236,13 @@ def render_create_prompt_template() -> rx.Component:
     )
 
 
-@template(
-    route="/prompt_template",
-    title="Prompt Template",
-    on_load=PromptTemplateState.on_load(),
-)
-def prompt_template() -> rx.Component:
-    """The prompt template page.
-
-    Returns:
-        The UI for the prompt template page.
-    """
+def prompt_templatec_component() -> rx.Component:
     return rx.vstack(
-        rx.heading("Builtin Prompt Templates", size="8"),
+        rx.heading("Builtin Prompt Templates", size="4"),
         rx.divider(),
         render_builtin_prompt_templates(),
         rx.divider(),
-        rx.heading("Custom Prompt Templates", size="8"),
+        rx.heading("Custom Prompt Templates", size="4"),
         render_create_prompt_template(),
         render_custom_prompt_templates(),
         width="100%",

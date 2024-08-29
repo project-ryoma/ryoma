@@ -64,9 +64,6 @@ def agent_card(agent: Agent):
 def show_agent_grid():
     """Create a content grid."""
     return rx.vstack(
-        rx.chakra.text(
-            "Click on an agent to view its flow", width="100", padding_y="4"
-        ),
         rx.chakra.flex(
             rx.foreach(AgentState.agents, agent_card, width="100"), width="100%"
         ),
@@ -127,22 +124,9 @@ def create_agent_flow():
     )
 
 
-@template(
-    route="/agent", title="Agent", on_load=[AgentState.on_load, ToolState.on_load]
-)
-def agent() -> rx.Component:
-    """The tool page.
-
-    Returns:
-        The UI for the agent page.
-    """
+def agent_component() -> rx.Component:
     return rx.vstack(
-        rx.heading("Agent", size="8"),
-        rx.box(
-            show_agent_grid(),
-            margin_top="20px",
-            width="100%",
-        ),
+        show_agent_grid(),
         create_agent_flow(),
         # make the page full width
         width="100%",

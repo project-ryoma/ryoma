@@ -1,4 +1,3 @@
-import pandas as pd
 import reflex as rx
 
 from ryoma_lab import styles
@@ -8,6 +7,12 @@ from ryoma_lab.states.notebook import Cell, CellOutput, NotebookState
 
 def notebook_panel() -> rx.Component:
     return rx.flex(
+        rx.input(
+            placeholder="Enter filename",
+            value=NotebookState.notebook_filename,
+            on_change=NotebookState.set_notebook_filename,
+            size="2",
+        ),
         rx.select(
             ["python", "sql"],
             placeholder="Select Kernel",
@@ -32,6 +37,13 @@ def notebook_panel() -> rx.Component:
             variant="outline",
             size="2",
         ),
+
+        rx.button(
+            "Save",
+            on_click=NotebookState.save_notebook,
+            variant="outline",
+            size="2",
+        ),
         justify="start",
         spacing="2",
         width="100%",
@@ -47,6 +59,7 @@ def add_cell_button(index: int, position: str) -> rx.Component:
         padding="0",
         min_width="20px",
         height="20px",
+        cursor="pointer",
     )
 
 
@@ -159,6 +172,7 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
         width="100%",
         align_items="stretch",
         padding="1em",
+        _hover={"background_color": rx.color("gray", 3)},
     )
 
 
