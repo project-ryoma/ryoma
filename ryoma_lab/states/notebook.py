@@ -51,36 +51,30 @@ class NotebookState(rx.State):
     def file_list(self) -> List[FileNode]:
         return self.file_manager.list_directory()
 
-    def is_dataframe(self,
-                     item: CellOutput) -> bool:
+    def is_dataframe(self, item: CellOutput) -> bool:
         return item.data & item.output_type == "dataframe"
 
-    def data_contains_html(self,
-                           item: CellOutput) -> bool:
+    def data_contains_html(self, item: CellOutput) -> bool:
         return item.data & item.data.contains("text/html")
 
-    def get_html_content(self,
-                         item: CellOutput) -> str:
+    def get_html_content(self, item: CellOutput) -> str:
         return (
             item.data["text/html"]
             if item.data & item.data.contains("text/html")
             else ""
         )
 
-    def data_contains_image(self,
-                            item: CellOutput) -> bool:
+    def data_contains_image(self, item: CellOutput) -> bool:
         return item.data & item.data.contains("image/png")
 
-    def get_image_content(self,
-                          item: CellOutput) -> str:
+    def get_image_content(self, item: CellOutput) -> str:
         return (
             item.data["image/png"]
             if item.data & item.data.contains("image/png")
             else ""
         )
 
-    def get_plain_text_content(self,
-                               item: CellOutput) -> str:
+    def get_plain_text_content(self, item: CellOutput) -> str:
         if item.data & item.data.contains("text/plain"):
             return str(item.data["text/plain"])
         return ""
@@ -91,10 +85,10 @@ class NotebookState(rx.State):
         return shell
 
     def add_tool_cell(
-            self,
-            tool: Tool,
-            execute_function: Callable[[str, str], Coroutine[Any, Any, None]],
-            update_function: Callable[[str, str], None],
+        self,
+        tool: Tool,
+        execute_function: Callable[[str, str], Coroutine[Any, Any, None]],
+        update_function: Callable[[str, str], None],
     ):
         cell_content = f"# Tool: {tool.name}\n"
         for arg in tool.args:
@@ -110,8 +104,7 @@ class NotebookState(rx.State):
         self.cells.append(new_cell)
 
     @rx.background
-    async def execute_cell(self,
-                           cell_index: int):
+    async def execute_cell(self, cell_index: int):
         if 0 <= cell_index < len(self.cells):
             async with self:
                 result = await self.kernel.execute_code(self.cells[cell_index].content)
@@ -128,8 +121,7 @@ class NotebookState(rx.State):
         self.kernel = KernelFactory.create_kernel(self.kernel_type)
         return self.add_datasources_to_kernel
 
-    def set_kernel_type(self,
-                        kernel_type: str):
+    def set_kernel_type(self, kernel_type: str):
         if kernel_type not in ["python", "sql"]:
             raise ValueError(f"Unsupported kernel type: {kernel_type}")
         self.kernel_type = kernel_type
@@ -139,9 +131,7 @@ class NotebookState(rx.State):
     def add_cell(self):
         self.cells.append(Cell())
 
-    def add_cell_at(self,
-                    index: int,
-                    position: str):
+    def add_cell_at(self, index: int, position: str):
         if position == "before":
             self.cells.insert(index, Cell())
         elif position == "after":
@@ -150,16 +140,12 @@ class NotebookState(rx.State):
             self.cells = [Cell()]
 
     @rx.background
-    async def update_cell_content(self,
-                                  cell_index: int,
-                                  content: str):
+    async def update_cell_content(self, cell_index: int, content: str):
         async with self:
             if 0 <= cell_index < len(self.cells):
                 self.cells[cell_index].content = content
 
-    def set_cell_type(self,
-                      index: int,
-                      cell_type: str):
+    def set_cell_type(self, index: int, cell_type: str):
         if cell_type not in ["code", "markdown"]:
             raise ValueError(f"Unsupported cell type: {cell_type}")
         self.cells[index].cell_type = cell_type
@@ -168,8 +154,7 @@ class NotebookState(rx.State):
         for index in range(len(self.cells)):
             self.execute_cell(index)
 
-    def delete_cell(self,
-                    index: int):
+    def delete_cell(self, index: int):
         if 0 <= index < len(self.cells):
             self.cells.pop(index)
 
@@ -188,18 +173,15 @@ class NotebookState(rx.State):
     def set_notebook_filename(self, filename: str):
         self.notebook_filename = filename
 
-    def open_file_or_directory(self,
-                  file: FileNode):
+    def open_file_or_directory(self, file: FileNode):
         if file["is_dir"]:
             self.directory_structure = file
         else:
             self.notebook_filename = file["name"]
             self.load_notebook()
 
-
     @rx.background
-    async def execute_cell(self,
-                           cell_index: int):
+    async def execute_cell(self, cell_index: int):
         if 0 <= cell_index < len(self.cells):
             async with self:
                 result = await self.kernel.execute_code(self.cells[cell_index].content)
@@ -207,9 +189,7 @@ class NotebookState(rx.State):
                 self.cells[cell_index].output = [CellOutput(**result)]
 
     @rx.background
-    async def update_cell_content(self,
-                                  cell_index: int,
-                                  content: str):
+    async def update_cell_content(self, cell_index: int, content: str):
         async with self:
             if 0 <= cell_index < len(self.cells):
                 self.cells[cell_index].content = content
@@ -228,15 +208,11 @@ class NotebookState(rx.State):
 
 
 class NotebookDisplayPublisher(DisplayPublisher):
-    def __init__(self,
-                 state):
+    def __init__(self, state):
         super().__init__()
         self.state = state
 
-    def publish(self,
-                data,
-                metadata=None,
-                source=None):
+    def publish(self, data, metadata=None, source=None):
         current_cell = self.state.cells[-1]
         current_cell.output.append(CellOutput(output_type="display_data", data=data))
         self.state.cells[-1] = current_cell

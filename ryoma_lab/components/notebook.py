@@ -37,7 +37,6 @@ def notebook_panel() -> rx.Component:
             variant="outline",
             size="2",
         ),
-
         rx.button(
             "Save",
             on_click=NotebookState.save_notebook,

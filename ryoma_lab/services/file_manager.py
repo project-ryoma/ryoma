@@ -1,8 +1,9 @@
 import os
+from typing import Any, Dict, List
+
 import nbformat
-from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
-from typing import List, Dict, Any
 import reflex as rx
+from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 
 class FileNode(rx.Base):
@@ -13,9 +14,10 @@ class FileNode(rx.Base):
 class FileManager(rx.Base):
     base_directory: str
 
-    def __init__(self,
-                 base_directory: str,
-                 ):
+    def __init__(
+        self,
+        base_directory: str,
+    ):
         super().__init__(base_directory=base_directory)
         self.base_directory = os.path.abspath(base_directory)
 
@@ -27,61 +29,78 @@ class FileManager(rx.Base):
             items.append(FileNode(name=item, is_dir=is_dir))
         return items
 
-    def read_file(self,
-                  filename: str) -> str:
+    def read_file(self, filename: str) -> str:
         full_path = os.path.join(self.base_directory, filename)
         if not os.path.exists(full_path) or not os.path.isfile(full_path):
             return ""
-        with open(full_path, 'r') as f:
+        with open(full_path, "r") as f:
             return f.read()
 
-    def save_notebook(self,
-                      filename: str,
-                      cells: List[Dict[str, Any]]):
+    def save_notebook(self, filename: str, cells: List[Dict[str, Any]]):
         nb = new_notebook()
         for cell in cells:
-            if cell['cell_type'] == "code":
-                nb_cell = new_code_cell(cell['content'])
-                for output in cell.get('output', []):
-                    if output['output_type'] == "stream":
-                        nb_cell.outputs.append(nbformat.v4.new_output("stream", name="stdout", text=output['text']))
-                    elif output['output_type'] == "execute_result":
-                        nb_cell.outputs.append(nbformat.v4.new_output("execute_result", data=output['data']))
-                    elif output['output_type'] == "error":
+            if cell["cell_type"] == "code":
+                nb_cell = new_code_cell(cell["content"])
+                for output in cell.get("output", []):
+                    if output["output_type"] == "stream":
                         nb_cell.outputs.append(
-                            nbformat.v4.new_output("error", ename=output['ename'], evalue=output['evalue']))
+                            nbformat.v4.new_output(
+                                "stream", name="stdout", text=output["text"]
+                            )
+                        )
+                    elif output["output_type"] == "execute_result":
+                        nb_cell.outputs.append(
+                            nbformat.v4.new_output(
+                                "execute_result", data=output["data"]
+                            )
+                        )
+                    elif output["output_type"] == "error":
+                        nb_cell.outputs.append(
+                            nbformat.v4.new_output(
+                                "error", ename=output["ename"], evalue=output["evalue"]
+                            )
+                        )
             else:
-                nb_cell = new_markdown_cell(cell['content'])
+                nb_cell = new_markdown_cell(cell["content"])
             nb.cells.append(nb_cell)
 
         full_path = os.path.join(self.base_directory, filename)
-        with open(full_path, 'w') as f:
+        with open(full_path, "w") as f:
             nbformat.write(nb, f)
 
-    def load_notebook(self,
-                      filename: str) -> List[Dict[str, Any]]:
+    def load_notebook(self, filename: str) -> List[Dict[str, Any]]:
         full_path = os.path.join(self.base_directory, filename)
         if not os.path.exists(full_path):
             return []
 
-        with open(full_path, 'r') as f:
+        with open(full_path, "r") as f:
             nb = nbformat.read(f, as_version=4)
 
         cells = []
         for nb_cell in nb.cells:
             cell = {
-                'cell_type': nb_cell.cell_type,
-                'content': nb_cell.source,
-                'output': []
+                "cell_type": nb_cell.cell_type,
+                "content": nb_cell.source,
+                "output": [],
             }
-            if nb_cell.cell_type == "code" and hasattr(nb_cell, 'outputs'):
+            if nb_cell.cell_type == "code" and hasattr(nb_cell, "outputs"):
                 for output in nb_cell.outputs:
                     if output.output_type == "stream":
-                        cell['output'].append({'output_type': "stream", 'text': output.text})
+                        cell["output"].append(
+                            {"output_type": "stream", "text": output.text}
+                        )
                     elif output.output_type == "execute_result":
-                        cell['output'].append({'output_type': "execute_result", 'data': output.data})
+                        cell["output"].append(
+                            {"output_type": "execute_result", "data": output.data}
+                        )
                     elif output.output_type == "error":
-                        cell['output'].append({'output_type': "error", 'ename': output.ename, 'evalue': output.evalue})
+                        cell["output"].append(
+                            {
+                                "output_type": "error",
+                                "ename": output.ename,
+                                "evalue": output.evalue,
+                            }
+                        )
             cells.append(cell)
         return cells
 
