@@ -1,7 +1,9 @@
-import reflex as rx
 import logging
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
+
+import reflex as rx
 from sqlmodel import select
+
 from ryoma.datasource.factory import DataSourceFactory
 from ryoma_lab.models.datasource import DataSource
 
@@ -40,8 +42,7 @@ def create_datasource(data: Dict) -> DataSource:
         return datasource
 
 
-def update_datasource(id: int,
-                      data: Dict) -> Optional[DataSource]:
+def update_datasource(id: int, data: Dict) -> Optional[DataSource]:
     with rx.session() as session:
         datasource = session.get(DataSource, id)
         if datasource:

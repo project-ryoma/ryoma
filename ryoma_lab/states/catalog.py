@@ -7,9 +7,9 @@ from databuilder.loader.generic_loader import GenericLoader
 from databuilder.models.table_metadata import TableMetadata
 from pyhocon import ConfigTree
 
-from ryoma_lab.states.datasource import DataSourceState
-from ryoma_lab.models.data_catalog import Catalog, Table
 from ryoma_lab.apis import catalog as catalog_api
+from ryoma_lab.models.data_catalog import Catalog, Table
+from ryoma_lab.states.datasource import DataSourceState
 
 
 class CatalogState(rx.State):
@@ -56,7 +56,10 @@ class CatalogState(rx.State):
     def crawl_data_catalog(self, datasource_name: Optional[str] = None):
         datasource = DataSourceState.connect(datasource_name)
         try:
-            self.current_catalog_id, self.current_schema_id = catalog_api.commit_catalog(
+            (
+                self.current_catalog_id,
+                self.current_schema_id,
+            ) = catalog_api.commit_catalog(
                 datasource_name,
                 datasource.database,
                 datasource.db_schema,

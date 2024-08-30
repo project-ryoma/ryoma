@@ -1,11 +1,11 @@
-import reflex as rx
 from typing import List, Optional
 
+import reflex as rx
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 from sqlalchemy.orm import joinedload
 from sqlmodel import select
 
-from ryoma_lab.models.data_catalog import Catalog, Schema, Table, Column
-from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
+from ryoma_lab.models.data_catalog import Catalog, Column, Schema, Table
 
 
 def load_catalogs():
@@ -29,12 +29,12 @@ def get_table_metadata(table_name: str) -> Optional[Table]:
 
 
 def commit_catalog_record(
-        table: str,
-        columns: List[ColumnMetadata],
-        schema_id: int,
-        description: Optional[str] = None,
-        is_view: Optional[bool] = False,
-        attrs: Optional[str] = None,
+    table: str,
+    columns: List[ColumnMetadata],
+    schema_id: int,
+    description: Optional[str] = None,
+    is_view: Optional[bool] = False,
+    attrs: Optional[str] = None,
 ):
     with rx.session() as session:
         _table = session.exec(
@@ -66,9 +66,7 @@ def commit_catalog_record(
         session.commit()
 
 
-def commit_catalog(datasource: str,
-                   database: str,
-                   schema: str) -> tuple[int, int]:
+def commit_catalog(datasource: str, database: str, schema: str) -> tuple[int, int]:
     with rx.session() as session:
         _catalog = session.exec(
             select(Catalog).filter(
