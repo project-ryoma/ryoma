@@ -43,8 +43,7 @@ class RnD(rx.Component):
     def get_event_triggers(self) -> Dict[str, Any]:
         """Get event triggers."""
 
-        def drag_signature(e0,
-                           data: DraggableData):
+        def drag_signature(e0, data: DraggableData):
             """Get the drag signature."""
             return [
                 data.x,
@@ -55,11 +54,7 @@ class RnD(rx.Component):
                 data.lastY,
             ]
 
-        def resize_signature(e0,
-                             direction,
-                             ref,
-                             delta,
-                             position):
+        def resize_signature(e0, direction, ref, delta, position):
             """Get the resize signature."""
             return [
                 direction,

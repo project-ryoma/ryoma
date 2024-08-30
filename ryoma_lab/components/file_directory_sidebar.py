@@ -30,9 +30,7 @@ def dropdown_item(children: rx.Component) -> rx.Component:
             rx.context_menu.item("Share"),
             rx.context_menu.item("Add to favorites"),
             rx.context_menu.separator(),
-            rx.context_menu.item(
-                "Delete", shortcut="⌘ ⌫", color="red"
-            ),
+            rx.context_menu.item("Delete", shortcut="⌘ ⌫", color="red"),
         ),
     )
 
@@ -46,13 +44,13 @@ def file_item(file: FileNode) -> rx.Component:
                     rx.icon("folder", size=16),
                     rx.icon("file", size=16),
                 ),
-                rx.text(file.name,  size="1"),
-                width="100%"
+                rx.text(file.name, size="1"),
+                width="100%",
             ),
             on_double_click=lambda: NotebookState.open_file_or_directory(file),
             _hover={"background_color": rx.color("gray", 3)},
             cursor="pointer",
-            width="100%"
+            width="100%",
         )
     )
 

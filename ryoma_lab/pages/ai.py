@@ -23,7 +23,7 @@ from ryoma_lab.templates import template
         AgentState.on_load,
         PromptTemplateState.on_load,
         ToolState.on_load,
-        DataSourceState.on_load
+        DataSourceState.on_load,
     ],
 )
 def ai() -> rx.Component:
