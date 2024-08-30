@@ -7,12 +7,13 @@ from typing import Optional
 
 import reflex as rx
 from langchain_core.runnables.graph import Edge, Node
-from sqlmodel import Field, select
+from sqlmodel import select
 
 from ryoma.agent.factory import AgentFactory, get_builtin_agents
 from ryoma.agent.workflow import WorkflowAgent
 from ryoma.models.agent import AgentType
 from ryoma_lab.states.graph import Graph
+from ryoma_lab.models.agent import Agent
 
 
 def get_node_position(node: Node):
@@ -38,14 +39,6 @@ def create_agent_graph_node(node: Node):
 
 def create_agent_graph_edge(id, edge: Edge):
     return {"id": id, "source": edge.source, "target": edge.target, "animated": True}
-
-
-class Agent(rx.Model, table=True):
-    id: Optional[str] = Field(default=None, primary_key=True)
-    name: str
-    description: Optional[str]
-    type: Optional[AgentType] = Field(default=AgentType.ryoma)
-    workflow: Optional[str]
 
 
 class AgentState(rx.State):

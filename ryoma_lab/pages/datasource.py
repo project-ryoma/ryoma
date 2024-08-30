@@ -190,7 +190,7 @@ def update_datasource(datasource: DataSource):
         rx.dialog.trigger(
             rx.button(
                 rx.icon("square_pen", width=24, height=24),
-                on_click=DataSourceState.render_update_datasource(datasource),
+                on_click=DataSourceState.toggle_update_datasource_dialog(datasource),
             ),
         ),
         rx.dialog.content(

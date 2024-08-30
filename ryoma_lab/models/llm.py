@@ -1,6 +1,4 @@
 from enum import Enum
-
-# get embedding models
 from jupyter_ai_magics.embedding_providers import (
     GPT4AllEmbeddingsProvider,
     HfHubEmbeddingsProvider,

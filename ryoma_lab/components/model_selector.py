@@ -1,6 +1,6 @@
 import reflex as rx
 
-from ryoma_lab.states.llm_providers import ChatModelProvider, EmbeddingModelProvider
+from ryoma_lab.models.llm import ChatModelProvider, EmbeddingModelProvider
 
 
 def model_selector(

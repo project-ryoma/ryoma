@@ -1,13 +1,9 @@
 import logging
-from typing import Any, List, Optional
-
+from typing import Optional, List, Dict, Any
 import reflex as rx
-from sqlmodel import delete, select
-
-from ryoma.datasource.base import DataSource as DataSourceBase
-from ryoma.datasource.factory import DataSourceFactory, DataSourceProvider
-from ryoma_lab.apis.datasource import get_datasource_by_name, get_datasource_configs
 from ryoma_lab.models.datasource import DataSource
+from ryoma_lab.apis import datasource as datasource_api
+from ryoma.datasource.factory import DataSourceProvider
 
 
 class DataSourceState(rx.State):
@@ -20,13 +16,31 @@ class DataSourceState(rx.State):
     sort_value: str
     is_open: bool = False
     allow_crawl_catalog: bool = True
-
     config_type: str = "connection_url"
+    datasources: List[DataSource] = []
 
-    datasources: list[DataSource] = []
-    open_alert: bool = False
+    update_datasource_dialog_open: bool = False
 
-    def change_crawl_catalog(self, value: bool):
+    def toggle_update_datasource_dialog(self, datasource_id: int):
+        self.update_datasource_dialog_open = not self.update_datasource_dialog_open
+        self.id = datasource_id
+
+    def _sort_datasources(self,
+                          key: str):
+        self.datasources.sort(key=lambda ds: getattr(ds, key, "").lower())
+
+    def sort_values(self,
+                   value: str):
+        self.sort_value = value
+        self._sort_datasources(self.sort_value)
+
+    def load_entries(self):
+        self.datasources = datasource_api.load_datasource_entries()
+        if self.sort_value:
+            self._sort_datasources(self.sort_value)
+
+    def change_crawl_catalog(self,
+                             value: bool):
         self.allow_crawl_catalog = value
 
     @rx.var
@@ -37,7 +51,8 @@ class DataSourceState(rx.State):
     def num_datasources(self) -> int:
         return len(self.datasources)
 
-    def _datasource_fields(self, datasource: str) -> dict[str, Any]:
+    def _datasource_fields(self,
+                           datasource: str) -> dict[str, Any]:
         fields = DataSourceProvider[datasource].value.__fields__.copy()
         for additional_field in ["type", "name", "connection_url"]:
             if additional_field in fields:
@@ -48,136 +63,82 @@ class DataSourceState(rx.State):
     def datasource_attribute_names(self) -> List[str]:
         if self.datasource:
             fields = self._datasource_fields(self.datasource)
-            return [key for key in fields]
+            return list(fields.keys())
         else:
             return []
 
     @rx.var
     def missing_configs(self) -> bool:
-        # Required by all data sources
         if not self.datasource or not self.name:
             return True
 
         # Use connection_url
         if self.config_type == "connection_url":
-            if not self.connection_url:
-                return True
+            return not self.connection_url
         else:
             # Required by the data source
             model_fields = self._datasource_fields(self.datasource)
-            for key in model_fields:
-                if model_fields[key].required and not self.attributes.get(key):
-                    return True
-        return False
+            return any(model_fields[key].required and not self.attributes.get(key) for key in model_fields)
 
-    def set_datasource_attributes(self, attribute: str, value: str):
+    def set_datasource_attributes(self,
+                                  attribute: str,
+                                  value: str):
         self.attributes[attribute] = value
 
     def get_datasource_attributes(self) -> dict[str, str]:
         model_fields = self._datasource_fields(self.datasource)
-        ds_attrs = {key: self.attributes.get(key, "") for key in model_fields}
-        return ds_attrs
+        return {key: self.attributes.get(key, "") for key in model_fields}
 
     def get_datasource_configs(self) -> dict:
-        if self.config_type == "connection_url":
-            return {"connection_url": self.connection_url}
-        else:
-            return self.attributes
-
-    def load_entries(self):
-        with rx.session() as session:
-            self.datasources = session.exec(select(DataSource)).all()
-
-            if self.sort_value:
-                self.datasources = sorted(
-                    self.datasources,
-                    key=lambda datasource: getattr(datasource, self.sort_value).lower(),
-                )
-
-    def sort_values(self, sort_value: str):
-        self.sort_value = sort_value
-        self.load_entries()
-
-    def render_update_datasource(self, datasource: DataSource):
-        self.id = datasource["id"]
-        self.name = datasource["name"]
-        self.datasource = datasource["datasource"]
-        self.connection_url = datasource["connection_url"]
-        attributes = eval(datasource["attributes"])
-        for key, value in attributes.items():
-            self.attributes[key] = value
+        return {"connection_url": self.connection_url} if self.config_type == "connection_url" else self.attributes
 
     def connect_and_add_datasource(self):
         if self.missing_configs:
             return
         configs = self.get_datasource_configs()
         try:
-            ds = DataSourceFactory.create_datasource(self.datasource, **configs)
-            ds.connect()
-            logging.info(f"Connected to {self.datasource}")
+            datasource_api.connect_datasource(self.datasource, **configs)
+            datasource = self.build_datasource()
+            datasource_api.create_datasource(datasource.dict())
+            self.load_entries()
+            rx.toast.success(f"Connected to {self.datasource}")
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource}: {e}")
-            return rx.toast.error(f"Failed to connect to {self.datasource}: {e}")
-        with rx.session() as session:
-            datasource = self.build_datasource()
-            session.add(datasource)
-            session.commit()
-        self.load_entries()
+            rx.toast.error(f"Failed to connect to {self.datasource}: {e}")
 
-    def build_datasource(self, datasource: Optional[DataSource] = None):
+    def build_datasource(self,
+                         datasource: Optional[DataSource] = None) -> DataSource:
         datasource_attrs = self.get_datasource_attributes()
-
         datasource_params = {
             "name": self.name,
             "datasource": self.datasource,
             "connection_url": self.connection_url,
             "attributes": str(datasource_attrs),
         }
-
-        if not datasource:
-            datasource = DataSource(**datasource_params)
-        else:
+        if datasource:
             for key, value in datasource_params.items():
                 setattr(datasource, key, value)
+            return datasource
+        return DataSource(**datasource_params)
 
-        return datasource
-
-    def update_datasource(self, ds_id: str):
-        with rx.session() as session:
-            datasource = session.exec(
-                select(DataSource).where(DataSource.id == ds_id)
-            ).first()
-            datasource = self.build_datasource(datasource)
-            session.add(datasource)
-            session.commit()
+    def update_datasource(self,
+                          ds_id: int):
+        datasource = self.build_datasource()
+        datasource_api.update_datasource(ds_id, datasource.dict())
         self.load_entries()
 
-    def delete_datasource(self, datasource_id: str):
-        with rx.session() as session:
-            session.exec(delete(DataSource).where(DataSource.id == datasource_id))
-            session.commit()
+    def delete_datasource(self,
+                          datasource_id: int):
+        datasource_api.delete_datasource(datasource_id)
         self.load_entries()
 
     @staticmethod
-    def connect(datasource_name: str) -> Optional[DataSourceBase]:
-        ds = get_datasource_by_name(datasource_name)
-        configs = get_datasource_configs(ds)
-        if not ds:
-            return
-        try:
-            source = DataSourceFactory.create_datasource(ds.datasource, **configs)
-            source.connect()
-            logging.info(f"Connected to {ds.datasource}")
-            return source
-        except Exception as e:
-            logging.error(f"Failed to connect to {ds.datasource}: {e}")
+    def connect(datasource_name: str) -> Any:
+        return datasource_api.connect_datasource_by_name(datasource_name)
 
     @staticmethod
-    def get_all_datasources():
-        with rx.session() as session:
-            datasources = session.exec(select(DataSource)).all()
-            logging.info(f"Retrieved {len(datasources)} datasources from the database")
-            return {ds.name: ds for ds in datasources}
+    def get_all_datasources() -> Dict[str, DataSource]:
+        return datasource_api.get_all_datasources()
 
     def on_load(self):
         self.load_entries()

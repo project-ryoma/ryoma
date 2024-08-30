@@ -6,20 +6,11 @@ import reflex as rx
 from sqlmodel import Field, select
 
 from ryoma.prompt.prompt_builder import prompt_factory
+from ryoma_lab.models.prompt import PromptTemplate
 
 path = os.path.dirname(__file__)
 f = open(f"{path}/formatted_prompt_examples.json")
 data = json.load(f)
-
-
-class PromptTemplate(rx.Model, table=True):
-    prompt_repr: str
-    k_shot: int
-    example_format: str
-    selector_type: str
-    prompt_template_name: str
-    prompt_lines: str
-    prompt_template_type: Optional[str] = Field(default="custom")
 
 
 class PromptTemplateState(rx.State):
