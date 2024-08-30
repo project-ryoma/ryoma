@@ -8,6 +8,7 @@ from ryoma_lab.components.tool import tool_component
 from ryoma_lab.components.vector_store import vector_store_component
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.AiState import AIState
+from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.tool import ToolState
 from ryoma_lab.templates import template
@@ -22,6 +23,7 @@ from ryoma_lab.templates import template
         AgentState.on_load,
         PromptTemplateState.on_load,
         ToolState.on_load,
+        DataSourceState.on_load
     ],
 )
 def ai() -> rx.Component:

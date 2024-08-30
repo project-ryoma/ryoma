@@ -155,7 +155,6 @@ def notebook() -> rx.Component:
             NotebookState.cells,
             lambda cell, index: cell_render(cell, index),
         ),
-        width="100%",
         align_items="stretch",
         background_color=rx.color("white"),
         border=styles.border,

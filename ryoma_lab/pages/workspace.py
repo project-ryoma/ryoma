@@ -10,6 +10,7 @@ from ryoma_lab.components.model_selector import (
     embedding_model_selector,
 )
 from ryoma_lab.components.notebook import notebook
+from ryoma_lab.components.react_rnd import rnd
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -468,6 +469,7 @@ def chatbox_render() -> rx.Component:
         ),
         direction="column",
         width="100%",
+        height="85vh",
         border=styles.border,
         border_radius=styles.border_radius,
         background_color=rx.color("mauve", 2),
@@ -492,11 +494,31 @@ def workspace() -> rx.Component:
     """The main app."""
     return rx.chakra.flex(
         file_directory_sidebar(),
-        rx.grid(
-            notebook(),
-            chatbox_render(),
-            columns="2",
-            spacing="4",
+        rx.box(
+            rnd(
+                notebook(),
+                default={
+                    "x": 0,
+                    "y": 0,
+                    "width": 880,
+                    "height": "100%",
+                },
+                disable_dragging=True,
+            ),
+            rnd(
+                chatbox_render(),
+                default={
+                    "x": 890,
+                    "y": 0,
+                    "width": 450,
+                    "height": "100%",
+                },
+                position={
+                    "x": 890,
+                    "y": 0,
+                },
+                disable_dragging=True,
+            ),
         ),
         h="85vh",
         width="100%",

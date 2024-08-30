@@ -7,18 +7,53 @@ from ryoma_lab.services.file_manager import FileNode
 from ryoma_lab.states.notebook import NotebookState
 
 
-def file_item(file: FileNode) -> rx.Component:
-    return rx.box(
-        rx.hstack(
-            rx.cond(
-                file.is_dir,
-                rx.icon("folder", size=16),
-                rx.icon("file", size=16),
-            ),
-            rx.text(file.name, cursor="pointer", size="1"),
+def dropdown_item(children: rx.Component) -> rx.Component:
+    return rx.context_menu.root(
+        rx.context_menu.trigger(
+            children,
         ),
-        on_click=lambda: NotebookState.open_file_or_directory(file),
-        _hover={"background_color": rx.color("gray", 3)},
+        rx.context_menu.content(
+            rx.context_menu.item("Edit", shortcut="⌘ E"),
+            rx.context_menu.item("Duplicate", shortcut="⌘ D"),
+            rx.context_menu.separator(),
+            rx.context_menu.item("Archive", shortcut="⌘ N"),
+            rx.context_menu.sub(
+                rx.context_menu.sub_trigger("More"),
+                rx.context_menu.sub_content(
+                    rx.context_menu.item("Move to project…"),
+                    rx.context_menu.item("Move to folder…"),
+                    rx.context_menu.separator(),
+                    rx.context_menu.item("Advanced options…"),
+                ),
+            ),
+            rx.context_menu.separator(),
+            rx.context_menu.item("Share"),
+            rx.context_menu.item("Add to favorites"),
+            rx.context_menu.separator(),
+            rx.context_menu.item(
+                "Delete", shortcut="⌘ ⌫", color="red"
+            ),
+        ),
+    )
+
+
+def file_item(file: FileNode) -> rx.Component:
+    return dropdown_item(
+        rx.box(
+            rx.hstack(
+                rx.cond(
+                    file.is_dir,
+                    rx.icon("folder", size=16),
+                    rx.icon("file", size=16),
+                ),
+                rx.text(file.name,  size="1"),
+                width="100%"
+            ),
+            on_double_click=lambda: NotebookState.open_file_or_directory(file),
+            _hover={"background_color": rx.color("gray", 3)},
+            cursor="pointer",
+            width="100%"
+        )
     )
 
 

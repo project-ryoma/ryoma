@@ -24,7 +24,7 @@ from sqlmodel import select
 
 from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
-from ryoma_lab.apis.datasource import get_datasource_by_name, get_datasource_configs
+from ryoma_lab.apis import datasource as datasouce_api
 from ryoma_lab.apis.vector_store import get_feature_stores
 from ryoma_lab.models.vector_store import (
     FeastFeatureView,
@@ -75,8 +75,8 @@ class VectorStoreState(BaseState):
         self.feature_source_configs[key] = value
 
     def _get_datasource_configs(self, ds: str) -> dict[str, str]:
-        ds = get_datasource_by_name(ds)
-        configs = get_datasource_configs(ds)
+        ds = datasouce_api.get_datasource_by_name(ds)
+        configs = datasouce_api.get_datasource_configs(ds)
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],
@@ -196,7 +196,7 @@ class VectorStoreState(BaseState):
                 ),
             )
         else:
-            ds = get_datasource_by_name(self.feature_datasource)
+            ds = datasouce_api.get_datasource_by_name(self.feature_datasource)
             datasource_cls = get_feast_datasource_by_name(ds.datasource)
             if datasource_cls:
                 return datasource_cls(

@@ -70,16 +70,14 @@ def get_all_datasources() -> Dict[str, DataSource]:
         return {ds.name: ds for ds in datasources}
 
 
-def connect_datasource(datasource: DataSource):
+def connect_datasource(datasource: str, configs: dict):
     try:
-        configs = datasource.attributes
-        configs["connection_url"] = datasource.connection_url
-        source = DataSourceFactory.create_datasource(datasource.datasource, **configs)
+        source = DataSourceFactory.create_datasource(datasource, **configs)
         source.connect()
-        logging.info(f"Connected to {datasource.datasource}")
+        logging.info(f"Connected to {datasource}")
         return source
     except Exception as e:
-        logging.error(f"Failed to connect to {datasource.datasource}: {e}")
+        logging.error(f"Failed to connect to {datasource}: {e}")
         raise
 
 
@@ -87,9 +85,11 @@ def connect_datasource_by_name(datasource_name: str) -> Any:
     datasource = get_datasource_by_name(datasource_name)
     if not datasource:
         raise ValueError(f"Datasource {datasource_name} not found")
-    configs = eval(datasource.attributes)
-    configs["connection_url"] = datasource.connection_url
-    return connect_datasource(datasource.datasource, **configs)
+    if datasource.connection_url:
+        configs = {"connection_url": datasource.connection_url}
+    else:
+        configs = eval(datasource.attributes)
+    return connect_datasource(datasource.datasource, configs)
 
 
 def get_datasource_configs(ds: DataSource) -> dict[str, str]:

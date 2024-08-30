@@ -100,7 +100,7 @@ class DataSourceState(rx.State):
             return
         configs = self.get_datasource_configs()
         try:
-            datasource_api.connect_datasource(self.datasource, **configs)
+            datasource_api.connect_datasource(self.datasource, configs)
             datasource = self.build_datasource()
             datasource_api.create_datasource(datasource.dict())
             self.load_entries()

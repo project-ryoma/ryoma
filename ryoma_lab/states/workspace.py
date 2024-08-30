@@ -24,7 +24,7 @@ from ryoma_lab.services.vector_store import (
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
-from ryoma_lab.states.notebook import NotebookState  # Added this line
+from ryoma_lab.states.notebook import NotebookState
 from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 
 
