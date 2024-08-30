@@ -364,12 +364,7 @@ def show_store():
     )
 
 
-@template(
-    route="/vector_store",
-    title="Vector Store",
-    on_load=[BaseState.on_load, VectorStoreState.on_load, DataSourceState.on_load],
-)
-def vector_store() -> rx.Component:
+def vector_store_component() -> rx.Component:
     """The Vector Store page.
 
     Returns:

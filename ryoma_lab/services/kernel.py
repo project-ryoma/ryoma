@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
@@ -32,10 +33,14 @@ class BaseKernel(rx.Base):
             "output_type": "error",
             "ename": type(error).__name__,
             "evalue": str(error),
+            "traceback": self._format_traceback(error),
         }
 
     def _create_success_response(self, result: Any) -> Dict[str, Any]:
         return {
             "output_type": "execute_result",
-            "data": {"text/plain": str(result)},
+            "data": {"text/plain": str(result)} if result is not None else None,
         }
+
+    def _format_traceback(self, error: Exception) -> str:
+        return ''.join(traceback.format_exception(type(error), error, error.__traceback__))

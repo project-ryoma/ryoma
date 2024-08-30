@@ -265,8 +265,6 @@ def data_source_table() -> rx.Component:
                 font_family="Inter",
             ),
             width="100%",
-            padding_top="2em",
-            padding_bottom="1em",
         ),
         rx.chakra.table(
             rx.chakra.thead(

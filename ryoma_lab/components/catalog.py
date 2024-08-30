@@ -72,6 +72,8 @@ def render_catalog_list():
             min_width="300px",
         ),
         border=styles.border,
+        border_radius=styles.border_radius,
+        padding="1em",
         min_height="40vh",
     )
 

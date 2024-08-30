@@ -2,7 +2,8 @@ import reflex as rx
 
 from ryoma_lab import styles
 from ryoma_lab.components.code_editor import codeeditor
-from ryoma_lab.states.notebook import Cell, CellOutput, NotebookState
+from ryoma_lab.states.notebook import Cell, NotebookState
+from ryoma_lab.components.cell import render_output
 
 
 def notebook_panel() -> rx.Component:
@@ -50,7 +51,8 @@ def notebook_panel() -> rx.Component:
     )
 
 
-def add_cell_button(index: int, position: str) -> rx.Component:
+def add_cell_button(index: int,
+                    position: str) -> rx.Component:
     return rx.button(
         rx.icon("circle_plus", size=18),
         on_click=lambda: NotebookState.add_cell_at(index, position),
@@ -62,50 +64,8 @@ def add_cell_button(index: int, position: str) -> rx.Component:
     )
 
 
-def render_output_item(item: CellOutput) -> rx.Component:
-    return rx.cond(
-        item.output_type == "stream",
-        rx.text(item.text),
-        rx.cond(
-            item.output_type == "execute_result",
-            rx.cond(
-                NotebookState.data_contains_html(item),
-                rx.html(f"{NotebookState.get_html_content(item)}"),
-                rx.cond(
-                    NotebookState.data_contains_image(item),
-                    rx.image(
-                        src=f"data:image/png;base64,{NotebookState.get_image_content(item)}"
-                    ),
-                    rx.markdown(f"```{NotebookState.get_plain_text_content(item)}```"),
-                ),
-            ),
-            rx.cond(
-                item.output_type == "dataframe",
-                render_dataframe(item),
-                rx.cond(
-                    item.output_type == "error",
-                    rx.text(f"{item.ename}: {item.evalue}", color="red"),
-                    rx.text("Unknown output type"),
-                ),
-            ),
-        ),
-    )
-
-
-def render_dataframe(item: CellOutput) -> rx.Component:
-    return rx.data_table(
-        data=item.data,
-        pagination=True,
-        search=True,
-        sort=True,
-    )
-
-
-def render_output(output: list[CellOutput]) -> rx.Component:
-    return rx.vstack(rx.foreach(output, render_output_item))
-
-
-def cell_render(cell: Cell, index: int) -> rx.Component:
+def cell_render(cell: Cell,
+                index: int) -> rx.Component:
     return rx.hstack(
         rx.vstack(
             add_cell_button(index, "before"),
@@ -195,7 +155,8 @@ def notebook() -> rx.Component:
         ),
         rx.foreach(
             NotebookState.cells,
-            lambda cell, index: cell_render(cell, index),
+            lambda cell,
+                   index: cell_render(cell, index),
         ),
         width="100%",
         align_items="stretch",

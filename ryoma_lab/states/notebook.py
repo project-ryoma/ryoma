@@ -11,23 +11,8 @@ from ryoma_lab.services.file_manager import FileManager, FileNode
 from ryoma_lab.services.kernel import BaseKernel
 from ryoma_lab.services.kernel_factory import KernelFactory
 from ryoma_lab.states.datasource import DataSourceState
+from ryoma_lab.models.cell import Cell, CellOutput
 
-
-class CellOutput(rx.Base):
-    output_type: Literal["stream", "execute_result", "dataframe", "error"]
-    text: Optional[str] = None
-    data: Optional[Union[dict, pd.DataFrame]] = None
-    ename: Optional[str] = None
-    evalue: Optional[str] = None
-
-
-class Cell(rx.Base):
-    cell_type: Literal["code", "markdown"] = "code"
-    content: str = ""
-    output: List[CellOutput] = []
-    tool_id: Optional[str] = None
-    execute_function: Optional[Callable[[str, str], Coroutine[Any, Any, None]]] = None
-    update_function: Optional[Callable[[str, str], None]] = None
 
 
 class NotebookState(rx.State):
