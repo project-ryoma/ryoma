@@ -1,9 +1,9 @@
 import reflex as rx
 
 from ryoma_lab import styles
+from ryoma_lab.components.cell import render_output
 from ryoma_lab.components.code_editor import codeeditor
 from ryoma_lab.states.notebook import Cell, NotebookState
-from ryoma_lab.components.cell import render_output
 
 
 def notebook_panel() -> rx.Component:
@@ -51,8 +51,7 @@ def notebook_panel() -> rx.Component:
     )
 
 
-def add_cell_button(index: int,
-                    position: str) -> rx.Component:
+def add_cell_button(index: int, position: str) -> rx.Component:
     return rx.button(
         rx.icon("circle_plus", size=18),
         on_click=lambda: NotebookState.add_cell_at(index, position),
@@ -64,8 +63,7 @@ def add_cell_button(index: int,
     )
 
 
-def cell_render(cell: Cell,
-                index: int) -> rx.Component:
+def cell_render(cell: Cell, index: int) -> rx.Component:
     return rx.hstack(
         rx.vstack(
             add_cell_button(index, "before"),
@@ -155,8 +153,7 @@ def notebook() -> rx.Component:
         ),
         rx.foreach(
             NotebookState.cells,
-            lambda cell,
-                   index: cell_render(cell, index),
+            lambda cell, index: cell_render(cell, index),
         ),
         width="100%",
         align_items="stretch",

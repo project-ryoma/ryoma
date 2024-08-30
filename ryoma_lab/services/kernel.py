@@ -43,4 +43,6 @@ class BaseKernel(rx.Base):
         }
 
     def _format_traceback(self, error: Exception) -> str:
-        return ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+        return "".join(
+            traceback.format_exception(type(error), error, error.__traceback__)
+        )

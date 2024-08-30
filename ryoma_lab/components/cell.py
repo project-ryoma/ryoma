@@ -1,4 +1,5 @@
 import reflex as rx
+
 from ryoma_lab.models.cell import CellOutput
 from ryoma_lab.states.notebook import NotebookState
 
@@ -51,7 +52,9 @@ def render_execute_result(item: CellOutput) -> rx.Component:
     if NotebookState.data_contains_html(item):
         return rx.html(f"{NotebookState.get_html_content(item)}")
     elif NotebookState.data_contains_image(item):
-        return rx.image(src=f"data:image/png;base64,{NotebookState.get_image_content(item)}")
+        return rx.image(
+            src=f"data:image/png;base64,{NotebookState.get_image_content(item)}"
+        )
     else:
         return rx.markdown(f"```{NotebookState.get_plain_text_content(item)}```")
 
