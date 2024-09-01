@@ -1,7 +1,6 @@
 """The Vector Store page."""
 
 import reflex as rx
-
 from ryoma_lab import styles
 from ryoma_lab.components.model_selector import embedding_model_selector
 from ryoma_lab.components.upload import upload_render
@@ -9,6 +8,30 @@ from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.templates import ThemeState, template
+
+
+class VectorStoreUploadState(rx.State):
+    uploading: bool = False
+    progress: int = 0
+    total_bytes: int = 0
+
+    async def handle_upload(self,
+                            files: list[rx.UploadFile]):
+        for file in files:
+            file_content = await file.read()
+            self.total_bytes += len(file_content)
+            await VectorStoreState.handle_upload([file])
+
+    def handle_upload_progress(self,
+                               progress: dict):
+        self.uploading = True
+        self.progress = round(progress["progress"] * 100)
+        if self.progress >= 100:
+            self.uploading = False
+
+    def cancel_upload(self):
+        self.uploading = False
+        return rx.cancel_upload("vector_store_upload")
 
 
 def render_feature_source_configs():
@@ -155,12 +178,6 @@ def setup_store():
                 padding_bottom="1em",
             ),
             rx.flex(
-                rx.chakra.heading("Project Name *", size="sm"),
-                rx.input(
-                    placeholder="Enter the name of the project",
-                    on_blur=VectorStoreState.set_project_name,
-                    required=True,
-                ),
                 rx.chakra.heading("Online Store *", size="sm"),
                 rx.select.root(
                     rx.select.trigger(
@@ -174,41 +191,20 @@ def setup_store():
                             ),
                         ),
                     ),
-                    value=VectorStoreState.online_store,
-                    on_change=lambda ds: VectorStoreState.set_online_store(ds),
+                    value=VectorStoreState.vector_store,
+                    on_change=lambda ds: VectorStoreState.set_vector_store(ds),
                 ),
                 rx.chakra.heading("Online Store Configs", size="sm"),
                 rx.input(
                     placeholder="Enter the online vector store configs",
-                    on_blur=VectorStoreState.set_online_store_configs,
-                ),
-                rx.chakra.heading("Offline Store", size="sm"),
-                rx.select.root(
-                    rx.select.trigger(
-                        placeholder="Select the data source as the offline store",
-                    ),
-                    rx.select.content(
-                        rx.select.group(
-                            rx.foreach(
-                                DataSourceState.datasources,
-                                lambda ds: rx.select.item(ds.name, value=ds.name),
-                            ),
-                        ),
-                    ),
-                    value=VectorStoreState.offline_store,
-                    on_change=lambda ds: VectorStoreState.set_offline_store(ds),
-                ),
-                rx.chakra.heading("Offline Store Configs", size="sm"),
-                rx.input(
-                    placeholder="Enter the offline store configs",
-                    on_blur=VectorStoreState.set_offline_store_configs,
+                    on_blur=VectorStoreState.set_vector_store_configs,
                 ),
                 rx.flex(
                     rx.dialog.close(
                         rx.button(
                             "Create Store",
                             size="2",
-                            on_click=VectorStoreState.create_store,
+                            on_click=VectorStoreState.create_vector_store,
                         ),
                     ),
                     rx.dialog.close(
@@ -334,33 +330,87 @@ def show_features():
     )
 
 
-def show_store():
-    return rx.chakra.box(
-        rx.tabs.root(
-            rx.tabs.list(
-                rx.foreach(
-                    VectorStoreState.projects,
-                    lambda project: rx.tabs.trigger(
-                        project.project_name,
-                        value=project.project_name,
-                        cursor="pointer",
+def create_store_dialog() -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.trigger(rx.button("Create Vector Store")),
+        rx.dialog.content(
+            rx.dialog.title("Create New Vector Store"),
+            rx.vstack(
+                rx.input(
+                    placeholder="Project Name",
+                    on_change=VectorStoreState.set_project_name,
+                ),
+                rx.select(
+                    ["FAISS", "Chroma", "Pinecone"],
+                    placeholder="Select Vector Store Type",
+                    on_change=VectorStoreState.set_vector_store_type,
+                ),
+                embedding_model_selector(
+                    VectorStoreState.embedding_model,
+                    VectorStoreState.set_embedding_model,
+                    trigger_width="100%",
+                ),
+                rx.button(
+                    "Create",
+                    on_click=VectorStoreState.create_vector_store,
+                ),
+                spacing="4",
+            ),
+        ),
+        open=VectorStoreState.create_store_dialog_open,
+    )
+
+
+def add_documents_dialog() -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.trigger(rx.button("Add Documents")),
+        rx.dialog.content(
+            rx.dialog.title("Add Documents to Vector Store"),
+            rx.vstack(
+                rx.upload(
+                    rx.vstack(
+                        rx.button("Select Files"),
+                        rx.text("Drag and drop files here"),
+                    ),
+                    id="vector_store_upload",
+                    multiple=True,
+                    accept={".pdf": [], ".txt": [], ".docx": []},
+                    max_files=10,
+                ),
+                rx.vstack(
+                    rx.foreach(
+                        rx.selected_files("vector_store_upload"), rx.text
+                    )
+                ),
+                rx.progress(value=VectorStoreUploadState.progress, max=100),
+                rx.cond(
+                    ~VectorStoreUploadState.uploading,
+                    rx.button(
+                        "Upload",
+                        on_click=VectorStoreUploadState.handle_upload(
+                            rx.upload_files(
+                                upload_id="vector_store_upload",
+                                on_upload_progress=VectorStoreUploadState.handle_upload_progress,
+                            ),
+                        ),
+                    ),
+                    rx.button(
+                        "Cancel",
+                        on_click=VectorStoreUploadState.cancel_upload,
                     ),
                 ),
+                rx.text(
+                    "Total bytes uploaded: ",
+                    VectorStoreUploadState.total_bytes,
+                ),
+                rx.button(
+                    "Add Documents",
+                    on_click=VectorStoreState.add_documents,
+                ),
+                spacing="4",
             ),
-            rx.tabs.content(
-                show_features(),
-                value=VectorStoreState.project.project_name,
-                width="100%",
-            ),
-            value=VectorStoreState.project.project_name,
-            on_change=VectorStoreState.set_project,
-            orientation="horizontal",
-            height="100vh",
-            width="100%",
         ),
-        width="100%",
-        border=styles.border,
-        border_radius=styles.border_radius,
+        open=VectorStoreState.add_documents_dialog_open,
     )
 
 
@@ -371,9 +421,10 @@ def vector_store_component() -> rx.Component:
         The UI for the Vector Store page.
     """
     return rx.vstack(
-        rx.chakra.heading("Vector Store [Beta]"),
-        rx.chakra.text("Create a vector store to store your embedding features"),
         setup_store(),
-        show_store(),
+        show_features(),
+        add_documents_dialog(),
         width="100%",
+        height="100%",
+        padding="2em",
     )

@@ -6,9 +6,11 @@ from ryoma_lab.components.agent import agent_component
 from ryoma_lab.components.prompt_template import prompt_templatec_component
 from ryoma_lab.components.tool import tool_component
 from ryoma_lab.components.vector_store import vector_store_component
+from ryoma_lab.components.embedding import embedding_component
 from ryoma_lab.states.agent import AgentState
-from ryoma_lab.states.AiState import AIState
+from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.datasource import DataSourceState
+from ryoma_lab.states.embedding import EmbeddingState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.tool import ToolState
 from ryoma_lab.templates import template
@@ -24,6 +26,7 @@ from ryoma_lab.templates import template
         PromptTemplateState.on_load,
         ToolState.on_load,
         DataSourceState.on_load,
+        EmbeddingState.on_load,
     ],
 )
 def ai() -> rx.Component:
@@ -37,6 +40,7 @@ def ai() -> rx.Component:
         rx.tabs.root(
             rx.tabs.list(
                 rx.tabs.trigger("Agent", value="agent", cursor="pointer"),
+                rx.tabs.trigger("Embeddings", value="embeddings", cursor="pointer"),
                 rx.tabs.trigger(
                     "Prompt Settings", value="prompt_settings", cursor="pointer"
                 ),
@@ -47,6 +51,11 @@ def ai() -> rx.Component:
                 agent_component(),
                 padding_y="2em",
                 value="agent",
+            ),
+            rx.tabs.content(
+                embedding_component(),
+                padding_y="2em",
+                value="embeddings"
             ),
             rx.tabs.content(
                 prompt_templatec_component(),

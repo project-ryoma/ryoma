@@ -7,13 +7,14 @@ from sqlmodel import Field, select
 
 from ryoma.prompt.prompt_builder import prompt_factory
 from ryoma_lab.models.prompt import PromptTemplate
+from ryoma_lab.states.ai import AIState
 
 path = os.path.dirname(__file__)
 f = open(f"{path}/formatted_prompt_examples.json")
 data = json.load(f)
 
 
-class PromptTemplateState(rx.State):
+class PromptTemplateState(AIState):
     question: str
     prompt_templates: List[PromptTemplate] = []
 

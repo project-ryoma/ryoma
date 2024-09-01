@@ -270,28 +270,6 @@ def prompt_template_selector() -> rx.Component:
                         size="2",
                         weight="bold",
                     ),
-                    rx.select.root(
-                        rx.select.trigger(
-                            placeholder="Select your vector store",
-                        ),
-                        rx.select.content(
-                            rx.select.group(
-                                rx.select.label("Select your vector store"),
-                                rx.foreach(
-                                    VectorStoreState.projects,
-                                    lambda x: rx.select.item(
-                                        x.project_name, value=x.project_name
-                                    ),
-                                ),
-                                rx.select.item(
-                                    "Create new feature +",
-                                    value="new",
-                                ),
-                            ),
-                        ),
-                        value=ChatState.current_vector_store,
-                        on_change=ChatState.set_current_vector_store,
-                    ),
                     rx.cond(
                         ChatState.current_vector_store,
                         rx.box(

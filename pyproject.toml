@@ -3,18 +3,23 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "ryoma-studio"
+name = "ryoma-dev"
 version = "0.0.1"
 description = "Root project for Ryoma AI Platform"
 authors = ["ryoma <contact@project-ryoma.com>"]
 license = "Apache Software License 2.0"
 readme = "README.md"
 
+packages = [
+    { include = "ryoma", from = "ryoma" },
+    { include = "ryoma_lab", from = "ryoma_lab" },
+]
+
 [tool.poetry.dependencies]
 python = "^3.9"
 ryoma = {path = "./ryoma"}
 ryoma_lab = {path = "./ryoma_lab"}
-rx = "^3.2.0"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

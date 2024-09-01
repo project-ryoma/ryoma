@@ -2,6 +2,7 @@ import reflex as rx
 
 from ryoma import tool
 from ryoma_lab.models.tool import Tool, ToolArg
+from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.utils import (
     get_model_classes,
     get_model_fields,
@@ -9,7 +10,7 @@ from ryoma_lab.states.utils import (
 )
 
 
-class ToolState(rx.State):
+class ToolState(AIState):
     tools: list[Tool]
 
     @rx.var

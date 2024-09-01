@@ -14,6 +14,7 @@ from ryoma.agent.workflow import WorkflowAgent
 from ryoma.models.agent import AgentType
 from ryoma_lab.models.agent import Agent
 from ryoma_lab.states.graph import Graph
+from ryoma_lab.states.ai import AIState
 
 
 def get_node_position(node: Node):
@@ -41,7 +42,7 @@ def create_agent_graph_edge(id, edge: Edge):
     return {"id": id, "source": edge.source, "target": edge.target, "animated": True}
 
 
-class AgentState(rx.State):
+class AgentState(AIState):
     agents: list[Agent] = []
     is_open: bool = False
     current_agent_name: Optional[str] = None
