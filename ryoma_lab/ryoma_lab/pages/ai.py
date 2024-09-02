@@ -13,6 +13,7 @@ from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.embedding import EmbeddingState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.tool import ToolState
+from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.templates import template
 
 
@@ -27,6 +28,7 @@ from ryoma_lab.templates import template
         ToolState.on_load,
         DataSourceState.on_load,
         EmbeddingState.on_load,
+        VectorStoreState.on_load,
     ],
 )
 def ai() -> rx.Component:

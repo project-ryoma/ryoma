@@ -23,8 +23,11 @@ class FeastFeatureView(rx.Model):
 
 
 class VectorStore(rx.Model, table=True):
-    vector_store: str
-    vector_store_configs: Optional[str]
+    project_name: str
+    online_store: str
+    online_store_configs: Optional[str]
+    offline_store: str
+    offline_store_configs: Optional[str]
 
 
 def get_vector_store_config():

@@ -57,7 +57,11 @@ def build_feast_repo_config(
             **offline_store_configs,
         }
     else:
-        configs["offline_config"] = {}
+        configs["offline_config"] = {
+            "type": "file",
+            "path": "data/registry.db",
+        }
+    print(configs)
     return RepoConfig(**configs)
 
 
@@ -86,13 +90,9 @@ def get_feature_store(
         project_name=store.project_name,
         vector_store_config=vector_store_config,
         online_store=store.online_store,
-        online_store_configs=json.loads(
-            store.online_store_configs if store.online_store_configs else "{}"
-        ),
+        online_store_configs=eval(store.online_store_configs) if store.online_store_configs else "{}",
         offline_store=store.offline_store,
-        offline_store_configs=json.loads(
-            store.offline_store_configs if store.offline_store_configs else "{}"
-        ),
+        offline_store_configs=eval(store.offline_store_configs) if store.offline_store_configs else "{}",
     )
     return FeatureStore(config=repo_config)
 

@@ -17,14 +17,6 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ryoma = {path = "./ryoma"}
-ryoma_lab = {path = "./ryoma_lab"}
+ryoma = {path = "./ryoma", develop = true}
+ryoma_lab = {path = "./ryoma_lab", develop = true, extras = ["dev"]}
 
-
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-black = "^23.3.0"
-isort = "^5.9.3"
-mypy = "^0.910"
-flake8 = "^3.9.2"
-click = "^8.0.0"
