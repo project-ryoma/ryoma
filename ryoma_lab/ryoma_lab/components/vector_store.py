@@ -82,18 +82,10 @@ def add_feature():
                     rx.select.content(
                         rx.select.group(
                             rx.select.item("Upload files", value="files"),
-                            rx.cond(
-                                VectorStoreState.project
-                                & VectorStoreState.project.offline_store,
-                                rx.select.item(
-                                    VectorStoreState.project.offline_store,
-                                    value=VectorStoreState.project.offline_store,
-                                ),
+                            rx.foreach(
+                                DataSourceState.datasources,
+                                lambda ds: rx.select.item(ds.name, value=ds.name),
                             ),
-                            # rx.foreach(
-                            #     DataSourceState.datasources,
-                            #     lambda ds: rx.select.item(ds.name, value=ds.name),
-                            # ),
                         ),
                     ),
                     value=VectorStoreState.feature_datasource,

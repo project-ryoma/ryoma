@@ -20,7 +20,6 @@ from feast.repo_operations import (
 from feast.types import Array, Float32
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
-from sqlmodel import select
 
 from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
@@ -29,8 +28,6 @@ from ryoma_lab.apis.vector_store import get_feature_stores
 from ryoma_lab.models.vector_store import (
     FeastFeatureView,
     VectorStore,
-    VectorStoreConfig,
-    get_vector_store_config,
 )
 from ryoma_lab.services.vector_store import (
     build_feast_repo_config,

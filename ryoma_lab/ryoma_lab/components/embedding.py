@@ -1,6 +1,7 @@
 import reflex as rx
-from ryoma_lab.states.embedding import EmbeddingState
+
 from ryoma_lab.components.model_selector import embedding_model_selector
+from ryoma_lab.states.embedding import EmbeddingState
 
 
 def model_config_render() -> rx.Component:
@@ -47,6 +48,7 @@ def embedding_component() -> rx.Component:
                 on_change=EmbeddingState.set_dimension,
             ),
         ),
+        rx.button("Create Embedding", on_click=EmbeddingState.create_embedding),
         width="100%",
-        padding_x="2em"
+        padding_x="2em",
     )
