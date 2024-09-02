@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ryoma_lab.states.base import BaseState
 from ryoma_lab.models.embedding import Embedding
+from ryoma_lab.states.base import BaseState
 
 
 class AIState(BaseState):

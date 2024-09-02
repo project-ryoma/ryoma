@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from ryoma_lab.models.embedding import Embedding
 from ryoma.agent.utils import load_model_provider
+from ryoma_lab.models.embedding import Embedding
 from ryoma_lab.states.ai import AIState
 
 
