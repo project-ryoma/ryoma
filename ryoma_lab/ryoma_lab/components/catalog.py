@@ -2,6 +2,7 @@
 
 import reflex as rx
 
+from ryoma.datasource.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
@@ -80,7 +81,11 @@ def render_catalog_list():
 
 def render_metadata_content():
     return rx.flex(
-        rx.chakra.heading(CatalogState.table_metadata.name, size="md"),
+        rx.hstack(
+            rx.heading(CatalogState.table_metadata.name),
+            index_data_catalog_render(CatalogState.table_metadata),
+            width="100%",
+        ),
         rx.cond(
             CatalogState.table_metadata.description,
             rx.text(CatalogState.table_metadata.description),
@@ -126,7 +131,7 @@ def render_catalog_body():
 
 
 def sync_data_catalog_render(
-    datasource: DataSource,
+        datasource: DataSource,
 ):
     return rx.vstack(
         rx.dialog.root(
@@ -154,6 +159,54 @@ def sync_data_catalog_render(
                             size="2",
                             on_click=lambda: CatalogState.crawl_data_catalog(
                                 datasource.name
+                            ),
+                        ),
+                    ),
+                    rx.dialog.close(
+                        rx.button(
+                            "Cancel",
+                            variant="soft",
+                            color_scheme="gray",
+                        )
+                    ),
+                    padding_top="1em",
+                    spacing="3",
+                    mt="4",
+                    justify="end",
+                ),
+            ),
+        ),
+    )
+
+
+def index_data_catalog_render(
+    table: Table,
+):
+    return rx.vstack(
+        rx.dialog.root(
+            rx.dialog.trigger(
+                rx.button("Index"),
+            ),
+            rx.dialog.content(
+                rx.dialog.title(
+                    "Embed and Index Data Source",
+                    size="1",
+                    font_family="Inter",
+                    padding_top="1em",
+                ),
+                rx.dialog.description(
+                    "Index data source to enable search and discovery. ",
+                    size="2",
+                    mb="4",
+                    padding_bottom="1em",
+                ),
+                rx.flex(
+                    rx.dialog.close(
+                        rx.button(
+                            "Start",
+                            size="2",
+                            on_click=lambda: CatalogState.index_data_catalog(
+                                table
                             ),
                         ),
                     ),

@@ -7,7 +7,7 @@ from ryoma_lab import styles
 from ryoma_lab.components.catalog import (
     catalog_search,
     render_catalog_body,
-    sync_data_catalog_render,
+    sync_data_catalog_render
 )
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
@@ -15,11 +15,12 @@ from ryoma_lab.templates import template
 
 
 def show_datasource(datasource: DataSource):
-    return rx.chakra.tr(
-        rx.chakra.td(datasource.name),
-        rx.chakra.td(update_datasource(datasource)),
-        rx.chakra.td(sync_data_catalog_render(datasource)),
-        rx.chakra.td(
+    return rx.table.row(
+        rx.table.cell(datasource.name),
+        rx.table.cell(datasource.datasource),
+        rx.table.cell(update_datasource(datasource)),
+        rx.table.cell(sync_data_catalog_render(datasource)),
+        rx.table.cell(
             rx.button(
                 "Delete",
                 on_click=lambda: DataSourceState.delete_datasource(datasource.id),
@@ -266,20 +267,21 @@ def data_source_table() -> rx.Component:
             ),
             width="100%",
         ),
-        rx.chakra.table(
-            rx.chakra.thead(
-                rx.chakra.tr(
-                    rx.chakra.th("Name"),
-                    rx.chakra.th("Edit"),
-                    rx.chakra.th("Catalog"),
-                    rx.chakra.th("Delete"),
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    rx.table.column_header_cell("Name"),
+                    rx.table.column_header_cell("Data Source"),
+                    rx.table.column_header_cell("Update"),
+                    rx.table.column_header_cell("Catalog"),
+                    rx.table.column_header_cell("Delete"),
                 ),
             ),
-            rx.chakra.tbody(rx.foreach(DataSourceState.datasources, show_datasource)),
+            rx.table.body(rx.foreach(DataSourceState.datasources, show_datasource)),
             size="6",
             width="100%",
             justify="stretch",
-            variant="striped",
+            variant="surface",
         ),
         width="100%",
         border=styles.border,

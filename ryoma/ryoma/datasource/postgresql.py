@@ -63,7 +63,7 @@ class PostgreSqlDataSource(SqlDataSource):
                 tables.append(tb)
             return tables
 
-        schema = self.db_schema or "public"
+        schema = self.db_schema
         tables = get_table_metadata(self.database, schema)
         database = Database(database_name=schema, tables=tables)
         return database

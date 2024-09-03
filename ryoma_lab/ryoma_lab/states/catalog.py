@@ -9,7 +9,9 @@ from pyhocon import ConfigTree
 
 from ryoma_lab.apis import catalog as catalog_api
 from ryoma_lab.models.data_catalog import Catalog, Table
+from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.datasource import DataSourceState
+from ryoma_lab.states.embedding import EmbeddingState
 
 
 class CatalogState(rx.State):
@@ -70,6 +72,10 @@ class CatalogState(rx.State):
             self.load_entries()
         except Exception as e:
             rx.toast(str(e))
+
+    def index_data_catalog(self, table: Table):
+        pass
+
 
     def on_load(self):
         self.current_catalog_id = None

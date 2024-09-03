@@ -11,6 +11,7 @@ class DataSource(rx.Model, table=True):
     connection_url: Optional[str]
     attributes: Optional[str]
     catalog_id: Optional[int] = None
+    index_id: Optional[int] = None
 
     @property
     def attributes_dict(self) -> dict:
