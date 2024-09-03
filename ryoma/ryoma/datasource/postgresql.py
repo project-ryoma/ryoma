@@ -69,10 +69,19 @@ class PostgreSqlDataSource(SqlDataSource):
         return database
 
     def connection_string(self):
-        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}/{self.db_schema}"
+        auth_part = ""
+        if self.user:
+            auth_part += self.user
+            if self.password:
+                auth_part += f":{self.password}"
+
+        if auth_part:
+            auth_part += "@"
+
+        return f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
 
     def crawl_data_catalog(
-        self, loader: Loader, where_clause_suffix: Optional[str] = ""
+        self, loader: Loader, where_clause_suffix: Optional[str] = None
     ):
         from databuilder.extractor.postgres_metadata_extractor import (
             PostgresMetadataExtractor,
@@ -82,7 +91,7 @@ class PostgreSqlDataSource(SqlDataSource):
         job_config = ConfigFactory.from_dict(
             {
                 "extractor.postgres_metadata.{}".format(
-                    PostgresMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY
+                    f"st.schemaname = '{self.db_schema or 'public'}'"
                 ): where_clause_suffix,
                 "extractor.postgres_metadata.{}".format(
                     PostgresMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME
