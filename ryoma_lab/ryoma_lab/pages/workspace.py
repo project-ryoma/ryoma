@@ -10,7 +10,7 @@ from ryoma_lab.components.model_selector import (
     embedding_model_selector,
 )
 from ryoma_lab.components.notebook import notebook
-from ryoma_lab.components.react_rnd import rnd
+from ryoma_lab.components.react_resizable_panels import resizable_panels as rzp
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -473,30 +473,24 @@ def workspace() -> rx.Component:
     return rx.chakra.flex(
         file_directory_sidebar(),
         rx.box(
-            rnd(
-                notebook(),
-                default={
-                    "x": 0,
-                    "y": 0,
-                    "width": 880,
-                    "height": "100%",
-                },
-                disable_dragging=True,
+            rzp.group(
+                rzp.panel(
+                    notebook(),
+                    background_color=rx.color("mauve", 2),
+                    min_size=20,
+                    default_size=50,
+                ),
+                rzp.handle(),
+                rzp.panel(
+                    chatbox_render(),
+                    background_color=rx.color("mauve", 2),
+                    min_size=20,
+                    default_size=30,
+                ),
+                direction="horizontal",
             ),
-            rnd(
-                chatbox_render(),
-                default={
-                    "x": 890,
-                    "y": 0,
-                    "width": 450,
-                    "height": "100%",
-                },
-                position={
-                    "x": 890,
-                    "y": 0,
-                },
-                disable_dragging=True,
-            ),
+            width="100%",
+            height="100%",
         ),
         h="85vh",
         width="100%",

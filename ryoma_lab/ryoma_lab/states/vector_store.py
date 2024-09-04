@@ -1,11 +1,9 @@
-import datetime
 import logging
 import os
 import pathlib
 from pathlib import Path
 from typing import Optional
 
-import pandas as pd
 import reflex as rx
 from feast import FeatureView, FileSource
 from feast.data_format import ParquetFormat
@@ -18,25 +16,16 @@ from feast.repo_operations import (
     apply_total_with_repo_instance,
 )
 from feast.types import Array, Float32
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
 
-from ryoma.agent.embedding import EmbeddingAgent
-from ryoma.agent.factory import AgentFactory
-from ryoma_lab.apis.datasource import get_datasource_by_name, get_datasource_configs
-from ryoma_lab.apis.vector_store import get_feature_stores
+from ryoma_lab.apis import datasource as datasource_api
+from ryoma_lab.apis import vector_store as vector_store_api
 from ryoma_lab.models.vector_store import FeastFeatureView, VectorStore
-from ryoma_lab.services.vector_store import (
-    build_feast_repo_config,
-    get_feast_datasource_by_name,
-    get_feature_store,
-    get_feature_views,
-)
-from ryoma_lab.states.base import BaseState
-from ryoma_lab.states.datasource import DataSource, DataSourceState
+from ryoma_lab.services import vector_store as vector_store_service
+from ryoma_lab.states.ai import AIState
+from ryoma_lab.states.datasource import DataSource
 
 
-class VectorStoreState(BaseState):
+class VectorStoreState(AIState):
     projects: list[VectorStore] = []
     project: Optional[VectorStore] = None
 
@@ -62,15 +51,12 @@ class VectorStoreState(BaseState):
     files: list[str] = []
     feature_source_configs: dict[str, str] = {}
 
-    materialize_embedding_model: Optional[str] = None
-    materialize_embedding_model_configs: Optional[str] = None
-
     def set_feature_source_config(self, key: str, value: str):
         self.feature_source_configs[key] = value
 
     def _get_datasource_configs(self, ds: str) -> dict[str, str]:
-        ds = get_datasource_by_name(ds)
-        configs = get_datasource_configs(ds)
+        ds = datasource_api.get_datasource_by_name(ds)
+        configs = datasource_api.get_datasource_configs(ds)
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],
@@ -127,8 +113,22 @@ class VectorStoreState(BaseState):
             project = self.projects[0]
         if project:
             self.project = project
-            self._current_fs = get_feature_store(project, self.vector_store_config)
-            self.current_feature_views = get_feature_views(self._current_fs)
+            self._current_fs = vector_store_service.get_feature_store(
+                project, self.vector_store_config
+            )
+            self.current_feature_views = vector_store_service.get_feature_views(
+                self._current_fs
+            )
+
+    def get_project(self, project_name: str):
+        return next(
+            (
+                project
+                for project in self.projects
+                if project.project_name == project_name
+            ),
+            None,
+        )
 
     def create_store(self):
         repo_config_input = {
@@ -144,7 +144,7 @@ class VectorStoreState(BaseState):
             repo_config_input,
         )
 
-        repo_config = build_feast_repo_config(**repo_config_input)
+        repo_config = vector_store_service.build_feast_repo_config(**repo_config_input)
         repo_path = Path(os.path.join(Path.cwd(), "data"))
         try:
             project, registry, repo, store = _prepare_registry_and_repo(
@@ -190,8 +190,10 @@ class VectorStoreState(BaseState):
                 ),
             )
         else:
-            ds = get_datasource_by_name(self.feature_datasource)
-            datasource_cls = get_feast_datasource_by_name(ds.datasource)
+            ds = datasource_api.get_datasource_by_name(self.feature_datasource)
+            datasource_cls = vector_store_service.get_feast_datasource_by_name(
+                ds.datasource
+            )
             if datasource_cls:
                 return datasource_cls(
                     name=self.feature_view_name, **self.feature_source_configs
@@ -220,116 +222,16 @@ class VectorStoreState(BaseState):
         self._reload_project()
         self.toggle_create_feature_dialog()
 
+    def index_feature(self, feature_view: FeastFeatureView):
+        logging.info(f"Indexing feature view {feature_view}")
+        vector_store_service.index_feature_from_source(self._current_fs, feature_view)
+        logging.info(f"Feature view {feature_view} indexed")
+
     def load_store(self):
-        self.projects = get_feature_stores()
+        self.projects = vector_store_api.get_feature_stores()
         self._reload_project()
 
         logging.info("Feature store loaded")
-
-    def materialize_feature(self, feature_view: FeastFeatureView):
-        logging.info(f"Loading feature view {feature_view}")
-        if feature_view["source_type"] != "PushSource":
-            self._materialize_offline_feature_view(feature_view)
-            return
-
-        root_dir = rx.get_upload_dir()
-        source_dir = f"{root_dir}/{feature_view['name']}/{feature_view['source']}"
-        push_source_type = feature_view["push_source_type"]
-
-        if push_source_type in ["parquet", "csv", "json", "txt"]:
-            self._process_file_source(feature_view, source_dir, push_source_type)
-        elif push_source_type == "pdf":
-            self._process_pdf_source(feature_view, source_dir)
-        else:
-            logging.error(f"Unsupported source type: {push_source_type}")
-
-    def _materialize_offline_feature_view(self, feature_view: FeastFeatureView):
-        logging.info(f"Materializing offline feature view {feature_view}")
-        self._current_fs.materialize_incremental(
-            datetime.datetime.now(), [feature_view["name"]]
-        )
-
-    def _process_file_source(
-        self, feature_view: FeastFeatureView, source_dir: str, file_type: str
-    ):
-        try:
-            feature_df = self._load_feature_dataframe(source_dir, file_type)
-            if self.materialize_embedding_model:
-                feature_df = self._apply_embedding(feature_df)
-            self._validate_feature_dataframe(feature_df, feature_view)
-            self._current_fs.push(feature_view["source"], feature_df)
-            logging.info(f"Source {feature_view['source']} pushed to feature.")
-        except Exception as e:
-            logging.error(f"Error processing file source: {e}")
-            raise e
-
-    def _process_pdf_source(self, feature_view, source_dir):
-        try:
-            docs = PyPDFLoader(source_dir).load()
-            if self.materialize_embedding_model:
-                embedding_agent = self._create_embedding_agent()
-                self._process_pdf_document(docs, embedding_agent, feature_view)
-        except Exception as e:
-            logging.error(f"Error processing PDF source: {e}")
-            raise e
-
-    def _load_feature_dataframe(self, source_dir, file_type):
-        if file_type == "parquet":
-            return pd.read_parquet(source_dir)
-        # Add support for other file types (csv, json, txt) if needed
-        raise ValueError(f"Unsupported file type: {file_type}")
-
-    def _create_embedding_agent(
-        self,
-    ) -> EmbeddingAgent:
-        return AgentFactory.create_agent(
-            "embedding",
-            model=self.materialize_embedding_model,
-            model_parameters=self.materialize_embedding_model_configs,
-        )
-
-    def _apply_embedding(self, feature_df):
-        logging.info("Run embedding before materializing feature")
-        embedding_agent = self._create_embedding_agent()
-
-        feature_df["feature"] = feature_df["feature"].apply(
-            lambda x: embedding_agent.embed_query(x) if isinstance(x, str) else x
-        )
-        return feature_df
-
-    def _validate_feature_dataframe(self, feature_df, feature_view):
-        required_columns = [
-            "event_timestamp",
-            feature_view["feature"],
-            feature_view["entities"],
-        ]
-        if feature_df.empty:
-            logging.error(f"Error loading feature: {feature_view['source']} is empty")
-            raise ValueError("Feature DataFrame is empty")
-        if not all(col in feature_df.columns for col in required_columns):
-            missing_columns = [
-                col for col in required_columns if col not in feature_df.columns
-            ]
-            logging.error(
-                f"Error loading feature: {feature_view['source']} is missing required columns: {', '.join(missing_columns)}"
-            )
-            raise ValueError("Missing required columns")
-
-    def _process_pdf_document(
-        self,
-        docs: list[Document],
-        embedding_agent: EmbeddingAgent,
-        feature_view: FeastFeatureView,
-    ):
-        embedded_data = embedding_agent.embed_documents(docs)
-        inputs = {
-            "event_timestamp": [datetime.datetime.now()] * len(embedded_data),
-            feature_view["feature"]: embedded_data,
-            feature_view["entities"]: [""] * len(embedded_data),
-        }
-        self._current_fs.write_to_online_store(
-            feature_view_name=feature_view["name"], inputs=inputs
-        )
 
     async def handle_upload(self, files: list[rx.UploadFile]):
         """Handle the upload of file(s).

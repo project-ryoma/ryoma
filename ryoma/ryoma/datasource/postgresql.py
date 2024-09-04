@@ -78,7 +78,9 @@ class PostgreSqlDataSource(SqlDataSource):
         if auth_part:
             auth_part += "@"
 
-        return f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
+        return (
+            f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
+        )
 
     def crawl_data_catalog(
         self, loader: Loader, where_clause_suffix: Optional[str] = None

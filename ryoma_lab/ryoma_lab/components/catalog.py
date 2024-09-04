@@ -5,8 +5,8 @@ import reflex as rx
 from ryoma.datasource.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
-from ryoma_lab.states.datasource import DataSource, DataSourceState
-from ryoma_lab.templates import template
+from ryoma_lab.states.datasource import DataSource
+from ryoma_lab.states.vector_store import VectorStoreState
 
 
 def catalog_search():
@@ -131,7 +131,7 @@ def render_catalog_body():
 
 
 def sync_data_catalog_render(
-        datasource: DataSource,
+    datasource: DataSource,
 ):
     return rx.vstack(
         rx.dialog.root(
@@ -200,14 +200,29 @@ def index_data_catalog_render(
                     mb="4",
                     padding_bottom="1em",
                 ),
+                rx.select.root(
+                    rx.select.trigger(
+                        "Select Vector Store",
+                        width="100%",
+                    ),
+                    rx.select.content(
+                        rx.foreach(
+                            VectorStoreState.projects,
+                            lambda project: rx.select.item(
+                                project.project_name,
+                                value=project.project_name,
+                            ),
+                        )
+                    ),
+                    value=CatalogState.vector_store,
+                    on_change=CatalogState.set_vector_store,
+                ),
                 rx.flex(
                     rx.dialog.close(
                         rx.button(
                             "Start",
                             size="2",
-                            on_click=lambda: CatalogState.index_data_catalog(
-                                table
-                            ),
+                            on_click=lambda: CatalogState.index_data_catalog(table),
                         ),
                     ),
                     rx.dialog.close(

@@ -48,7 +48,6 @@ def embedding_component() -> rx.Component:
                 on_change=EmbeddingState.set_dimension,
             ),
         ),
-        rx.button("Create Embedding", on_click=EmbeddingState.create_embedding),
         width="100%",
         padding_x="2em",
     )

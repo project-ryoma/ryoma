@@ -1,13 +1,18 @@
 import pytest
+from sqlalchemy import create_engine
 
 from ryoma.datasource.postgresql import PostgreSqlDataSource
-from sqlalchemy import create_engine
 
 
 @pytest.fixture
 def postgres():
     return PostgreSqlDataSource(
-        user="", password="", host="localhost", port=5432, database="postgres", db_schema="public"
+        user="",
+        password="",
+        host="localhost",
+        port=5432,
+        database="postgres",
+        db_schema="public",
     )
 
 

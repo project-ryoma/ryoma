@@ -219,51 +219,32 @@ def setup_store():
     )
 
 
-def materialize_feature_render(feature_view) -> rx.Component:
+def index_feature_render(feature_view) -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.chakra.button(
-                "Materialize",
+                "Index",
                 on_click=VectorStoreState.toggle_materialize_feature_dialog,
             ),
         ),
         rx.dialog.content(
             rx.dialog.title(
-                "Materialize Feature",
+                "Embed and Index Feature",
                 size="1",
                 font_family="Inter",
                 padding_top="1em",
             ),
             rx.dialog.description(
-                "Materialize the feature data into the vector store.",
+                "Embed and index the feature data into the vector store.",
                 size="2",
                 mb="4",
                 padding_bottom="1em",
-            ),
-            rx.vstack(
-                rx.chakra.heading("Embeddings", size="sm"),
-                embedding_model_selector(
-                    VectorStoreState.materialize_embedding_model,
-                    VectorStoreState.set_materialize_embedding_model,
-                    trigger_width="100%",
-                ),
-                rx.chakra.heading("Model Configs", size="sm"),
-                rx.chakra.input(
-                    placeholder="Enter the model configs",
-                    on_blur=VectorStoreState.set_materialize_embedding_model_configs,
-                ),
-                width="100%",
-                border=styles.border,
-                border_radius=styles.border_radius,
-                padding="1em",
             ),
             rx.flex(
                 rx.dialog.close(
                     rx.button(
                         "Confirm",
-                        on_click=lambda: VectorStoreState.materialize_feature(
-                            feature_view
-                        ),
+                        on_click=lambda: VectorStoreState.index_feature(feature_view),
                     ),
                 ),
                 rx.dialog.close(
@@ -294,7 +275,7 @@ def show_features():
                         rx.chakra.th("Entities"),
                         rx.chakra.th("Feature"),
                         rx.chakra.th("Source"),
-                        rx.chakra.th("Materialize"),
+                        rx.chakra.th("Index"),
                     )
                 ),
                 rx.chakra.tbody(
@@ -305,7 +286,7 @@ def show_features():
                             rx.chakra.td(feature_view.entities),
                             rx.chakra.td(feature_view.feature),
                             rx.chakra.td(feature_view.source),
-                            rx.chakra.td(materialize_feature_render(feature_view)),
+                            rx.chakra.td(index_feature_render(feature_view)),
                         ),
                     ),
                     width="100%",

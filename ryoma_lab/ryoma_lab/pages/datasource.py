@@ -7,10 +7,11 @@ from ryoma_lab import styles
 from ryoma_lab.components.catalog import (
     catalog_search,
     render_catalog_body,
-    sync_data_catalog_render
+    sync_data_catalog_render,
 )
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
+from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.templates import template
 
 
@@ -293,7 +294,11 @@ def data_source_table() -> rx.Component:
 @template(
     route="/datasource",
     title="Data Source",
-    on_load=[DataSourceState.on_load(), CatalogState.on_load()],
+    on_load=[
+        DataSourceState.on_load(),
+        CatalogState.on_load(),
+        VectorStoreState.on_load(),
+    ],
 )
 def datasource() -> rx.Component:
     """The Data Source page.

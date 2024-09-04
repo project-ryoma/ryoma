@@ -5,13 +5,16 @@ import reflex as rx
 from databuilder.loader.base_loader import Loader
 from databuilder.loader.generic_loader import GenericLoader
 from databuilder.models.table_metadata import TableMetadata
+from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
 
 from ryoma_lab.apis import catalog as catalog_api
+from ryoma_lab.apis import embedding as embedding_api
 from ryoma_lab.models.data_catalog import Catalog, Table
+from ryoma_lab.services import vector_store as vector_store_service
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.datasource import DataSourceState
-from ryoma_lab.states.embedding import EmbeddingState
+from ryoma_lab.states.vector_store import VectorStoreState
 
 
 class CatalogState(rx.State):
@@ -19,6 +22,8 @@ class CatalogState(rx.State):
     current_schema_id: Optional[int] = None
     catalogs: List[Catalog] = []
     selected_table: Optional[str] = None
+
+    vector_store: Optional[str] = ""
 
     def set_selected_table(self, table: str):
         self.selected_table = table
@@ -73,9 +78,30 @@ class CatalogState(rx.State):
         except Exception as e:
             rx.toast(str(e))
 
-    def index_data_catalog(self, table: Table):
-        pass
+    async def get_embedding_client(self) -> Embeddings:
+        embedding = await self.get_state(AIState)
+        return embedding_api.get_embedding_client(
+            embedding.model, embedding.model_parameters
+        )
 
+    def _get_embedding_content(self, table: Table):
+        return f"Table: {table.name}\nColumns: {table.columns}\nDescription: {table.description}"
+
+    async def _get_fs(self):
+        vector_store = await self.get_state(VectorStoreState)
+        return vector_store.get_project(self.vector_store)
+
+    async def index_data_catalog(self, table: Table):
+        logging.info(f"Indexing table {table}")
+        embedding_client = await self.get_embedding_client()
+        if not embedding_client:
+            return
+        embedded_table_content = embedding_client.embed_query(
+            self._get_embedding_content(table)
+        )
+
+        fs = await self._get_fs()
+        vector_store_service.index_feature(fs, table["name"], embedded_table_content)
 
     def on_load(self):
         self.current_catalog_id = None
