@@ -84,6 +84,7 @@ class PanelResizeHandle(ResizablePanels):
             "width": "7px",
             "background": rx.color("accent", 7),
             "opacity": 0.0,
+            "_hover": {"opacity": 1.0},
         }
 
 

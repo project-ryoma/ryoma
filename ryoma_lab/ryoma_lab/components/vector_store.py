@@ -70,10 +70,10 @@ def add_feature():
                     on_blur=VectorStoreState.set_feature_name,
                     required=True,
                 ),
-                rx.chakra.heading("Entities", size="sm"),
+                rx.chakra.heading("Entity Name", size="sm"),
                 rx.input(
-                    placeholder="Enter the entities",
-                    on_blur=VectorStoreState.set_feature_entities,
+                    placeholder="Enter the entity name",
+                    on_blur=VectorStoreState.set_feature_entity_name,
                     required=False,
                 ),
                 rx.chakra.heading("Feature Data Source", size="sm"),
@@ -272,7 +272,7 @@ def show_features():
                 rx.chakra.thead(
                     rx.chakra.tr(
                         rx.chakra.th("Feature View"),
-                        rx.chakra.th("Entities"),
+                        rx.chakra.th("Entity Name"),
                         rx.chakra.th("Feature"),
                         rx.chakra.th("Source"),
                         rx.chakra.th("Index"),
@@ -339,5 +339,5 @@ def vector_store_component() -> rx.Component:
         show_store(),
         width="100%",
         height="100%",
-        padding="2em",
+        padding_x="1em",
     )

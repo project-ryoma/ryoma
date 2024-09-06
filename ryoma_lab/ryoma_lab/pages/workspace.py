@@ -131,48 +131,6 @@ def action_bar() -> rx.Component:
     )
 
 
-def datasource_selector() -> rx.Component:
-    """The datasource selector."""
-    return rx.box(
-        rx.text(
-            "Data Source",
-            asi_="div",
-            mb="1",
-            size="1",
-            weight="bold",
-            color_scheme="gray",
-            padding_left="1px",
-        ),
-        rx.select.root(
-            rx.select.trigger(
-                placeholder="Select a datasource",
-                width="100%",
-            ),
-            rx.select.content(
-                rx.select.group(
-                    rx.select.label("Connected Data Source"),
-                    rx.cond(
-                        DataSourceState.datasource_names,
-                        rx.foreach(
-                            DataSourceState.datasource_names,
-                            lambda ds: rx.select.item(ds, value=ds),
-                        ),
-                    ),
-                    width="100%",
-                ),
-                rx.select.group(
-                    rx.select.item("Create new datasource + ", value="custom"),
-                ),
-                width="100%",
-            ),
-            value=ChatState.current_datasource,
-            on_change=ChatState.set_current_datasource,
-            width="100%",
-        ),
-        label="Datasource",
-        width="100%",
-    )
-
 
 def prompt_template_selector() -> rx.Component:
     """The prompt template selector."""
@@ -379,7 +337,6 @@ def chatbox_render() -> rx.Component:
         rx.chakra.hstack(
             rx.flex(
                 chat_model_selector_render(),
-                datasource_selector(),
                 agent_selector(),
                 direction="row",
                 spacing="3",

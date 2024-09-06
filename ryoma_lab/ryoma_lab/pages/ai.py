@@ -10,7 +10,6 @@ from ryoma_lab.components.vector_store import vector_store_component
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.datasource import DataSourceState
-from ryoma_lab.states.embedding import EmbeddingState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.tool import ToolState
 from ryoma_lab.states.vector_store import VectorStoreState
@@ -27,7 +26,6 @@ from ryoma_lab.templates import template
         PromptTemplateState.on_load,
         ToolState.on_load,
         DataSourceState.on_load,
-        EmbeddingState.on_load,
         VectorStoreState.on_load,
     ],
 )
@@ -45,7 +43,7 @@ def ai() -> rx.Component:
                 rx.tabs.trigger(
                     "Prompt Settings", value="prompt_settings", cursor="pointer"
                 ),
-                rx.tabs.trigger("Vector Store", value="vector_store", cursor="pointer"),
+                rx.tabs.trigger("Vector Store", value="vector_store_project_name", cursor="pointer"),
                 rx.tabs.trigger("Agent", value="agent", cursor="pointer"),
                 rx.tabs.trigger("Tools", value="tool", cursor="pointer"),
             ),
@@ -58,7 +56,7 @@ def ai() -> rx.Component:
             rx.tabs.content(
                 vector_store_component(),
                 padding_y="2em",
-                value="vector_store",
+                value="vector_store_project_name",
             ),
             rx.tabs.content(
                 agent_component(),

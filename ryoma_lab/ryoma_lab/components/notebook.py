@@ -3,8 +3,41 @@ import reflex as rx
 from ryoma_lab import styles
 from ryoma_lab.components.cell import render_output
 from ryoma_lab.components.code_editor import codeeditor
+from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.notebook import Cell, NotebookState
+from ryoma_lab.states.workspace import WorkSpaceState
 
+
+def datasource_selector() -> rx.Component:
+    """The datasource selector."""
+    return rx.box(
+        rx.select.root(
+            rx.select.trigger(
+                placeholder="Select a datasource",
+            ),
+            rx.select.content(
+                rx.select.group(
+                    rx.select.label("Connected Data Source"),
+                    rx.cond(
+                        DataSourceState.datasource_names,
+                        rx.foreach(
+                            DataSourceState.datasource_names,
+                            lambda ds: rx.select.item(ds, value=ds),
+                        ),
+                    ),
+                    width="100%",
+                ),
+                rx.select.group(
+                    rx.select.item("Create new datasource + ", value="custom"),
+                ),
+                width="100%",
+            ),
+            value=WorkSpaceState.current_datasource,
+            on_change=WorkSpaceState.set_current_datasource,
+            width="100%",
+        ),
+        label="Datasource",
+    )
 
 def notebook_panel() -> rx.Component:
     return rx.flex(
@@ -20,6 +53,7 @@ def notebook_panel() -> rx.Component:
             on_change=NotebookState.set_kernel_type,
             size="2",
         ),
+        datasource_selector(),
         rx.button(
             "Run All",
             on_click=NotebookState.run_all_cells,

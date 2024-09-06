@@ -9,6 +9,7 @@ from ryoma_lab.components.catalog import (
     render_catalog_body,
     sync_data_catalog_render,
 )
+from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSource, DataSourceState
 from ryoma_lab.states.vector_store import VectorStoreState
@@ -298,6 +299,7 @@ def data_source_table() -> rx.Component:
         DataSourceState.on_load(),
         CatalogState.on_load(),
         VectorStoreState.on_load(),
+        AIState.on_load(),
     ],
 )
 def datasource() -> rx.Component:

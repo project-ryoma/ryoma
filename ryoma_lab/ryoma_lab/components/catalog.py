@@ -202,7 +202,7 @@ def index_data_catalog_render(
                 ),
                 rx.select.root(
                     rx.select.trigger(
-                        "Select Vector Store",
+                        placeholder="Select Vector Store",
                         width="100%",
                     ),
                     rx.select.content(
@@ -214,8 +214,29 @@ def index_data_catalog_render(
                             ),
                         )
                     ),
-                    value=CatalogState.vector_store,
-                    on_change=CatalogState.set_vector_store,
+                    value=CatalogState.vector_store_project_name,
+                    on_change=CatalogState.set_vector_store_project_name,
+                ),
+                rx.cond(
+                    CatalogState.vector_store_project_name,
+                    rx.select.root(
+                        rx.select.trigger(
+                            placeholder="Select Feature View to store in Vector Store",
+                            width="100%",
+                            margin_top="1em",
+                        ),
+                        rx.select.content(
+                            rx.foreach(
+                                VectorStoreState.current_feature_views,
+                                lambda feature_view: rx.select.item(
+                                    feature_view.name,
+                                    value=feature_view.name,
+                                ),
+                            )
+                        ),
+                        value=CatalogState.feature_view_name,
+                        on_change=lambda x: CatalogState.set_feature_view_name(x),
+                    ),
                 ),
                 rx.flex(
                     rx.dialog.close(

@@ -13,7 +13,7 @@ class VectorStoreConfig(rx.Base):
     path: str
 
 
-class FeastFeatureView(rx.Model):
+class FeatureViewModel(rx.Model):
     name: str
     feature: str
     entities: Optional[str] = ""
