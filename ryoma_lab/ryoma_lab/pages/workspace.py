@@ -131,7 +131,6 @@ def action_bar() -> rx.Component:
     )
 
 
-
 def prompt_template_selector() -> rx.Component:
     """The prompt template selector."""
     return rx.chakra.form(

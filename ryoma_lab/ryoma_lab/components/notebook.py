@@ -39,6 +39,7 @@ def datasource_selector() -> rx.Component:
         label="Datasource",
     )
 
+
 def notebook_panel() -> rx.Component:
     return rx.flex(
         rx.input(

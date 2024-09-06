@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 import reflex as rx
-
 from feast.feature_store import FeatureStore
 from feast.repo_operations import (
     _prepare_registry_and_repo,
@@ -48,13 +47,10 @@ class VectorStoreState(AIState):
     files: list[str] = []
     feature_source_configs: dict[str, str] = {}
 
-    def set_feature_source_config(self,
-                                  key: str,
-                                  value: str):
+    def set_feature_source_config(self, key: str, value: str):
         self.feature_source_configs[key] = value
 
-    def _get_datasource_configs(self,
-                                ds: str) -> dict[str, str]:
+    def _get_datasource_configs(self, ds: str) -> dict[str, str]:
         ds = datasource_api.get_datasource_by_name(ds)
         configs = datasource_api.get_datasource_configs(ds)
         if "connection_url" in configs:
@@ -63,8 +59,7 @@ class VectorStoreState(AIState):
             }
         return configs
 
-    def set_online_store(self,
-                         ds: str):
+    def set_online_store(self, ds: str):
         self.online_store = ds
         configs = self._get_datasource_configs(ds)
         self.online_store_configs = {
@@ -75,8 +70,7 @@ class VectorStoreState(AIState):
             f"Online store type set to {self.online_store} with configs {self.online_store_configs}"
         )
 
-    def set_offline_store(self,
-                          ds: str):
+    def set_offline_store(self, ds: str):
         self.offline_store = ds
         configs = self._get_datasource_configs(ds)
         self.offline_store_configs = {
@@ -96,13 +90,11 @@ class VectorStoreState(AIState):
     def toggle_materialize_feature_dialog(self):
         self.materialize_feature_dialog_open = not self.materialize_feature_dialog_open
 
-    def set_project(self,
-                    project_name: str):
+    def set_project(self, project_name: str):
         self.project_name = project_name
         self._reload_store(self.project_name)
 
-    def get_project(self,
-                    project_name: str):
+    def get_project(self, project_name: str):
         return next(
             (
                 project
@@ -112,8 +104,7 @@ class VectorStoreState(AIState):
             None,
         )
 
-    def _reload_store(self,
-                      project_name: Optional[str] = None):
+    def _reload_store(self, project_name: Optional[str] = None):
         project = None
         if project_name:
             project = self.get_project(project_name)
@@ -176,8 +167,7 @@ class VectorStoreState(AIState):
         self._reload_store()
         self.toggle_create_feature_dialog()
 
-    def index_feature(self,
-                      feature_view: FeatureViewModel):
+    def index_feature(self, feature_view: FeatureViewModel):
         logging.info(f"Indexing feature view {feature_view}")
         vector_store_service.index_feature_from_source(self._current_fs, feature_view)
         logging.info(f"Feature view {feature_view} indexed")
@@ -188,8 +178,7 @@ class VectorStoreState(AIState):
 
         logging.info("Feature store loaded")
 
-    async def handle_upload(self,
-                            files: list[rx.UploadFile]):
+    async def handle_upload(self, files: list[rx.UploadFile]):
         """Handle the upload of file(s).
 
         Args:
@@ -211,8 +200,7 @@ class VectorStoreState(AIState):
             # Update the files var.
             self.files.append(file.filename)
 
-    def delete_project(self,
-                       project_name):
+    def delete_project(self, project_name):
         vector_store_api.delete_project(project_name)
         self.load_store()
 

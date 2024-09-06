@@ -1,6 +1,6 @@
+import datetime
 import logging
 from typing import List, Optional
-import datetime
 
 import reflex as rx
 from databuilder.loader.base_loader import Loader
@@ -29,8 +29,7 @@ class CatalogState(BaseState):
     vector_store_project_name: str = ""
     feature_view_name: str = ""
 
-    def set_selected_table(self,
-                           table: str):
+    def set_selected_table(self, table: str):
         self.selected_table = table
 
     @rx.var
@@ -42,8 +41,7 @@ class CatalogState(BaseState):
     def load_entries(self):
         self.catalogs = catalog_api.load_catalogs()
 
-    def _load_catalog_record(self,
-                             record: TableMetadata):
+    def _load_catalog_record(self, record: TableMetadata):
         logging.info(f"Loading catalog entry to database: {record}")
 
         catalog_api.commit_catalog_record(
@@ -57,19 +55,16 @@ class CatalogState(BaseState):
 
     def _record_loader(self) -> Loader:
         class SessionLoader(GenericLoader):
-            def __init__(self,
-                         callback_func):
+            def __init__(self, callback_func):
                 self._callback_func = callback_func
 
-            def init(self,
-                     conf: ConfigTree) -> None:
+            def init(self, conf: ConfigTree) -> None:
                 self.conf = conf
                 self._callback_func = self._callback_func
 
         return SessionLoader(self._load_catalog_record)
 
-    def crawl_data_catalog(self,
-                           datasource_name: Optional[str] = None):
+    def crawl_data_catalog(self, datasource_name: Optional[str] = None):
         datasource = DataSourceState.connect(datasource_name)
         try:
             (
@@ -93,8 +88,7 @@ class CatalogState(BaseState):
             aistate.embedding.model, aistate.embedding.model_parameters
         )
 
-    def _get_embedding_content(self,
-                               table: Table):
+    def _get_embedding_content(self, table: Table):
         return f"Table: {table['name']}\nColumns: {table['columns']}\nDescription: {table['description']}"
 
     async def _get_fs(self):
@@ -102,8 +96,7 @@ class CatalogState(BaseState):
         project = vector_store_state.get_project(self.vector_store_project_name)
         return vector_store_service.get_feature_store(project, self.vector_store_config)
 
-    async def index_data_catalog(self,
-                                 table: Table):
+    async def index_data_catalog(self, table: Table):
         logging.info(f"Indexing table {table}")
         embedding_client = await self.get_embedding_client()
         if not embedding_client:
@@ -112,14 +105,18 @@ class CatalogState(BaseState):
             self._get_embedding_content(table)
         )
         fs = await self._get_fs()
-        feature_view = vector_store_service.get_feature_view_by_name(fs, self.feature_view_name)
+        feature_view = vector_store_service.get_feature_view_by_name(
+            fs, self.feature_view_name
+        )
         embedding_feature_inputs = vector_store_service.build_vector_feature_inputs(
             feature_view=feature_view,
             inputs=embedded_table_content,
-            entity_value=table["name"]
+            entity_value=table["name"],
         )
 
-        vector_store_service.index_feature_from_data(fs, self.feature_view_name, embedding_feature_inputs)
+        vector_store_service.index_feature_from_data(
+            fs, self.feature_view_name, embedding_feature_inputs
+        )
 
     def on_load(self):
         self.current_catalog_id = None

@@ -43,7 +43,9 @@ def ai() -> rx.Component:
                 rx.tabs.trigger(
                     "Prompt Settings", value="prompt_settings", cursor="pointer"
                 ),
-                rx.tabs.trigger("Vector Store", value="vector_store_project_name", cursor="pointer"),
+                rx.tabs.trigger(
+                    "Vector Store", value="vector_store_project_name", cursor="pointer"
+                ),
                 rx.tabs.trigger("Agent", value="agent", cursor="pointer"),
                 rx.tabs.trigger("Tools", value="tool", cursor="pointer"),
             ),

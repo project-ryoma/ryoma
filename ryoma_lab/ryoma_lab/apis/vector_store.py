@@ -16,11 +16,11 @@ def delete_project(project_name: str):
 
 
 def save_project(
-        project_name: str,
-        online_store: str,
-        online_store_configs: dict[str, str],
-        offline_store: str,
-        offline_store_configs: dict[str, str],
+    project_name: str,
+    online_store: str,
+    online_store_configs: dict[str, str],
+    offline_store: str,
+    offline_store_configs: dict[str, str],
 ) -> None:
     with rx.session() as session:
         session.add(

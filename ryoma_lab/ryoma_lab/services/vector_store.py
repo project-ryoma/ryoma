@@ -5,14 +5,15 @@ from typing import Any, Optional, Union
 
 import pandas as pd
 import reflex as rx
-from feast import FeatureStore, RepoConfig, FeatureView, Field, FileSource, Entity
+from feast import Entity, FeatureStore, FeatureView, Field, FileSource, RepoConfig
 from feast.data_format import ParquetFormat
-from feast.data_source import DataSource as FeastDataSource, PushSource
+from feast.data_source import DataSource as FeastDataSource
+from feast.data_source import PushSource
 from feast.types import Array, Float32
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
-from ryoma_lab.apis import datasource as datasource_api
 
+from ryoma_lab.apis import datasource as datasource_api
 from ryoma_lab.models.vector_store import (
     FeatureViewModel,
     VectorStore,
@@ -21,11 +22,11 @@ from ryoma_lab.models.vector_store import (
 
 
 def retrieve_vector_features(
-        fs: FeatureStore,
-        feature: str,
-        query: list[float],
-        top_k: int = 3,
-        distance_metric: str = "L2",
+    fs: FeatureStore,
+    feature: str,
+    query: list[float],
+    top_k: int = 3,
+    distance_metric: str = "L2",
 ) -> dict:
     logging.info(f"Retrieving online documents for {feature} with vector")
     response = fs.retrieve_online_documents(
@@ -36,12 +37,12 @@ def retrieve_vector_features(
 
 
 def build_feast_repo_config(
-        project_name,
-        vector_store_config: VectorStoreConfig,
-        online_store: str,
-        online_store_configs: dict[str, str],
-        offline_store: Optional[str] = None,
-        offline_store_configs: Optional[dict[str, str]] = None,
+    project_name,
+    vector_store_config: VectorStoreConfig,
+    online_store: str,
+    online_store_configs: dict[str, str],
+    offline_store: Optional[str] = None,
+    offline_store_configs: Optional[dict[str, str]] = None,
 ):
     logging.info(f"Building feast repo config with project name: {project_name}")
     configs = {
@@ -90,8 +91,7 @@ def get_feast_datasource_by_name(ds: str) -> Optional[FeastDataSource]:
 
 
 def get_feature_store(
-        store: VectorStore,
-        vector_store_config: VectorStoreConfig
+    store: VectorStore, vector_store_config: VectorStoreConfig
 ) -> FeatureStore:
     logging.info(f"Getting feature store with store: {store.project_name}")
     repo_config = build_feast_repo_config(
@@ -110,7 +110,7 @@ def get_feature_store(
 
 
 def get_feature_views(
-        fs: FeatureStore,
+    fs: FeatureStore,
 ) -> list[FeatureViewModel]:
     vector_feature_views = []
     for feature_view in fs.list_feature_views():
@@ -135,8 +135,7 @@ def get_feature_views(
 
 
 def get_feature_view_by_name(
-        fs: FeatureStore,
-        feature_view_name: str
+    fs: FeatureStore, feature_view_name: str
 ) -> Optional[FeatureView]:
     for feature_view in fs.list_feature_views():
         if feature_view.name == feature_view_name:
@@ -144,8 +143,7 @@ def get_feature_view_by_name(
     return None
 
 
-def load_feature_dataframe(source_dir,
-                           file_type):
+def load_feature_dataframe(source_dir, file_type):
     if file_type == "parquet":
         return pd.read_parquet(source_dir)
     elif file_type == "csv":
@@ -156,8 +154,7 @@ def load_feature_dataframe(source_dir,
 
 
 def validate_feature_dataframe(
-        feature_df: pd.DataFrame,
-        feature_view: FeatureViewModel
+    feature_df: pd.DataFrame, feature_view: FeatureViewModel
 ):
     required_columns = [
         "event_timestamp",
@@ -177,9 +174,7 @@ def validate_feature_dataframe(
         raise ValueError("Missing required columns")
 
 
-def process_file_source(feature_view: FeatureViewModel,
-                        file_path: str,
-                        file_type: str):
+def process_file_source(feature_view: FeatureViewModel, file_path: str, file_type: str):
     try:
         df = load_feature_dataframe(file_path, file_type)
         validate_feature_dataframe(df, feature_view)
@@ -189,8 +184,7 @@ def process_file_source(feature_view: FeatureViewModel,
         raise e
 
 
-def process_pdf_source(feature_view,
-                       source_path) -> dict[str, list[Any]]:
+def process_pdf_source(feature_view, source_path) -> dict[str, list[Any]]:
     try:
         docs = PyPDFLoader(source_path).load()
         return {
@@ -204,8 +198,8 @@ def process_pdf_source(feature_view,
 
 
 def apply_embedding(
-        embedding_client: Embeddings,
-        inputs_data: Union[dict[str, list[Any]], pd.DataFrame],
+    embedding_client: Embeddings,
+    inputs_data: Union[dict[str, list[Any]], pd.DataFrame],
 ):
     if not inputs_data:
         return None
@@ -224,9 +218,9 @@ def get_source_path(feature_view: FeatureViewModel):
 
 
 def index_feature_from_source(
-        fs: FeatureStore,
-        feature_view: FeatureViewModel,
-        embedding_client: Optional[Embeddings] = None,
+    fs: FeatureStore,
+    feature_view: FeatureViewModel,
+    embedding_client: Optional[Embeddings] = None,
 ):
     logging.info(f"Loading feature view {feature_view}")
     if feature_view["source_type"] == "PushSource":
@@ -250,8 +244,7 @@ def index_feature_from_source(
         index_feature_from_offline_source(fs, feature_view)
 
 
-def index_feature_from_offline_source(fs: FeatureStore,
-                                      feature_view: FeatureViewModel):
+def index_feature_from_offline_source(fs: FeatureStore, feature_view: FeatureViewModel):
     logging.info(f"Materializing offline feature view {feature_view}")
     fs.materialize_incremental(
         end_date=datetime.now(),
@@ -260,9 +253,9 @@ def index_feature_from_offline_source(fs: FeatureStore,
 
 
 def index_feature_from_data(
-        fs: FeatureStore,
-        feast_feature_view: Union[str, FeatureViewModel],
-        inputs: Optional[Union[dict[str, list[Any]], pd.DataFrame]] = None,
+    fs: FeatureStore,
+    feast_feature_view: Union[str, FeatureViewModel],
+    inputs: Optional[Union[dict[str, list[Any]], pd.DataFrame]] = None,
 ):
     feature_view_name = feast_feature_view
     if isinstance(feast_feature_view, FeatureViewModel):
@@ -275,13 +268,13 @@ def index_feature_from_data(
 
 
 def create_vector_feature_view(
-        fs: FeatureStore,
-        feature_view_name: str,
-        feature_name: str,
-        source: str,
-        source_configs: dict[str, Any],
-        entity: str,
-        files: list[str],
+    fs: FeatureStore,
+    feature_view_name: str,
+    feature_name: str,
+    source: str,
+    source_configs: dict[str, Any],
+    entity: str,
+    files: list[str],
 ):
     fs.apply(
         FeatureView(
@@ -297,7 +290,7 @@ def create_vector_feature_view(
 
 
 def create_entity(entity_name: str):
-    return Entity(name=entity_name, join_keys=['__dummy_id'])
+    return Entity(name=entity_name, join_keys=["__dummy_id"])
 
 
 def create_vector_feature_schema(feature_name: str):
@@ -305,16 +298,14 @@ def create_vector_feature_schema(feature_name: str):
 
 
 def create_feature_source(
-        feature_view_name: str,
-        feature_datasource: str,
-        feature_source_configs: dict[str, Any],
-        files: list[str],
+    feature_view_name: str,
+    feature_datasource: str,
+    feature_source_configs: dict[str, Any],
+    files: list[str],
 ) -> FeastDataSource:
     if feature_datasource == "files":
         return PushSource(
-            name="\n".join(
-                files
-            ),  # feature view name is used to reference the source
+            name="\n".join(files),  # feature view name is used to reference the source
             batch_source=FileSource(
                 file_format=ParquetFormat(),
                 path="data/feature.parquet",
@@ -323,23 +314,17 @@ def create_feature_source(
         )
     else:
         ds = datasource_api.get_datasource_by_name(feature_datasource)
-        datasource_cls = get_feast_datasource_by_name(
-            ds.datasource
-        )
+        datasource_cls = get_feast_datasource_by_name(ds.datasource)
         if datasource_cls:
-            return datasource_cls(
-                name=feature_view_name, **feature_source_configs
-            )
+            return datasource_cls(name=feature_view_name, **feature_source_configs)
         else:
-            logging.error(
-                f"Data source for {feature_datasource} not supported"
-            )
+            logging.error(f"Data source for {feature_datasource} not supported")
         raise ValueError(f"Data source for {feature_datasource} not supported")
 
 
 def create_additional_tags(
-        feature_datasource: str,
-        files: list[str],
+    feature_datasource: str,
+    files: list[str],
 ) -> dict[str, str]:
     if feature_datasource == "files":
         return {"push_source_type": get_file_type(files[0])}
@@ -359,9 +344,9 @@ def get_file_type(file: str) -> str:
 
 
 def build_vector_feature_inputs(
-        feature_view: FeatureView,
-        inputs: list[float],
-        entity_value: Optional[str] = None,
+    feature_view: FeatureView,
+    inputs: list[float],
+    entity_value: Optional[str] = None,
 ):
     feature_name = feature_view.name
     entity = feature_view.entity_columns[0].name

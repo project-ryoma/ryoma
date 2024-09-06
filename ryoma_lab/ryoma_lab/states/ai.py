@@ -13,25 +13,22 @@ class AIState(BaseState):
     dimension: int = 512
     api_key: Optional[str] = ""
 
-    def set_model(self,
-                  model: str):
+    def set_model(self, model: str):
         self.selected_model = model
         self.load_embedding()
 
-    def set_dimension(self,
-                      dimension: int):
+    def set_dimension(self, dimension: int):
         self.dimension = dimension
         self.load_embedding()
 
-    def set_api_key(self,
-                    api_key: str):
+    def set_api_key(self, api_key: str):
         self.api_key = api_key
         self.load_embedding()
 
     def load_embedding(self):
         self.embedding = Embedding(
             model=self.selected_model,
-            model_parameters={"api_key": self.api_key, "dimension": self.dimension}
+            model_parameters={"api_key": self.api_key, "dimension": self.dimension},
         )
 
     def on_load(self):
