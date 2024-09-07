@@ -14,13 +14,8 @@ from ryoma.agent.embedding import EmbeddingAgent
 from ryoma.agent.factory import AgentFactory
 from ryoma.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.apis.kernel import kernel_api
-from ryoma_lab.apis.vector_store import get_projects
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
-from ryoma_lab.services.vector_store import (
-    get_feature_store,
-    get_feature_views,
-    retrieve_vector_features,
-)
+from ryoma_lab.services.vector_store import VectorStoreService
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
@@ -111,17 +106,17 @@ class ChatState(WorkSpaceState):
     def current_feature_views(self) -> list[str]:
         if not self.current_vector_store:
             return []
-        all_stores = get_projects()
-        current_store = next(
-            (
-                store
-                for store in all_stores
-                if store.project_name == self.current_vector_store
-            ),
-            None,
-        )
-        self._current_store = get_feature_store(current_store, self.vector_store_config)
-        feature_views = get_feature_views(self._current_store)
+        with VectorStoreService() as vector_store_service:
+            all_stores = vector_store_service.load_projects()
+            current_store = next(
+                (
+                    store
+                    for store in all_stores
+                    if store.project_name == self.current_vector_store
+                ),
+                None,
+            )
+            feature_views = vector_store_service.get_feature_views(current_store)
         return [
             f"{feature_view.name}:{feature_view.feature}"
             for feature_view in feature_views
@@ -416,12 +411,13 @@ class ChatState(WorkSpaceState):
             # embed the question
             embedded_question = self._current_embedding_agent.embed_query(question)
 
-            top_k_features = retrieve_vector_features(
-                fs=self._current_store,
-                feature=self.current_vector_feature,
-                query=embedded_question,
-                top_k=self.current_k_shot,
-            )
+            with VectorStoreService() as vector_store_service:
+                top_k_features = vector_store_service.retrieve_vector_features(
+                    fs=self._current_store,
+                    feature=self.current_vector_feature,
+                    query=embedded_question,
+                    top_k=self.current_k_shot,
+                )
 
             # TODO: add similar features to the prompt template
             self._current_chat_agent.add_prompt_context(top_k_features)

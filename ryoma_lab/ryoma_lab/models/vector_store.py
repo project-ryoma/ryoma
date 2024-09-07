@@ -28,12 +28,3 @@ class VectorStore(rx.Model, table=True):
     online_store_configs: Optional[str]
     offline_store: str
     offline_store_configs: Optional[str]
-
-
-def get_vector_store_config():
-    rx_config = rx.config.get_config()
-    if "vector_store_config" in rx_config:
-        return rx_config["vector_store_config"]
-    else:
-        # default config
-        return VectorStoreConfig(**{"registry_type": "file", "path": "data/vector.db"})
