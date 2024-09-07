@@ -9,11 +9,11 @@ from ryoma_lab.states.workspace import WorkSpaceState
 
 
 def datasource_selector() -> rx.Component:
-    """The datasource selector."""
+    """The type selector."""
     return rx.box(
         rx.select.root(
             rx.select.trigger(
-                placeholder="Select a datasource",
+                placeholder="Select a type",
             ),
             rx.select.content(
                 rx.select.group(
@@ -28,7 +28,7 @@ def datasource_selector() -> rx.Component:
                     width="100%",
                 ),
                 rx.select.group(
-                    rx.select.item("Create new datasource + ", value="custom"),
+                    rx.select.item("Create new type + ", value="custom"),
                 ),
                 width="100%",
             ),

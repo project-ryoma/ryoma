@@ -11,21 +11,21 @@ from ryoma_lab.components.catalog import (
 )
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.catalog import CatalogState
-from ryoma_lab.states.datasource import DataSource, DataSourceState
+from ryoma_lab.states.datasource import DataSourceModel, DataSourceState
 from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.templates import template
 
 
-def show_datasource(datasource: DataSource):
+def show_datasource(datasource_model: DataSourceModel):
     return rx.table.row(
-        rx.table.cell(datasource.name),
-        rx.table.cell(datasource.datasource),
-        rx.table.cell(update_datasource(datasource)),
-        rx.table.cell(sync_data_catalog_render(datasource)),
+        rx.table.cell(datasource_model.name),
+        rx.table.cell(datasource_model.type),
+        rx.table.cell(update_datasource(datasource_model)),
+        rx.table.cell(sync_data_catalog_render(datasource_model)),
         rx.table.cell(
             rx.button(
                 "Delete",
-                on_click=lambda: DataSourceState.delete_datasource(datasource.id),
+                on_click=lambda: DataSourceState.delete_datasource(datasource_model.id),
             )
         ),
     )
@@ -188,7 +188,7 @@ def add_datasource():
     )
 
 
-def update_datasource(datasource: DataSource):
+def update_datasource(datasource: DataSourceModel):
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
@@ -293,7 +293,7 @@ def data_source_table() -> rx.Component:
 
 
 @template(
-    route="/datasource",
+    route="/type",
     title="Data Source",
     on_load=[
         DataSourceState.on_load(),

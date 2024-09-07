@@ -13,12 +13,12 @@ from feast.types import Array, Float32, UnixTimestamp
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
 
-from ryoma_lab.apis import datasource as datasource_api
 from ryoma_lab.models.vector_store import (
     FeatureViewModel,
     VectorStore,
     VectorStoreConfig,
 )
+from ryoma_lab.services.datasource import DataSourceService
 
 
 def retrieve_vector_features(
@@ -354,8 +354,9 @@ def create_feature_source(
             ),
         )
     else:
-        ds = datasource_api.get_datasource_by_name(source_type)
-        datasource_cls = get_feast_datasource_by_name(ds.datasource)
+        with DataSourceService() as datasource_service:
+            ds = datasource_service.get_datasource_by_name(source_type)
+        datasource_cls = get_feast_datasource_by_name(ds.type)
         if datasource_cls:
             return datasource_cls(name=feature_view_name, **feature_source_configs)
         else:

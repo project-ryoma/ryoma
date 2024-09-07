@@ -13,21 +13,12 @@ from ryoma.datasource.metadata import Catalog, Database
 
 class DataSource(BaseModel, ABC):
     type: str = Field(..., description="Type of the data source")
-    database: Optional[str] = Field(None, description="Database name")
-
-    @abstractmethod
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
-        pass
-
-    @abstractmethod
-    def crawl_data_catalog(self, **kwargs):
-        raise NotImplementedError(
-            "crawl_data_catalog is not implemented for this data source"
-        )
 
 
 class SqlDataSource(DataSource):
     type: str = "ibis"
+    database: Optional[str] = Field(None, description="Database name")
+    db_schema: Optional[str] = Field(None, description="Schema name")
     connection_url: Optional[str] = Field(None, description="Connection URL")
 
     def connect(self, **kwargs) -> BaseBackend:
@@ -51,17 +42,18 @@ class SqlDataSource(DataSource):
             result = result.to_pandas()
         return result
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
-        raise NotImplementedError(
-            "metadata function needs to be implemented for the data source."
-        )
-
-    def crawl_data_catalog(self, **kwargs):
-        raise NotImplementedError(
-            "crawl_data_catalog is not implemented for this data source"
-        )
-
+    @abstractmethod
     def get_query_plan(self, query: str) -> Any:
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
+        )
+
+    @abstractmethod
+    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+        pass
+
+    @abstractmethod
+    def crawl_data_catalog(self, **kwargs):
+        raise NotImplementedError(
+            "crawl_data_catalog is not implemented for this data source"
         )

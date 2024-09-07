@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 079536e22d00
+Revision ID: 41870b68d1e2
 Revises: 
-Create Date: 2024-09-02 11:29:13.905515
+Create Date: 2024-09-07 10:32:57.262589
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "079536e22d00"
+revision: str = "41870b68d1e2"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -38,7 +38,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "catalog",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
         sa.Column("datasource", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("database", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
@@ -59,10 +59,11 @@ def upgrade() -> None:
         "datasource",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("datasource", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("type", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("connection_url", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("attributes", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("catalog_id", sa.Integer(), nullable=True),
+        sa.Column("index_id", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -115,6 +116,7 @@ def upgrade() -> None:
     op.create_table(
         "vectorstore",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("project_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("online_store", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column(
             "online_store_configs", sqlmodel.sql.sqltypes.AutoString(), nullable=True
@@ -151,9 +153,9 @@ def upgrade() -> None:
 
     op.create_table(
         "schema",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("catalog_id", sa.Integer(), nullable=True),
+        sa.Column("catalog_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.ForeignKeyConstraint(
             ["catalog_id"],
             ["catalog.id"],
@@ -162,12 +164,12 @@ def upgrade() -> None:
     )
     op.create_table(
         "table",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("is_view", sa.Boolean(), nullable=True),
         sa.Column("attrs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("schema_id", sa.Integer(), nullable=True),
+        sa.Column("schema_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.ForeignKeyConstraint(
             ["schema_id"],
             ["schema.id"],
@@ -176,11 +178,11 @@ def upgrade() -> None:
     )
     op.create_table(
         "column",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("type", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("table_id", sa.Integer(), nullable=True),
+        sa.Column("table_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.ForeignKeyConstraint(
             ["table_id"],
             ["table.id"],

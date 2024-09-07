@@ -3,11 +3,13 @@ from typing import Optional
 import reflex as rx
 
 
-class DataSource(rx.Model, table=True):
-    """The SqlDataSource model."""
+class DataSourceModel(rx.Model, table=True):
+    """The DataSource model."""
+
+    __tablename__ = "datasource"
 
     name: str
-    datasource: str
+    type: str
     connection_url: Optional[str]
     attributes: Optional[str]
     catalog_id: Optional[int] = None

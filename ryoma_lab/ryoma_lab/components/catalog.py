@@ -5,7 +5,7 @@ import reflex as rx
 from ryoma.datasource.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
-from ryoma_lab.states.datasource import DataSource
+from ryoma_lab.states.datasource import DataSourceModel
 from ryoma_lab.states.vector_store import VectorStoreState
 
 
@@ -131,7 +131,7 @@ def render_catalog_body():
 
 
 def sync_data_catalog_render(
-    datasource: DataSource,
+    datasource: DataSourceModel,
 ):
     return rx.vstack(
         rx.dialog.root(

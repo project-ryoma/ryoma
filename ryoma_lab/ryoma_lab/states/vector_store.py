@@ -10,10 +10,10 @@ from feast.repo_operations import (
     apply_total_with_repo_instance,
 )
 
-from ryoma_lab.apis import datasource as datasource_api
 from ryoma_lab.apis import vector_store as vector_store_api
 from ryoma_lab.models.vector_store import FeatureViewModel, VectorStore
 from ryoma_lab.services import vector_store as vector_store_service
+from ryoma_lab.services.datasource import DataSourceService
 from ryoma_lab.states.ai import AIState
 
 
@@ -48,8 +48,12 @@ class VectorStoreState(AIState):
         self.feature_source_configs[key] = value
 
     def _get_datasource_configs(self, ds: str) -> dict[str, str]:
-        ds = datasource_api.get_datasource_by_name(ds)
-        configs = datasource_api.get_datasource_configs(ds)
+        with DataSourceService() as datasource_service:
+            datasource = datasource_service.get_datasource_by_name(ds)
+            if datasource:
+                configs = datasource_service.get_datasource_configs(datasource)
+        if not configs:
+            return {}
         if "connection_url" in configs:
             configs = {
                 "path": configs["connection_url"],

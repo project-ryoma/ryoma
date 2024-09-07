@@ -31,5 +31,4 @@ class DataSourceFactory:
             raise ValueError(f"Unsupported datasource: {datasource}")
 
         datasource_class = DataSourceProvider[datasource].value
-        print("here", args, kwargs)
         return datasource_class(*args, **kwargs)

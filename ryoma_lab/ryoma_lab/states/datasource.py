@@ -4,8 +4,9 @@ from typing import Any, Dict, List, Optional
 import reflex as rx
 
 from ryoma.datasource.factory import DataSourceProvider
-from ryoma_lab.apis import datasource as datasource_api
-from ryoma_lab.models.datasource import DataSource
+from ryoma_lab.models.datasource import DataSourceModel
+from ryoma_lab.services.catalog import CatalogService
+from ryoma_lab.services.datasource import DataSourceService
 
 
 class DataSourceState(rx.State):
@@ -19,7 +20,7 @@ class DataSourceState(rx.State):
     is_open: bool = False
     allow_crawl_catalog: bool = True
     config_type: str = "connection_url"
-    datasources: List[DataSource] = []
+    datasources: List[DataSourceModel] = []
 
     update_datasource_dialog_open: bool = False
 
@@ -34,8 +35,9 @@ class DataSourceState(rx.State):
         self.sort_value = value
         self._sort_datasources(self.sort_value)
 
-    def load_entries(self):
-        self.datasources = datasource_api.load_datasource_entries()
+    def load_datasources(self):
+        with DataSourceService() as datasource_service:
+            self.datasources = datasource_service.load_datasources()
         if self.sort_value:
             self._sort_datasources(self.sort_value)
 
@@ -100,20 +102,28 @@ class DataSourceState(rx.State):
             return
         configs = self.get_datasource_configs()
         try:
-            datasource_api.connect_datasource(self.datasource, configs)
-            datasource = self.build_datasource()
-            datasource_api.create_datasource(datasource.dict())
-            self.load_entries()
+            with DataSourceService() as datasource_service:
+                ds = datasource_service.connect_datasource(self.datasource, configs)
+                datasource_model = self.build_datasource_model()
+                datasource_service.create_datasource(datasource_model.dict())
+
+            with CatalogService() as catalog_service:
+                catalog_service.upsert(self.name, ds.database, ds.db_schema)
+
             rx.toast.success(f"Connected to {self.datasource}")
         except Exception as e:
             logging.error(f"Failed to connect to {self.datasource}: {e}")
             rx.toast.error(f"Failed to connect to {self.datasource}: {e}")
 
-    def build_datasource(self, datasource: Optional[DataSource] = None) -> DataSource:
+        self.load_datasources()
+
+    def build_datasource_model(
+        self, datasource: Optional[DataSourceModel] = None
+    ) -> DataSourceModel:
         datasource_attrs = self.get_datasource_attributes()
         datasource_params = {
             "name": self.name,
-            "datasource": self.datasource,
+            "type": self.datasource,
             "connection_url": self.connection_url,
             "attributes": str(datasource_attrs),
         }
@@ -121,24 +131,23 @@ class DataSourceState(rx.State):
             for key, value in datasource_params.items():
                 setattr(datasource, key, value)
             return datasource
-        return DataSource(**datasource_params)
+        return DataSourceModel(**datasource_params)
 
     def update_datasource(self, ds_id: int):
-        datasource = self.build_datasource()
-        datasource_api.update_datasource(ds_id, datasource.dict())
-        self.load_entries()
+        datasource = self.build_datasource_model()
+        with DataSourceService() as datasource_service:
+            datasource_service.update_datasource(ds_id, datasource.dict())
+        self.load_datasources()
 
     def delete_datasource(self, datasource_id: int):
-        datasource_api.delete_datasource(datasource_id)
-        self.load_entries()
+        with DataSourceService() as datasource_service:
+            datasource_service.delete_datasource(datasource_id)
+        self.load_datasources()
 
     @staticmethod
     def connect(datasource_name: str) -> Any:
-        return datasource_api.connect_datasource_by_name(datasource_name)
-
-    @staticmethod
-    def get_all_datasources() -> Dict[str, DataSource]:
-        return datasource_api.get_all_datasources()
+        with DataSourceService() as datasource_service:
+            return datasource_service.connect_datasource_by_name(datasource_name)
 
     def on_load(self):
-        self.load_entries()
+        self.load_datasources()

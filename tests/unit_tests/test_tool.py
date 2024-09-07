@@ -46,7 +46,7 @@ def test_pyspark_tool(pyspark_session, pandas_dataframe):
 
 
 def test_sql_tool(mock_sql_data_source):
-    with patch("ryoma.datasource.base.SqlDataSource.query") as mock_execute:
+    with patch("ryoma.type.base.SqlDataSource.query") as mock_execute:
         mock_execute.return_value = "success"
         sql_tool = SqlQueryTool(datasource=mock_sql_data_source)
         query = "SELECT * FROM customers LIMIT 4"

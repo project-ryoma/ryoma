@@ -142,7 +142,7 @@ class WorkflowAgent(BaseAgent):
     def add_datasource(self, datasource: DataSource):
         super().add_datasource(datasource)
         for tool in self.tools:
-            if hasattr(tool, "datasource"):
+            if hasattr(tool, "type"):
                 tool.datasource = datasource
         return self
 

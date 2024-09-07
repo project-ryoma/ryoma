@@ -9,10 +9,10 @@ from databuilder.models.table_metadata import TableMetadata
 from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
 
-from ryoma_lab.apis import catalog as catalog_api
 from ryoma_lab.apis import embedding as embedding_api
 from ryoma_lab.models.data_catalog import Catalog, Table
 from ryoma_lab.services import vector_store as vector_store_service
+from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -36,22 +36,25 @@ class CatalogState(BaseState):
     def table_metadata(self) -> Optional[Table]:
         if not self.selected_table:
             return None
-        return catalog_api.get_table_metadata(self.selected_table)
+        with CatalogService() as catalog_service:
+            return catalog_service.get_table_metadata(self.selected_table)
 
     def load_catalogs(self):
-        self.catalogs = catalog_api.load_catalogs()
+        with CatalogService() as catalog_service:
+            self.catalogs = catalog_service.load()
 
     def _load_catalog_record(self, record: TableMetadata):
         logging.info(f"Loading catalog entry to database: {record}")
 
-        catalog_api.commit_catalog_record(
-            table=record.name,
-            columns=record.columns,
-            schema_id=self.current_schema_id,
-            description=record.description.text if record.description else None,
-            is_view=record.is_view,
-            attrs=str(record.attrs),
-        )
+        with CatalogService() as catalog_service:
+            catalog_service.upsert_table(
+                table=record.name,
+                columns=record.columns,
+                schema_id=self.current_schema_id,
+                description=record.description.text if record.description else None,
+                is_view=record.is_view,
+                attrs=str(record.attrs),
+            )
 
     def _record_loader(self) -> Loader:
         class SessionLoader(GenericLoader):
@@ -64,17 +67,16 @@ class CatalogState(BaseState):
 
         return SessionLoader(self._load_catalog_record)
 
-    def crawl_data_catalog(self, datasource_name: Optional[str] = None):
+    def crawl_data_catalog(self, datasource_name: str):
         datasource = DataSourceState.connect(datasource_name)
-        try:
-            (
-                self.current_catalog_id,
-                self.current_schema_id,
-            ) = catalog_api.commit_catalog(
-                datasource_name,
-                datasource.database,
-                datasource.db_schema,
+        with CatalogService() as catalog_service:
+            self.current_catalog_id = catalog_service.get_catalog_id(
+                datasource_name, datasource.database
             )
+            self.current_schema_id = catalog_service.get_schema_id(
+                self.current_catalog_id, datasource.db_schema
+            )
+        try:
             datasource.crawl_data_catalog(loader=self._record_loader())
 
             # reload the catalog entries

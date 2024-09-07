@@ -134,7 +134,7 @@ class ChatState(WorkSpaceState):
 
     def set_current_datasource(self, datasource: str):
         if datasource == "custom":
-            return rx.redirect("/datasource")
+            return rx.redirect("/type")
         if self.current_datasource != datasource:
             self.current_datasource = datasource
             self._current_chat_agent_state_change = True

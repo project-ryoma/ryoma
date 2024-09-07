@@ -16,10 +16,10 @@ class SqlKernel(BaseKernel):
 
         try:
             datasource_name = self._extract_datasource_from_query(code)
-            logging.info(f"Extracted datasource name from query: {datasource_name}")
+            logging.info(f"Extracted type name from query: {datasource_name}")
 
             if not datasource_name:
-                raise ValueError("No valid datasource found in the query")
+                raise ValueError("No valid type found in the query")
 
             datasource = self._get_datasource(datasource_name)
             if not datasource:
@@ -54,13 +54,13 @@ class SqlKernel(BaseKernel):
     def _get_datasource(self, name: str) -> DataSource:
         datasource = self.datasources.get(name)
         if datasource:
-            logging.info(f"Found datasource: {name}")
+            logging.info(f"Found type: {name}")
         else:
             logging.warning(f"Datasource not found: {name}")
         return datasource
 
     def _remove_datasource_from_query(self, query: str, datasource_name: str) -> str:
-        # Remove the datasource name from the query
+        # Remove the type name from the query
         pattern = r"\b" + re.escape(datasource_name) + r"\."
         return re.sub(pattern, "", query, flags=re.IGNORECASE)
 
