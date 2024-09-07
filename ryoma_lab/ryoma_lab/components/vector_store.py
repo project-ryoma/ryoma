@@ -165,31 +165,10 @@ def setup_store():
                     value=VectorStoreState.online_store,
                     on_change=lambda ds: VectorStoreState.set_online_store(ds),
                 ),
-                rx.chakra.heading("Online Store Configs", size="sm"),
+                rx.chakra.heading("Embedding dimension", size="sm"),
                 rx.input(
-                    placeholder="Enter the online vector store configs",
-                    on_blur=VectorStoreState.set_online_store_configs,
-                ),
-                rx.chakra.heading("Offline Store", size="sm"),
-                rx.select.root(
-                    rx.select.trigger(
-                        placeholder="Select the data source as the offline store",
-                    ),
-                    rx.select.content(
-                        rx.select.group(
-                            rx.foreach(
-                                DataSourceState.datasources,
-                                lambda ds: rx.select.item(ds.name, value=ds.name),
-                            ),
-                        ),
-                    ),
-                    value=VectorStoreState.offline_store,
-                    on_change=lambda ds: VectorStoreState.set_offline_store(ds),
-                ),
-                rx.chakra.heading("Offline Store Configs", size="sm"),
-                rx.input(
-                    placeholder="Enter the offline store configs",
-                    on_blur=VectorStoreState.set_offline_store_configs,
+                    placeholder="Enter the dimension of the embeddings",
+                    on_blur=VectorStoreState.set_embedding_dimension,
                 ),
                 rx.flex(
                     rx.dialog.close(

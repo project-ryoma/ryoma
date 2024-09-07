@@ -38,7 +38,7 @@ class CatalogState(BaseState):
             return None
         return catalog_api.get_table_metadata(self.selected_table)
 
-    def load_entries(self):
+    def load_catalogs(self):
         self.catalogs = catalog_api.load_catalogs()
 
     def _load_catalog_record(self, record: TableMetadata):
@@ -78,7 +78,7 @@ class CatalogState(BaseState):
             datasource.crawl_data_catalog(loader=self._record_loader())
 
             # reload the catalog entries
-            self.load_entries()
+            self.load_catalogs()
         except Exception as e:
             rx.toast(str(e))
 
@@ -96,7 +96,7 @@ class CatalogState(BaseState):
         project = vector_store_state.get_project(self.vector_store_project_name)
         return vector_store_service.get_feature_store(project, self.vector_store_config)
 
-    async def index_data_catalog(self, table: Table):
+    async def index_table(self, table: Table):
         logging.info(f"Indexing table {table}")
         embedding_client = await self.get_embedding_client()
         if not embedding_client:
@@ -117,10 +117,11 @@ class CatalogState(BaseState):
         vector_store_service.index_feature_from_data(
             fs, self.feature_view_name, embedding_feature_inputs
         )
+        logging.info(f"Table {table} indexed")
 
     def on_load(self):
         self.current_catalog_id = None
         self.current_schema_id = None
         self.catalogs = []
         self.selected_table = None
-        self.load_entries()
+        self.load_catalogs()

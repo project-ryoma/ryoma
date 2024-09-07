@@ -243,7 +243,7 @@ def index_data_catalog_render(
                         rx.button(
                             "Start",
                             size="2",
-                            on_click=lambda: CatalogState.index_data_catalog(table),
+                            on_click=lambda: CatalogState.index_table(table),
                         ),
                     ),
                     rx.dialog.close(

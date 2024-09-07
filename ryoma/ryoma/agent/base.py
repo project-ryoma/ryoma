@@ -76,6 +76,10 @@ class BaseAgent(RyomaAgent):
         self.output_parser = output_parser
 
     def _build_chain(self, **kwargs) -> RunnableSerializable:
+        if not self.model:
+            raise ValueError(
+                f"Unable to initialize model, please ensure you have valid configurations."
+            )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         if self.output_parser:
             return self.output_prompt | self.model | self.output_parser

@@ -15,7 +15,6 @@ from ryoma_lab.apis import vector_store as vector_store_api
 from ryoma_lab.models.vector_store import FeatureViewModel, VectorStore
 from ryoma_lab.services import vector_store as vector_store_service
 from ryoma_lab.states.ai import AIState
-from ryoma_lab.states.datasource import DataSource
 
 
 class VectorStoreState(AIState):
@@ -26,9 +25,7 @@ class VectorStoreState(AIState):
     project_name: str
     online_store: str
     offline_store: Optional[str] = ""
-    offline_store_source: Optional[DataSource] = None
-    online_store_configs: Optional[dict[str, str]] = {}
-    offline_store_configs: Optional[dict[str, str]] = {}
+    embedding_dimension: int = 512
 
     # Feature view configuration
     feature_view_name: str
@@ -61,22 +58,12 @@ class VectorStoreState(AIState):
 
     def set_online_store(self, ds: str):
         self.online_store = ds
-        configs = self._get_datasource_configs(ds)
-        self.online_store_configs = {
-            "type": self.online_store,
-            **configs,
-        }
         logging.info(
             f"Online store type set to {self.online_store} with configs {self.online_store_configs}"
         )
 
     def set_offline_store(self, ds: str):
         self.offline_store = ds
-        configs = self._get_datasource_configs(ds)
-        self.offline_store_configs = {
-            "type": self.offline_store,
-            **configs,
-        }
         logging.info(
             f"Offline store type set to {self.offline_store} with configs {self.offline_store_configs}"
         )
@@ -120,13 +107,20 @@ class VectorStoreState(AIState):
             )
 
     def create_store(self):
+        datasource_configs = self._get_datasource_configs(self.online_store)
+        online_store_configs = {
+            "type": self.online_store,
+            **datasource_configs,
+            "dimension": self.embedding_dimension,
+        }
+
         repo_config_input = {
             "project_name": self.project_name,
             "vector_store_config": self.vector_store_config,
             "online_store": self.online_store,
-            "online_store_configs": dict(self.online_store_configs),
+            "online_store_configs": online_store_configs,
             "offline_store": self.offline_store,
-            "offline_store_configs": dict(self.offline_store_configs),
+            "offline_store_configs": None,
         }
         logging.info(
             "Creating feature store with the following configurations: %s",
@@ -158,8 +152,8 @@ class VectorStoreState(AIState):
             self._current_fs,
             feature_view_name=self.feature_view_name,
             feature_name=self.feature_name,
-            entity=self.feature_entity_name,
-            source=self.feature_datasource,
+            entity=(self.feature_entity_name, self.feature_entity_name),
+            source_type=self.feature_datasource,
             source_configs=self.feature_source_configs,
             files=self.files,
         )

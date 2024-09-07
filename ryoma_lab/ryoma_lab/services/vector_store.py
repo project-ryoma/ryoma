@@ -8,8 +8,8 @@ import reflex as rx
 from feast import Entity, FeatureStore, FeatureView, Field, FileSource, RepoConfig
 from feast.data_format import ParquetFormat
 from feast.data_source import DataSource as FeastDataSource
-from feast.data_source import PushSource
-from feast.types import Array, Float32
+from feast.data_source import PushSource, RequestSource
+from feast.types import Array, Float32, UnixTimestamp
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
 
@@ -52,11 +52,7 @@ def build_feast_repo_config(
             "type": vector_store_config.registry_type,
             "path": vector_store_config.path,
         },
-        "online_store": {
-            "type": online_store,
-            **online_store_configs,
-            "pgvector_enabled": "true",
-        },
+        "online_store": build_online_store_configs(online_store, online_store_configs),
         "entity_key_serialization_version": 3,
     }
 
@@ -71,6 +67,30 @@ def build_feast_repo_config(
             "path": "data/registry.db",
         }
     return RepoConfig(**configs)
+
+
+def build_online_store_configs(
+    online_store: str, online_store_configs: dict[str, str]
+) -> dict[str, str]:
+    if online_store == "postgres":
+        print("here", online_store_configs)
+        return {
+            "type": online_store,
+            "host": online_store_configs.get("host"),
+            "port": online_store_configs.get("port"),
+            "database": online_store_configs.get("database"),
+            "user": online_store_configs.get("user"),
+            "password": online_store_configs.get("password"),
+            "pgvector_enabled": "true",
+            "vector_len": online_store_configs.get("dimension"),
+        }
+    elif online_store == "sqlite":
+        return {
+            "type": online_store,
+            "path": online_store_configs.get("path"),
+        }
+    else:
+        raise ValueError(f"Online store {online_store} not supported")
 
 
 def get_feast_datasource_by_name(ds: str) -> Optional[FeastDataSource]:
@@ -271,41 +291,62 @@ def create_vector_feature_view(
     fs: FeatureStore,
     feature_view_name: str,
     feature_name: str,
-    source: str,
+    source_type: str,
     source_configs: dict[str, Any],
-    entity: str,
-    files: list[str],
+    entity: tuple[str, str],
+    files: Optional[list[str]] = None,
 ):
+    # entity = create_entity(entity[0], entity[1])
+    schema = create_vector_feature_schema(feature_name)
+    source = create_feature_source(
+        feature_view_name, schema, source_type, source_configs, files
+    )
+    tags = create_additional_tags(source_type, files)
     fs.apply(
-        FeatureView(
-            name=feature_view_name,
-            entities=create_entity(entity),
-            schema=create_vector_feature_schema(feature_name),
-            batch_source=create_feature_source(
-                feature_view_name, source, source_configs, files
+        [
+            source,
+            FeatureView(
+                name=feature_view_name,
+                # entities=[entity],
+                schema=schema,
+                source=source,
+                tags=tags,
             ),
-            tags=create_additional_tags(source, files),
-        )
+        ]
     )
 
 
-def create_entity(entity_name: str):
-    return Entity(name=entity_name, join_keys=["__dummy_id"])
+def create_entity(entity_name: str, entity_key: str):
+    if not entity_name or not entity_key:
+        raise ValueError("Entity name and key are required")
+    return Entity(name=entity_name, join_keys=[entity_key])
 
 
-def create_vector_feature_schema(feature_name: str):
-    return [Field(name=feature_name, dtype=Array(Float32))]
+def create_vector_feature_schema(feature_name: str, entity: Optional[Entity] = None):
+    schema = [
+        Field(name=feature_name, dtype=Array(Float32)),
+        Field(name="event_timestamp", dtype=UnixTimestamp),
+    ]
+    if entity:
+        schema.append(Field(name=entity.name, dtype=entity.value_type))
+    return schema
 
 
 def create_feature_source(
     feature_view_name: str,
-    feature_datasource: str,
+    feature_schema: list[Field],
+    source_type: str,
     feature_source_configs: dict[str, Any],
     files: list[str],
 ) -> FeastDataSource:
-    if feature_datasource == "files":
+    if not source_type:
+        return RequestSource(
+            name=feature_view_name,
+            schema=feature_schema,
+        )
+    elif source_type == "files":
         return PushSource(
-            name="\n".join(files),  # feature view name is used to reference the source
+            name="\n".join(files),
             batch_source=FileSource(
                 file_format=ParquetFormat(),
                 path="data/feature.parquet",
@@ -313,13 +354,13 @@ def create_feature_source(
             ),
         )
     else:
-        ds = datasource_api.get_datasource_by_name(feature_datasource)
+        ds = datasource_api.get_datasource_by_name(source_type)
         datasource_cls = get_feast_datasource_by_name(ds.datasource)
         if datasource_cls:
             return datasource_cls(name=feature_view_name, **feature_source_configs)
         else:
-            logging.error(f"Data source for {feature_datasource} not supported")
-        raise ValueError(f"Data source for {feature_datasource} not supported")
+            logging.error(f"Data source for {source_type} not supported")
+        raise ValueError(f"Data source for {source_type} not supported")
 
 
 def create_additional_tags(
@@ -349,9 +390,11 @@ def build_vector_feature_inputs(
     entity_value: Optional[str] = None,
 ):
     feature_name = feature_view.name
-    entity = feature_view.entity_columns[0].name
+    # TODO: enable entity
+    # entity = feature_view.entities[0].name
+    entity = "__dummy_id"
     return {
+        "embeddings": [inputs],
         "event_timestamp": [datetime.now()],
-        feature_name: [inputs],
         entity: [entity_value] if entity_value else [""],
     }
