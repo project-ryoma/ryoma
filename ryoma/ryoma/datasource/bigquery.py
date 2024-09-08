@@ -14,7 +14,7 @@ from ryoma.datasource.metadata import Catalog, Column, Database
 
 
 class BigqueryDataSource(SqlDataSource):
-    project_id: str = Field(..., description="Bigquery project ID")
+    project_id: str = Field(..., description="Bigquery current_store ID")
     dataset_id: str = Field(..., description="Bigquery dataset ID")
     credentials: Optional[str] = Field(None, description="Path to the credentials file")
 

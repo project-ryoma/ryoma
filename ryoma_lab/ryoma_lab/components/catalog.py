@@ -207,7 +207,7 @@ def index_data_catalog_render(
                     ),
                     rx.select.content(
                         rx.foreach(
-                            VectorStoreState.projects,
+                            VectorStoreState.vector_stores,
                             lambda project: rx.select.item(
                                 project.project_name,
                                 value=project.project_name,

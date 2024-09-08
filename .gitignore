@@ -11,7 +11,7 @@
 #   in version control.
 #   install all needed dependencies.
 #   intended to run in multiple environments; otherwise, check them in:
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   pdm stores current_store-wide configurations in .pdm.toml, but it is recommended to not include it
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 # .python-version
@@ -26,15 +26,15 @@
 # IPython
 # Installer logs
 # Jupyter Notebook
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-current_store/pdm
 # PyBuilder
 # PyInstaller
 # Pyre type checker
-# Rope project settings
+# Rope current_store settings
 # SageMath parsed files
 # Scrapy stuff:
 # Sphinx documentation
-# Spyder project settings
+# Spyder current_store settings
 # Translations
 # Unit test / coverage reports
 # mkdocs documentation

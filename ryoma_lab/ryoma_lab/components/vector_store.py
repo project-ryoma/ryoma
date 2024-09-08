@@ -145,7 +145,7 @@ def setup_store():
             rx.flex(
                 rx.chakra.heading("Project Name *", size="sm"),
                 rx.input(
-                    placeholder="Enter the name of the project",
+                    placeholder="Enter the name of the current_store",
                     on_blur=VectorStoreState.set_project_name,
                     required=True,
                 ),
@@ -287,7 +287,7 @@ def show_store():
         rx.tabs.root(
             rx.tabs.list(
                 rx.foreach(
-                    VectorStoreState.projects,
+                    VectorStoreState.vector_stores,
                     lambda project: rx.tabs.trigger(
                         project.project_name,
                         value=project.project_name,
@@ -297,11 +297,11 @@ def show_store():
             ),
             rx.tabs.content(
                 show_features(),
-                value=VectorStoreState.project.project_name,
+                value=VectorStoreState.current_store.project_name,
                 width="100%",
             ),
-            value=VectorStoreState.project.project_name,
-            on_change=VectorStoreState.set_project,
+            value=VectorStoreState.current_store.project_name,
+            on_change=VectorStoreState.set_store,
             orientation="horizontal",
             height="100vh",
             width="100%",

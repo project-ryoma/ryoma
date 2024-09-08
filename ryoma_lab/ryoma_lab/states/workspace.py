@@ -107,7 +107,7 @@ class ChatState(WorkSpaceState):
         if not self.current_vector_store:
             return []
         with VectorStoreService() as vector_store_service:
-            all_stores = vector_store_service.load_projects()
+            all_stores = vector_store_service.load_stores()
             current_store = next(
                 (
                     store

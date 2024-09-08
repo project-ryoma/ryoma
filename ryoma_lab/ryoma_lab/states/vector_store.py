@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import reflex as rx
-from feast.feature_store import FeatureStore
+from feast import FeatureStore
 
 from ryoma_lab.models.vector_store import FeatureViewModel, VectorStore
 from ryoma_lab.services.datasource import DataSourceService
@@ -13,8 +13,8 @@ from ryoma_lab.states.ai import AIState
 
 
 class VectorStoreState(AIState):
-    projects: list[VectorStore] = []
-    project: Optional[VectorStore] = None
+    vector_stores: list[VectorStore] = []
+    current_store: Optional[VectorStore] = None
 
     # Vector store configuration
     project_name: str
@@ -55,18 +55,6 @@ class VectorStoreState(AIState):
             }
         return configs
 
-    def set_online_store(self, ds: str):
-        self.online_store = ds
-        logging.info(
-            f"Online store type set to {self.online_store} with configs {self.online_store_configs}"
-        )
-
-    def set_offline_store(self, ds: str):
-        self.offline_store = ds
-        logging.info(
-            f"Offline store type set to {self.offline_store} with configs {self.offline_store_configs}"
-        )
-
     def toggle_create_feature_dialog(self):
         self.create_feature_dialog_open = not self.create_feature_dialog_open
 
@@ -76,32 +64,34 @@ class VectorStoreState(AIState):
     def toggle_materialize_feature_dialog(self):
         self.materialize_feature_dialog_open = not self.materialize_feature_dialog_open
 
-    def set_project(self, project_name: str):
+    def set_store(self, project_name: str):
         self.project_name = project_name
-        self._reload_store(self.project_name)
+        self._load_feature_store(self.project_name)
 
-    def get_project(self, project_name: str):
+    def get_store(self, project_name: str):
         return next(
             (
-                project
-                for project in self.projects
-                if project.project_name == project_name
+                store
+                for store in self.vector_stores
+                if store.project_name == project_name
             ),
             None,
         )
 
-    def _reload_store(self, project_name: Optional[str] = None):
-        project = None
+    def _load_feature_store(self, project_name: Optional[str] = None):
+        store = None
         if project_name:
-            project = self.get_project(project_name)
-        elif self.projects:
-            project = self.projects[0]
-        if project:
-            self.project = project
+            store = self.get_store(project_name)
+        elif self.vector_stores:
+            store = self.vector_stores[0]
+        if store:
+            self.current_store = store
             with VectorStoreService() as vector_store_service:
-                self._current_fs = vector_store_service.get_feature_store(self.project)
+                self._current_fs = vector_store_service.get_feature_store(
+                    self.current_store
+                )
                 self.current_feature_views = vector_store_service.get_feature_views(
-                    self._current_fs
+                    self.current_store
                 )
 
     def create_store(self):
@@ -130,8 +120,8 @@ class VectorStoreState(AIState):
 
                 logging.info("Feature store applied successfully.")
 
-                # save the project to the database
-                vector_store_service.save_project(**repo_config_input)
+                # save the current_store to the database
+                vector_store_service.save_store(**repo_config_input)
             self.load_store()
         except Exception as e:
             logging.error(f"Error creating feature store: {e}")
@@ -151,7 +141,7 @@ class VectorStoreState(AIState):
                 files=self.files,
             )
         logging.info(f"Feature View {self.feature_view_name} created")
-        self._reload_store()
+        self._load_feature_store()
         self.toggle_create_feature_dialog()
 
     def index_feature(self, feature_view: FeatureViewModel):
@@ -164,8 +154,8 @@ class VectorStoreState(AIState):
 
     def load_store(self):
         with VectorStoreService() as vector_store_service:
-            self.projects = vector_store_service.load_projects()
-        self._reload_store()
+            self.vector_stores = vector_store_service.load_stores()
+        self._load_feature_store()
 
         logging.info("Feature store loaded")
 
@@ -191,9 +181,9 @@ class VectorStoreState(AIState):
             # Update the files var.
             self.files.append(file.filename)
 
-    def delete_project(self, project_name):
+    def delete_store(self, project_name):
         with VectorStoreService() as vector_store_service:
-            vector_store_service.delete_project(project_name)
+            vector_store_service.delete_store(project_name)
         self.load_store()
 
     def on_load(self) -> None:

@@ -20,7 +20,7 @@ def dropdown_item(children: rx.Component) -> rx.Component:
             rx.context_menu.sub(
                 rx.context_menu.sub_trigger("More"),
                 rx.context_menu.sub_content(
-                    rx.context_menu.item("Move to project…"),
+                    rx.context_menu.item("Move to current_store…"),
                     rx.context_menu.item("Move to folder…"),
                     rx.context_menu.separator(),
                     rx.context_menu.item("Advanced options…"),
