@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 import reflex as rx
 
-from ryoma.datasource.base import DataSource
+from ryoma_ai.datasource.base import DataSource
 
 
 class BaseKernel(rx.Base):

@@ -11,13 +11,13 @@ license = "Apache Software License 2.0"
 readme = "README.md"
 
 packages = [
-    { include = "ryoma", from = "ryoma" },
+    { include = "ryoma_ai", from = "ryoma_ai" },
     { include = "ryoma_lab", from = "ryoma_lab" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ryoma = {path = "./ryoma", develop = true}
+ryoma_ai = {path = "./ryoma_ai", develop = true}
 ryoma_lab = {path = "./ryoma_lab", develop = true, extras = ["all"]}
 pyupgrade = "^3.17.0"
 

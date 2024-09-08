@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column(
             "type",
             sa.Enum(
-                "ryoma", "base", "embedding", "workflow", "custom", name="agenttype"
+                "ryoma_ai", "base", "embedding", "workflow", "custom", name="agenttype"
             ),
             nullable=True,
         ),

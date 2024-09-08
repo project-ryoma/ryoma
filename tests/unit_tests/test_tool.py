@@ -4,9 +4,9 @@ import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
 
-from ryoma.tool.pandas_tool import PandasTool
-from ryoma.tool.spark_tool import SparkTool
-from ryoma.tool.sql_tool import SqlQueryTool
+from ryoma_ai.tool.pandas_tool import PandasTool
+from ryoma_ai.tool.spark_tool import SparkTool
+from ryoma_ai.tool.sql_tool import SqlQueryTool
 from tests.unit_tests.test_datasource import MockSqlDataSource
 
 
@@ -46,7 +46,7 @@ def test_pyspark_tool(pyspark_session, pandas_dataframe):
 
 
 def test_sql_tool(mock_sql_data_source):
-    with patch("ryoma.type.base.SqlDataSource.query") as mock_execute:
+    with patch("ryoma_ai.type.base.SqlDataSource.query") as mock_execute:
         mock_execute.return_value = "success"
         sql_tool = SqlQueryTool(datasource=mock_sql_data_source)
         query = "SELECT * FROM customers LIMIT 4"

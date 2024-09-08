@@ -5,9 +5,10 @@ Spark agent is an Ryoma agent specialize in writing spark code.
 ## Example
 
 {% code title="python" %}
+
 ```python
-from ryoma.agent.pyspark import PySparkAgent
-from ryoma.datasource.postgresql import PostgreSqlDataSource 
+from ryoma_ai.agent.pyspark import PySparkAgent
+from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
 
 datasource = PostgreSqlDataSource("postgresql://localhost:5432/db")
 spark_configs = {

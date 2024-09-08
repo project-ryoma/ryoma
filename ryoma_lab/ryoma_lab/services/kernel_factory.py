@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 import reflex as rx
 
-from ryoma.datasource.base import DataSource
+from ryoma_ai.datasource.base import DataSource
 from ryoma_lab.services.kernel import BaseKernel
 from ryoma_lab.services.pythonkernel import PythonKernel
 from ryoma_lab.services.sqlkernel import SqlKernel

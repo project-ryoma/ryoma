@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-from ryoma.datasource.base import DataSource
+from ryoma_ai.datasource.base import DataSource
 from ryoma_lab.services.kernel import BaseKernel
 
 

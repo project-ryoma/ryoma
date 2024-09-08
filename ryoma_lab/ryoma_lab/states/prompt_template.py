@@ -5,7 +5,7 @@ from typing import List, Optional
 import reflex as rx
 from sqlmodel import Field, select
 
-from ryoma.prompt.prompt_builder import prompt_factory
+from ryoma_ai.prompt.prompt_builder import prompt_factory
 from ryoma_lab.models.prompt import PromptTemplate
 from ryoma_lab.states.ai import AIState
 

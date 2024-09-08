@@ -29,12 +29,12 @@ Our platform leverages a combination of cutting-edge technologies and frameworks
 Simply install the package using pip:
 
 ```shell
-pip install ryoma
+pip install ryoma_ai
 ```
 Or with extra dependencies:
 
 ```shell
-pip install ryoma[snowflake]
+pip install ryoma_ai[snowflake]
 ```
 
 ## Basic Example
@@ -42,8 +42,8 @@ Below is an example of using SqlAgent to connect to a PostgreSQL database and as
 You can read more details in the [documentation](https://ryoma-1.gitbook.io/ryoma/).
 
 ```python
-from ryoma.agent.sql import SqlAgent
-from ryoma.datasource.postgresql import PostgreSqlDataSource
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
 
 # Connect to a PostgreSQL database
 datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")

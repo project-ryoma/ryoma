@@ -3,7 +3,7 @@ from typing import Optional
 import reflex as rx
 from sqlmodel import Field
 
-from ryoma.models.agent import AgentType
+from ryoma_ai.models.agent import AgentType
 
 
 class Agent(rx.Model, table=True):

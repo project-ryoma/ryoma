@@ -26,8 +26,8 @@ def sidebar_header() -> rx.Component:
     return rx.hstack(
         # The logo.
         rx.color_mode_cond(
-            rx.image(src="/ryoma-horizontal-color.svg", height="3em"),
-            rx.image(src="/ryoma-horizontal-white.svg", height="3em"),
+            rx.image(src="/ryoma_ai-horizontal-color.svg", height="3em"),
+            rx.image(src="/ryoma_ai-horizontal-white.svg", height="3em"),
         ),
         rx.spacer(),
         rx.cond(

@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 from mock import patch
 
-from ryoma.datasource.base import SqlDataSource
-from ryoma.datasource.metadata import Catalog
+from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.metadata import Catalog
 
 
 class MockSqlDataSource(SqlDataSource):
@@ -28,7 +28,7 @@ def mock_sql_data_source():
 
 
 def test_execute_query(mock_sql_data_source):
-    with patch("ryoma.type.base.SqlDataSource.query") as mock_execute:
+    with patch("ryoma_ai.type.base.SqlDataSource.query") as mock_execute:
         mock_execute.return_value = "success"
         results = mock_sql_data_source.query("SELECT * FROM table")
     assert results == "success"

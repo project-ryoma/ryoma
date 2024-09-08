@@ -15,7 +15,7 @@ To install Ryoma, run the following command:
 
 {% code title="bash" %}
 ```bash
-pip install ryoma
+pip install ryoma_ai
 ```
 {% endcode %}
 
@@ -24,16 +24,17 @@ pip install ryoma
 To start using Ryoma, you can run the following code:
 
 {% code title="python" %}
+
 ```python
 
-from ryoma.agent.pandas import PandasAgent
+from ryoma_ai.agent.pandas import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({
     'customer_id': [1, 2, 3, 4, 5],
     'purchase_amount': [100, 200, 300, 400, 500]
 })
-pandas_agent = PandasAgent("gpt-3.5-turbo") \
+pandas_agent = PandasAgent("gpt-3.5-turbo")
     .add_dataframe(df)
 
 print(pandas_agent.stream("I want to get the top customer which making the most purchases"))

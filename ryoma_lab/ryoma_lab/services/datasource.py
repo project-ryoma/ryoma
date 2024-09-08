@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 import reflex as rx
 from sqlmodel import select
 
-from ryoma.datasource.factory import DataSourceFactory
+from ryoma_ai.datasource.factory import DataSourceFactory
 from ryoma_lab.models.datasource import DataSourceModel
 
 

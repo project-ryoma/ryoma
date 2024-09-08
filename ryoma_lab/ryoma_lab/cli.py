@@ -15,7 +15,7 @@ def init_user():
         user = User(
             id=str(uuid.uuid4()),
             username="admin",
-            email="admin@ryoma.com",
+            email="admin@ryoma_ai.com",
             hashed_password="admin",
             permissions={"admin": ["read", "write"]},
         )

@@ -29,8 +29,9 @@ and currently supported models are:
 ## Example
 
 {% code title="python" %}
+
 ```python
-from ryoma.agent.pandas import PandasAgent
+from ryoma_ai.agent.pandas import PandasAgent
 import pandas as pd
 
 df = pd.DataFrame({

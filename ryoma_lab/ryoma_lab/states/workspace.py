@@ -9,10 +9,10 @@ from feast import FeatureStore
 from langchain_core.messages import AIMessage, ToolMessage
 from sqlmodel import delete, select
 
-from ryoma.agent.base import BaseAgent
-from ryoma.agent.embedding import EmbeddingAgent
-from ryoma.agent.factory import AgentFactory
-from ryoma.agent.workflow import ToolMode, WorkflowAgent
+from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.embedding import EmbeddingAgent
+from ryoma_ai.agent.factory import AgentFactory
+from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.apis.kernel import kernel_api
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
 from ryoma_lab.services.vector_store import VectorStoreService

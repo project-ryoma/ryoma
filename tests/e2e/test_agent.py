@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from ryoma.agent.base import BaseAgent
-from ryoma.agent.sql import SqlAgent
+from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.sql import SqlAgent
 
 
 @pytest.fixture(autouse=True)
@@ -14,7 +14,7 @@ def setup_openai_api_key():
 
 
 def test_base_agent():
-    # Create an simple ryoma Agent with GPT-3.5-turbo model
+    # Create an simple ryoma_ai Agent with GPT-3.5-turbo model
     ryoma_agent = BaseAgent("gpt-3.5-turbo")
     result = ryoma_agent.stream(
         "I want to get the top 5 customers which making the most purchases"
@@ -23,7 +23,7 @@ def test_base_agent():
 
 
 def test_workflow_agent():
-    # Create an simple ryoma Agent with GPT-3.5-turbo model
+    # Create an simple ryoma_ai Agent with GPT-3.5-turbo model
     ryoma_agent = SqlAgent("gpt-3.5-turbo")
     result = ryoma_agent.stream(
         "I want to get the top 5 customers which making the most purchases"

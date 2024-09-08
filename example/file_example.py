@@ -1,4 +1,4 @@
-from ryoma.datasource.file import FileDataSource
+from ryoma_ai.datasource.file import FileDataSource
 
 f = FileDataSource("./creditcard.csv")
 

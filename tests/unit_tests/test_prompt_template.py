@@ -1,4 +1,4 @@
-from ryoma.prompt.prompt_template import PromptTemplateFactory
+from ryoma_ai.prompt.prompt_template import PromptTemplateFactory
 
 
 def test_base_prompt_template():

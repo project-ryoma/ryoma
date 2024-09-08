@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from ryoma.datasource.factory import get_supported_datasources
+from ryoma_ai.datasource.factory import get_supported_datasources
 from ryoma_lab import styles
 from ryoma_lab.components.catalog import (
     catalog_search,

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import reflex as rx
 
-from ryoma.datasource.factory import DataSourceProvider
+from ryoma_ai.datasource.factory import DataSourceProvider
 from ryoma_lab.models.datasource import DataSourceModel
 from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.services.datasource import DataSourceService

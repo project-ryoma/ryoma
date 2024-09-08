@@ -1,10 +1,10 @@
 import os
 
-from ryoma.agent.pandas import PandasAgent
-from ryoma.agent.python import PythonAgent
-from ryoma.agent.sql import SqlAgent
-from ryoma.datasource.postgresql import PostgreSqlDataSource
-from ryoma.datasource.snowflake import SnowflakeDataSource
+from ryoma_ai.agent.pandas import PandasAgent
+from ryoma_ai.agent.python import PythonAgent
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
+from ryoma_ai.datasource.snowflake import SnowflakeDataSource
 
 # Snowflake
 

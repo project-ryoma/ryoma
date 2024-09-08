@@ -5,8 +5,9 @@ The Python agent is an Ryoma agent that run python script in IPython Kernel ([IP
 ## Example
 
 {% code title="python" %}
+
 ```python
-from ryoma.agent.python import PythonAgent
+from ryoma_ai.agent.python import PythonAgent
 
 python_agent = PythonAgent("gpt-3.5-turbo")
 

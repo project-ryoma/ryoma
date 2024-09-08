@@ -9,9 +9,9 @@ import reflex as rx
 from langchain_core.runnables.graph import Edge, Node
 from sqlmodel import select
 
-from ryoma.agent.factory import AgentFactory, get_builtin_agents
-from ryoma.agent.workflow import WorkflowAgent
-from ryoma.models.agent import AgentType
+from ryoma_ai.agent.factory import AgentFactory, get_builtin_agents
+from ryoma_ai.agent.workflow import WorkflowAgent
+from ryoma_ai.models.agent import AgentType
 from ryoma_lab.models.agent import Agent
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.graph import Graph

@@ -9,9 +9,9 @@ Pass Data Source to SqlAgent and analyze the data.
 {% code title="python" %}
 
 ```python
-from ryoma.agent.sql import SqlAgent
-from ryoma.datasource.postgresql import PostgreSqlDataSource
-from ryoma.prompt.base import BasicContextPromptTemplate
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
+from ryoma_ai.prompt.base import BasicContextPromptTemplate
 
 postgres_datasource = PostgreSqlDataSource("postgresql://localhost:5432/db")
 sql_agent = SqlAgent("gpt-3.5-turbo")

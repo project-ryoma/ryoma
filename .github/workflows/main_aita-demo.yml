@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy ryoma api
+name: Build and deploy ryoma_ai api
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
       - main
     paths:
       - 'Dockerfile'
-      - 'ryoma/**'
-      - 'ryoma-lab/**'
+      - 'ryoma_ai/**'
+      - 'ryoma_ai-lab/**'
       - '.github/workflows/main_ryoma-demo.yml'
   workflow_dispatch:
 
@@ -65,6 +65,6 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           acrName: ryomaregistry
-          containerAppName: ryoma-dataapp
-          resourceGroup: ryoma
-          imageToDeploy: ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
+          containerAppName: ryoma_ai-dataapp
+          resourceGroup: ryoma_ai
+          imageToDeploy: ryomaregistry.azurecr.io/ryoma_ai-dataapp:${{ env.COMMIT_SHA }}
