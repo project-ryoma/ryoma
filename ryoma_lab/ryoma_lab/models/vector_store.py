@@ -28,4 +28,3 @@ class VectorStore(rx.Model, table=True):
     online_store_configs: Optional[str]
     offline_store: str
     offline_store_configs: Optional[str]
-
