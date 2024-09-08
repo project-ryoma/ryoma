@@ -1,4 +1,3 @@
-import datetime
 import logging
 from typing import List, Optional
 
@@ -9,8 +8,8 @@ from databuilder.models.table_metadata import TableMetadata
 from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
 
-from ryoma_lab.apis import embedding as embedding_api
 from ryoma_lab.models.data_catalog import Catalog, Table
+from ryoma_lab.services import embedding as embedding_service
 from ryoma_lab.services import vector_store as vector_store_service
 from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.states.ai import AIState
@@ -86,7 +85,7 @@ class CatalogState(BaseState):
 
     async def get_embedding_client(self) -> Embeddings:
         aistate = await self.get_state(AIState)
-        return embedding_api.get_embedding_client(
+        return embedding_service.get_embedding_client(
             aistate.embedding.model, aistate.embedding.model_parameters
         )
 

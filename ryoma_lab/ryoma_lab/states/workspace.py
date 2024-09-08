@@ -13,8 +13,8 @@ from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.agent.embedding import EmbeddingAgent
 from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
-from ryoma_lab.apis.kernel import kernel_api
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
+from ryoma_lab.services.kernel import KernelService
 from ryoma_lab.services.vector_store import VectorStoreService
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -234,7 +234,8 @@ class ChatState(WorkSpaceState):
         self.current_chat = list(self.chats.keys())[0]
 
         # delete the kernel history
-        kernel_api.clear_kernels()
+        with KernelService() as kernel_service:
+            kernel_service.clear_kernels()
 
     def set_chat(self, chat_title: str):
         """Set the title of the current chat.

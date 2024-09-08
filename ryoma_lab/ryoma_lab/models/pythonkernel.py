@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from IPython.core.interactiveshell import InteractiveShell
 
-from ryoma_lab.services.kernel import BaseKernel
+from ryoma_lab.models.kernel import BaseKernel
 
 
 class PythonKernel(BaseKernel):

@@ -1,13 +1,11 @@
 import logging
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict
 
-import pandas as pd
-from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from ryoma_ai.datasource.base import DataSource
-from ryoma_lab.services.kernel import BaseKernel
+from ryoma_lab.models.kernel import BaseKernel
 
 
 class SqlKernel(BaseKernel):

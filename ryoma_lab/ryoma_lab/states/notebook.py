@@ -1,16 +1,15 @@
 import logging
-from typing import Any, Callable, Coroutine, List, Literal, Optional, Union
+from typing import Any, Callable, Coroutine, List
 
-import pandas as pd
 import reflex as rx
 from IPython.core.displaypub import DisplayPublisher
 from IPython.core.interactiveshell import InteractiveShell
 
 from ryoma_lab.models.cell import Cell, CellOutput
+from ryoma_lab.models.kernel import BaseKernel
 from ryoma_lab.models.tool import Tool
 from ryoma_lab.services.file_manager import FileManager, FileNode
-from ryoma_lab.services.kernel import BaseKernel
-from ryoma_lab.services.kernel_factory import KernelFactory
+from ryoma_lab.services.kernel import KernelFactory
 from ryoma_lab.states.datasource import DataSourceState
 
 
