@@ -11,7 +11,7 @@ from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Database, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class SnowflakeDataSource(SqlDataSource):
@@ -43,7 +43,7 @@ class SnowflakeDataSource(SqlDataSource):
         except Exception as e:
             raise Exception(f"Failed to connect to ibis: {e}")
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Snowflake")
         conn = self.connect()
 
@@ -69,21 +69,19 @@ class SnowflakeDataSource(SqlDataSource):
 
         if self.database and self.db_schema:
             tables = get_table_metadata(self.database, self.db_schema)
-            database = Database(database_name=self.db_schema, tables=tables)
+            database = Schema(database_name=self.db_schema, tables=tables)
             return database
         elif self.database:
             databases = []
             for database in conn.list_databases(catalog=self.database):
                 tables = get_table_metadata(self.database, database)
-                databases.append(Database(database_name=database, tables=tables))
+                databases.append(Schema(database_name=database, tables=tables))
             return Catalog(catalog_name=self.database, databases=databases)
 
     def connection_string(self):
         return f"snowflake://{self.user}:{self.password}@{self.account}/{self.database}/{self.db_schema}"
 
-    def crawl_data_catalog(
-        self, loader: Loader, where_clause_suffix: Optional[str] = ""
-    ):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )

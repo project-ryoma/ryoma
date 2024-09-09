@@ -8,20 +8,18 @@ from databuilder.models.table_metadata import TableMetadata
 from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
 
-from ryoma_lab.models.data_catalog import Catalog, Table
+from ryoma_lab.models.data_catalog import CatalogTable, TableTable
 from ryoma_lab.services import embedding as embedding_service
 from ryoma_lab.services import vector_store as vector_store_service
 from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.states.ai import AIState
-from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.vector_store import VectorStoreState
 
 
-class CatalogState(BaseState):
+class CatalogState(DataSourceState):
     current_catalog_id: Optional[int] = None
     current_schema_id: Optional[int] = None
-    catalogs: List[Catalog] = []
     selected_table: Optional[str] = None
 
     # vector store configuration
@@ -32,22 +30,18 @@ class CatalogState(BaseState):
         self.selected_table = table
 
     @rx.var
-    def table_metadata(self) -> Optional[Table]:
+    def table_metadata(self) -> Optional[TableTable]:
         if not self.selected_table:
             return None
         with CatalogService() as catalog_service:
             return catalog_service.get_table_metadata(self.selected_table)
 
-    def load_catalogs(self):
-        with CatalogService() as catalog_service:
-            self.catalogs = catalog_service.load()
-
     def _load_catalog_record(self, record: TableMetadata):
         logging.info(f"Loading catalog entry to database: {record}")
 
         with CatalogService() as catalog_service:
-            catalog_service.upsert_table(
-                table=record.name,
+            catalog_service.write_table(
+                table_name=record.name,
                 columns=record.columns,
                 schema_id=self.current_schema_id,
                 description=record.description.text if record.description else None,
@@ -66,7 +60,8 @@ class CatalogState(BaseState):
 
         return SessionLoader(self._load_catalog_record)
 
-    def crawl_data_catalog(self, datasource_name: str):
+    def sync_catalog(self, datasource_name: str):
+        logging.info(f"Start crawling metadata for datasource {datasource_name}")
         datasource = DataSourceState.connect(datasource_name)
         with CatalogService() as catalog_service:
             self.current_catalog_id = catalog_service.get_catalog_id(
@@ -76,7 +71,7 @@ class CatalogState(BaseState):
                 self.current_catalog_id, datasource.db_schema
             )
         try:
-            datasource.crawl_data_catalog(loader=self._record_loader())
+            datasource.crawl_metadata(loader=self._record_loader())
 
             # reload the catalog entries
             self.load_catalogs()
@@ -89,7 +84,7 @@ class CatalogState(BaseState):
             aistate.embedding.model, aistate.embedding.model_parameters
         )
 
-    def _get_embedding_content(self, table: Table):
+    def _get_embedding_content(self, table: TableTable):
         return f"Table: {table['name']}\nColumns: {table['columns']}\nDescription: {table['description']}"
 
     async def _get_fs(self):
@@ -97,7 +92,7 @@ class CatalogState(BaseState):
         project = vector_store_state.get_project(self.vector_store_project_name)
         return vector_store_service.get_feature_store(project, self.vector_store_config)
 
-    async def index_table(self, table: Table):
+    async def index_table(self, table: TableTable):
         logging.info(f"Indexing table {table}")
         embedding_client = await self.get_embedding_client()
         if not embedding_client:
@@ -121,8 +116,5 @@ class CatalogState(BaseState):
         logging.info(f"Table {table} indexed")
 
     def on_load(self):
-        self.current_catalog_id = None
-        self.current_schema_id = None
-        self.catalogs = []
-        self.selected_table = None
+        super().on_load()
         self.load_catalogs()

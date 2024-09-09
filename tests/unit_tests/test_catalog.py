@@ -2,9 +2,9 @@ from ryoma_ai.datasource.metadata import Catalog
 
 data = {
     "catalog_name": "main",
-    "databases": [
+    "schemas": [
         {
-            "database_name": "",
+            "name": "",
             "tables": [
                 {
                     "table_name": "author",
@@ -24,6 +24,6 @@ data = {
 def test_catalog_model():
     catalog = Catalog(**data)
     assert catalog.catalog_name == "main"
-    assert len(catalog.databases) == 1
-    assert catalog.databases[0].database_name == ""
-    assert len(catalog.databases[0].tables) == 1
+    assert len(catalog.schemas) == 1
+    assert catalog.schemas[0].name == ""
+    assert len(catalog.schemas[0].tables) == 1

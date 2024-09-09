@@ -11,7 +11,7 @@ from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Database, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class MySqlDataSource(SqlDataSource):
@@ -20,7 +20,7 @@ class MySqlDataSource(SqlDataSource):
     password: Optional[str] = Field(None, description="Password")
     host: Optional[str] = Field(None, description="Host name")
     port: Optional[int] = Field(None, description="Port number")
-    database: Optional[str] = Field(None, description="Database name")
+    database: Optional[str] = Field(None, description="Schema name")
 
     def connect(self, **kwargs) -> BaseBackend:
         return ibis.mysql.coonect(
@@ -32,7 +32,7 @@ class MySqlDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Mysql")
         conn = self.connect()
 
@@ -55,14 +55,12 @@ class MySqlDataSource(SqlDataSource):
             return tables
 
         tables = get_table_metadata(self.database)
-        return Database(database_name=self.database, tables=tables)
+        return Schema(database_name=self.database, tables=tables)
 
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_data_catalog(
-        self, loader: Loader, where_clause_suffix: Optional[str] = ""
-    ):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )

@@ -13,7 +13,7 @@ def datasource_selector() -> rx.Component:
     return rx.box(
         rx.select.root(
             rx.select.trigger(
-                placeholder="Select a type",
+                placeholder="Select a data source",
             ),
             rx.select.content(
                 rx.select.group(
@@ -28,13 +28,21 @@ def datasource_selector() -> rx.Component:
                     width="100%",
                 ),
                 rx.select.group(
-                    rx.select.item("Create new type + ", value="custom"),
+                    rx.select.item("Create new data source + ", value="custom"),
                 ),
                 width="100%",
+                position="popper",
+                side="bottom",
             ),
+            open=WorkSpaceState.datasource_dialog_open,
+            on_open_change=WorkSpaceState.set_datasource_dialog_open,
             value=WorkSpaceState.current_datasource,
             on_change=WorkSpaceState.set_current_datasource,
             width="100%",
+        ),
+        rx.cond(
+            WorkSpaceState.current_datasource,
+            rx.select(["table1", "table2"], placeholder="Select Table"),
         ),
         label="Datasource",
     )

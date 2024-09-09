@@ -3,8 +3,10 @@ from typing import Any, Dict, List, Optional
 
 import reflex as rx
 
+from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.factory import DataSourceProvider
-from ryoma_lab.models.datasource import DataSourceModel
+from ryoma_lab.models.data_catalog import CatalogTable
+from ryoma_lab.models.datasource import DataSourceTable
 from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.services.datasource import DataSourceService
 
@@ -20,7 +22,9 @@ class DataSourceState(rx.State):
     is_open: bool = False
     allow_crawl_catalog: bool = True
     config_type: str = "connection_url"
-    datasources: List[DataSourceModel] = []
+
+    datasources: List[DataSourceTable] = []
+    catalogs: List[CatalogTable] = []
 
     update_datasource_dialog_open: bool = False
 
@@ -105,10 +109,10 @@ class DataSourceState(rx.State):
             with DataSourceService() as datasource_service:
                 ds = datasource_service.connect_datasource(self.datasource, configs)
                 datasource_model = self.build_datasource_model()
-                datasource_service.create_datasource(datasource_model.dict())
+                datasource_service.save_datasource(datasource_model)
 
             with CatalogService() as catalog_service:
-                catalog_service.upsert(self.name, ds.database, ds.db_schema)
+                catalog_service.write_catalog(self.name, ds.database, ds.db_schema)
 
             rx.toast.success(f"Connected to {self.datasource}")
         except Exception as e:
@@ -116,10 +120,11 @@ class DataSourceState(rx.State):
             rx.toast.error(f"Failed to connect to {self.datasource}: {e}")
 
         self.load_datasources()
+        self.load_catalogs()
 
     def build_datasource_model(
-        self, datasource: Optional[DataSourceModel] = None
-    ) -> DataSourceModel:
+        self, datasource: Optional[DataSourceTable] = None
+    ) -> DataSourceTable:
         datasource_attrs = self.get_datasource_attributes()
         datasource_params = {
             "name": self.name,
@@ -131,7 +136,7 @@ class DataSourceState(rx.State):
             for key, value in datasource_params.items():
                 setattr(datasource, key, value)
             return datasource
-        return DataSourceModel(**datasource_params)
+        return DataSourceTable(**datasource_params)
 
     def update_datasource(self, ds_id: int):
         datasource = self.build_datasource_model()
@@ -145,9 +150,13 @@ class DataSourceState(rx.State):
         self.load_datasources()
 
     @staticmethod
-    def connect(datasource_name: str) -> Any:
+    def connect(datasource_name: str) -> DataSource:
         with DataSourceService() as datasource_service:
             return datasource_service.connect_datasource_by_name(datasource_name)
+
+    def load_catalogs(self):
+        with CatalogService() as catalog_service:
+            self.catalogs = catalog_service.load_catalogs()
 
     def on_load(self):
         self.load_datasources()

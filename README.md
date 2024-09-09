@@ -45,7 +45,7 @@ You can read more details in the [documentation](https://ryoma-1.gitbook.io/ryom
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
 
-# Connect to a PostgreSQL database
+# Connect to a PostgreSQL catalog
 datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")
 
 # Create a SQL agent

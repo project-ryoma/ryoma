@@ -26,8 +26,8 @@ def sidebar_header() -> rx.Component:
     return rx.hstack(
         # The logo.
         rx.color_mode_cond(
-            rx.image(src="/ryoma_ai-horizontal-color.svg", height="3em"),
-            rx.image(src="/ryoma_ai-horizontal-white.svg", height="3em"),
+            rx.image(src="/ryoma-horizontal-color.svg", height="3em"),
+            rx.image(src="/ryoma-horizontal-white.svg", height="3em"),
         ),
         rx.spacer(),
         rx.cond(
@@ -37,6 +37,7 @@ def sidebar_header() -> rx.Component:
                     rx.icon("github"),
                     color_scheme="gray",
                     variant="soft",
+                    cursor="pointer",
                 ),
                 href="https://github.com/project-ryoma/ryoma",
                 target="_blank",
@@ -56,13 +57,14 @@ def sidebar_footer() -> rx.Component:
     Returns:
         rx.Component: The sidebar_chat_history footer component.
     """
-    return rx.chakra.hstack(
-        rx.chakra.link(
-            rx.chakra.center(
-                rx.chakra.image(
+    return rx.hstack(
+        rx.link(
+            rx.center(
+                rx.image(
                     src="/paneleft.svg",
                     height="2.5em",
                     padding="0.5em",
+                    cursor="pointer",
                 ),
                 bg="transparent",
                 border_radius=styles.border_radius,
@@ -75,7 +77,7 @@ def sidebar_footer() -> rx.Component:
             left=rx.cond(BaseState.sidebar_displayed, "13.5em", "1em"),
             **styles.overlapping_button_style,
         ),
-        rx.chakra.spacer(),
+        rx.spacer(),
         width="100%",
         border_top=styles.border,
         padding="1em",

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 41870b68d1e2
+Revision ID: 18cfc56c778e
 Revises: 
-Create Date: 2024-09-07 10:32:57.262589
+Create Date: 2024-09-08 22:53:39.168503
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "41870b68d1e2"
+revision: str = "18cfc56c778e"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column(
             "type",
             sa.Enum(
-                "ryoma_ai", "base", "embedding", "workflow", "custom", name="agenttype"
+                "ryoma", "base", "embedding", "workflow", "custom", name="agenttype"
             ),
             nullable=True,
         ),
@@ -39,8 +39,8 @@ def upgrade() -> None:
     op.create_table(
         "catalog",
         sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
-        sa.Column("datasource", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("database", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("datasource", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+        sa.Column("catalog_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -154,7 +154,7 @@ def upgrade() -> None:
     op.create_table(
         "schema",
         sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
-        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("schema_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("catalog_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.ForeignKeyConstraint(
             ["catalog_id"],
@@ -165,7 +165,7 @@ def upgrade() -> None:
     op.create_table(
         "table",
         sa.Column("id", sqlmodel.sql.sqltypes.AutoString(length=36), nullable=False),
-        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("table_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("is_view", sa.Boolean(), nullable=True),
         sa.Column("attrs", sqlmodel.sql.sqltypes.AutoString(), nullable=True),

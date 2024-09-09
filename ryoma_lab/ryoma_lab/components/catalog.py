@@ -5,7 +5,7 @@ import reflex as rx
 from ryoma_ai.datasource.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
-from ryoma_lab.states.datasource import DataSourceModel
+from ryoma_lab.states.datasource import DataSourceTable
 from ryoma_lab.states.vector_store import VectorStoreState
 
 
@@ -32,7 +32,7 @@ def render_catalog_list():
                 lambda catalog: rx.chakra.accordion_item(
                     rx.chakra.accordion_button(
                         rx.chakra.accordion_icon(),
-                        rx.chakra.heading(catalog.database, size="md"),
+                        rx.chakra.heading(catalog.catalog_name, size="md"),
                     ),
                     rx.chakra.accordion_panel(
                         rx.chakra.accordion(
@@ -41,7 +41,9 @@ def render_catalog_list():
                                 lambda schema: rx.chakra.accordion_item(
                                     rx.chakra.accordion_button(
                                         rx.chakra.accordion_icon(),
-                                        rx.chakra.text(schema.name, font_size="md"),
+                                        rx.chakra.text(
+                                            schema.schema_name, font_size="md"
+                                        ),
                                     ),
                                     rx.chakra.accordion_panel(
                                         rx.chakra.accordion(
@@ -50,10 +52,11 @@ def render_catalog_list():
                                                 lambda table: rx.chakra.accordion_item(
                                                     rx.chakra.accordion_button(
                                                         rx.chakra.text(
-                                                            table.name, font_size="xs"
+                                                            table.table_name,
+                                                            font_size="xs",
                                                         ),
                                                         on_click=lambda: CatalogState.set_selected_table(
-                                                            table.name
+                                                            table.table_name
                                                         ),
                                                     ),
                                                 ),
@@ -82,7 +85,7 @@ def render_catalog_list():
 def render_metadata_content():
     return rx.flex(
         rx.hstack(
-            rx.heading(CatalogState.table_metadata.name),
+            rx.heading(CatalogState.table_metadata.table_name),
             index_data_catalog_render(CatalogState.table_metadata),
             width="100%",
         ),
@@ -131,7 +134,7 @@ def render_catalog_body():
 
 
 def sync_data_catalog_render(
-    datasource: DataSourceModel,
+    datasource: DataSourceTable,
 ):
     return rx.vstack(
         rx.dialog.root(
@@ -157,9 +160,7 @@ def sync_data_catalog_render(
                         rx.button(
                             "Sync",
                             size="2",
-                            on_click=lambda: CatalogState.crawl_data_catalog(
-                                datasource.name
-                            ),
+                            on_click=lambda: CatalogState.sync_catalog(datasource.name),
                         ),
                     ),
                     rx.dialog.close(

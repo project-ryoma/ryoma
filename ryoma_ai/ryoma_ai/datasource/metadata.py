@@ -27,20 +27,22 @@ class Table(BaseModel):
         populate_by_name = True
 
 
-class Database(BaseModel):
-    database_name: str = Field(
-        ..., description="Name of the database", alias="schema_name"
+class Schema(BaseModel):
+    schema_name: str = Field(..., description="Name of the schema")
+    tables: Optional[List[Table]] = Field(
+        None, description="List of tables in the schema"
     )
-    tables: List[Table] = Field(..., description="List of tables in the database")
 
     class Config:
         populate_by_name = True
 
 
 class Catalog(BaseModel):
-    catalog_name: str = Field(..., description="Name of the catalog")
-    databases: Optional[List[Database]] = Field(
-        None, description="List of database schemas in the catalog"
+    catalog_name: str = Field(
+        ..., description="Name of the catalog, also known as the database name"
+    )
+    schemas: Optional[List[Schema]] = Field(
+        None, description="List of catalog schemas in the catalog"
     )
 
     class Config:

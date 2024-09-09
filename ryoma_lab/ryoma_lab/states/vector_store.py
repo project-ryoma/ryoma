@@ -120,7 +120,7 @@ class VectorStoreState(AIState):
 
                 logging.info("Feature store applied successfully.")
 
-                # save the current_store to the database
+                # save the current_store to the catalog
                 vector_store_service.save_store(**repo_config_input)
             self.load_store()
         except Exception as e:

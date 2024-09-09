@@ -442,7 +442,7 @@ publish/
 *.[Pp]ublish.xml
 *.azurePubxml
 # Note: Comment the next line if you want to checkin your web deploy settings,
-# but database connection strings (with potential passwords) will be unencrypted
+# but catalog connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
 
@@ -608,7 +608,7 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-# BeatPulse healthcheck temp database
+# BeatPulse healthcheck temp catalog
 healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017

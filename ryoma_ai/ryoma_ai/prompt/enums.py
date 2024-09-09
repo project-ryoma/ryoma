@@ -41,4 +41,4 @@ class SelectorType:
     EUC_DISTANCE_MASK_PRE_SKELETON_SIMILARITY_THRESHOLD_SHIFT = (
         "EUCDISMASKPRESKLSIMTHRSHIFT"
     )
-    # TODO: from the same database
+    # TODO: from the same catalog

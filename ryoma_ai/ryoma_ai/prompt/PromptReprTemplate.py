@@ -17,7 +17,7 @@ class BasicPrompt(object):
 
 
 class SQLPrompt(BasicPrompt):
-    template_info = "/* Given the following database feature: */\n" "{}"
+    template_info = "/* Given the following catalog feature: */\n" "{}"
     template_question = "/* Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -37,7 +37,7 @@ class SQLPrompt(BasicPrompt):
 
 
 class TextPrompt(BasicPrompt):
-    template_info = "Given the following database feature:\n" "{}"
+    template_info = "Given the following catalog feature:\n" "{}"
     template_question = "Answer the following: {}"
 
     def format_question(self, example: dict):
@@ -150,7 +150,7 @@ class InstructionPrompt(BasicPrompt):
 
 class TextWithForeignKeyPrompt(BasicPrompt):
     template_info = (
-        "Given the following database feature:\n"
+        "Given the following catalog feature:\n"
         "{} \n"
         "And their foreign keys:\n"
         "{}"
@@ -285,7 +285,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
 
 
 class SQLWithRulePrompt(BasicPrompt):
-    template_info = "/* Given the following database feature: */\n" "{}"
+    template_info = "/* Given the following catalog feature: */\n" "{}"
     template_question = "/* Answer the following with no explanation: {} */"
 
     def format_question(self, example: dict):
@@ -305,7 +305,7 @@ class SQLWithRulePrompt(BasicPrompt):
 
 
 class TextWithRulePrompt(BasicPrompt):
-    template_info = "Given the following database feature:\n" "{}"
+    template_info = "Given the following catalog feature:\n" "{}"
     template_question = "Answer the following with no explanation: {}"
 
     def format_question(self, example: dict):
@@ -382,7 +382,7 @@ class InstructionWithRulePrompt(BasicPrompt):
 
 
 class SQLCOTPrompt(BasicPrompt):
-    template_info = "/* Given the following database feature: */\n" "{}"
+    template_info = "/* Given the following catalog feature: */\n" "{}"
     template_question = "/* Let's think step by step. Answer the following: {} */"
 
     def format_question(self, example: dict):
@@ -405,7 +405,7 @@ class SQLCOTPrompt(BasicPrompt):
 
 
 class TextCOTPrompt(BasicPrompt):
-    template_info = "Given the following database feature:\n" "{}"
+    template_info = "Given the following catalog feature:\n" "{}"
     template_question = "Let's think step by step. Answer the following: {}"
 
     def format_question(self, example: dict):

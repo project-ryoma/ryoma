@@ -4049,7 +4049,7 @@ test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
 [[package]]
 name = "psycopg2"
 version = "2.9.9"
-description = "psycopg2 - Python-PostgreSQL Database Adapter"
+description = "psycopg2 - Python-PostgreSQL Schema Adapter"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -4071,7 +4071,7 @@ files = [
 [[package]]
 name = "psycopg2-binary"
 version = "2.9.9"
-description = "psycopg2 - Python-PostgreSQL Database Adapter"
+description = "psycopg2 - Python-PostgreSQL Schema Adapter"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -5752,7 +5752,7 @@ sqlparse = ">=0.4.1,<0.6.0"
 [[package]]
 name = "sqlalchemy"
 version = "2.0.33"
-description = "Database Abstraction Library"
+description = "Schema Abstraction Library"
 optional = false
 python-versions = ">=3.7"
 files = [

@@ -27,5 +27,4 @@ def convert(data):
 
 for data in [dataset1, dataset2]:
     formatted_data["templates"].append(convert(data))
-print(formatted_data)
 json.dump(formatted_data, open("./formatted_data.json", "w"), indent=4)

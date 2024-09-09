@@ -19,17 +19,15 @@ class SqlDataSourceTool(BaseTool, ABC):
 
 
 class QueryInput(BaseModel):
-    query: str = Field(
-        description="sql query that can be executed by the sql database."
-    )
+    query: str = Field(description="sql query that can be executed by the sql catalog.")
 
 
 class SqlQueryTool(SqlDataSourceTool):
-    """Tool for querying a SQL database."""
+    """Tool for querying a SQL catalog."""
 
     name: str = "sql_database_query"
     description: str = """
-    Execute a SQL query against the database and get back the result..
+    Execute a SQL query against the catalog and get back the result..
     If the query is not correct, an error message will be returned.
     If an error is returned, rewrite the query, check the query, and try again.
     """
@@ -70,12 +68,12 @@ class Table(BaseModel):
 
 
 class CreateTableTool(SqlDataSourceTool):
-    """Tool for creating a table in a SQL database."""
+    """Tool for creating a table in a SQL catalog."""
 
     datasource: Optional[SqlDataSource] = Field(None, exclude=True)
     name: str = "create_table"
     description: str = """
-    Create a table in the database.
+    Create a table in the catalog.
     If the table already exists, an error message will be returned.
     input arguments are table_name and table_columns.
     """

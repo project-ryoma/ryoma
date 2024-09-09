@@ -23,7 +23,7 @@ ryoma = "ryoma_lab.cli:main"
 python = "^3.9"
 ryoma_ai = {path = "../ryoma_ai"}
 alembic = "^1.13.1"
-reflex = "^0.5.9"
+reflex = "^0.5.10"
 transformers = "^4.40.2"
 sql-metadata = "^2.11.0"
 feast = "^0.39.1"

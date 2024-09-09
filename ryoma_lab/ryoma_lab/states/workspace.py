@@ -3,7 +3,6 @@ import logging
 import pickle
 from typing import Any, Iterator, Optional, Union
 
-import httpx
 import reflex as rx
 from feast import FeatureStore
 from langchain_core.messages import AIMessage, ToolMessage
@@ -49,6 +48,20 @@ DEFAULT_CHATS = {
 
 class WorkSpaceState(BaseState):
     current_datasource: str
+    current_schema: str
+
+    datasource_dialog_open: bool = False
+
+    def open_datasource_dialog(self):
+        self.datasource_dialog_open = True
+
+    def set_current_datasource(self, datasource: str):
+        if datasource == "custom":
+            return rx.redirect("/type")
+        self.current_datasource = datasource
+
+    def set_current_schema(self, schema: str):
+        self.current_schema = schema
 
 
 class ChatState(WorkSpaceState):
@@ -125,13 +138,6 @@ class ChatState(WorkSpaceState):
     def set_current_chat_model(self, chat_model: str):
         if self.current_chat_model != chat_model:
             self.current_chat_model = chat_model
-            self._current_chat_agent_state_change = True
-
-    def set_current_datasource(self, datasource: str):
-        if datasource == "custom":
-            return rx.redirect("/type")
-        if self.current_datasource != datasource:
-            self.current_datasource = datasource
             self._current_chat_agent_state_change = True
 
     def set_current_chat_agent_type(self, chat_agent_type: str):
@@ -365,7 +371,7 @@ class ChatState(WorkSpaceState):
         # Toggle the processing flag.
         self.processing = False
 
-        # commit the chat to the database
+        # commit the chat to the catalog
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,
@@ -429,7 +435,7 @@ class ChatState(WorkSpaceState):
         # Toggle the processing flag.
         self.processing = False
 
-        # commit the chat to the database
+        # commit the chat to the catalog
         self._commit_chat(
             self.current_chat,
             self.chats[self.current_chat][-1].question,
@@ -451,7 +457,7 @@ class ChatState(WorkSpaceState):
         await self._process_agent_state()
 
     def load_chats(self):
-        """Load the chats from the database."""
+        """Load the chats from the catalog."""
         with rx.session() as session:
             chats = session.exec(
                 select(Chat).where(Chat.user == self.user.username)

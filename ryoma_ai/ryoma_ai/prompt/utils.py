@@ -120,7 +120,7 @@ def get_primary_key(table_name, path_db=None, cur=None):
 
 
 def get_table_names(path_db=None, cur=None):
-    """Get names of all tables within the database, and reuse cur if it's not None"""
+    """Get names of all tables within the catalog, and reuse cur if it's not None"""
     table_names = execute_query(
         queries="SELECT name FROM sqlite_master WHERE type='table'",
         path_db=path_db,

@@ -6,24 +6,22 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
-from ibis import BaseBackend
+from ibis.backends.sql import SQLBackend
 from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Database, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class PostgreSqlDataSource(SqlDataSource):
     connection_url: Optional[str] = Field(None, description="Connection URL")
     user: Optional[str] = Field(None, description="User name")
     password: Optional[str] = Field(None, description="Password")
-    host: Optional[str] = Field(None, description="Host name")
+    host: Optional[str] = Field(None, description="Host schema_name")
     port: Optional[int] = Field(None, description="Port number")
-    database: Optional[str] = Field(None, description="Database name")
-    db_schema: Optional[str] = Field(None, description="Schema name")
 
-    def connect(self) -> BaseBackend:
+    def connect(self) -> SQLBackend:
         logging.info("Connecting to Postgres")
         if self.connection_url is not None:
             logging.info("Connection URL provided, using it to connect")
@@ -41,7 +39,7 @@ class PostgreSqlDataSource(SqlDataSource):
             logging.info("Connected to Postgres")
             return conn
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Postgres")
         conn = self.connect()
 
@@ -54,7 +52,7 @@ class PostgreSqlDataSource(SqlDataSource):
                     columns=[
                         Column(
                             name=name,
-                            type=table_schema[name].name,
+                            type=table_schema[name].schema_name,
                             nullable=table_schema[name].nullable,
                         )
                         for name in table_schema
@@ -65,7 +63,7 @@ class PostgreSqlDataSource(SqlDataSource):
 
         schema = self.db_schema
         tables = get_table_metadata(self.database, schema)
-        database = Database(database_name=schema, tables=tables)
+        database = Schema(database_name=schema, tables=tables)
         return database
 
     def connection_string(self):
@@ -82,14 +80,12 @@ class PostgreSqlDataSource(SqlDataSource):
             f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
         )
 
-    def crawl_data_catalog(
-        self, loader: Loader, where_clause_suffix: Optional[str] = None
-    ):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = None):
         from databuilder.extractor.postgres_metadata_extractor import (
             PostgresMetadataExtractor,
         )
 
-        logging.info("Started crawling data catalog from Postgres")
+        logging.info("Start crawling metadata from Postgres database")
         job_config = ConfigFactory.from_dict(
             {
                 "extractor.postgres_metadata.{}".format(
@@ -109,7 +105,7 @@ class PostgreSqlDataSource(SqlDataSource):
         )
         job.launch()
 
-    def get_query_plan(self, query: str) -> str:
+    def get_query_plan(self, query: str) -> Table:
         conn = self.connect()
         explain_query = f"EXPLAIN {query}"
         return conn.sql(explain_query)

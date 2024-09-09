@@ -5,49 +5,59 @@ import reflex as rx
 from sqlmodel import Field, Relationship
 
 
-class Catalog(rx.Model, table=True):
+class CatalogTable(rx.Model, table=True):
     """The Catalog Table Model."""
 
+    __tablename__ = "catalog"
+
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()), primary_key=True, max_length=36
     )
-    datasource: str
-    database: str
+    datasource: Optional[str] = Field(None, description="Name of the datasource")
+    catalog_name: str = Field(
+        ..., description="Name of the catalog, also known as the database name"
+    )
 
-    schemas: List["Schema"] = Relationship(back_populates="catalog")
+    schemas: List["SchemaTable"] = Relationship(back_populates="catalog")
 
 
-class Schema(rx.Model, table=True):
+class SchemaTable(rx.Model, table=True):
     """The Schema Model."""
 
+    __tablename__ = "schema"
+
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()), primary_key=True, max_length=36
     )
-    name: str
-    tables: List["Table"] = Relationship(back_populates="schema")
+    schema_name: str
+    tables: List["TableTable"] = Relationship(back_populates="schema")
 
     catalog_id: Optional[str] = Field(default=None, foreign_key="catalog.id")
-    catalog: Optional[Catalog] = Relationship(back_populates="schemas")
+    catalog: Optional[CatalogTable] = Relationship(back_populates="schemas")
 
 
-class Table(rx.Model, table=True):
+class TableTable(rx.Model, table=True):
     """The Table Model."""
+
+    __tablename__ = "table"
 
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()), primary_key=True, max_length=36
     )
-    name: str
+    table_name: str
     description: Optional[str] = None
     is_view: Optional[bool] = False
     attrs: Optional[str] = None
-    columns: List["Column"] = Relationship(back_populates="table")
+    columns: List["ColumnTable"] = Relationship(back_populates="table")
 
     schema_id: Optional[str] = Field(default=None, foreign_key="schema.id")
-    schema: Optional[Schema] = Relationship(back_populates="tables")
+    schema: Optional[SchemaTable] = Relationship(back_populates="tables")
 
 
-class Column(rx.Model, table=True):
+class ColumnTable(rx.Model, table=True):
     """The Column Model."""
+
+    __tablename__ = "column"
 
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()), primary_key=True, max_length=36
@@ -57,4 +67,4 @@ class Column(rx.Model, table=True):
     description: Optional[str] = None
 
     table_id: Optional[str] = Field(default=None, foreign_key="table.id")
-    table: Optional[Table] = Relationship(back_populates="columns")
+    table: Optional[TableTable] = Relationship(back_populates="columns")

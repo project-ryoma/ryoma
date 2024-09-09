@@ -5,7 +5,7 @@ from ibis import BaseBackend
 from langchain_core.pydantic_v1 import Field
 
 from ryoma_ai.datasource.base import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Database, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class SqliteDataSource(SqlDataSource):
@@ -20,7 +20,7 @@ class SqliteDataSource(SqlDataSource):
     def connect(self) -> BaseBackend:
         return ibis.sqlite.connect(self.connection_url)
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Database, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         conn = self.connect()
         tables = []
         for table in conn.list_tables():
@@ -37,10 +37,10 @@ class SqliteDataSource(SqlDataSource):
                 ],
             )
             tables.append(tb)
-        return Database(
+        return Schema(
             database_name=self.connection_url,
             tables=tables,
         )
 
-    def crawl_data_catalog(self, **kwargs):
+    def crawl_metadata(self, **kwargs):
         pass

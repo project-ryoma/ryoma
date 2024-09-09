@@ -8,7 +8,7 @@ from ryoma_lab.states.base import User
 
 @cli.command(
     name="init-user",
-    help="Initialize the admin user database.",
+    help="Initialize the admin user catalog.",
 )
 def init_user():
     with rx.session() as session:

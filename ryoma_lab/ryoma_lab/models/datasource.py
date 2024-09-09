@@ -3,7 +3,7 @@ from typing import Optional
 import reflex as rx
 
 
-class DataSourceModel(rx.Model, table=True):
+class DataSourceTable(rx.Model, table=True):
     """The DataSource model."""
 
     __tablename__ = "datasource"
