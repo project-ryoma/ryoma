@@ -39,7 +39,7 @@ class CatalogService:
         ).first()
         return table_metadata
 
-    def write_table(
+    def save_table(
         self,
         table_name: str,
         columns: List[ColumnMetadata],
@@ -76,7 +76,7 @@ class CatalogService:
             self.session.add(_column)
         self.session.commit()
 
-    def write_catalog(
+    def save_catalog(
         self, datasource_name: str, catalog_name: str, schema_name: Optional[str] = None
     ):
         _catalog = self.session.exec(

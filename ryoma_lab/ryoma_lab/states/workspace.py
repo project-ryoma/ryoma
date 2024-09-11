@@ -14,6 +14,7 @@ from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
 from ryoma_lab.services.kernel import KernelService
+from ryoma_lab.services.prompt_template import PromptTemplateService
 from ryoma_lab.services.vector_store import VectorStoreService
 from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
@@ -50,17 +51,21 @@ class WorkSpaceState(BaseState):
     current_datasource: str
     current_schema: str
 
+    _current_store: Optional[FeatureStore] = None
+
     datasource_dialog_open: bool = False
 
     def open_datasource_dialog(self):
         self.datasource_dialog_open = True
 
-    def set_current_datasource(self, datasource: str):
+    def set_current_datasource(self,
+                               datasource: str):
         if datasource == "custom":
             return rx.redirect("/type")
         self.current_datasource = datasource
 
-    def set_current_schema(self, schema: str):
+    def set_current_schema(self,
+                           schema: str):
         self.current_schema = schema
 
 
@@ -87,8 +92,6 @@ class ChatState(WorkSpaceState):
     current_k_shot: int = 0
 
     current_vector_store: str = ""
-
-    _current_store: Optional[FeatureStore] = None
 
     current_vector_feature: str = ""
 
@@ -135,25 +138,30 @@ class ChatState(WorkSpaceState):
             for feature_view in feature_views
         ]
 
-    def set_current_chat_model(self, chat_model: str):
+    def set_current_chat_model(self,
+                               chat_model: str):
         if self.current_chat_model != chat_model:
             self.current_chat_model = chat_model
             self._current_chat_agent_state_change = True
 
-    def set_current_chat_agent_type(self, chat_agent_type: str):
+    def set_current_chat_agent_type(self,
+                                    chat_agent_type: str):
         if self.current_chat_agent_type != chat_agent_type:
             self.current_chat_agent_type = chat_agent_type
             self._current_chat_agent_state_change = True
 
-    def set_current_prompt_template(self, prompt_template_name: str):
-        self.current_prompt_template = PromptTemplateState.get_prompt_template(
-            prompt_template_name
-        )
+    def set_current_prompt_template(self,
+                                    prompt_template_name: str):
+        with PromptTemplateService() as prompt_template_service:
+            self.current_prompt_template = prompt_template_service.get_prompt_template_by_name(
+                prompt_template_name
+            )
         self.vector_feature_dialog_open = (
-            self.current_prompt_template and self.current_prompt_template.k_shot > 0
+                self.current_prompt_template and self.current_prompt_template.k_shot > 0
         )
 
-    def _create_chat_agent(self, **kwargs):
+    def _create_chat_agent(self,
+                           **kwargs):
         if not self._current_chat_agent or self._current_chat_agent_state_change:
             logging.info(
                 f"Creating {self.current_chat_agent_type} agent with model {self.current_chat_model}"
@@ -173,15 +181,16 @@ class ChatState(WorkSpaceState):
             )
             self._current_chat_agent_state_change = False
 
-    def set_current_embedding_model(self, embedding_model: str):
+    def set_current_embedding_model(self,
+                                    embedding_model: str):
         if self.current_embedding_model != embedding_model:
             self.current_embedding_model = embedding_model
             self._current_embedding_agent_state_change = True
 
     def _create_embedding_agent(self):
         if (
-            not self._current_embedding_agent
-            or self._current_embedding_agent_state_change
+                not self._current_embedding_agent
+                or self._current_embedding_agent_state_change
         ):
             logging.info(
                 f"Creating embedding agent with model {self.current_embedding_model}"
@@ -193,7 +202,8 @@ class ChatState(WorkSpaceState):
             )
             self._current_embedding_agent_state_change = False
 
-    def set_current_vector_feature(self, vector_feature: str):
+    def set_current_vector_feature(self,
+                                   vector_feature: str):
         if vector_feature == "new":
             return rx.redirect("/vector_store_project_name")
         self.current_vector_feature = vector_feature
@@ -202,7 +212,9 @@ class ChatState(WorkSpaceState):
         if self.current_prompt_template and self.current_prompt_template.k_shot > 0:
             return True
 
-    def update_tool_arg(self, key: str, value: str):
+    def update_tool_arg(self,
+                        key: str,
+                        value: str):
         for arg in self.current_tool.args:
             if arg.name == key:
                 arg.value = value
@@ -230,7 +242,8 @@ class ChatState(WorkSpaceState):
             )
             session.commit()
 
-    def delete_chat(self, chat_title: str):
+    def delete_chat(self,
+                    chat_title: str):
         """Delete the current chat."""
         with rx.session() as session:
             session.exec(delete(Chat).where(Chat.title == chat_title))
@@ -243,7 +256,8 @@ class ChatState(WorkSpaceState):
         with KernelService() as kernel_service:
             kernel_service.clear_kernels()
 
-    def set_chat(self, chat_title: str):
+    def set_chat(self,
+                 chat_title: str):
         """Set the title of the current chat.
 
         Args:
@@ -260,7 +274,10 @@ class ChatState(WorkSpaceState):
         """
         return list(self.chats.keys())
 
-    def _commit_chat(self, title: str, question: str, answer: str):
+    def _commit_chat(self,
+                     title: str,
+                     question: str,
+                     answer: str):
         with rx.session() as session:
             session.add(
                 Chat(
@@ -275,7 +292,8 @@ class ChatState(WorkSpaceState):
             )
             session.commit()
 
-    async def _process_agent_response(self, events: Iterator[Any]):
+    async def _process_agent_response(self,
+                                      events: Iterator[Any]):
         for event in events:
             if hasattr(event, "content"):
                 message = event
@@ -314,11 +332,14 @@ class ChatState(WorkSpaceState):
             # Add a new cell to the notebook with the tool code
             await self.add_tool_cell(self.current_tool)
 
-    async def add_tool_cell(self, tool: Tool):
+    async def add_tool_cell(self,
+                            tool: Tool):
         notebook_state = await self.get_state(NotebookState)
         notebook_state.add_tool_cell(tool, self.execute_tool, self.update_tool)
 
-    async def execute_tool(self, tool_id: str, updated_code: str):
+    async def execute_tool(self,
+                           tool_id: str,
+                           updated_code: str):
         if not self.current_tool or self.current_tool.id != tool_id:
             return
 
@@ -328,7 +349,9 @@ class ChatState(WorkSpaceState):
         async for _ in self.run_tool():
             yield
 
-    def update_tool(self, tool_id: str, updated_code: str):
+    def update_tool(self,
+                    tool_id: str,
+                    updated_code: str):
         if self.current_tool and self.current_tool.id == tool_id:
             # Parse the updated code to extract new argument values
             new_args = self.parse_tool_code(updated_code)
@@ -341,7 +364,8 @@ class ChatState(WorkSpaceState):
             }
             self._current_chat_agent.update_tool(self.current_tool.id, tool_args)
 
-    def parse_tool_code(self, code: str) -> dict[str, str]:
+    def parse_tool_code(self,
+                        code: str) -> dict[str, str]:
         # Implement parsing logic to extract argument values from the code
         # This is a simple example and might need to be more robust
         args = {}
@@ -378,7 +402,8 @@ class ChatState(WorkSpaceState):
             self.chats[self.current_chat][-1].answer,
         )
 
-    async def process_question(self, form_data: dict[str, str]):
+    async def process_question(self,
+                               form_data: dict[str, str]):
         if not self.current_chat_model:
             yield rx.toast.error("Please select a chat model.")
             return
@@ -442,7 +467,8 @@ class ChatState(WorkSpaceState):
             self.chats[self.current_chat][-1].answer,
         )
 
-    async def _invoke_agent(self, question: Optional[str] = ""):
+    async def _invoke_agent(self,
+                            question: Optional[str] = ""):
         """Get the response from the API.
 
         Args:

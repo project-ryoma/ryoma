@@ -19,7 +19,7 @@ class ReprType:
     CBR = "CBR"
 
 
-class ExampleType:
+class ExampleFormat:
     ONLY_SQL = "ONLYSQL"
     QA = "QA"
     COMPLETE = "COMPLETE"

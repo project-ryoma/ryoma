@@ -1,21 +1,17 @@
-import json
-import os
 from typing import List, Optional
 
 import reflex as rx
-from sqlmodel import Field, select
 
 from ryoma_ai.prompt.prompt_builder import prompt_factory
 from ryoma_lab.models.prompt import PromptTemplate
+from ryoma_lab.services.prompt_template import PromptTemplateService
 from ryoma_lab.states.ai import AIState
 
-path = os.path.dirname(__file__)
-f = open(f"{path}/formatted_prompt_examples.json")
-data = json.load(f)
+QUESTION = "What are the average and minimum price (in Euro) of all products?"
 
 
 class PromptTemplateState(AIState):
-    question: str
+    question: str = QUESTION
     prompt_templates: List[PromptTemplate] = []
 
     prompt_repr: str = ""
@@ -30,8 +26,12 @@ class PromptTemplateState(AIState):
     def get_language_extensions(self) -> List[str]:
         return ["loadLanguage('sql')"]
 
-    def copy_to_current_prompt_template(self, prompt_template_name: str):
-        pt = self.get_prompt_template(prompt_template_name)
+    def copy_to_current_prompt_template(self,
+                                        prompt_template_name: str):
+        pt = next(
+            (pt for pt in self.prompt_templates if pt.prompt_template_name == prompt_template_name),
+            None,
+        )
         self.prompt_repr = pt.prompt_repr
         self.k_shot = pt.k_shot
         self.example_format = pt.example_format
@@ -48,51 +48,14 @@ class PromptTemplateState(AIState):
     def prompt_template_names(self) -> List[str]:
         return [pt.prompt_template_name for pt in self.prompt_templates]
 
-    @staticmethod
-    def load_builtin_prompt_templates():
-        question = data["question"]
-        prompt_templates = []
-        for template in data["templates"]:
-            prompt_template_name = template["name"]
-            prompt_repr = template["args"]["prompt_repr"]
-            k_shot = template["args"]["k_shot"]
-            example_format = template["args"]["example_format"]
-            selector_type = template["args"]["selector_type"]
-            prompt_lines = template["formatted_question"]["prompt"]
-            prompt_template = PromptTemplate(
-                prompt_repr=prompt_repr,
-                k_shot=k_shot,
-                example_format=example_format,
-                selector_type=selector_type,
-                prompt_template_name=prompt_template_name,
-                prompt_lines=prompt_lines,
-                prompt_template_type="builtin",
-            )
-            prompt_templates.append(prompt_template)
-        return question, prompt_templates
-
     def load_prompt_templates(self):
-        self.question, self.prompt_templates = self.load_builtin_prompt_templates()
-        with rx.session() as session:
-            custom_prompt_templates = session.exec(select(PromptTemplate)).all()
-            if custom_prompt_templates:
-                self.prompt_templates.extend(custom_prompt_templates)
-        return self.prompt_templates
+        with PromptTemplateService() as prompt_template_service:
+            self.prompt_templates = prompt_template_service.load_prompt_templates()
 
     @staticmethod
-    def get_prompt_template(prompt_template_name: str) -> Optional[PromptTemplate]:
-        _, prompt_templates = PromptTemplateState.load_builtin_prompt_templates()
-        return next(
-            (
-                pt
-                for pt in prompt_templates
-                if pt.prompt_template_name == prompt_template_name
-            ),
-            None,
-        )
-
-    @staticmethod
-    def build_prompt(prompt_template: PromptTemplate, embedding_model: str, target):
+    def build_prompt(prompt_template: PromptTemplate,
+                     embedding_model: str,
+                     target):
         prompt = prompt_factory(
             repr_type=prompt_template.prompt_repr,
             k_shot=0,
@@ -103,18 +66,15 @@ class PromptTemplateState(AIState):
         return target_prompt["prompt"]
 
     def create_prompt_template(self):
-        with rx.session() as session:
-            prompt_template = PromptTemplate(
+        with PromptTemplateService() as prompt_template_service:
+            prompt_template_service.save_prompt_template(
                 prompt_repr=self.prompt_repr,
                 k_shot=self.k_shot,
                 example_format=self.example_format,
                 selector_type=self.selector_type,
                 prompt_template_name=self.prompt_template_name,
-                prompt_lines=self.prompt_template_lines,
-                prompt_template_type="custom",
+                prompt_template_lines=self.prompt_template_lines,
             )
-            session.add(prompt_template)
-            session.commit()
 
         self.load_prompt_templates()
         self.create_prompt_template_dialog_open = (

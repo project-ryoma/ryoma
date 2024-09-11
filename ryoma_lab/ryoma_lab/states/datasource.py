@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 import reflex as rx
 
@@ -112,7 +112,7 @@ class DataSourceState(rx.State):
                 datasource_service.save_datasource(datasource_model)
 
             with CatalogService() as catalog_service:
-                catalog_service.write_catalog(self.name, ds.database, ds.db_schema)
+                catalog_service.save_catalog(self.name, ds.database, ds.db_schema)
 
             rx.toast.success(f"Connected to {self.datasource}")
         except Exception as e:

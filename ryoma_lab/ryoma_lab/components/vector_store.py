@@ -315,7 +315,10 @@ def show_store():
 def vector_store_component() -> rx.Component:
     return rx.vstack(
         setup_store(),
-        show_store(),
+        rx.cond(
+            VectorStoreState.vector_stores,
+            show_store(),
+        ),
         width="100%",
         height="100%",
         padding_x="1em",

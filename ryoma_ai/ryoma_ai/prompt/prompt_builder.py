@@ -1,4 +1,4 @@
-from ryoma_ai.prompt.enums import ExampleType, ReprType, SelectorType
+from ryoma_ai.prompt.enums import ExampleFormat, ReprType, SelectorType
 from ryoma_ai.prompt.ExampleFormatTemplate import *
 from ryoma_ai.prompt.ExampleSelectorTemplate import *
 from ryoma_ai.prompt.PromptICLTemplate import BasicICLPrompt
@@ -48,17 +48,17 @@ def get_repr_cls(repr_type: str):
 
 
 def get_example_format_cls(example_format: str):
-    if example_format == ExampleType.ONLY_SQL:
+    if example_format == ExampleFormat.ONLY_SQL:
         example_format_cls = SqlExampleStyle
-    elif example_format == ExampleType.QA:
+    elif example_format == ExampleFormat.QA:
         example_format_cls = QuestionSqlExampleStyle
-    elif example_format == ExampleType.QAWRULE:
+    elif example_format == ExampleFormat.QAWRULE:
         example_format_cls = QuestionSqlWithRuleExampleStyle
-    elif example_format == ExampleType.COMPLETE:
+    elif example_format == ExampleFormat.COMPLETE:
         example_format_cls = CompleteExampleStyle
-    elif example_format == ExampleType.OPENAI_DEMOSTRATION_QA:
+    elif example_format == ExampleFormat.OPENAI_DEMOSTRATION_QA:
         example_format_cls = NumberSignQuestionSqlExampleStyle
-    elif example_format == ExampleType.BASIC_QA:
+    elif example_format == ExampleFormat.BASIC_QA:
         example_format_cls = BaselineQuestionSqlExampleStyle
     else:
         raise ValueError(f"{example_format} is not supported yet!")
@@ -84,7 +84,10 @@ def get_example_selector(selector_type: str):
 
 
 def prompt_factory(
-    repr_type: str, k_shot: int, example_format: str, selector_type: str
+    repr_type: str,
+    k_shot: int,
+    example_format: str,
+    selector_type: str
 ):
     repr_cls = get_repr_cls(repr_type)
 
@@ -96,7 +99,9 @@ def prompt_factory(
             name = cls_name
             NUM_EXAMPLE = k_shot
 
-            def __init__(self, *args, **kwargs):
+            def __init__(self,
+                         *args,
+                         **kwargs):
                 repr_cls.__init__(self, *args, **kwargs)
                 # init tokenizer
                 BasicICLPrompt.__init__(self, *args, **kwargs)
@@ -110,7 +115,9 @@ def prompt_factory(
             name = cls_name
             NUM_EXAMPLE = k_shot
 
-            def __init__(self, *args, **kwargs):
+            def __init__(self,
+                         *args,
+                         **kwargs):
                 selector_cls.__init__(self, *args, **kwargs)
                 # init tokenizer
                 BasicICLPrompt.__init__(self, *args, **kwargs)
