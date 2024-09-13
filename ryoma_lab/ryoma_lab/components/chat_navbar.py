@@ -1,6 +1,6 @@
 import reflex as rx
 
-from ryoma_lab.states.workspace import ChatState
+from ryoma_lab.states.chat import ChatState
 
 
 def chat_history_item(chat: str) -> rx.Component:

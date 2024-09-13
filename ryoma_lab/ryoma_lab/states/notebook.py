@@ -11,17 +11,19 @@ from ryoma_lab.models.tool import Tool
 from ryoma_lab.services.file_manager import FileManager, FileNode
 from ryoma_lab.services.kernel import KernelFactory
 from ryoma_lab.states.datasource import DataSourceState
+from ryoma_lab.states.workspace import WorkspaceState
 
 
-class NotebookState(rx.State):
+class NotebookState(WorkspaceState):
     cells: List[Cell] = [Cell()]
-    kernel_type: str = "python"
+    kernel_type: str = "sql"
     namespace: dict = {}
-    kernel: BaseKernel = KernelFactory.create_kernel("python")
+    kernel: BaseKernel = KernelFactory.create_kernel("sql")
     file_manager: FileManager = FileManager(base_directory=".")
     directory_structure: FileNode = FileNode(name="Root", is_dir=True)
     sidebar_width: str = "250px"
     is_sidebar_open: bool = True
+    notebook_filename: str = "notebook.ipynb"
 
     def toggle_sidebar(self):
         self.is_sidebar_open = not self.is_sidebar_open
@@ -150,8 +152,6 @@ class NotebookState(rx.State):
         if self.notebook_filename:
             cells_data = self.file_manager.load_notebook(self.notebook_filename)
             self.cells = [Cell(**cell_data) for cell_data in cells_data]
-
-    notebook_filename: str = "notebook.ipynb"
 
     def set_notebook_filename(self, filename: str):
         self.notebook_filename = filename
