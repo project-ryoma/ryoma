@@ -26,10 +26,13 @@ class PromptTemplateState(AIState):
     def get_language_extensions(self) -> List[str]:
         return ["loadLanguage('sql')"]
 
-    def copy_to_current_prompt_template(self,
-                                        prompt_template_name: str):
+    def copy_to_current_prompt_template(self, prompt_template_name: str):
         pt = next(
-            (pt for pt in self.prompt_templates if pt.prompt_template_name == prompt_template_name),
+            (
+                pt
+                for pt in self.prompt_templates
+                if pt.prompt_template_name == prompt_template_name
+            ),
             None,
         )
         self.prompt_repr = pt.prompt_repr
@@ -53,9 +56,7 @@ class PromptTemplateState(AIState):
             self.prompt_templates = prompt_template_service.load_prompt_templates()
 
     @staticmethod
-    def build_prompt(prompt_template: PromptTemplate,
-                     embedding_model: str,
-                     target):
+    def build_prompt(prompt_template: PromptTemplate, embedding_model: str, target):
         prompt = prompt_factory(
             repr_type=prompt_template.prompt_repr,
             k_shot=0,

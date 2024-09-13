@@ -84,10 +84,7 @@ def get_example_selector(selector_type: str):
 
 
 def prompt_factory(
-    repr_type: str,
-    k_shot: int,
-    example_format: str,
-    selector_type: str
+    repr_type: str, k_shot: int, example_format: str, selector_type: str
 ):
     repr_cls = get_repr_cls(repr_type)
 
@@ -99,9 +96,7 @@ def prompt_factory(
             name = cls_name
             NUM_EXAMPLE = k_shot
 
-            def __init__(self,
-                         *args,
-                         **kwargs):
+            def __init__(self, *args, **kwargs):
                 repr_cls.__init__(self, *args, **kwargs)
                 # init tokenizer
                 BasicICLPrompt.__init__(self, *args, **kwargs)
@@ -115,9 +110,7 @@ def prompt_factory(
             name = cls_name
             NUM_EXAMPLE = k_shot
 
-            def __init__(self,
-                         *args,
-                         **kwargs):
+            def __init__(self, *args, **kwargs):
                 selector_cls.__init__(self, *args, **kwargs)
                 # init tokenizer
                 BasicICLPrompt.__init__(self, *args, **kwargs)

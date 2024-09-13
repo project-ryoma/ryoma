@@ -20,7 +20,9 @@ def datasource_selector() -> rx.Component:
                         DataSourceState.catalogs,
                         rx.foreach(
                             DataSourceState.catalogs,
-                            lambda catalog: rx.select.item(catalog.catalog_name, value=catalog.catalog_name),
+                            lambda catalog: rx.select.item(
+                                catalog.catalog_name, value=catalog.catalog_name
+                            ),
                         ),
                     ),
                     width="100%",
@@ -44,7 +46,9 @@ def datasource_selector() -> rx.Component:
                     rx.select.group(
                         rx.foreach(
                             WorkspaceState.schemas,
-                            lambda schema: rx.select.item(schema.schema_name, value=schema.schema_name),
+                            lambda schema: rx.select.item(
+                                schema.schema_name, value=schema.schema_name
+                            ),
                         )
                     ),
                     width="100%",
@@ -55,10 +59,10 @@ def datasource_selector() -> rx.Component:
                 on_open_change=WorkspaceState.toggle_schema_dialog,
                 value=WorkspaceState.current_schema_name,
                 on_change=WorkspaceState.set_current_schema_name,
-                width="100%"
+                width="100%",
             ),
         ),
-        width="100%"
+        width="100%",
     )
 
 
@@ -70,7 +74,7 @@ def notebook_panel() -> rx.Component:
                 value=NotebookState.notebook_filename,
                 on_change=NotebookState.set_notebook_filename,
                 size="2",
-                min_width="10em"
+                min_width="10em",
             ),
             rx.select(
                 ["python", "sql"],
@@ -81,7 +85,7 @@ def notebook_panel() -> rx.Component:
                 min_width="10em",
             ),
             datasource_selector(),
-            spacing="2"
+            spacing="2",
         ),
         rx.flex(
             rx.button(
@@ -113,12 +117,11 @@ def notebook_panel() -> rx.Component:
             width="100%",
             border_radius=styles.border_radius,
         ),
-        width="100%"
+        width="100%",
     )
 
 
-def add_cell_button(index: int,
-                    position: str) -> rx.Component:
+def add_cell_button(index: int, position: str) -> rx.Component:
     return rx.button(
         rx.icon("circle_plus", size=18),
         on_click=lambda: NotebookState.add_cell_at(index, position),
@@ -130,8 +133,7 @@ def add_cell_button(index: int,
     )
 
 
-def cell_render(cell: Cell,
-                index: int) -> rx.Component:
+def cell_render(cell: Cell, index: int) -> rx.Component:
     return rx.hstack(
         rx.vstack(
             add_cell_button(index, "before"),
@@ -221,8 +223,7 @@ def notebook() -> rx.Component:
         ),
         rx.foreach(
             NotebookState.cells,
-            lambda cell,
-                   index: cell_render(cell, index),
+            lambda cell, index: cell_render(cell, index),
         ),
         align_items="stretch",
         background_color=rx.color("white"),

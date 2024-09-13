@@ -1,9 +1,8 @@
+import json
+import os
 from typing import Optional
 
 import reflex as rx
-import os
-import json
-
 from sqlmodel import select
 
 from ryoma_lab.models.prompt import PromptTemplate
@@ -20,10 +19,7 @@ class PromptTemplateService:
     def __enter__(self):
         return self
 
-    def __exit__(self,
-                 exc_type,
-                 exc_val,
-                 exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.close()
 
     def load_prompt_templates(self) -> list[PromptTemplate]:
@@ -56,13 +52,13 @@ class PromptTemplateService:
         return prompt_templates
 
     def save_prompt_template(
-            self,
-            prompt_repr: str,
-            k_shot: int,
-            example_format: str,
-            selector_type: str,
-            prompt_template_name: str,
-            prompt_template_lines: str
+        self,
+        prompt_repr: str,
+        k_shot: int,
+        example_format: str,
+        selector_type: str,
+        prompt_template_name: str,
+        prompt_template_lines: str,
     ):
         prompt_template = PromptTemplate(
             prompt_repr=prompt_repr,
@@ -76,8 +72,9 @@ class PromptTemplateService:
         self.session.add(prompt_template)
         self.session.commit()
 
-    def get_prompt_template_by_name(self,
-                                    prompt_template_name: str) -> Optional[PromptTemplate]:
+    def get_prompt_template_by_name(
+        self, prompt_template_name: str
+    ) -> Optional[PromptTemplate]:
         prompt_templates = self.load_prompt_templates()
         return next(
             (

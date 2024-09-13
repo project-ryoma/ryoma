@@ -22,8 +22,7 @@ class SnowflakeDataSource(SqlDataSource):
     warehouse: Optional[str] = Field("COMPUTE_WH", description="Warehouse name")
     role: Optional[str] = Field("PUBLIC_ROLE", description="Role name")
 
-    def connect(self,
-                **kwargs) -> BaseBackend:
+    def connect(self, **kwargs) -> BaseBackend:
         logging.info("Connecting to Snowflake")
         try:
             if self.connection_url:
@@ -44,13 +43,11 @@ class SnowflakeDataSource(SqlDataSource):
         except Exception as e:
             raise Exception(f"Failed to connect to ibis: {e}")
 
-    def get_metadata(self,
-                     **kwargs) -> Union[Catalog, Schema, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Snowflake")
         conn = self.connect()
 
-        def get_table_metadata(database: str,
-                               schema: str) -> list[Table]:
+        def get_table_metadata(database: str, schema: str) -> list[Table]:
             tables = []
             for table in conn.list_tables(database=(database, schema)):
                 table_schema = conn.get_schema(
@@ -94,9 +91,7 @@ class SnowflakeDataSource(SqlDataSource):
             role=self.role,
         )
 
-    def crawl_metadata(self,
-                       loader: Loader,
-                       where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )
@@ -126,8 +121,7 @@ class SnowflakeDataSource(SqlDataSource):
 
         job.launch()
 
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         conn = self.connect()
         explain_query = f"EXPLAIN USING JSON {query}"
         return conn.sql(explain_query)
