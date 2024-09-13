@@ -13,11 +13,12 @@ from ryoma_lab.components.notebook import notebook
 from ryoma_lab.components.react_resizable_panels import resizable_panels as rzp
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState
+from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.vector_store import VectorStoreState
-from ryoma_lab.states.workspace import QA, ChatState
+from ryoma_lab.states.workspace import QA, ChatState, WorkspaceState
 from ryoma_lab.styles import markdown_style, message_style
 from ryoma_lab.templates import template
 
@@ -416,8 +417,10 @@ def chatbox_render() -> rx.Component:
     title="Workspace",
     on_load=[
         BaseState.on_load,
+        WorkspaceState.on_load,
         ChatState.on_load,
         DataSourceState.on_load,
+        CatalogState.on_load,
         PromptTemplateState.on_load,
         AgentState.on_load,
         VectorStoreState.on_load,

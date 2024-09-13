@@ -37,51 +37,45 @@ gpt4all = "^2.8.2"
 langchain-huggingface = "^0.0.3"
 langchain-qdrant = "^0.1.3"
 
-[tool.poetry.group.snowflake]
-optional = true
+[project.optional-dependencies]
+snowflake = [
+    "ibis-framework[snowflake]>=9.0.0",
+    "amundsen-databuilder[snowflake]>=7.5.0",
+    "feast[snowflake]>=0.39.1"
+]
+sqlite = [
+    "ibis-framework[sqlite]>=9.0.0",
+    "feast[sqlite]>=0.39.1"
+]
+postgresql = [
+    "psycopg2>=2.9.2",
+    "ibis-framework[postgres]>=9.0.0",
+    "amundsen-databuilder[postgres]>=7.5.0",
+    "feast[postgres]>=0.39.1"
+]
+mysql = [
+    "ibis-framework[mysql]>=9.0.0",
+    "amundsen-databuilder[mysql]>=7.5.0",
+    "feast[mysql]>=0.39.1"
+]
+bigquery = [
+    "ibis-framework[bigquery]>=9.0.0",
+    "amundsen-databuilder[bigquery]>=7.5.0",
+    "feast[bigquery]>=0.39.1"
+]
+pyspark = [
+    "ibis-framework[pyspark]>=9.0.0",
+    "pyspark>=3.2.0",
+    "findspark>=1.4.2",
+    "feast[pyspark]>=0.39.1"
+]
 
-[tool.poetry.group.snowflake.dependencies]
-ibis-framework = { version = "^9.0.0", extras = ["snowflake"] }
-amundsen-databuilder = { version = "^7.5.0", extras = ["snowflake"] }
-feast = { version = "^0.39.1", extras = ["snowflake"] }
-
-[tool.poetry.group.sqlite]
-optional = true
-
-[tool.poetry.group.sqlite.dependencies]
-ibis-framework = { version = "^9.0.0", extras = ["sqlite"] }
-feast = { version = "^0.39.1", extras = ["sqlite"] }
-
-[tool.poetry.group.postgresql]
-optional = true
-
-[tool.poetry.group.postgresql.dependencies]
-psycopg2 = { version = "^2.9.2", optional = true }
-ibis-framework = { version = "^9.0.0", extras = ["postgres"] }
-amundsen-databuilder = { version = "^7.5.0", extras = ["postgres"] }
-feast = { version = "^0.39.1", extras = ["postgres"] }
-
-[tool.poetry.group.mysql]
-optional = true
-
-[tool.poetry.group.mysql.dependencies]
-ibis-framework = { version = "^9.0.0", extras = ["mysql"] }
-amundsen-databuilder = { version = "^7.5.0", extras = ["mysql"] }
-feast = { version = "^0.39.1", extras = ["mysql"] }
-
-[tool.poetry.group.bigquery]
-optional = true
-
-[tool.poetry.group.bigquery.dependencies]
-ibis-framework = { version = "^9.0.0", extras = ["bigquery"] }
-amundsen-databuilder = { version = "^7.5.0", extras = ["bigquery"] }
-feast = { version = "^0.39.1", extras = ["bigquery"] }
-
-[tool.poetry.group.pyspark]
-optional = true
-
-[tool.poetry.group.pyspark.dependencies]
-ibis-framework = { version = "^9.0.0", extras = ["pyspark"] }
-pyspark = { version = "^3.2.0", optional = true }
-findspark = { version = "^1.4.2", optional = true }
-feast = { version = "^0.39.1", extras = ["pyspark"] }
+[tool.poetry.extras]
+all = [
+    "snowflake",
+    "sqlite",
+    "postgresql",
+    "mysql",
+    "bigquery",
+    "pyspark"
+]

@@ -17,9 +17,9 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ryoma_ai = {path = "./ryoma_ai", develop = true}
-ryoma_lab = {path = "./ryoma_lab", develop = true, extras = ["all"]}
 pyupgrade = "^3.17.0"
+ryoma_ai = {path = "./ryoma_ai", develop = true}
+ryoma_lab = {path = "./ryoma_lab", develop = true}
 
 
 [tool.poetry.dev-dependencies]

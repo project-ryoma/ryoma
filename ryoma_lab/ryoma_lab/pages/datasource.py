@@ -296,10 +296,10 @@ def data_source_table() -> rx.Component:
     route="/datasource",
     title="Data Source",
     on_load=[
-        DataSourceState.on_load(),
-        CatalogState.on_load(),
-        VectorStoreState.on_load(),
-        AIState.on_load(),
+        DataSourceState.on_load,
+        CatalogState.on_load,
+        VectorStoreState.on_load,
+        AIState.on_load,
     ],
 )
 def datasource() -> rx.Component:

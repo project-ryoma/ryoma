@@ -8,9 +8,10 @@ from sqlmodel import select
 
 from ryoma_lab.models.kernel import Kernel, ToolKernel
 from ryoma_lab.models.tool import Tool, ToolOutput
+from ryoma_lab.states.base import BaseState
 
 
-class KernelState(rx.State):
+class KernelState(BaseState):
     kernels: list[Kernel] = []
 
     @staticmethod

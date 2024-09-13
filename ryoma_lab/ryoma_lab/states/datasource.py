@@ -160,3 +160,4 @@ class DataSourceState(rx.State):
 
     def on_load(self):
         self.load_datasources()
+        self.load_catalogs()

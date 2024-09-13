@@ -127,5 +127,4 @@ class CatalogState(DataSourceState):
         logging.info(f"Table {table} indexed")
 
     def on_load(self):
-        super().on_load()
         self.load_catalogs()

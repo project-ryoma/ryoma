@@ -5,24 +5,22 @@ from ryoma_lab.components.cell import render_output
 from ryoma_lab.components.code_editor import codeeditor
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.notebook import Cell, NotebookState
-from ryoma_lab.states.workspace import WorkSpaceState
+from ryoma_lab.states.workspace import WorkspaceState
 
 
 def datasource_selector() -> rx.Component:
     """The type selector."""
-    return rx.box(
+    return rx.hstack(
         rx.select.root(
-            rx.select.trigger(
-                placeholder="Select a data source",
-            ),
+            rx.select.trigger(placeholder="Select your data source"),
             rx.select.content(
                 rx.select.group(
                     rx.select.label("Connected Data Source"),
                     rx.cond(
-                        DataSourceState.datasource_names,
+                        DataSourceState.catalogs,
                         rx.foreach(
-                            DataSourceState.datasource_names,
-                            lambda ds: rx.select.item(ds, value=ds),
+                            DataSourceState.catalogs,
+                            lambda catalog: rx.select.item(catalog.catalog_name, value=catalog.catalog_name),
                         ),
                     ),
                     width="100%",
@@ -34,67 +32,93 @@ def datasource_selector() -> rx.Component:
                 position="popper",
                 side="bottom",
             ),
-            open=WorkSpaceState.datasource_dialog_open,
-            on_open_change=WorkSpaceState.set_datasource_dialog_open,
-            value=WorkSpaceState.current_datasource,
-            on_change=WorkSpaceState.set_current_datasource,
-            width="100%",
+            on_change=WorkspaceState.set_catalog_name,
+            open=WorkspaceState.catalog_dialog_open,
+            on_open_change=WorkspaceState.toggle_catalog_dialog,
         ),
         rx.cond(
-            WorkSpaceState.current_datasource,
-            rx.select(["table1", "table2"], placeholder="Select Table"),
+            WorkspaceState.schemas.length() > 0,
+            rx.select.root(
+                rx.select.trigger(placeholder="Select your schema"),
+                rx.select.content(
+                    rx.select.group(
+                        rx.foreach(
+                            WorkspaceState.schemas,
+                            lambda schema: rx.select.item(schema.schema_name, value=schema.schema_name),
+                        )
+                    ),
+                    width="100%",
+                    position="popper",
+                    side="bottom",
+                ),
+                open=WorkspaceState.schema_dialog_open,
+                on_open_change=WorkspaceState.toggle_schema_dialog,
+                value=WorkspaceState.current_schema_name,
+                on_change=WorkspaceState.set_current_schema_name,
+                width="100%"
+            ),
         ),
-        label="Datasource",
+        width="100%"
     )
 
 
 def notebook_panel() -> rx.Component:
-    return rx.flex(
-        rx.input(
-            placeholder="Enter filename",
-            value=NotebookState.notebook_filename,
-            on_change=NotebookState.set_notebook_filename,
-            size="2",
+    return rx.vstack(
+        rx.flex(
+            rx.input(
+                placeholder="Enter filename",
+                value=NotebookState.notebook_filename,
+                on_change=NotebookState.set_notebook_filename,
+                size="2",
+                min_width="10em"
+            ),
+            rx.select(
+                ["python", "sql"],
+                default_value="sql",
+                placeholder="Select Kernel",
+                on_change=NotebookState.set_kernel_type,
+                size="2",
+                min_width="10em",
+            ),
+            datasource_selector(),
+            spacing="2"
         ),
-        rx.select(
-            ["python", "sql"],
-            placeholder="Select Kernel",
-            on_change=NotebookState.set_kernel_type,
-            size="2",
+        rx.flex(
+            rx.button(
+                "Run All",
+                on_click=NotebookState.run_all_cells,
+                variant="outline",
+                size="2",
+            ),
+            rx.button(
+                "Restart Kernel",
+                on_click=NotebookState.restart_kernel,
+                variant="outline",
+                size="2",
+            ),
+            rx.button(
+                "Clear All Outputs",
+                on_click=NotebookState.clear_all_outputs,
+                variant="outline",
+                size="2",
+            ),
+            rx.button(
+                "Save",
+                on_click=NotebookState.save_notebook,
+                variant="outline",
+                size="2",
+            ),
+            justify="start",
+            spacing="2",
+            width="100%",
+            border_radius=styles.border_radius,
         ),
-        datasource_selector(),
-        rx.button(
-            "Run All",
-            on_click=NotebookState.run_all_cells,
-            variant="outline",
-            size="2",
-        ),
-        rx.button(
-            "Restart Kernel",
-            on_click=NotebookState.restart_kernel,
-            variant="outline",
-            size="2",
-        ),
-        rx.button(
-            "Clear All Outputs",
-            on_click=NotebookState.clear_all_outputs,
-            variant="outline",
-            size="2",
-        ),
-        rx.button(
-            "Save",
-            on_click=NotebookState.save_notebook,
-            variant="outline",
-            size="2",
-        ),
-        justify="start",
-        spacing="2",
-        width="100%",
-        border_radius=styles.border_radius,
+        width="100%"
     )
 
 
-def add_cell_button(index: int, position: str) -> rx.Component:
+def add_cell_button(index: int,
+                    position: str) -> rx.Component:
     return rx.button(
         rx.icon("circle_plus", size=18),
         on_click=lambda: NotebookState.add_cell_at(index, position),
@@ -106,7 +130,8 @@ def add_cell_button(index: int, position: str) -> rx.Component:
     )
 
 
-def cell_render(cell: Cell, index: int) -> rx.Component:
+def cell_render(cell: Cell,
+                index: int) -> rx.Component:
     return rx.hstack(
         rx.vstack(
             add_cell_button(index, "before"),
@@ -196,7 +221,8 @@ def notebook() -> rx.Component:
         ),
         rx.foreach(
             NotebookState.cells,
-            lambda cell, index: cell_render(cell, index),
+            lambda cell,
+                   index: cell_render(cell, index),
         ),
         align_items="stretch",
         background_color=rx.color("white"),
