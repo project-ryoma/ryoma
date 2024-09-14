@@ -4,32 +4,19 @@ from typing import Any, Dict
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from ryoma_ai.datasource.base import DataSource
-from ryoma_lab.models.kernel import BaseKernel
+from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_lab.services.kernel.base import BaseKernel
 
 
 class SqlKernel(BaseKernel):
-    def execute(self, code: str) -> Dict[str, Any]:
-        logging.info(f"Executing SQL code: {code}")
+    datasource: SqlDataSource
+
+    def execute(self,
+                query: str) -> Dict[str, Any]:
+        logging.info(f"Executing SQL query: {query}")
 
         try:
-            datasource_name = self._extract_datasource_from_query(code)
-            logging.info(f"Extracted type name from query: {datasource_name}")
-
-            if not datasource_name:
-                raise ValueError("No valid type found in the query")
-
-            datasource = self._get_datasource(datasource_name)
-            if not datasource:
-                raise ValueError(
-                    f"Datasource '{datasource_name}' not found. Available datasources: {list(self.datasources.keys())}"
-                )
-
-            modified_query = self._remove_datasource_from_query(code, datasource_name)
-            logging.info(f"Modified query: {modified_query}")
-
-            df = datasource.query(modified_query)
-
+            df = self.datasource.query(query)
             return {
                 "output_type": "dataframe",
                 "data": df,
@@ -41,7 +28,8 @@ class SqlKernel(BaseKernel):
             logging.error(f"Unexpected error: {str(e)}")
             return self._create_error_response(e)
 
-    def _extract_datasource_from_query(self, query: str) -> str:
+    def _extract_datasource_from_query(self,
+                                       query: str) -> str:
         # This regex looks for table names in common SQL patterns
         pattern = r'\bFROM\s+"?(\w+)"?|\bJOIN\s+"?(\w+)"?'
         matches = re.findall(pattern, query, re.IGNORECASE)
@@ -49,7 +37,8 @@ class SqlKernel(BaseKernel):
         datasources = [ds for match in matches for ds in match if ds]
         return datasources[0] if datasources else None
 
-    def _get_datasource(self, name: str) -> DataSource:
+    def _get_datasource(self,
+                        name: str) -> SqlDataSource:
         datasource = self.datasources.get(name)
         if datasource:
             logging.info(f"Found type: {name}")
@@ -57,11 +46,14 @@ class SqlKernel(BaseKernel):
             logging.warning(f"Datasource not found: {name}")
         return datasource
 
-    def _remove_datasource_from_query(self, query: str, datasource_name: str) -> str:
+    def _remove_datasource_from_query(self,
+                                      query: str,
+                                      datasource_name: str) -> str:
         # Remove the type name from the query
         pattern = r"\b" + re.escape(datasource_name) + r"\."
         return re.sub(pattern, "", query, flags=re.IGNORECASE)
 
-    def set_datasources(self, datasources: Dict[str, DataSource]):
+    def set_datasources(self,
+                        datasources: Dict[str, SqlDataSource]):
         self.datasources = datasources
         logging.info(f"Updated datasources: {list(self.datasources.keys())}")

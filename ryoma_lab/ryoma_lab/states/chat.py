@@ -12,12 +12,10 @@ from ryoma_ai.agent.embedding import EmbeddingAgent
 from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
 from ryoma_lab.models.tool import Tool, ToolArg, ToolOutput
-from ryoma_lab.services.kernel import KernelService
 from ryoma_lab.services.prompt_template import PromptTemplateService
 from ryoma_lab.services.vector_store import VectorStoreService
 from ryoma_lab.states.datasource import DataSourceState
 from ryoma_lab.states.kernel import KernelState
-from ryoma_lab.states.notebook import NotebookState
 from ryoma_lab.states.prompt_template import PromptTemplate
 from ryoma_lab.states.workspace import WorkspaceState
 
@@ -222,10 +220,6 @@ class ChatState(WorkspaceState):
         self.load_chats()
         self.current_chat = list(self.chats.keys())[0]
 
-        # delete the kernel history
-        with KernelService() as kernel_service:
-            kernel_service.clear_kernels()
-
     def set_chat(self, chat_title: str):
         """Set the title of the current chat.
 
@@ -295,11 +289,7 @@ class ChatState(WorkspaceState):
             ].answer += f"\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
 
             # Add a new cell to the notebook with the tool code
-            await self.add_tool_cell(self.current_tool)
-
-    async def add_tool_cell(self, tool: Tool):
-        notebook_state = await self.get_state(NotebookState)
-        notebook_state.add_tool_cell(tool, self.execute_tool, self.update_tool)
+            await self.add_tool_cell(self.current_tool, self.execute_tool, self.update_tool)
 
     async def execute_tool(self, tool_id: str, updated_code: str):
         if not self.current_tool or self.current_tool.id != tool_id:

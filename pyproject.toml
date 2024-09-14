@@ -20,6 +20,7 @@ python = "^3.9"
 pyupgrade = "^3.17.0"
 ryoma_ai = {path = "./ryoma_ai", develop = true}
 ryoma_lab = {path = "./ryoma_lab", develop = true}
+rx = "^3.2.0"
 
 
 [tool.poetry.dev-dependencies]
