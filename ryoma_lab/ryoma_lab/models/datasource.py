@@ -14,4 +14,3 @@ class DataSourceTable(rx.Model, table=True):
     attributes: Optional[str]
     catalog_id: Optional[int] = None
     index_id: Optional[int] = None
-

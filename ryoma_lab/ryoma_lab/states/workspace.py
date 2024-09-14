@@ -1,21 +1,20 @@
-import reflex as rx
-from feast import FeatureStore
-
-from ryoma_ai.datasource.base import DataSource
-from ryoma_lab.models.data_catalog import CatalogTable, SchemaTable
-from ryoma_lab.services.catalog import CatalogService
-from ryoma_lab.states.base import BaseState
 import logging
 from typing import Any, Callable, Coroutine, List, Optional
 
+import reflex as rx
+from feast import FeatureStore
 from IPython.core.displaypub import DisplayPublisher
 from IPython.core.interactiveshell import InteractiveShell
 
+from ryoma_ai.datasource.base import DataSource
 from ryoma_lab.models.cell import Cell, CellOutput
+from ryoma_lab.models.data_catalog import CatalogTable, SchemaTable
 from ryoma_lab.models.tool import Tool
+from ryoma_lab.services.catalog import CatalogService
 from ryoma_lab.services.file_manager import FileManager, FileNode
 from ryoma_lab.services.kernel.base import BaseKernel
 from ryoma_lab.services.kernel.factory import KernelFactory
+from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.datasource import DataSourceState
 
 
@@ -41,8 +40,7 @@ class WorkspaceState(BaseState):
     is_sidebar_open: bool = True
     notebook_filename: str = "notebook.ipynb"
 
-    def set_catalog_name(self,
-                         catalog_name: str):
+    def set_catalog_name(self, catalog_name: str):
         if catalog_name == "custom":
             return rx.redirect("/datasource")
         if not self.current_catalog_name or self.current_catalog_name != catalog_name:
@@ -56,12 +54,10 @@ class WorkspaceState(BaseState):
     def _connect_datasource(self, datasource_name: str) -> DataSource:
         return DataSourceState.connect(datasource_name)
 
-    def toggle_catalog_dialog(self,
-                              is_open: bool):
+    def toggle_catalog_dialog(self, is_open: bool):
         self.catalog_dialog_open = is_open
 
-    def toggle_schema_dialog(self,
-                             is_open: bool):
+    def toggle_schema_dialog(self, is_open: bool):
         self.schema_dialog_open = is_open
 
     @rx.var
@@ -78,8 +74,7 @@ class WorkspaceState(BaseState):
         )
         return res
 
-    def set_current_schema_name(self,
-                                schema_name: str):
+    def set_current_schema_name(self, schema_name: str):
         self.current_schema_name = schema_name
 
     def toggle_sidebar(self):
@@ -93,36 +88,30 @@ class WorkspaceState(BaseState):
     def file_list(self) -> List[FileNode]:
         return self.file_manager.list_directory()
 
-    def is_dataframe(self,
-                     item: CellOutput) -> bool:
+    def is_dataframe(self, item: CellOutput) -> bool:
         return item.data & item.output_type == "dataframe"
 
-    def data_contains_html(self,
-                           item: CellOutput) -> bool:
+    def data_contains_html(self, item: CellOutput) -> bool:
         return item.data & item.data.contains("text/html")
 
-    def get_html_content(self,
-                         item: CellOutput) -> str:
+    def get_html_content(self, item: CellOutput) -> str:
         return (
             item.data["text/html"]
             if item.data & item.data.contains("text/html")
             else ""
         )
 
-    def data_contains_image(self,
-                            item: CellOutput) -> bool:
+    def data_contains_image(self, item: CellOutput) -> bool:
         return item.data & item.data.contains("image/png")
 
-    def get_image_content(self,
-                          item: CellOutput) -> str:
+    def get_image_content(self, item: CellOutput) -> str:
         return (
             item.data["image/png"]
             if item.data & item.data.contains("image/png")
             else ""
         )
 
-    def get_plain_text_content(self,
-                               item: CellOutput) -> str:
+    def get_plain_text_content(self, item: CellOutput) -> str:
         if item.data & item.data.contains("text/plain"):
             return str(item.data["text/plain"])
         return ""
@@ -133,10 +122,10 @@ class WorkspaceState(BaseState):
         return shell
 
     def add_tool_cell(
-            self,
-            tool: Tool,
-            execute_function: Callable[[str, str], Coroutine[Any, Any, None]],
-            update_function: Callable[[str, str], None],
+        self,
+        tool: Tool,
+        execute_function: Callable[[str, str], Coroutine[Any, Any, None]],
+        update_function: Callable[[str, str], None],
     ):
         cell_content = f"# Tool: {tool.name}\n"
         for arg in tool.args:
@@ -152,8 +141,7 @@ class WorkspaceState(BaseState):
         self.cells.append(new_cell)
 
     @rx.background
-    async def execute_cell(self,
-                           cell_index: int):
+    async def execute_cell(self, cell_index: int):
         if 0 <= cell_index < len(self.cells):
             async with self:
                 result = await self.kernel.execute_code(self.cells[cell_index].content)
@@ -168,8 +156,7 @@ class WorkspaceState(BaseState):
         self.clear_all_outputs()
         self.namespace = {}
 
-    def set_kernel_type(self,
-                        kernel_type: str):
+    def set_kernel_type(self, kernel_type: str):
         if kernel_type not in ["python", "sql"]:
             raise ValueError(f"Unsupported kernel type: {kernel_type}")
         self.kernel_type = kernel_type
@@ -178,9 +165,7 @@ class WorkspaceState(BaseState):
     def add_cell(self):
         self.cells.append(Cell())
 
-    def add_cell_at(self,
-                    index: int,
-                    position: str):
+    def add_cell_at(self, index: int, position: str):
         if position == "before":
             self.cells.insert(index, Cell())
         elif position == "after":
@@ -189,16 +174,12 @@ class WorkspaceState(BaseState):
             self.cells = [Cell()]
 
     @rx.background
-    async def update_cell_content(self,
-                                  cell_index: int,
-                                  content: str):
+    async def update_cell_content(self, cell_index: int, content: str):
         async with self:
             if 0 <= cell_index < len(self.cells):
                 self.cells[cell_index].content = content
 
-    def set_cell_type(self,
-                      index: int,
-                      cell_type: str):
+    def set_cell_type(self, index: int, cell_type: str):
         if cell_type not in ["code", "markdown"]:
             raise ValueError(f"Unsupported cell type: {cell_type}")
         self.cells[index].cell_type = cell_type
@@ -207,8 +188,7 @@ class WorkspaceState(BaseState):
         for index in range(len(self.cells)):
             self.execute_cell(index)
 
-    def delete_cell(self,
-                    index: int):
+    def delete_cell(self, index: int):
         if 0 <= index < len(self.cells):
             self.cells.pop(index)
 
@@ -222,12 +202,10 @@ class WorkspaceState(BaseState):
             cells_data = self.file_manager.load_notebook(self.notebook_filename)
             self.cells = [Cell(**cell_data) for cell_data in cells_data]
 
-    def set_notebook_filename(self,
-                              filename: str):
+    def set_notebook_filename(self, filename: str):
         self.notebook_filename = filename
 
-    def open_file_or_directory(self,
-                               file: FileNode):
+    def open_file_or_directory(self, file: FileNode):
         if file["is_dir"]:
             self.directory_structure = file
         else:
@@ -235,8 +213,7 @@ class WorkspaceState(BaseState):
             self.load_notebook()
 
     @rx.background
-    async def execute_cell(self,
-                           cell_index: int):
+    async def execute_cell(self, cell_index: int):
         if 0 <= cell_index < len(self.cells):
             async with self:
                 result = await self.kernel.execute_code(self.cells[cell_index].content)
@@ -244,9 +221,7 @@ class WorkspaceState(BaseState):
                 self.cells[cell_index].output = [CellOutput(**result)]
 
     @rx.background
-    async def update_cell_content(self,
-                                  cell_index: int,
-                                  content: str):
+    async def update_cell_content(self, cell_index: int, content: str):
         async with self:
             if 0 <= cell_index < len(self.cells):
                 self.cells[cell_index].content = content
@@ -256,7 +231,9 @@ class WorkspaceState(BaseState):
             datasource = DataSourceState.connect(self.current_catalog.datasource_name)
         else:
             datasource = None
-        self.kernel = KernelFactory.create_kernel(self.kernel_type, datasource, **kwargs)
+        self.kernel = KernelFactory.create_kernel(
+            self.kernel_type, datasource, **kwargs
+        )
 
     def load_workspaces(self):
         with CatalogService() as catalog_service:
