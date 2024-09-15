@@ -22,7 +22,9 @@ class StreamOutput(CellOutput):
 
 
 class ExecuteResultOutput(CellOutput):
-    output_type: Literal["stream", "execute_result", "dataframe", "error"] = "execute_result"
+    output_type: Literal[
+        "stream", "execute_result", "dataframe", "error"
+    ] = "execute_result"
     execute_result: Union[dict[str, Any], None] = None
 
 
@@ -37,7 +39,15 @@ class UnknownOutput(ErrorOutput):
 class Cell(rx.Base):
     cell_type: Literal["code", "markdown"] = "code"
     content: str = ""
-    output: List[Union[StreamOutput, ExecuteResultOutput, DataframeOutput, ErrorOutput, UnknownOutput]] = []
+    output: List[
+        Union[
+            StreamOutput,
+            ExecuteResultOutput,
+            DataframeOutput,
+            ErrorOutput,
+            UnknownOutput,
+        ]
+    ] = []
     tool_id: Optional[str] = None
     execute_function: Optional[Callable[[str, str], Coroutine[Any, Any, None]]] = None
     update_function: Optional[Callable[[str, str], None]] = None

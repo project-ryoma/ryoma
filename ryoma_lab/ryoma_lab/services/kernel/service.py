@@ -1,8 +1,9 @@
 from typing import Optional
+
 from ryoma_ai.datasource.base import DataSource
-from ryoma_lab.services.kernel.sqlkernel import SqlKernel
-from ryoma_lab.services.kernel.pythonkernel import PythonKernel
 from ryoma_lab.services.kernel.base import BaseKernel
+from ryoma_lab.services.kernel.pythonkernel import PythonKernel
+from ryoma_lab.services.kernel.sqlkernel import SqlKernel
 
 
 class KernelService:
@@ -29,4 +30,3 @@ class KernelService:
 
     def get_datasource(self) -> Optional[DataSource]:
         return self.datasource
-

@@ -3,8 +3,14 @@ from typing import Optional, Union
 import pandas as pd
 import reflex as rx
 
-from ryoma_lab.models.cell import CellOutput, StreamOutput, ExecuteResultOutput, ErrorOutput, DataframeOutput, \
-    UnknownOutput
+from ryoma_lab.models.cell import (
+    CellOutput,
+    DataframeOutput,
+    ErrorOutput,
+    ExecuteResultOutput,
+    StreamOutput,
+    UnknownOutput,
+)
 from ryoma_lab.states.workspace import WorkspaceState
 
 
@@ -22,7 +28,14 @@ def render_error_output(item: ErrorOutput) -> rx.Component:
 
 
 def render_output_item(
-        item: Union[CellOutput, StreamOutput, ExecuteResultOutput, DataframeOutput, ErrorOutput, UnknownOutput]
+    item: Union[
+        CellOutput,
+        StreamOutput,
+        ExecuteResultOutput,
+        DataframeOutput,
+        ErrorOutput,
+        UnknownOutput,
+    ]
 ) -> rx.Component:
     return rx.box(
         rx.cond(
@@ -61,6 +74,14 @@ def render_execute_result(item: ExecuteResultOutput) -> rx.Component:
 
 
 def render_output(
-        output: list[Union[StreamOutput, ExecuteResultOutput, DataframeOutput, ErrorOutput, UnknownOutput]]
+    output: list[
+        Union[
+            StreamOutput,
+            ExecuteResultOutput,
+            DataframeOutput,
+            ErrorOutput,
+            UnknownOutput,
+        ]
+    ]
 ) -> rx.Component:
     return rx.vstack(rx.foreach(output, render_output_item))
