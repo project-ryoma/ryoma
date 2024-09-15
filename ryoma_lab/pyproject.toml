@@ -70,7 +70,6 @@ pyspark = [
     "feast[pyspark]>=0.39.1"
 ]
 
-[tool.poetry.extras]
 all = [
     "snowflake",
     "sqlite",

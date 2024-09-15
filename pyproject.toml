@@ -19,8 +19,8 @@ packages = [
 python = "^3.9"
 pyupgrade = "^3.17.0"
 ryoma_ai = {path = "./ryoma_ai", develop = true}
-ryoma_lab = {path = "./ryoma_lab", develop = true}
-rx = "^3.2.0"
+ryoma_lab = {path = "./ryoma_lab", develop = true, extras = ["all"]}
+ibis-framework = {version = ">=9.0.0", extras = ["snowflake"]}
 
 
 [tool.poetry.dev-dependencies]

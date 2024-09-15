@@ -16,7 +16,6 @@ from ryoma_lab.states.base import BaseState
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.chat import QA, ChatState
 from ryoma_lab.states.datasource import DataSourceState
-from ryoma_lab.states.kernel import KernelState
 from ryoma_lab.states.prompt_template import PromptTemplateState
 from ryoma_lab.states.vector_store import VectorStoreState
 from ryoma_lab.states.workspace import WorkspaceState
@@ -425,7 +424,6 @@ def chatbox_render() -> rx.Component:
         PromptTemplateState.on_load,
         AgentState.on_load,
         VectorStoreState.on_load,
-        KernelState.on_load,
     ],
 )
 def workspace() -> rx.Component:

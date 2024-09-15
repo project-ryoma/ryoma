@@ -1,16 +1,13 @@
 import asyncio
 import traceback
 from abc import abstractmethod
-from typing import Any, Dict
-
-import reflex as rx
+from typing import Any, Dict, Optional
 
 from ryoma_ai.datasource.base import DataSource
 
 
-class BaseKernel(rx.Base):
-    def __init__(self, /, datasource: DataSource = None, **data: Any):
-        super().__init__(**data)
+class BaseKernel:
+    def __init__(self, datasource: Optional[DataSource] = None, **kwargs):
         self.datasource = datasource
 
     async def execute_code(self, code: str) -> Dict[str, Any]:
