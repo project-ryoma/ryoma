@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import nbformat
 import reflex as rx
@@ -21,20 +21,29 @@ class FileManager(rx.Base):
         super().__init__(base_directory=base_directory)
         self.base_directory = os.path.abspath(base_directory)
 
-    def list_directory(self) -> List[FileNode]:
+    def change_directory(self, directory: str):
+        self.base_directory = os.path.join(self.base_directory, directory)
+
+    def list_directory(self, prefix: str = "") -> List[FileNode]:
         items = []
         for item in os.listdir(self.base_directory):
             item_path = os.path.join(self.base_directory, item)
             is_dir = os.path.isdir(item_path)
+            if prefix and not item.startswith(prefix):
+                continue
             items.append(FileNode(name=item, is_dir=is_dir))
         return items
 
-    def read_file(self, filename: str) -> str:
+    def read_file(self, filename: str) -> List[Dict[str, Any]]:
         full_path = os.path.join(self.base_directory, filename)
         if not os.path.exists(full_path) or not os.path.isfile(full_path):
-            return ""
-        with open(full_path, "r") as f:
-            return f.read()
+            raise FileNotFoundError(f"File not found: {filename}")
+        if filename.endswith(".ipynb"):
+            return self.read_notebook(full_path)
+        elif filename.endswith(".py"):
+            return self.read_python_file(full_path)
+        else:
+            raise ValueError(f"Unsupported file type: {filename}")
 
     def save_notebook(self, filename: str, cells: List[Dict[str, Any]]):
         nb = new_notebook()
@@ -68,11 +77,8 @@ class FileManager(rx.Base):
         with open(full_path, "w") as f:
             nbformat.write(nb, f)
 
-    def load_notebook(self, filename: str) -> List[Dict[str, Any]]:
-        full_path = os.path.join(self.base_directory, filename)
-        if not os.path.exists(full_path):
-            return []
-
+    @staticmethod
+    def read_notebook(full_path: str) -> List[Dict[str, Any]]:
         with open(full_path, "r") as f:
             nb = nbformat.read(f, as_version=4)
 
@@ -103,6 +109,17 @@ class FileManager(rx.Base):
                         )
             cells.append(cell)
         return cells
+
+    @staticmethod
+    def read_python_file(full_path: str) -> List[Dict[str, Any]]:
+        with open(full_path, "r") as f:
+            file_content = f.read()
+        return [
+            {
+                "cell_type": "code",
+                "content": file_content,
+            }
+        ]
 
     def get_directory_structure(self) -> List[Dict[str, Any]]:
         structure = []

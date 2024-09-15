@@ -45,11 +45,16 @@ class WorkspaceState(BaseState):
     _kernel: Optional[BaseKernel] = None
     kernel_state_changed: bool = False
     namespace: dict = {}
+
+    # file manager state
+    search_prefix: str = ""
     file_manager: FileManager = FileManager(base_directory=".")
-    directory_structure: FileNode = FileNode(name="Root", is_dir=True)
     sidebar_width: str = "250px"
     is_sidebar_open: bool = True
     notebook_filename: str = "notebook.ipynb"
+
+    def search_files(self, search_term: str):
+        self.search_prefix = search_term
 
     @staticmethod
     def add_tool_run(tool: Tool, output: ToolOutput):
@@ -118,7 +123,7 @@ class WorkspaceState(BaseState):
 
     @rx.var
     def file_list(self) -> List[FileNode]:
-        return self.file_manager.list_directory()
+        return self.file_manager.list_directory(prefix=self.search_prefix)
 
     def data_contains_html(self, item: CellOutput) -> bool:
         return item.execute_result & item.execute_result.contains("text/html")
@@ -219,20 +224,18 @@ class WorkspaceState(BaseState):
             cells_data = [cell.dict() for cell in self.cells]
             self.file_manager.save_notebook(self.notebook_filename, cells_data)
 
-    def load_notebook(self):
-        if self.notebook_filename:
-            cells_data = self.file_manager.load_notebook(self.notebook_filename)
-            self.cells = [Cell(**cell_data) for cell_data in cells_data]
-
     def set_notebook_filename(self, filename: str):
         self.notebook_filename = filename
 
     def open_file_or_directory(self, file: FileNode):
         if file["is_dir"]:
-            self.directory_structure = file
+            self.file_manager.change_directory(file["name"])
         else:
-            self.notebook_filename = file["name"]
-            self.load_notebook()
+            try:
+                cells_data = self.file_manager.read_file(file["name"])
+                self.cells = [Cell(**cell_data) for cell_data in cells_data]
+            except Exception as e:
+                return rx.toast.error(f"Failed to open file: {e}")
 
     def _build_cell_output(self, exec_result: dict[str, Any]) -> CellOutput:
         if exec_result["output_type"] == "error":

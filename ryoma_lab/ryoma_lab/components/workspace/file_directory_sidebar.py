@@ -71,7 +71,15 @@ def file_directory_sidebar() -> rx.Component:
             ),
             width="100%",
         ),
+        rx.input(
+            placeholder="Search...",
+            value=WorkspaceState.search_prefix,
+            on_change=WorkspaceState.set_search_prefix,
+            width="100%",
+            margin_bottom="10px",
+        ),
         rx.vstack(
+            file_item(FileNode(name="..", is_dir=True)),
             rx.foreach(WorkspaceState.file_list, lambda file: file_item(file)),
             margin_top="0.5em",
             align_items="start",
