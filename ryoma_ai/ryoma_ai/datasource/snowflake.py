@@ -113,9 +113,9 @@ class SnowflakeDataSource(SqlDataSource):
             role=self.role,
         )
 
-    def crawl_metadata(self,
-                       loader: Loader,
-                       where_clause_suffix: Optional[str] = ""):
+    def get_metadata(self,
+                     loader: Loader,
+                     where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )

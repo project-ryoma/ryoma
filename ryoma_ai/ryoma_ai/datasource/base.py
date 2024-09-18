@@ -1,8 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
-import ibis
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
@@ -17,10 +16,17 @@ class DataSource(ABC):
         self.type = type
 
     @abstractmethod
-    def crawl_metadata(self,
-                       **kwargs):
+    def connect(self,
+                **kwargs) -> Any:
         raise NotImplementedError(
-            "crawl_metadata is not implemented for this data source"
+            "connect is not implemented for this data source"
+        )
+
+    @abstractmethod
+    def get_metadata(self,
+                     **kwargs):
+        raise NotImplementedError(
+            "get_metadata is not implemented for this data source"
         )
 
 

@@ -3,7 +3,7 @@ import os
 from ryoma_ai.agent.pandas import PandasAgent
 from ryoma_ai.agent.python import PythonAgent
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgresql import PostgresDataSource
+from ryoma_ai.datasource.postgres import PostgresDataSource
 from ryoma_ai.datasource.snowflake import SnowflakeDataSource
 
 # Snowflake

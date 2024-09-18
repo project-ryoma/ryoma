@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 import reflex as rx
 
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.factory import DataSourceProvider, DataSourceFactory
+from ryoma_ai.datasource.factory import DataSourceFactory
 from ryoma_lab.models.data_catalog import CatalogTable
 from ryoma_lab.models.datasource import DataSourceTable
 from ryoma_lab.services.catalog import CatalogService
@@ -83,7 +83,7 @@ class DataSourceState(rx.State):
             # Required by the data source
             model_fields = self._get_datasource_configs(self.datasource)
             return any(
-                model_fields[key].is_required and not self.attributes.get(key)
+                model_fields[key].is_required() and not self.attributes.get(key)
                 for key in model_fields
             )
 
@@ -105,6 +105,7 @@ class DataSourceState(rx.State):
         if self.missing_configs:
             rx.toast.error("Please fill in all required fields")
             return
+        logging.info(f"Connecting to {self.datasource}")
         configs = self.get_datasource_configs()
         try:
             with DataSourceService() as datasource_service:

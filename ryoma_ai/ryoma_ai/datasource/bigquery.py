@@ -47,7 +47,7 @@ class BigqueryDataSource(SqlDataSource):
             tables.append(tb)
         return Schema(database_name=self.dataset_id, tables=tables)
 
-    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.bigquery_metadata_extractor import (
             BigQueryMetadataExtractor,
         )
