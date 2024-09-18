@@ -7,19 +7,24 @@ from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.file import FileDataSource
 from ryoma_ai.datasource.mysql import MySqlDataSource
 from ryoma_ai.datasource.nosql import DynamodbDataSource
-from ryoma_ai.datasource.postgresql import PostgresDataSource
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource
+from ryoma_ai.datasource.postgres import PostgresConfig, PostgresDataSource
+from ryoma_ai.datasource.snowflake import SnowflakeConfig, SnowflakeDataSource
 from ryoma_ai.datasource.sqlite import SqliteDataSource
 
 
 class DataSourceProvider(Enum):
     mysql = MySqlDataSource
-    postgresql = PostgresDataSource
+    postgres = PostgresDataSource
     bigquery = BigqueryDataSource
     snowflake = SnowflakeDataSource
     file = FileDataSource
     dynamodb = DynamodbDataSource
     sqlite = SqliteDataSource
+
+
+class DataSourceConfigProvider(Enum):
+    postgres = PostgresConfig
+    snowflake = SnowflakeConfig
 
 
 def get_supported_datasources():
@@ -28,9 +33,7 @@ def get_supported_datasources():
 
 class DataSourceFactory:
     @staticmethod
-    def create_datasource(datasource: str,
-                          *args,
-                          **kwargs) -> DataSource:
+    def create_datasource(datasource: str, *args, **kwargs) -> DataSource:
         if not hasattr(DataSourceProvider, datasource):
             raise ValueError(f"Unsupported datasource: {datasource}")
 
@@ -43,10 +46,8 @@ class DataSourceFactory:
 
     @staticmethod
     def get_datasource_config(datasource: str):
-        if datasource == "postgresql":
-            from feast.infra.online_stores.contrib.postgres import PostgreSQLOnlineStoreConfig
-            return DataSourceFactory.get_model_fields(PostgreSQLOnlineStoreConfig)
-        if datasource == "snowflake":
-            from feast.infra.online_stores.snowflake import SnowflakeOnlineStoreConfig
-            return DataSourceFactory.get_model_fields(SnowflakeOnlineStoreConfig)
+        if not hasattr(DataSourceConfigProvider, datasource):
+            raise ValueError(f"Unsupported datasource: {datasource}")
 
+        config_class = DataSourceConfigProvider[datasource].value
+        return DataSourceFactory.get_model_fields(config_class)

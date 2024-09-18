@@ -14,14 +14,16 @@ from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class MySqlDataSource(SqlDataSource):
-    def __init__(self,
-                 database: Optional[str] = None,
-                 db_schema: Optional[str] = None,
-                 connection_url: Optional[str] = None,
-                 username: Optional[str] = None,
-                 password: Optional[str] = None,
-                 host: Optional[str] = None,
-                 port: Optional[int] = None):
+    def __init__(
+        self,
+        database: Optional[str] = None,
+        db_schema: Optional[str] = None,
+        connection_url: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+    ):
         super().__init__(database=database, db_schema=db_schema)
         self.username = username
         self.password = password
@@ -29,8 +31,7 @@ class MySqlDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def connect(self,
-                **kwargs) -> BaseBackend:
+    def connect(self, **kwargs) -> BaseBackend:
         return ibis.mysql.connect(
             user=self.username,
             password=self.password,
@@ -40,8 +41,7 @@ class MySqlDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def get_metadata(self,
-                     **kwargs) -> Union[Catalog, Schema, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Mysql")
         conn = self.connect()
 
@@ -69,9 +69,7 @@ class MySqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_metadata(self,
-                       loader: Loader,
-                       where_clause_suffix: Optional[str] = ""):
+    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )

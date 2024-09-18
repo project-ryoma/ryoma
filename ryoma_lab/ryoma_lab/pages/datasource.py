@@ -148,15 +148,11 @@ def add_datasource():
                 spacing="4",
             ),
             rx.cond(
-                DataSourceState.missing_configs,
-                rx.chakra.alert(
-                    rx.chakra.alert_icon(),
-                    rx.chakra.alert_title(
-                        "Please fill in all the required fields",
-                    ),
-                    status="warning",
-                    mb="3",
-                    mt="3",
+                DataSourceState.datasource & DataSourceState.missing_configs,
+                rx.callout(
+                    "Please fill in all the required fields",
+                    icon="info",
+                    spacing="3",
                 ),
             ),
             rx.flex(

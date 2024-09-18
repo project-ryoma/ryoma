@@ -169,7 +169,7 @@ class VectorStoreService:
         )
 
         feast_datasource_map = {
-            "postgresql": PostgreSQLSource,
+            "postgres": PostgreSQLSource,
             "snowflake": SnowflakeSource,
             "bigquery": BigQuerySource,
             "redshift": RedshiftSource,

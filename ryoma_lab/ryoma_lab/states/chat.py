@@ -286,9 +286,7 @@ class ChatState(WorkspaceState):
             ].answer += f"\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
 
             # Add a new cell to the notebook with the tool code
-            self.add_tool_cell(
-                self.current_tool, self.execute_tool, self.update_tool
-            )
+            self.add_tool_cell(self.current_tool, self.execute_tool, self.update_tool)
 
     async def execute_tool(self, tool_id: str, updated_code: str):
         if not self.current_tool or self.current_tool.id != tool_id:

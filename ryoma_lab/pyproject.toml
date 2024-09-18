@@ -47,7 +47,7 @@ sqlite = [
     "ibis-framework[sqlite]>=9.0.0",
     "feast[sqlite]>=0.39.1"
 ]
-postgresql = [
+postgres = [
     "psycopg2>=2.9.2",
     "ibis-framework[postgres]>=9.0.0",
     "amundsen-databuilder[postgres]>=7.5.0",
@@ -73,7 +73,7 @@ pyspark = [
 all = [
     "snowflake",
     "sqlite",
-    "postgresql",
+    "postgres",
     "mysql",
     "bigquery",
     "pyspark"

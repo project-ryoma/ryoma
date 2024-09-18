@@ -1,48 +1,40 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
-import ibis
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
 
-from ryoma_ai.datasource.metadata import Catalog, Schema, Table, Column
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class DataSource(ABC):
-    def __init__(self,
-                 type: str,
-                 **kwargs):
+    def __init__(self, type: str, **kwargs):
         self.type = type
 
     @abstractmethod
-    def crawl_metadata(self,
-                       **kwargs):
+    def connect(self, **kwargs) -> Any:
+        raise NotImplementedError("connect is not implemented for this data source")
+
+    @abstractmethod
+    def get_metadata(self, **kwargs):
         raise NotImplementedError(
-            "crawl_metadata is not implemented for this data source"
+            "get_metadata is not implemented for this data source"
         )
 
 
 class SqlDataSource(DataSource):
-    def __init__(self,
-                 database: Optional[str] = None,
-                 db_schema: Optional[str] = None):
+    def __init__(self, database: Optional[str] = None, db_schema: Optional[str] = None):
         super().__init__(type="sql")
         self.database = database
         self.db_schema = db_schema
 
     @abstractmethod
-    def connect(self,
-                **kwargs) -> SQLBackend:
-        raise NotImplementedError(
-            "connect is not implemented for this data source"
-        )
+    def connect(self, **kwargs) -> SQLBackend:
+        raise NotImplementedError("connect is not implemented for this data source")
 
-    def query(self,
-              query,
-              result_format="pandas",
-              **kwargs) -> IbisTable:
+    def query(self, query, result_format="pandas", **kwargs) -> IbisTable:
         logging.info("Executing query: {}".format(query))
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
@@ -83,7 +75,9 @@ class SqlDataSource(DataSource):
             for catalog in catalogs:
                 for schema in catalog.schemas:
                     schema.tables = self.list_tables(
-                        catalog=catalog.catalog_name, schema=schema.schema_name, with_columns=with_columns
+                        catalog=catalog.catalog_name,
+                        schema=schema.schema_name,
+                        with_columns=with_columns,
                     )
         return catalogs
 
@@ -104,7 +98,9 @@ class SqlDataSource(DataSource):
         if with_table:
             for schema in schemas:
                 schema.tables = self.list_tables(
-                    catalog=catalog, schema=schema.schema_name, with_columns=with_columns
+                    catalog=catalog,
+                    schema=schema.schema_name,
+                    with_columns=with_columns,
                 )
         return schemas
 
@@ -118,10 +114,10 @@ class SqlDataSource(DataSource):
         catalog = catalog or self.database or conn.current_database
         if schema is not None:
             catalog = (catalog, schema)
-        tables = [Table(
-            table_name=table,
-            columns=[]
-        ) for table in conn.list_tables(database=catalog)]
+        tables = [
+            Table(table_name=table, columns=[])
+            for table in conn.list_tables(database=catalog)
+        ]
         if with_columns:
             for table in tables:
                 table_schema = conn.get_schema(table, catalog=catalog)
@@ -136,8 +132,7 @@ class SqlDataSource(DataSource):
         return tables
 
     @abstractmethod
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
         )

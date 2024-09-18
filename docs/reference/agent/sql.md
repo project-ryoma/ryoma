@@ -10,7 +10,7 @@ Pass Data Source to SqlAgent and analyze the data.
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgresql import PostgresDataSource
+from ryoma_ai.datasource.postgres import PostgresDataSource
 from ryoma_ai.prompt.base import BasicContextPromptTemplate
 
 postgres_datasource = PostgresDataSource("postgresql://localhost:5432/db")
