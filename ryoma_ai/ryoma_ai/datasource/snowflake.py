@@ -7,47 +7,69 @@ from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
-from langchain_core.pydantic_v1 import Field
+from ibis.backends.sql import SQLBackend
+from pydantic import BaseModel, Field
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
+class SnowflakeConfig(BaseModel):
+    user: str = Field(..., description="Snowflake user name")
+    password: str = Field(..., description="Snowflake password")
+    account: str = Field(..., description="Snowflake account")
+    database: str = Field(..., description="Database name")
+    warehouse: Optional[str] = Field(None, description="Snowflake warehouse name")
+    role: Optional[str] = Field(None, description="Snowflake role name")
+    db_schema: Optional[str] = Field(None, description="Database schema")
+
+
 class SnowflakeDataSource(SqlDataSource):
-    connection_url: Optional[str] = Field(None, description="Connection URL")
-    user: Optional[str] = Field(Nscription="User name")
-    password: Optional[str] = Field(None, description="Password")
-    account: Optional[str] = Field(None, description="Account name")
-    warehouse: Optional[str] = Field("COMPUTE_WH", description="Warehouse name")
-    role: Optional[str] = Field("PUBLIC_ROLE", description="Role name")
+    def __init__(self,
+                 user: Optional[str] = None,
+                 password: Optional[str] = None,
+                 account: Optional[str] = None,
+                 database: Optional[str] = None,
+                 warehouse: Optional[str] = None,
+                 role: Optional[str] = None,
+                 db_schema: Optional[str] = None,
+                 connection_url: Optional[str] = None):
+        super().__init__(database=database, db_schema=db_schema)
+        self.user = user
+        self.password = password
+        self.account = account
+        self.warehouse = warehouse or "COMPUTE_WH"
+        self.role = role or "PUBLIC_ROLE"
+        self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> BaseBackend:
-        logging.info("Connecting to Snowflake")
+    def connect(self,
+                **kwargs) -> Union[BaseBackend, SQLBackend]:
+        if self.connection_url:
+            logging.info("Connection URL provided, using it to connect")
+            return ibis.connect(self.connection_url)
+        logging.info("Connection URL not provided, using individual parameters")
         try:
-            if self.connection_url:
-                logging.info("Connection URL provided, using it to connect")
-                return ibis.connect(self.connection_url)
-            else:
-                logging.info("Connection URL not provided, using individual parameters")
-                return ibis.snowflake.connect(
-                    user=self.user,
-                    password=self.password,
-                    account=self.account,
-                    warehouse=self.warehouse,
-                    role=self.role,
-                    database=self.database,
-                    schema=self.db_schema,
-                    **kwargs,
-                )
+            return ibis.snowflake.connect(
+                user=self.user,
+                password=self.password,
+                account=self.account,
+                warehouse=self.warehouse,
+                role=self.role,
+                database=self.database,
+                schema=self.db_schema,
+                **kwargs,
+            )
         except Exception as e:
-            raise Exception(f"Failed to connect to ibis: {e}")
+            raise Exception(f"Failed to connect to Snowflake: {e}")
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
+    def get_metadata(self,
+                     **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Snowflake")
         conn = self.connect()
 
-        def get_table_metadata(database: str, schema: str) -> list[Table]:
+        def get_table_metadata(database: str,
+                               schema: str) -> list[Table]:
             tables = []
             for table in conn.list_tables(database=(database, schema)):
                 table_schema = conn.get_schema(
@@ -91,7 +113,9 @@ class SnowflakeDataSource(SqlDataSource):
             role=self.role,
         )
 
-    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self,
+                       loader: Loader,
+                       where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )
@@ -121,7 +145,8 @@ class SnowflakeDataSource(SqlDataSource):
 
         job.launch()
 
-    def get_query_plan(self, query: str) -> Any:
+    def get_query_plan(self,
+                       query: str) -> Any:
         conn = self.connect()
         explain_query = f"EXPLAIN USING JSON {query}"
         return conn.sql(explain_query)

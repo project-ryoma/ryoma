@@ -68,8 +68,6 @@ class WorkspaceState(BaseState):
             session.commit()
 
     def _get_datasource(self) -> Optional[DataSource]:
-        if not self.current_catalog_name:
-            return None
         catalog = self.current_catalog
         if not catalog:
             return None
@@ -200,11 +198,9 @@ class WorkspaceState(BaseState):
         elif position == "only":
             self.cells = [Cell()]
 
-    @rx.background
-    async def update_cell_content(self, cell_index: int, content: str):
-        async with self:
-            if 0 <= cell_index < len(self.cells):
-                self.cells[cell_index].content = content
+    def update_cell_content(self, cell_index: int, content: str):
+        if 0 <= cell_index < len(self.cells):
+            self.cells[cell_index].content = content
 
     def set_cell_type(self, index: int, cell_type: str):
         if cell_type not in ["code", "markdown"]:

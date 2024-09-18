@@ -172,8 +172,7 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                 cell.cell_type == "code",
                 codeeditor(
                     value=cell.content,
-                    on_change=lambda x: WorkspaceState.update_cell_content(index, x),
-                    language="python",
+                    on_change=lambda content: WorkspaceState.update_cell_content(index, content),
                     extensions=rx.Var.create(
                         '[loadLanguage("sql"), loadLanguage("python")]',
                         _var_is_local=False,
@@ -181,8 +180,7 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                 ),
                 codeeditor(
                     value=cell.content,
-                    on_change=lambda x: WorkspaceState.update_cell_content(index, x),
-                    language="markdown",
+                    on_change=lambda content: WorkspaceState.update_cell_content(index, content),
                 ),
             ),
             rx.cond(

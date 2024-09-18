@@ -1,12 +1,12 @@
 import pytest
 from sqlalchemy import create_engine
 
-from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
+from ryoma_ai.datasource.postgresql import PostgresDataSource
 
 
 @pytest.fixture
 def postgres():
-    return PostgreSqlDataSource(
+    return PostgresDataSource(
         user="",
         password="",
         host="localhost",

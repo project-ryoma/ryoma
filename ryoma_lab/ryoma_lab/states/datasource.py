@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 import reflex as rx
 
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.factory import DataSourceProvider
+from ryoma_ai.datasource.factory import DataSourceProvider, DataSourceFactory
 from ryoma_lab.models.data_catalog import CatalogTable
 from ryoma_lab.models.datasource import DataSourceTable
 from ryoma_lab.services.catalog import CatalogService
@@ -56,8 +56,8 @@ class DataSourceState(rx.State):
     def num_datasources(self) -> int:
         return len(self.datasources)
 
-    def _datasource_fields(self, datasource: str) -> dict[str, Any]:
-        fields = DataSourceProvider[datasource].value.__fields__.copy()
+    def _get_datasource_configs(self, datasource: str) -> dict[str, Any]:
+        fields = DataSourceFactory.get_datasource_config(datasource)
         for additional_field in ["type", "name", "connection_url"]:
             if additional_field in fields:
                 del fields[additional_field]
@@ -66,7 +66,7 @@ class DataSourceState(rx.State):
     @rx.var
     def datasource_attribute_names(self) -> List[str]:
         if self.datasource:
-            fields = self._datasource_fields(self.datasource)
+            fields = self._get_datasource_configs(self.datasource)
             return list(fields.keys())
         else:
             return []
@@ -81,9 +81,9 @@ class DataSourceState(rx.State):
             return not self.connection_url
         else:
             # Required by the data source
-            model_fields = self._datasource_fields(self.datasource)
+            model_fields = self._get_datasource_configs(self.datasource)
             return any(
-                model_fields[key].required and not self.attributes.get(key)
+                model_fields[key].is_required and not self.attributes.get(key)
                 for key in model_fields
             )
 
@@ -91,7 +91,7 @@ class DataSourceState(rx.State):
         self.attributes[attribute] = value
 
     def get_datasource_attributes(self) -> dict[str, str]:
-        model_fields = self._datasource_fields(self.datasource)
+        model_fields = self._get_datasource_configs(self.datasource)
         return {key: self.attributes.get(key, "") for key in model_fields}
 
     def get_datasource_configs(self) -> dict:
@@ -103,6 +103,7 @@ class DataSourceState(rx.State):
 
     def connect_and_add_datasource(self):
         if self.missing_configs:
+            rx.toast.error("Please fill in all required fields")
             return
         configs = self.get_datasource_configs()
         try:

@@ -43,10 +43,10 @@ You can read more details in the [documentation](https://ryoma-1.gitbook.io/ryom
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgresql import PostgreSqlDataSource
+from ryoma_ai.datasource.postgresql import PostgresDataSource
 
 # Connect to a PostgreSQL catalog
-datasource = PostgreSqlDataSource("postgresql://user:password@localhost:5432/dbname")
+datasource = PostgresDataSource("postgresql://user:password@localhost:5432/dbname")
 
 # Create a SQL agent
 sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)

@@ -90,8 +90,6 @@ class ChatState(WorkspaceState):
 
     vector_feature_dialog_open: bool = False
 
-    notebook_html: str = ""
-
     @rx.var
     def current_feature_views(self) -> list[str]:
         if not self.current_vector_store:
@@ -144,8 +142,8 @@ class ChatState(WorkspaceState):
                 model=self.current_chat_model,
                 **kwargs,
             )
-            if self.current_catalog:
-                datasource = DataSourceState.connect(self.current_catalog)
+            if self.current_catalog_name:
+                datasource = self._get_datasource()
                 self._current_chat_agent.add_datasource(datasource)
 
             logging.info(
@@ -288,7 +286,7 @@ class ChatState(WorkspaceState):
             ].answer += f"\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
 
             # Add a new cell to the notebook with the tool code
-            await self.add_tool_cell(
+            self.add_tool_cell(
                 self.current_tool, self.execute_tool, self.update_tool
             )
 

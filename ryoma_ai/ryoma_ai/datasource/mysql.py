@@ -7,7 +7,6 @@ from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
-from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
@@ -15,15 +14,24 @@ from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class MySqlDataSource(SqlDataSource):
-    connection_url: Optional[str] = Field(None, description="Connection URL")
-    username: Optional[str] = Field(None, description="User name")
-    password: Optional[str] = Field(None, description="Password")
-    host: Optional[str] = Field(None, description="Host name")
-    port: Optional[int] = Field(None, description="Port number")
-    database: Optional[str] = Field(None, description="Schema name")
+    def __init__(self,
+                 database: Optional[str] = None,
+                 db_schema: Optional[str] = None,
+                 connection_url: Optional[str] = None,
+                 username: Optional[str] = None,
+                 password: Optional[str] = None,
+                 host: Optional[str] = None,
+                 port: Optional[int] = None):
+        super().__init__(database=database, db_schema=db_schema)
+        self.username = username
+        self.password = password
+        self.host = host
+        self.port = port
+        self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> BaseBackend:
-        return ibis.mysql.coonect(
+    def connect(self,
+                **kwargs) -> BaseBackend:
+        return ibis.mysql.connect(
             user=self.username,
             password=self.password,
             host=self.host,
@@ -32,7 +40,8 @@ class MySqlDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
+    def get_metadata(self,
+                     **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Mysql")
         conn = self.connect()
 
@@ -60,7 +69,9 @@ class MySqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self,
+                       loader: Loader,
+                       where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )

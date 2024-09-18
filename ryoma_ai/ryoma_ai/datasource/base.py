@@ -6,36 +6,43 @@ import ibis
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
-from langchain_core.pydantic_v1 import BaseModel
-from pydantic import Field
 
-from ryoma_ai.datasource.metadata import Catalog, Schema, Table
+from ryoma_ai.datasource.metadata import Catalog, Schema, Table, Column
 
 
-class DataSource(BaseModel, ABC):
-    type: str = Field(..., description="Type of the data source")
+class DataSource(ABC):
+    def __init__(self,
+                 type: str,
+                 **kwargs):
+        self.type = type
 
     @abstractmethod
-    def crawl_metadata(self, **kwargs):
+    def crawl_metadata(self,
+                       **kwargs):
         raise NotImplementedError(
             "crawl_metadata is not implemented for this data source"
         )
 
 
 class SqlDataSource(DataSource):
-    type: str = "ibis"
-    database: Optional[str] = Field(None, description="Schema name")
-    db_schema: Optional[str] = Field(None, description="Schema name")
-    connection_url: Optional[str] = Field(None, description="Connection URL")
+    def __init__(self,
+                 database: Optional[str] = None,
+                 db_schema: Optional[str] = None):
+        super().__init__(type="sql")
+        self.database = database
+        self.db_schema = db_schema
 
-    def connect(self, **kwargs) -> SQLBackend:
-        logging.info("Connecting to ibis data source")
-        try:
-            return ibis.connect(self.connection_url, **kwargs)
-        except Exception as e:
-            raise Exception(f"Failed to connect to ibis: {e}")
+    @abstractmethod
+    def connect(self,
+                **kwargs) -> SQLBackend:
+        raise NotImplementedError(
+            "connect is not implemented for this data source"
+        )
 
-    def query(self, query, result_format="pandas", **kwargs) -> IbisTable:
+    def query(self,
+              query,
+              result_format="pandas",
+              **kwargs) -> IbisTable:
         logging.info("Executing query: {}".format(query))
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
@@ -49,11 +56,19 @@ class SqlDataSource(DataSource):
             result = result.to_pandas()
         return result
 
+    def get_metadata(
+        self,
+        catalog: Optional[str] = None,
+    ):
+        catalog = self.database if not catalog else catalog
+        return self.list_schemas(catalog=catalog, with_table=True, with_columns=True)
+
     def list_catalogs(
         self,
         like: Optional[str] = None,
         with_schema: bool = False,
         with_table: bool = False,
+        with_columns: bool = False,
     ) -> list[Catalog]:
         conn: CanListCatalog = self.connect()
         if not hasattr(conn, "list_catalogs"):
@@ -68,18 +83,20 @@ class SqlDataSource(DataSource):
             for catalog in catalogs:
                 for schema in catalog.schemas:
                     schema.tables = self.list_tables(
-                        catalog=catalog.catalog_name, schema=schema.schema_name
+                        catalog=catalog.catalog_name, schema=schema.schema_name, with_columns=with_columns
                     )
         return catalogs
 
     def list_schemas(
-        self, catalog: Optional[str] = None, with_table: bool = False
+        self,
+        catalog: Optional[str] = None,
+        with_table: bool = False,
+        with_columns: bool = False,
     ) -> list[Schema]:
         conn: CanListDatabase = self.connect()
         if not hasattr(conn, "list_schemas"):
             raise Exception("This data source does not support listing schemas")
-        if not catalog:
-            catalog = self.database
+        catalog = catalog or self.database or conn.current_database
         schemas = [
             Schema(schema_name=schema)
             for schema in conn.list_databases(catalog=catalog)
@@ -87,26 +104,40 @@ class SqlDataSource(DataSource):
         if with_table:
             for schema in schemas:
                 schema.tables = self.list_tables(
-                    catalog=catalog, schema=schema.schema_name
+                    catalog=catalog, schema=schema.schema_name, with_columns=with_columns
                 )
         return schemas
 
     def list_tables(
-        self, catalog: Optional[str] = None, schema: Optional[str] = None
+        self,
+        catalog: Optional[str] = None,
+        schema: Optional[str] = None,
+        with_columns: bool = False,
     ) -> list[Table]:
         conn = self.connect()
-        catalog = self.database if not catalog else catalog
+        catalog = catalog or self.database or conn.current_database
         if schema is not None:
             catalog = (catalog, schema)
-        tables = conn.list_tables(database=catalog)
-        return [Table(table_name=table, columns=[]) for table in tables]
+        tables = [Table(
+            table_name=table,
+            columns=[]
+        ) for table in conn.list_tables(database=catalog)]
+        if with_columns:
+            for table in tables:
+                table_schema = conn.get_schema(table, catalog=catalog)
+                table.columns = [
+                    Column(
+                        name=name,
+                        type=table_schema[name].name,
+                        nullable=table_schema[name].nullable,
+                    )
+                    for name in table_schema
+                ]
+        return tables
 
     @abstractmethod
-    def get_query_plan(self, query: str) -> Any:
+    def get_query_plan(self,
+                       query: str) -> Any:
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
         )
-
-    @abstractmethod
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
-        pass

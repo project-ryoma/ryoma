@@ -9,12 +9,9 @@ from ryoma_ai.datasource.metadata import Table
 
 class FileDataSource(DataSource):
     type: str = "file"
-    file_path: str = Field(..., description="Path to the file")
-    file_format: str = Field(..., description="Format of the file")
-    file_name: str = Field(..., description="Name of the file")
-
-    class Config:
-        arbitrary_types_allowed = True
+    file_path: str
+    file_format: str
+    file_name: str
 
     def __init__(
         self,
@@ -23,13 +20,14 @@ class FileDataSource(DataSource):
         file_name: Optional[str] = None,
         **kwargs,
     ):
+        super().__init__(
+            type="file",
+        )
         if not file_name:
             file_name = file_path
-        super().__init__(
-            file_path=file_path,
-            file_name=file_name,
-            file_format=file_format,
-        )
+        self.file_path = file_path
+        self.file_format = file_format
+        self.file_name = file_name
 
     def get_metadata(self, **kwargs) -> Table:
         table_schema = self.to_arrow(**kwargs).schema
