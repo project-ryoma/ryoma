@@ -7,8 +7,8 @@ from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.file import FileDataSource
 from ryoma_ai.datasource.mysql import MySqlDataSource
 from ryoma_ai.datasource.nosql import DynamodbDataSource
-from ryoma_ai.datasource.postgres import PostgresDataSource, PostgresConfig
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource, SnowflakeConfig
+from ryoma_ai.datasource.postgres import PostgresConfig, PostgresDataSource
+from ryoma_ai.datasource.snowflake import SnowflakeConfig, SnowflakeDataSource
 from ryoma_ai.datasource.sqlite import SqliteDataSource
 
 
@@ -33,9 +33,7 @@ def get_supported_datasources():
 
 class DataSourceFactory:
     @staticmethod
-    def create_datasource(datasource: str,
-                          *args,
-                          **kwargs) -> DataSource:
+    def create_datasource(datasource: str, *args, **kwargs) -> DataSource:
         if not hasattr(DataSourceProvider, datasource):
             raise ValueError(f"Unsupported datasource: {datasource}")
 

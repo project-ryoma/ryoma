@@ -1,4 +1,3 @@
-
 import ibis
 from ibis import BaseBackend
 from pydantic import BaseModel, Field
@@ -11,8 +10,7 @@ class SqliteConfig(BaseModel):
 
 
 class SqliteDataSource(SqlDataSource):
-    def __init__(self,
-                 connection_url: str):
+    def __init__(self, connection_url: str):
         super().__init__()
         self.connection_url = connection_url
 

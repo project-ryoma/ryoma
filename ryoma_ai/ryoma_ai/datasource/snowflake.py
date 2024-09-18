@@ -26,15 +26,17 @@ class SnowflakeConfig(BaseModel):
 
 
 class SnowflakeDataSource(SqlDataSource):
-    def __init__(self,
-                 user: Optional[str] = None,
-                 password: Optional[str] = None,
-                 account: Optional[str] = None,
-                 database: Optional[str] = None,
-                 warehouse: Optional[str] = None,
-                 role: Optional[str] = None,
-                 db_schema: Optional[str] = None,
-                 connection_url: Optional[str] = None):
+    def __init__(
+        self,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        account: Optional[str] = None,
+        database: Optional[str] = None,
+        warehouse: Optional[str] = None,
+        role: Optional[str] = None,
+        db_schema: Optional[str] = None,
+        connection_url: Optional[str] = None,
+    ):
         super().__init__(database=database, db_schema=db_schema)
         self.user = user
         self.password = password
@@ -43,8 +45,7 @@ class SnowflakeDataSource(SqlDataSource):
         self.role = role or "PUBLIC_ROLE"
         self.connection_url = connection_url
 
-    def connect(self,
-                **kwargs) -> Union[BaseBackend, SQLBackend]:
+    def connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
         if self.connection_url:
             logging.info("Connection URL provided, using it to connect")
             return ibis.connect(self.connection_url)
@@ -63,13 +64,11 @@ class SnowflakeDataSource(SqlDataSource):
         except Exception as e:
             raise Exception(f"Failed to connect to Snowflake: {e}")
 
-    def get_metadata(self,
-                     **kwargs) -> Union[Catalog, Schema, Table]:
+    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
         logging.info("Getting metadata from Snowflake")
         conn = self.connect()
 
-        def get_table_metadata(database: str,
-                               schema: str) -> list[Table]:
+        def get_table_metadata(database: str, schema: str) -> list[Table]:
             tables = []
             for table in conn.list_tables(database=(database, schema)):
                 table_schema = conn.get_schema(
@@ -113,9 +112,7 @@ class SnowflakeDataSource(SqlDataSource):
             role=self.role,
         )
 
-    def get_metadata(self,
-                     loader: Loader,
-                     where_clause_suffix: Optional[str] = ""):
+    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )
@@ -145,8 +142,7 @@ class SnowflakeDataSource(SqlDataSource):
 
         job.launch()
 
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         conn = self.connect()
         explain_query = f"EXPLAIN USING JSON {query}"
         return conn.sql(explain_query)
