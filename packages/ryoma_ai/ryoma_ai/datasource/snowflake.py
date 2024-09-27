@@ -64,41 +64,6 @@ class SnowflakeDataSource(SqlDataSource):
         except Exception as e:
             raise Exception(f"Failed to connect to Snowflake: {e}")
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
-        logging.info("Getting metadata from Snowflake")
-        conn = self.connect()
-
-        def get_table_metadata(database: str, schema: str) -> list[Table]:
-            tables = []
-            for table in conn.list_tables(database=(database, schema)):
-                table_schema = conn.get_schema(
-                    table_name=table, catalog=database, database=schema
-                )
-                tb = Table(
-                    table_name=table,
-                    columns=[
-                        Column(
-                            name=name,
-                            type=table_schema[name].name,
-                            nullable=table_schema[name].nullable,
-                        )
-                        for name in table_schema
-                    ],
-                )
-                tables.append(tb)
-            return tables
-
-        if self.database and self.db_schema:
-            tables = get_table_metadata(self.database, self.db_schema)
-            database = Schema(database_name=self.db_schema, tables=tables)
-            return database
-        elif self.database:
-            databases = []
-            for database in conn.list_databases(catalog=self.database):
-                tables = get_table_metadata(self.database, database)
-                databases.append(Schema(database_name=database, tables=tables))
-            return Catalog(catalog_name=self.database, databases=databases)
-
     def connection_string(self):
         return """
         snowflake://{user}:{password}@{account}/{database}/{schema}?warehouse={warehouse}&role={role}
@@ -112,7 +77,7 @@ class SnowflakeDataSource(SqlDataSource):
             role=self.role,
         )
 
-    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.snowflake_metadata_extractor import (
             SnowflakeMetadataExtractor,
         )

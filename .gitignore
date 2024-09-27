@@ -130,8 +130,8 @@ research/dataset
 sdist/
 share/python-wheels/
 target/
+uploaded_files
 var/
 venv.bak/
 venv/
 wheels/
-uploaded_files

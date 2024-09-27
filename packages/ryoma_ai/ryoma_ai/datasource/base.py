@@ -136,3 +136,9 @@ class SqlDataSource(DataSource):
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
         )
+
+    @abstractmethod
+    def crawl_metadata(self, **kwargs):
+        raise NotImplementedError(
+            "crawl_metadata is not implemented for this data source."
+        )

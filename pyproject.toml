@@ -1,31 +1,35 @@
 [build-system]
-requires = ["poetry_core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.4.0"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[tool.hatch.build.targets.wheel]
+packages = ["src/foo"]
+
+
+[project]
 name = "ryoma-dev"
 version = "0.0.1"
 description = "Root project for Ryoma AI Platform"
-authors = ["ryoma <contact@project-ryoma.com>"]
-license = "Apache Software License 2.0"
+license = {file = "LICENSE"}
 readme = "README.md"
+requires-python = ">=3.10"
 
-packages = [
-    { include = "ryoma_ai", from = "ryoma_ai" },
-    { include = "ryoma_lab", from = "ryoma_lab" },
+dependencies = [
+    "ryoma_lab[snowflake, pyspark, postgres, sqlite, mysql, bigquery]",
+    "ryoma_ai",
+    "pytest >= 6.2.5",
+    "black >= 23.3.0",
+    "isort >= 5.9.3",
+    "mypy >= 0.910",
+    "flake8 >= 3.9.2",
+    "click >= 8.0.0",
+    "pip >= 21.3.1",
+    "setuptools >= 58.0.4",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-pyupgrade = "^3.17.0"
-ryoma_ai = {path = "./ryoma_ai", develop = true}
-ryoma_lab = {path = "./ryoma_lab", develop = true, extras = ["all"]}
+[tool.uv.sources]
+ryoma_ai = { workspace = true}
+ryoma_lab = { workspace = true}
 
-
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-black = "^23.3.0"
-isort = "^5.9.3"
-mypy = "^0.910"
-flake8 = "^3.9.2"
-click = "^8.0.0"
+[tool.uv.workspace]
+members = ["packages/ryoma_ai", "packages/ryoma_lab"]

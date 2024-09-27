@@ -26,28 +26,7 @@ class BigqueryDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
-        logging.info("Getting metadata from Bigquery")
-        conn = self.connect()
-
-        tables = []
-        for table in conn.list_tables():
-            table_schema = conn.get_schema(table)
-            tb = Table(
-                table_name=table,
-                columns=[
-                    Column(
-                        name=name,
-                        type=table_schema[name].schema_name,
-                        nullable=table_schema[name].nullable,
-                    )
-                    for name in table_schema
-                ],
-            )
-            tables.append(tb)
-        return Schema(database_name=self.dataset_id, tables=tables)
-
-    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.bigquery_metadata_extractor import (
             BigQueryMetadataExtractor,
         )
