@@ -16,7 +16,7 @@ poetry-download:
 install:
 	uv lock && uv pip compile pyproject.toml -o requirements.txt
 	uv sync
-	uv run mypy --install-types --non-interactive ./
+	#uv run mypy --install-types --non-interactive ./
 
 .PHONY: pre-commit-install
 pre-commit-install:

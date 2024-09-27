@@ -30,8 +30,7 @@ jobs:
         key: venv-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
     - name: Install dependencies
       run: |
-        uv config virtualenvs.in-project true
-        uv install --with dev
+        make install
 
     - name: Run style checks
       run: |

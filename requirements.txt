@@ -1,257 +1,909 @@
-aiohappyeyeballs==2.4.0 ; python_version >= "3.9" and python_version < "4.0"
-aiohttp==3.10.5 ; python_version >= "3.9" and python_version < "4.0"
-aiosignal==1.3.1 ; python_version >= "3.9" and python_version < "4.0"
-alembic==1.13.2 ; python_version >= "3.9" and python_version < "4.0"
-amundsen-common==0.32.0 ; python_version >= "3.9" and python_version < "4.0"
-amundsen-databuilder==7.5.1 ; python_version >= "3.9" and python_version < "4.0"
-amundsen-rds==0.0.8 ; python_version >= "3.9" and python_version < "4.0"
-annotated-types==0.7.0 ; python_version >= "3.9" and python_version < "4.0"
-anyio==4.4.0 ; python_version >= "3.9" and python_version < "4.0"
-appnope==0.1.4 ; python_version >= "3.9" and python_version < "4.0" and sys_platform == "darwin"
-argon2-cffi-bindings==21.2.0 ; python_version >= "3.9" and python_version < "4.0"
-argon2-cffi==23.1.0 ; python_version >= "3.9" and python_version < "4.0"
-asttokens==2.4.1 ; python_version >= "3.9" and python_version < "4.0"
-async-timeout==4.0.3 ; python_version >= "3.9" and python_full_version < "3.11.3"
-atomicwrites==1.4.1 ; python_version >= "3.9" and python_version < "4.0"
-atpublic==4.1.0 ; python_version >= "3.9" and python_version < "4.0"
-attrs==24.2.0 ; python_version >= "3.9" and python_version < "4.0"
-backcall==0.2.0 ; python_version >= "3.9" and python_version < "4.0"
-backports-tarfile==1.2.0 ; python_version >= "3.9" and python_version < "3.12"
-bcrypt==4.1.2 ; python_version >= "3.9" and python_version < "4.0"
-bidict==0.23.1 ; python_version >= "3.9" and python_version < "4.0"
-blinker==1.8.2 ; python_version >= "3.9" and python_version < "4.0"
-build==1.2.1 ; python_version >= "3.9" and python_version < "4.0"
-certifi==2024.8.30 ; python_version >= "3.9" and python_version < "4.0"
-cffi==1.17.0 ; python_version >= "3.9" and python_version < "4.0"
-charset-normalizer==3.3.2 ; python_version >= "3.9" and python_version < "4.0"
-click==8.1.7 ; python_version >= "3.9" and python_version < "4.0"
-cloudpickle==3.0.0 ; python_version >= "3.9" and python_version < "4.0"
-colorama==0.4.6 ; python_version >= "3.9" and python_version < "4.0"
-cryptography==43.0.0 ; python_version >= "3.9" and python_version < "4.0"
-dask-expr==1.1.10 ; python_version >= "3.9" and python_version < "4.0"
-dask==2024.8.0 ; python_version >= "3.9" and python_version < "4.0"
-dask[dataframe]==2024.8.0 ; python_version >= "3.9" and python_version < "4.0"
-dataclasses-json==0.6.7 ; python_version >= "3.9" and python_version < "4.0"
-decorator==5.1.1 ; python_version >= "3.9" and python_version < "4.0"
-dill==0.3.8 ; python_version >= "3.9" and python_version < "4.0"
-distro==1.9.0 ; python_version >= "3.9" and python_version < "4.0"
-dnspython==2.6.1 ; python_version >= "3.9" and python_version < "4.0"
-docutils==0.21.2 ; python_version >= "3.9" and python_version < "4.0"
-elasticsearch-dsl==7.4.0 ; python_version >= "3.9" and python_version < "4.0"
-elasticsearch==7.9.1 ; python_version >= "3.9" and python_version < "4"
-email-validator==2.1.2 ; python_version >= "3.9" and python_version < "4.0"
-exceptiongroup==1.2.2 ; python_version >= "3.9" and python_version < "3.11"
-executing==2.1.0 ; python_version >= "3.9" and python_version < "4.0"
-fastapi-users-db-sqlalchemy==6.0.1 ; python_version >= "3.9" and python_version < "4.0"
-fastapi-users==13.0.0 ; python_version >= "3.9" and python_version < "4.0"
-fastapi-users[oauth,sqlalchemy]==13.0.0 ; python_version >= "3.9" and python_version < "4.0"
-fastapi==0.110.3 ; python_version >= "3.9" and python_version < "4.0"
-feast==0.39.1 ; python_version >= "3.9" and python_version < "4.0"
-filelock==3.15.4 ; python_version >= "3.9" and python_version < "4.0"
-flask==3.0.3 ; python_version >= "3.9" and python_version < "4.0"
-freezegun==1.5.1 ; python_version >= "3.9" and python_version < "4.0"
-frozenlist==1.4.1 ; python_version >= "3.9" and python_version < "4.0"
-fsspec==2024.6.1 ; python_version >= "3.9" and python_version < "4.0"
-gpt4all==2.8.2 ; python_version >= "3.9" and python_version < "4.0"
-greenlet==3.0.3 ; python_version >= "3.9" and python_version < "4.0"
-grpcio-tools==1.62.3 ; python_version >= "3.9" and python_version < "4.0"
-grpcio==1.66.1 ; python_version >= "3.9" and python_version < "4.0"
-gunicorn==22.0.0 ; python_version >= "3.9" and python_version < "4.0"
-h11==0.14.0 ; python_version >= "3.9" and python_version < "4.0"
-h2==4.1.0 ; python_version >= "3.9" and python_version < "4.0"
-hpack==4.0.0 ; python_version >= "3.9" and python_version < "4.0"
-httpcore==1.0.5 ; python_version >= "3.9" and python_version < "4.0"
-httplib2==0.22.0 ; python_version >= "3.9" and python_version < "4.0"
-httptools==0.6.1 ; python_version >= "3.9" and python_version < "4.0"
-httpx-oauth==0.15.1 ; python_version >= "3.9" and python_version < "4.0"
-httpx==0.27.2 ; python_version >= "3.9" and python_version < "4.0"
-httpx[http2]==0.27.2 ; python_version >= "3.9" and python_version < "4.0"
-huggingface-hub==0.24.6 ; python_version >= "3.9" and python_version < "4.0"
-hyperframe==6.0.1 ; python_version >= "3.9" and python_version < "4.0"
-ibis-framework==9.0.0 ; python_version >= "3.9" and python_version < "4.0"
-idna==3.8 ; python_version >= "3.9" and python_version < "4.0"
-importlib-metadata==8.4.0 ; python_version >= "3.9" and python_version < "4.0"
-ipython==8.14.0 ; python_version >= "3.9" and python_version < "4.0"
-itsdangerous==2.2.0 ; python_version >= "3.9" and python_version < "4.0"
-jaraco-classes==3.4.0 ; python_version >= "3.9" and python_version < "4.0"
-jaraco-context==6.0.1 ; python_version >= "3.9" and python_version < "4.0"
-jaraco-functools==4.0.2 ; python_version >= "3.9" and python_version < "4.0"
-jedi==0.19.1 ; python_version >= "3.9" and python_version < "4.0"
-jeepney==0.8.0 ; python_version >= "3.9" and python_version < "4.0" and sys_platform == "linux"
-jinja2==3.1.4 ; python_version >= "3.9" and python_version < "4.0"
-jiter==0.5.0 ; python_version >= "3.9" and python_version < "4.0"
-joblib==1.4.2 ; python_version >= "3.9" and python_version < "4.0"
-jsonpatch==1.33 ; python_version >= "3.9" and python_version < "4.0"
-jsonpath-ng==1.6.1 ; python_version >= "3.9" and python_version < "4.0"
-jsonpointer==3.0.0 ; python_version >= "3.9" and python_version < "4.0"
-jsonref==0.2 ; python_version >= "3.9" and python_version < "4.0"
-jsonschema-specifications==2023.12.1 ; python_version >= "3.9" and python_version < "4.0"
-jsonschema==4.23.0 ; python_version >= "3.9" and python_version < "4.0"
-jupyter-ai-magics==2.22.0 ; python_version >= "3.9" and python_version < "4.0"
-keyring==25.3.0 ; python_version >= "3.9" and python_version < "4.0"
-langchain-community==0.2.15 ; python_version >= "3.9" and python_version < "4.0"
-langchain-core==0.2.37 ; python_version >= "3.9" and python_version < "4.0"
-langchain-huggingface==0.0.3 ; python_version >= "3.9" and python_version < "4.0"
-langchain-openai==0.1.23 ; python_version >= "3.9" and python_version < "4.0"
-langchain-qdrant==0.1.3 ; python_version >= "3.9" and python_version < "4.0"
-langchain-text-splitters==0.2.2 ; python_version >= "3.9" and python_version < "4.0"
-langchain==0.2.15 ; python_version >= "3.9" and python_version < "4.0"
-langgraph==0.1.19 ; python_version >= "3.9" and python_version < "4.0"
-langsmith==0.1.108 ; python_version >= "3.9" and python_version < "4.0"
-lazy-loader==0.4 ; python_version >= "3.9" and python_version < "4.0"
-locket==1.0.0 ; python_version >= "3.9" and python_version < "4.0"
-makefun==1.15.4 ; python_version >= "3.9" and python_version < "4.0"
-mako==1.3.5 ; python_version >= "3.9" and python_version < "4.0"
-markdown-it-py==3.0.0 ; python_version >= "3.9" and python_version < "4.0"
-markupsafe==2.1.5 ; python_version >= "3.9" and python_version < "4.0"
-marshmallow3-annotations==1.1.0 ; python_version >= "3.9" and python_version < "4.0"
-marshmallow==3.22.0 ; python_version >= "3.9" and python_version < "4.0"
-matplotlib-inline==0.1.7 ; python_version >= "3.9" and python_version < "4.0"
-mdurl==0.1.2 ; python_version >= "3.9" and python_version < "4.0"
-mmh3==4.1.0 ; python_version >= "3.9" and python_version < "4.0"
-mock==5.1.0 ; python_version >= "3.9" and python_version < "4.0"
-more-itertools==10.4.0 ; python_version >= "3.9" and python_version < "4.0"
-mpmath==1.3.0 ; python_version >= "3.9" and python_version < "4.0"
-multidict==6.0.5 ; python_version >= "3.9" and python_version < "4.0"
-mypy-extensions==0.4.4 ; python_version >= "3.9" and python_version < "4.0"
-mypy-protobuf==3.6.0 ; python_version >= "3.9" and python_version < "4.0"
-mypy==0.910 ; python_version >= "3.9" and python_version < "4.0"
-neo4j-driver==4.4.12 ; python_version >= "3.9" and python_version < "4.0"
-networkx==3.2.1 ; python_version >= "3.9" and python_version < "4.0"
-nh3==0.2.18 ; python_version >= "3.9" and python_version < "4.0"
-numpy==1.26.4 ; python_version >= "3.9" and python_version < "4.0"
-nvidia-cublas-cu12==12.1.3.1 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cuda-cupti-cu12==12.1.105 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cuda-nvrtc-cu12==12.1.105 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cuda-runtime-cu12==12.1.105 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cudnn-cu12==9.1.0.70 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cufft-cu12==11.0.2.54 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-curand-cu12==10.3.2.106 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cusolver-cu12==11.4.5.107 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-cusparse-cu12==12.1.0.106 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-nccl-cu12==2.20.5 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-nvjitlink-cu12==12.6.68 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-nvidia-nvtx-cu12==12.1.105 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version >= "3.9" and python_version < "4.0"
-openai==1.43.0 ; python_version >= "3.9" and python_version < "4.0"
-orjson==3.10.7 ; python_version >= "3.9" and python_version < "4.0"
-packaging==24.1 ; python_version >= "3.9" and python_version < "4.0"
-pandas==2.2.2 ; python_version >= "3.9" and python_version < "4.0"
-parso==0.8.4 ; python_version >= "3.9" and python_version < "4.0"
-parsy==2.1 ; python_version >= "3.9" and python_version < "4.0"
-partd==1.4.2 ; python_version >= "3.9" and python_version < "4.0"
-pexpect==4.9.0 ; python_version >= "3.9" and python_version < "4.0" and sys_platform != "win32"
-pickleshare==0.7.5 ; python_version >= "3.9" and python_version < "4.0"
-pillow==10.4.0 ; python_version >= "3.9" and python_version < "4.0"
-pip==24.2 ; python_version >= "3.9" and python_version < "4.0"
-pipdeptree==2.16.2 ; python_version >= "3.9" and python_version < "4.0"
-pkginfo==1.10.0 ; python_version >= "3.9" and python_version < "4.0"
-platformdirs==4.2.2 ; python_version >= "3.9" and python_version < "4.0"
-pluggy==1.5.0 ; python_version >= "3.9" and python_version < "4.0"
-ply==3.11 ; python_version >= "3.9" and python_version < "4.0"
-portalocker==2.10.1 ; python_version >= "3.9" and python_version < "4.0"
-prompt-toolkit==3.0.47 ; python_version >= "3.9" and python_version < "4.0"
-protobuf==4.25.4 ; python_version >= "3.9" and python_version < "4.0"
-psutil==6.0.0 ; python_version >= "3.9" and python_version < "4.0"
-ptyprocess==0.7.0 ; python_version >= "3.9" and python_version < "4.0" and sys_platform != "win32"
-pure-eval==0.2.3 ; python_version >= "3.9" and python_version < "4.0"
-pwdlib[argon2,bcrypt]==0.2.0 ; python_version >= "3.9" and python_version < "4.0"
-py==1.11.0 ; python_version >= "3.9" and python_version < "4.0"
-pyarrow-hotfix==0.6 ; python_version >= "3.9" and python_version < "4.0"
-pyarrow==16.1.0 ; python_version >= "3.9" and python_version < "4.0"
-pycparser==2.22 ; python_version >= "3.9" and python_version < "4.0"
-pydantic-core==2.20.1 ; python_version >= "3.9" and python_version < "4.0"
-pydantic==2.8.2 ; python_version >= "3.9" and python_version < "4.0"
-pygments==2.18.0 ; python_version >= "3.9" and python_version < "4.0"
-pyhocon==0.3.61 ; python_version >= "3.9" and python_version < "4.0"
-pyjwt[crypto]==2.8.0 ; python_version >= "3.9" and python_version < "4.0"
-pyparsing==3.1.4 ; python_version >= "3.9" and python_version < "4.0"
-pypdf==4.3.1 ; python_version >= "3.9" and python_version < "4.0"
-pyproject-hooks==1.1.0 ; python_version >= "3.9" and python_version < "4.0"
-python-dateutil==2.9.0.post0 ; python_version >= "3.9" and python_version < "4.0"
-python-dotenv==1.0.1 ; python_version >= "3.9" and python_version < "4.0"
-python-engineio==4.9.1 ; python_version >= "3.9" and python_version < "4.0"
-python-multipart==0.0.9 ; python_version >= "3.9" and python_version < "4.0"
-python-socketio==5.11.4 ; python_version >= "3.9" and python_version < "4.0"
-pytz==2024.1 ; python_version >= "3.9" and python_version < "4.0"
-pywin32-ctypes==0.2.3 ; python_version >= "3.9" and python_version < "4.0" and sys_platform == "win32"
-pywin32==306 ; python_version >= "3.9" and python_version < "4.0" and platform_system == "Windows"
-pyyaml==6.0.2 ; python_version >= "3.9" and python_version < "4.0"
-qdrant-client==1.11.1 ; python_version >= "3.9" and python_version < "4.0"
-readme-renderer==44.0 ; python_version >= "3.9" and python_version < "4.0"
-redis==5.0.8 ; python_version >= "3.9" and python_version < "4.0"
-referencing==0.35.1 ; python_version >= "3.9" and python_version < "4.0"
-reflex-chakra==0.5.10 ; python_version >= "3.9" and python_version < "4.0"
-reflex-hosting-cli==0.1.13 ; python_version >= "3.9" and python_version < "4.0"
-reflex-resizable-panels==0.0.1 ; python_version >= "3.9" and python_version < "4.0"
-reflex==0.5.10 ; python_version >= "3.9" and python_version < "4.0"
-regex==2024.7.24 ; python_version >= "3.9" and python_version < "4.0"
-requests-toolbelt==1.0.0 ; python_version >= "3.9" and python_version < "4.0"
-requests==2.32.3 ; python_version >= "3.9" and python_version < "4.0"
-responses==0.25.3 ; python_version >= "3.9" and python_version < "4.0"
-retrying==1.3.4 ; python_version >= "3.9" and python_version < "4.0"
-rfc3986==2.0.0 ; python_version >= "3.9" and python_version < "4.0"
-rich==13.8.0 ; python_version >= "3.9" and python_version < "4.0"
-rpds-py==0.20.0 ; python_version >= "3.9" and python_version < "4.0"
-ryoma @ file:///Users/haoxu/dev/ryoma/ryoma ; python_version >= "3.9" and python_version < "4.0"
-ryoma-lab[all] @ file:///Users/haoxu/dev/ryoma/ryoma_lab ; python_version >= "3.9" and python_version < "4.0"
-safetensors==0.4.4 ; python_version >= "3.9" and python_version < "4.0"
-scikit-learn==1.5.1 ; python_version >= "3.9" and python_version < "4.0"
-scipy==1.13.1 ; python_version >= "3.9" and python_version < "4.0"
-secretstorage==3.3.3 ; python_version >= "3.9" and python_version < "4.0" and sys_platform == "linux"
-sentence-transformers==3.0.1 ; python_version >= "3.9" and python_version < "4.0"
-setuptools==70.1.1 ; python_version >= "3.9" and python_version < "4.0"
-shellingham==1.5.4 ; python_version >= "3.9" and python_version < "4.0"
-simple-websocket==1.0.0 ; python_version >= "3.9" and python_version < "4.0"
-six==1.16.0 ; python_version >= "3.9" and python_version < "4.0"
-sniffio==1.3.1 ; python_version >= "3.9" and python_version < "4.0"
-sql-formatter==0.6.2 ; python_version >= "3.9" and python_version < "4.0"
-sql-metadata==2.13.0 ; python_version >= "3.9" and python_version < "4.0"
-sqlalchemy==2.0.32 ; python_version >= "3.9" and python_version < "4.0"
-sqlalchemy[asyncio]==2.0.32 ; python_version >= "3.9" and python_version < "4.0"
-sqlalchemy[mypy]==2.0.32 ; python_version >= "3.9" and python_version < "4.0"
-sqlglot==23.12.2 ; python_version >= "3.9" and python_version < "4.0"
-sqlmodel==0.0.22 ; python_version >= "3.9" and python_version < "4.0"
-sqlparse==0.5.1 ; python_version >= "3.9" and python_version < "4.0"
-stack-data==0.6.3 ; python_version >= "3.9" and python_version < "4.0"
-starlette-admin==0.14.1 ; python_version >= "3.9" and python_version < "4.0"
-starlette==0.37.2 ; python_version >= "3.9" and python_version < "4.0"
-statsd==4.0.1 ; python_version >= "3.9" and python_version < "4.0"
-sympy==1.13.2 ; python_version >= "3.9" and python_version < "4.0"
-tabulate==0.9.0 ; python_version >= "3.9" and python_version < "4.0"
-tenacity==8.5.0 ; python_version >= "3.9" and python_version < "4.0"
-text-unidecode==1.3 ; python_version >= "3.9" and python_version < "4.0"
-threadpoolctl==3.5.0 ; python_version >= "3.9" and python_version < "4.0"
-tiktoken==0.7.0 ; python_version >= "3.9" and python_version < "4.0"
-tokenizers==0.19.1 ; python_version >= "3.9" and python_version < "4.0"
-toml==0.10.2 ; python_version >= "3.9" and python_version < "4.0"
-tomli==2.0.1 ; python_version >= "3.9" and python_version < "3.11"
-tomlkit==0.13.2 ; python_version >= "3.9" and python_version < "4.0"
-toolz==0.12.1 ; python_version >= "3.9" and python_version < "4.0"
-torch==2.4.0 ; python_version >= "3.9" and python_version < "4.0"
-tqdm==4.66.5 ; python_version >= "3.9" and python_version < "4.0"
-traitlets==5.14.3 ; python_version >= "3.9" and python_version < "4.0"
-transformers==4.44.2 ; python_version >= "3.9" and python_version < "4.0"
-triton==3.0.0 ; platform_system == "Linux" and platform_machine == "x86_64" and python_version < "3.13" and python_version >= "3.9"
-twine==5.1.1 ; python_version >= "3.9" and python_version < "4.0"
-typeguard==4.3.0 ; python_version >= "3.9" and python_version < "4.0"
-typer==0.12.5 ; python_version >= "3.9" and python_version < "4.0"
-types-protobuf==5.27.0.20240626 ; python_version >= "3.9" and python_version < "4.0"
-types-setuptools==70.3.0.20240710 ; python_version >= "3.9" and python_version < "4.0"
-typing-extensions==4.12.2 ; python_version >= "3.9" and python_version < "4.0"
-typing-inspect==0.9.0 ; python_version >= "3.9" and python_version < "4.0"
-tzdata==2024.1 ; python_version >= "3.9" and python_version < "4.0"
-unicodecsv==0.14.1 ; python_version >= "3.9" and python_version < "4.0"
-urllib3==2.2.2 ; python_version >= "3.9" and python_version < "4.0"
-uvicorn==0.30.6 ; python_version >= "3.9" and python_version < "4.0"
-uvicorn[standard]==0.30.6 ; python_version >= "3.9" and python_version < "4.0"
-uvloop==0.20.0 ; (sys_platform != "win32" and sys_platform != "cygwin") and platform_python_implementation != "PyPy" and python_version >= "3.9" and python_version < "4.0"
-watchdog==4.0.2 ; python_version >= "3.9" and python_version < "4.0"
-watchfiles==0.24.0 ; python_version >= "3.9" and python_version < "4.0"
-wcwidth==0.2.13 ; python_version >= "3.9" and python_version < "4.0"
-websockets==13.0.1 ; python_version >= "3.9" and python_version < "4.0"
-werkzeug==3.0.4 ; python_version >= "3.9" and python_version < "4.0"
-wheel==0.44.0 ; python_version >= "3.9" and python_version < "4.0"
-wrapt==1.16.0 ; python_version >= "3.9" and python_version < "4.0"
-wsproto==1.2.0 ; python_version >= "3.9" and python_version < "4.0"
-yarl==1.9.7 ; python_version >= "3.9" and python_version < "4.0"
-zipp==3.20.1 ; python_version >= "3.9" and python_version < "4.0"
+# This file was autogenerated by uv via the following command:
+#    uv pip compile pyproject.toml -o requirements.txt
+-e file:///Users/haoxu/dev/ryoma/packages/ryoma_ai
+    # via ryoma-dev (pyproject.toml)
+-e file:///Users/haoxu/dev/ryoma/packages/ryoma_lab
+    # via ryoma-dev (pyproject.toml)
+aiohappyeyeballs==2.4.0
+    # via aiohttp
+aiohttp==3.10.5
+    # via
+    #   langchain
+    #   langchain-community
+aiosignal==1.3.1
+    # via aiohttp
+alembic==1.13.2
+    # via
+    #   amundsen-rds
+    #   reflex
+    #   ryoma-lab
+amundsen-common==0.32.0
+    # via amundsen-databuilder
+amundsen-databuilder==7.5.1
+    # via ryoma-lab
+amundsen-rds==0.0.8
+    # via amundsen-databuilder
+annotated-types==0.7.0
+    # via pydantic
+anyio==4.4.0
+    # via
+    #   httpx
+    #   starlette
+    #   watchfiles
+argon2-cffi==23.1.0
+    # via pwdlib
+argon2-cffi-bindings==21.2.0
+    # via argon2-cffi
+asn1crypto==1.5.1
+    # via snowflake-connector-python
+asttokens==2.4.1
+    # via stack-data
+atomicwrites==1.4.1
+    # via amundsen-databuilder
+atpublic==4.1.0
+    # via ibis-framework
+attrs==24.2.0
+    # via
+    #   aiohttp
+    #   amundsen-common
+    #   jsonschema
+    #   referencing
+backports-tarfile==1.2.0
+    # via jaraco-context
+bcrypt==4.1.2
+    # via pwdlib
+bidict==0.23.1
+    # via
+    #   ibis-framework
+    #   python-socketio
+black==24.8.0
+    # via ryoma-dev (pyproject.toml)
+blinker==1.8.2
+    # via flask
+build==1.2.1
+    # via reflex
+cachetools==5.5.0
+    # via google-auth
+certifi==2024.8.30
+    # via
+    #   elasticsearch
+    #   httpcore
+    #   httpx
+    #   requests
+    #   snowflake-connector-python
+cffi==1.17.0
+    # via
+    #   argon2-cffi-bindings
+    #   cryptography
+    #   snowflake-connector-python
+charset-normalizer==3.3.2
+    # via
+    #   reflex
+    #   reflex-hosting-cli
+    #   requests
+    #   snowflake-connector-python
+click==8.1.7
+    # via
+    #   ryoma-dev (pyproject.toml)
+    #   black
+    #   dask
+    #   feast
+    #   flask
+    #   jupyter-ai-magics
+    #   typer
+    #   uvicorn
+cloudpickle==3.0.0
+    # via dask
+colorama==0.4.6
+    # via feast
+cryptography==43.0.0
+    # via
+    #   pyjwt
+    #   pyopenssl
+    #   snowflake-connector-python
+dask==2024.8.0
+    # via
+    #   dask-expr
+    #   feast
+dask-expr==1.1.10
+    # via dask
+dataclasses-json==0.6.7
+    # via langchain-community
+db-dtypes==1.3.0
+    # via ibis-framework
+decorator==5.1.1
+    # via ipython
+dill==0.3.8
+    # via
+    #   feast
+    #   reflex
+dnspython==2.6.1
+    # via email-validator
+docutils==0.21.2
+    # via readme-renderer
+elasticsearch==7.9.1
+    # via
+    #   amundsen-databuilder
+    #   elasticsearch-dsl
+elasticsearch-dsl==7.4.0
+    # via amundsen-databuilder
+email-validator==2.1.2
+    # via fastapi-users
+executing==2.1.0
+    # via stack-data
+fastapi==0.110.3
+    # via
+    #   fastapi-users
+    #   feast
+    #   reflex
+fastapi-users==13.0.0
+    # via
+    #   fastapi-users-db-sqlalchemy
+    #   ryoma-lab
+fastapi-users-db-sqlalchemy==6.0.1
+    # via fastapi-users
+fastjsonschema==2.20.0
+    # via nbformat
+feast==0.39.1
+    # via ryoma-lab
+filelock==3.15.4
+    # via
+    #   huggingface-hub
+    #   snowflake-connector-python
+    #   torch
+    #   transformers
+findspark==2.0.1
+    # via ryoma-lab
+flake8==7.1.1
+    # via ryoma-dev (pyproject.toml)
+flask==3.0.3
+    # via amundsen-common
+freezegun==1.5.1
+    # via amundsen-databuilder
+frozenlist==1.4.1
+    # via
+    #   aiohttp
+    #   aiosignal
+fsspec==2024.6.1
+    # via
+    #   dask
+    #   huggingface-hub
+    #   torch
+google-api-core==2.20.0
+    # via
+    #   google-api-python-client
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery-storage
+    #   google-cloud-core
+google-api-python-client==1.12.11
+    # via amundsen-databuilder
+google-auth==2.35.0
+    # via
+    #   amundsen-databuilder
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
+    #   google-auth-oauthlib
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery-storage
+    #   google-cloud-core
+    #   pydata-google-auth
+google-auth-httplib2==0.2.0
+    # via
+    #   amundsen-databuilder
+    #   google-api-python-client
+google-auth-oauthlib==1.2.1
+    # via pydata-google-auth
+google-cloud-bigquery==3.26.0
+    # via ibis-framework
+google-cloud-bigquery-storage==2.26.0
+    # via ibis-framework
+google-cloud-core==2.4.1
+    # via google-cloud-bigquery
+google-crc32c==1.6.0
+    # via google-resumable-media
+google-resumable-media==2.7.2
+    # via google-cloud-bigquery
+googleapis-common-protos==1.65.0
+    # via
+    #   google-api-core
+    #   grpcio-status
+gpt4all==2.8.2
+    # via ryoma-lab
+greenlet==3.0.3
+    # via sqlalchemy
+grpcio==1.66.1
+    # via
+    #   google-api-core
+    #   grpcio-status
+    #   grpcio-tools
+    #   qdrant-client
+grpcio-status==1.62.3
+    # via google-api-core
+grpcio-tools==1.62.3
+    # via qdrant-client
+gunicorn==22.0.0
+    # via
+    #   feast
+    #   reflex
+h11==0.14.0
+    # via
+    #   httpcore
+    #   uvicorn
+    #   wsproto
+h2==4.1.0
+    # via httpx
+hpack==4.0.0
+    # via h2
+httpcore==1.0.5
+    # via httpx
+httplib2==0.22.0
+    # via
+    #   amundsen-databuilder
+    #   google-api-python-client
+    #   google-auth-httplib2
+httptools==0.6.1
+    # via uvicorn
+httpx==0.27.2
+    # via
+    #   httpx-oauth
+    #   langsmith
+    #   qdrant-client
+    #   reflex
+    #   reflex-hosting-cli
+httpx-oauth==0.15.1
+    # via fastapi-users
+huggingface-hub==0.24.6
+    # via
+    #   langchain-huggingface
+    #   sentence-transformers
+    #   tokenizers
+    #   transformers
+hyperframe==6.0.1
+    # via h2
+ibis-framework==9.0.0
+    # via ryoma-lab
+idna==3.8
+    # via
+    #   anyio
+    #   email-validator
+    #   httpx
+    #   requests
+    #   snowflake-connector-python
+    #   yarl
+importlib-metadata==8.4.0
+    # via
+    #   dask
+    #   jupyter-ai-magics
+    #   keyring
+    #   twine
+iniconfig==2.0.0
+    # via pytest
+ipython==8.27.0
+    # via
+    #   jupyter-ai-magics
+    #   ryoma-lab
+isort==5.13.2
+    # via ryoma-dev (pyproject.toml)
+itsdangerous==2.2.0
+    # via flask
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==6.0.1
+    # via keyring
+jaraco-functools==4.0.2
+    # via keyring
+jedi==0.19.1
+    # via ipython
+jinja2==3.1.4
+    # via
+    #   amundsen-databuilder
+    #   feast
+    #   flask
+    #   reflex
+    #   starlette-admin
+    #   torch
+joblib==1.4.2
+    # via scikit-learn
+jsonpatch==1.33
+    # via langchain-core
+jsonpath-ng==1.6.1
+    # via jupyter-ai-magics
+jsonpointer==3.0.0
+    # via jsonpatch
+jsonref==0.2
+    # via amundsen-databuilder
+jsonschema==4.23.0
+    # via
+    #   feast
+    #   nbformat
+jsonschema-specifications==2023.12.1
+    # via jsonschema
+jupyter-ai-magics==2.24.0
+    # via ryoma-lab
+jupyter-core==5.7.2
+    # via nbformat
+keyring==25.3.0
+    # via twine
+langchain==0.2.15
+    # via
+    #   jupyter-ai-magics
+    #   langchain-community
+langchain-community==0.2.15
+    # via jupyter-ai-magics
+langchain-core==0.2.41
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-huggingface
+    #   langchain-qdrant
+    #   langchain-text-splitters
+    #   langgraph
+    #   langgraph-checkpoint
+langchain-huggingface==0.0.3
+    # via ryoma-lab
+langchain-qdrant==0.1.3
+    # via ryoma-lab
+langchain-text-splitters==0.2.2
+    # via langchain
+langgraph==0.2.28
+    # via ryoma-lab
+langgraph-checkpoint==1.0.12
+    # via langgraph
+langsmith==0.1.129
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-core
+lazy-loader==0.4
+    # via reflex
+locket==1.0.0
+    # via partd
+makefun==1.15.4
+    # via fastapi-users
+mako==1.3.5
+    # via alembic
+markdown-it-py==3.0.0
+    # via rich
+markupsafe==2.1.5
+    # via
+    #   jinja2
+    #   mako
+    #   werkzeug
+marshmallow==3.22.0
+    # via
+    #   amundsen-common
+    #   dataclasses-json
+    #   marshmallow3-annotations
+marshmallow3-annotations==1.1.0
+    # via amundsen-common
+matplotlib-inline==0.1.7
+    # via ipython
+mccabe==0.7.0
+    # via flake8
+mdurl==0.1.2
+    # via markdown-it-py
+mmh3==4.1.0
+    # via feast
+more-itertools==10.4.0
+    # via
+    #   amundsen-databuilder
+    #   jaraco-classes
+    #   jaraco-functools
+mpmath==1.3.0
+    # via sympy
+msgpack==1.1.0
+    # via langgraph-checkpoint
+multidict==6.0.5
+    # via
+    #   aiohttp
+    #   yarl
+mypy==0.910
+    # via
+    #   ryoma-dev (pyproject.toml)
+    #   sqlalchemy
+mypy-extensions==0.4.4
+    # via
+    #   black
+    #   mypy
+    #   typing-inspect
+mypy-protobuf==3.6.0
+    # via feast
+nbformat==5.10.4
+    # via ryoma-lab
+neo4j-driver==4.4.12
+    # via amundsen-databuilder
+networkx==3.2.1
+    # via torch
+nh3==0.2.18
+    # via readme-renderer
+numpy==1.26.4
+    # via
+    #   amundsen-databuilder
+    #   dask
+    #   db-dtypes
+    #   feast
+    #   ibis-framework
+    #   langchain
+    #   langchain-community
+    #   pandas
+    #   pyarrow
+    #   qdrant-client
+    #   scikit-learn
+    #   scipy
+    #   sentence-transformers
+    #   transformers
+oauthlib==3.2.2
+    # via requests-oauthlib
+orjson==3.10.7
+    # via langsmith
+packaging==24.1
+    # via
+    #   black
+    #   build
+    #   dask
+    #   db-dtypes
+    #   google-cloud-bigquery
+    #   gunicorn
+    #   huggingface-hub
+    #   ibis-framework
+    #   langchain-core
+    #   lazy-loader
+    #   marshmallow
+    #   pytest
+    #   reflex
+    #   snowflake-connector-python
+    #   transformers
+pandas==2.2.2
+    # via
+    #   amundsen-databuilder
+    #   dask
+    #   dask-expr
+    #   db-dtypes
+    #   feast
+    #   ibis-framework
+    #   snowflake-connector-python
+parso==0.8.4
+    # via jedi
+parsy==2.1
+    # via ibis-framework
+partd==1.4.2
+    # via dask
+pathspec==0.12.1
+    # via black
+pexpect==4.9.0
+    # via ipython
+pillow==10.4.0
+    # via sentence-transformers
+pip==24.2
+    # via
+    #   ryoma-dev (pyproject.toml)
+    #   pipdeptree
+pipdeptree==2.16.2
+    # via reflex-hosting-cli
+pkginfo==1.10.0
+    # via twine
+platformdirs==4.2.2
+    # via
+    #   black
+    #   jupyter-core
+    #   reflex
+    #   reflex-hosting-cli
+    #   snowflake-connector-python
+pluggy==1.5.0
+    # via
+    #   amundsen-databuilder
+    #   pytest
+ply==3.11
+    # via jsonpath-ng
+portalocker==2.10.1
+    # via qdrant-client
+prompt-toolkit==3.0.47
+    # via ipython
+proto-plus==1.24.0
+    # via
+    #   google-api-core
+    #   google-cloud-bigquery-storage
+protobuf==4.25.4
+    # via
+    #   feast
+    #   google-api-core
+    #   google-cloud-bigquery-storage
+    #   googleapis-common-protos
+    #   grpcio-status
+    #   grpcio-tools
+    #   mypy-protobuf
+    #   proto-plus
+psutil==6.0.0
+    # via reflex
+psycopg2==2.9.9
+    # via
+    #   ibis-framework
+    #   ryoma-lab
+psycopg2-binary==2.9.9
+    # via feast
+ptyprocess==0.7.0
+    # via pexpect
+pure-eval==0.2.3
+    # via stack-data
+pwdlib==0.2.0
+    # via fastapi-users
+py==1.11.0
+    # via amundsen-databuilder
+py4j==0.10.9.7
+    # via pyspark
+pyarrow==16.1.0
+    # via
+    #   dask-expr
+    #   db-dtypes
+    #   feast
+    #   ibis-framework
+    #   snowflake-connector-python
+pyarrow-hotfix==0.6
+    # via ibis-framework
+pyasn1==0.6.1
+    # via
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.4.1
+    # via google-auth
+pycodestyle==2.12.1
+    # via flake8
+pycparser==2.22
+    # via cffi
+pydantic==2.8.2
+    # via
+    #   fastapi
+    #   feast
+    #   langchain
+    #   langchain-core
+    #   langchain-qdrant
+    #   langsmith
+    #   qdrant-client
+    #   reflex
+    #   reflex-hosting-cli
+    #   sqlmodel
+pydantic-core==2.20.1
+    # via pydantic
+pydata-google-auth==1.8.2
+    # via ibis-framework
+pyflakes==3.2.0
+    # via flake8
+pygments==2.18.0
+    # via
+    #   feast
+    #   ipython
+    #   readme-renderer
+    #   rich
+pyhocon==0.3.61
+    # via amundsen-databuilder
+pyjwt==2.8.0
+    # via
+    #   fastapi-users
+    #   snowflake-connector-python
+pymysql==1.1.1
+    # via
+    #   feast
+    #   ibis-framework
+pyopenssl==24.2.1
+    # via snowflake-connector-python
+pyparsing==3.1.4
+    # via
+    #   amundsen-databuilder
+    #   httplib2
+    #   pyhocon
+pypdf==4.3.1
+    # via ryoma-lab
+pyproject-hooks==1.1.0
+    # via build
+pyspark==3.5.3
+    # via
+    #   ibis-framework
+    #   ryoma-lab
+pytest==8.3.3
+    # via ryoma-dev (pyproject.toml)
+python-dateutil==2.9.0.post0
+    # via
+    #   elasticsearch-dsl
+    #   freezegun
+    #   google-cloud-bigquery
+    #   ibis-framework
+    #   pandas
+    #   reflex-hosting-cli
+python-dotenv==1.0.1
+    # via uvicorn
+python-engineio==4.9.1
+    # via
+    #   python-socketio
+    #   reflex
+python-multipart==0.0.9
+    # via
+    #   fastapi-users
+    #   reflex
+    #   starlette-admin
+python-socketio==5.11.4
+    # via reflex
+pytz==2024.1
+    # via
+    #   amundsen-databuilder
+    #   ibis-framework
+    #   neo4j-driver
+    #   pandas
+    #   snowflake-connector-python
+pyyaml==6.0.2
+    # via
+    #   dask
+    #   feast
+    #   huggingface-hub
+    #   langchain
+    #   langchain-community
+    #   langchain-core
+    #   responses
+    #   transformers
+    #   uvicorn
+qdrant-client==1.11.1
+    # via langchain-qdrant
+readme-renderer==44.0
+    # via twine
+redis==5.0.8
+    # via reflex
+referencing==0.35.1
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+reflex==0.5.10
+    # via
+    #   reflex-chakra
+    #   ryoma-lab
+reflex-chakra==0.5.10
+    # via reflex
+reflex-hosting-cli==0.1.13
+    # via reflex
+regex==2024.7.24
+    # via
+    #   ibis-framework
+    #   transformers
+requests==2.32.3
+    # via
+    #   amundsen-databuilder
+    #   feast
+    #   google-api-core
+    #   google-cloud-bigquery
+    #   gpt4all
+    #   huggingface-hub
+    #   langchain
+    #   langchain-community
+    #   langsmith
+    #   requests-oauthlib
+    #   requests-toolbelt
+    #   responses
+    #   snowflake-connector-python
+    #   transformers
+    #   twine
+requests-oauthlib==2.0.0
+    # via google-auth-oauthlib
+requests-toolbelt==1.0.0
+    # via twine
+responses==0.25.3
+    # via amundsen-databuilder
+retrying==1.3.4
+    # via amundsen-databuilder
+rfc3986==2.0.0
+    # via twine
+rich==13.8.0
+    # via
+    #   ibis-framework
+    #   reflex
+    #   reflex-hosting-cli
+    #   twine
+    #   typer
+rpds-py==0.20.0
+    # via
+    #   jsonschema
+    #   referencing
+rsa==4.9
+    # via google-auth
+safetensors==0.4.4
+    # via transformers
+scikit-learn==1.5.1
+    # via sentence-transformers
+scipy==1.13.1
+    # via
+    #   scikit-learn
+    #   sentence-transformers
+sentence-transformers==3.0.1
+    # via langchain-huggingface
+setuptools==70.1.1
+    # via
+    #   ryoma-dev (pyproject.toml)
+    #   grpcio-tools
+    #   pydata-google-auth
+    #   reflex
+shellingham==1.5.4
+    # via typer
+simple-websocket==1.0.0
+    # via python-engineio
+six==1.16.0
+    # via
+    #   asttokens
+    #   elasticsearch-dsl
+    #   google-api-python-client
+    #   python-dateutil
+    #   retrying
+sniffio==1.3.1
+    # via
+    #   anyio
+    #   httpx
+snowflake-connector-python==3.12.2
+    # via
+    #   amundsen-databuilder
+    #   feast
+    #   ibis-framework
+    #   snowflake-sqlalchemy
+snowflake-sqlalchemy==1.6.1
+    # via amundsen-databuilder
+sortedcontainers==2.4.0
+    # via snowflake-connector-python
+sql-formatter==0.6.2
+    # via ryoma-lab
+sql-metadata==2.13.0
+    # via ryoma-lab
+sqlalchemy==2.0.32
+    # via
+    #   alembic
+    #   amundsen-databuilder
+    #   amundsen-rds
+    #   fastapi-users-db-sqlalchemy
+    #   feast
+    #   langchain
+    #   langchain-community
+    #   snowflake-sqlalchemy
+    #   sqlmodel
+sqlglot==23.12.2
+    # via ibis-framework
+sqlmodel==0.0.22
+    # via reflex
+sqlparse==0.5.1
+    # via sql-metadata
+stack-data==0.6.3
+    # via ipython
+starlette==0.37.2
+    # via
+    #   fastapi
+    #   starlette-admin
+starlette-admin==0.14.1
+    # via reflex
+statsd==4.0.1
+    # via amundsen-databuilder
+sympy==1.13.2
+    # via torch
+tabulate==0.9.0
+    # via
+    #   feast
+    #   reflex-hosting-cli
+tenacity==8.5.0
+    # via
+    #   feast
+    #   langchain
+    #   langchain-community
+    #   langchain-core
+text-unidecode==1.3
+    # via amundsen-databuilder
+threadpoolctl==3.5.0
+    # via scikit-learn
+tokenizers==0.19.1
+    # via
+    #   langchain-huggingface
+    #   transformers
+toml==0.10.2
+    # via
+    #   feast
+    #   mypy
+tomlkit==0.13.2
+    # via
+    #   reflex
+    #   snowflake-connector-python
+toolz==0.12.1
+    # via
+    #   dask
+    #   ibis-framework
+    #   partd
+torch==2.4.0
+    # via
+    #   ryoma-lab
+    #   sentence-transformers
+tqdm==4.66.5
+    # via
+    #   feast
+    #   gpt4all
+    #   huggingface-hub
+    #   sentence-transformers
+    #   transformers
+traitlets==5.14.3
+    # via
+    #   ipython
+    #   jupyter-core
+    #   matplotlib-inline
+    #   nbformat
+transformers==4.44.2
+    # via
+    #   langchain-huggingface
+    #   ryoma-lab
+    #   sentence-transformers
+twine==5.1.1
+    # via reflex
+typeguard==4.3.0
+    # via feast
+typer==0.12.5
+    # via
+    #   reflex
+    #   reflex-hosting-cli
+types-protobuf==5.27.0.20240626
+    # via mypy-protobuf
+types-pymysql==1.1.0.20240524
+    # via feast
+typing-extensions==4.12.2
+    # via
+    #   alembic
+    #   fastapi
+    #   huggingface-hub
+    #   ibis-framework
+    #   ipython
+    #   jupyter-ai-magics
+    #   langchain-core
+    #   mypy
+    #   pydantic
+    #   pydantic-core
+    #   snowflake-connector-python
+    #   sqlalchemy
+    #   torch
+    #   typeguard
+    #   typer
+    #   typing-inspect
+typing-inspect==0.9.0
+    # via dataclasses-json
+tzdata==2024.1
+    # via pandas
+unicodecsv==0.14.1
+    # via amundsen-databuilder
+uritemplate==3.0.1
+    # via google-api-python-client
+urllib3==2.2.2
+    # via
+    #   elasticsearch
+    #   qdrant-client
+    #   requests
+    #   responses
+    #   twine
+uvicorn==0.30.6
+    # via
+    #   feast
+    #   reflex
+uvloop==0.20.0
+    # via uvicorn
+watchdog==4.0.2
+    # via reflex
+watchfiles==0.24.0
+    # via
+    #   reflex
+    #   uvicorn
+wcwidth==0.2.13
+    # via prompt-toolkit
+websockets==13.0.1
+    # via
+    #   reflex-hosting-cli
+    #   uvicorn
+werkzeug==3.0.4
+    # via flask
+wheel==0.44.0
+    # via
+    #   amundsen-databuilder
+    #   reflex
+wrapt==1.16.0
+    # via reflex
+wsproto==1.2.0
+    # via simple-websocket
+yarl==1.9.7
+    # via aiohttp
+zipp==3.20.1
+    # via importlib-metadata
