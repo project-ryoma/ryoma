@@ -8,7 +8,7 @@ IMAGE := ryoma
 VERSION := latest
 
 .PHONY: uv-download
-poetry-download:
+uv-download:
 	curl -LsSf https://astral.sh/uv/install.sh | sh
 
 #* Installation
