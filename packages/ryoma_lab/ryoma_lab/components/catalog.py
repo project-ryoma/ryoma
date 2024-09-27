@@ -70,7 +70,6 @@ def render_catalog_list():
                         )
                     ),
                 ),
-                width="100%",
             ),
             allow_multiple=True,
             min_width="300px",

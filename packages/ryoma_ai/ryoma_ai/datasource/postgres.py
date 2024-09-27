@@ -68,7 +68,7 @@ class PostgresDataSource(SqlDataSource):
             f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
         )
 
-    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = None):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = None):
         from databuilder.extractor.postgres_metadata_extractor import (
             PostgresMetadataExtractor,
         )

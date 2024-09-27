@@ -301,7 +301,7 @@ def show_store():
                 width="100%",
             ),
             value=VectorStoreState.current_store.project_name,
-            on_change=VectorStoreState.set_store,
+            on_change=VectorStoreState.set_project,
             orientation="horizontal",
             height="100vh",
             width="100%",

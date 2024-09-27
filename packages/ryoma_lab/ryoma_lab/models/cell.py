@@ -37,7 +37,7 @@ class UnknownOutput(ErrorOutput):
 
 
 class Cell(rx.Base):
-    cell_type: Literal["code", "markdown"] = "code"
+    cell_type: str = "code"
     content: str = ""
     output: List[
         Union[

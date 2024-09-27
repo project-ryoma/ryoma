@@ -51,7 +51,13 @@ class VectorStoreState(AIState):
             return {}
         if "connection_url" in configs:
             configs = {
+                "type": datasource.type,
                 "path": configs["connection_url"],
+            }
+        else:
+            configs = {
+                "type": datasource.type,
+                **configs,
             }
         return configs
 
@@ -64,11 +70,11 @@ class VectorStoreState(AIState):
     def toggle_materialize_feature_dialog(self):
         self.materialize_feature_dialog_open = not self.materialize_feature_dialog_open
 
-    def set_store(self, project_name: str):
+    def set_project(self, project_name: str):
         self.project_name = project_name
-        self._load_feature_store(self.project_name)
+        self._load_project(self.project_name)
 
-    def get_store(self, project_name: str):
+    def get_project(self, project_name: str):
         return next(
             (
                 store
@@ -78,14 +84,14 @@ class VectorStoreState(AIState):
             None,
         )
 
-    def _load_feature_store(self, project_name: Optional[str] = None):
-        store = None
+    def _load_project(self, project_name: Optional[str] = None):
+        project = None
         if project_name:
-            store = self.get_store(project_name)
+            project = self.get_project(project_name)
         elif self.vector_stores:
-            store = self.vector_stores[0]
-        if store:
-            self.current_store = store
+            project = self.vector_stores[0]
+        if project:
+            self.current_store = project
             with VectorStoreService() as vector_store_service:
                 self._current_fs = vector_store_service.get_feature_store(
                     self.current_store
@@ -97,14 +103,13 @@ class VectorStoreState(AIState):
     def create_store(self):
         datasource_configs = self._get_datasource_configs(self.online_store)
         online_store_configs = {
-            "type": self.online_store,
             **datasource_configs,
             "dimension": self.embedding_dimension,
         }
 
         repo_config_input = {
             "project_name": self.project_name,
-            "online_store": self.online_store,
+            "online_store": datasource_configs["type"],
             "online_store_configs": online_store_configs,
             "offline_store": self.offline_store,
             "offline_store_configs": None,
@@ -141,7 +146,7 @@ class VectorStoreState(AIState):
                 files=self.files,
             )
         logging.info(f"Feature View {self.feature_view_name} created")
-        self._load_feature_store()
+        self._load_project()
         self.toggle_create_feature_dialog()
 
     def index_feature(self, feature_view: FeatureViewModel):
@@ -155,7 +160,7 @@ class VectorStoreState(AIState):
     def load_store(self):
         with VectorStoreService() as vector_store_service:
             self.vector_stores = vector_store_service.load_stores()
-        self._load_feature_store()
+        self._load_project()
 
         logging.info("Feature store loaded")
 

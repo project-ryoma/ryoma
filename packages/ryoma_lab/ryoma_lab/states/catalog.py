@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import reflex as rx
 from databuilder.loader.base_loader import Loader
@@ -8,13 +8,12 @@ from databuilder.models.table_metadata import TableMetadata
 from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
 
-from ryoma_lab.models.data_catalog import CatalogTable, TableTable
+from ryoma_lab.models.data_catalog import TableTable
 from ryoma_lab.services import embedding as embedding_service
-from ryoma_lab.services import vector_store as vector_store_service
 from ryoma_lab.services.catalog import CatalogService
+from ryoma_lab.services.vector_store import VectorStoreService
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.datasource import DataSourceState
-from ryoma_lab.states.vector_store import VectorStoreState
 
 
 class CatalogState(DataSourceState):
@@ -88,35 +87,28 @@ class CatalogState(DataSourceState):
             aistate.embedding.model, aistate.embedding.model_parameters
         )
 
-    def _get_embedding_content(self, table: TableTable):
-        return f"Table: {table['name']}\nColumns: {table['columns']}\nDescription: {table['description']}"
-
-    async def _get_fs(self):
-        vector_store_state = await self.get_state(VectorStoreState)
-        project = vector_store_state.get_project(self.vector_store_project_name)
-        return vector_store_service.get_feature_store(project, self.vector_store_config)
+    def _get_table_embedding_content(self, table: TableTable):
+        return f"""
+Table: {table["table_name"]}
+Description: {table["description"]}
+Columns: {table["columns"]}
+"""
 
     async def index_table(self, table: TableTable):
         logging.info(f"Indexing table {table}")
         embedding_client = await self.get_embedding_client()
         if not embedding_client:
             return
-        embedded_table_content = embedding_client.embed_query(
-            self._get_embedding_content(table)
+        table_embeddings = embedding_client.embed_query(
+            self._get_table_embedding_content(table)
         )
-        fs = await self._get_fs()
-        feature_view = vector_store_service.get_feature_view_by_name(
-            fs, self.feature_view_name
-        )
-        embedding_feature_inputs = vector_store_service.build_vector_feature_inputs(
-            feature_view=feature_view,
-            inputs=embedded_table_content,
-            entity_value=table["name"],
-        )
-
-        vector_store_service.index_feature_from_data(
-            fs, self.feature_view_name, embedding_feature_inputs
-        )
+        with VectorStoreService() as vector_store_service:
+            vector_store_service.index_feature_view(
+                self.vector_store_project_name,
+                self.feature_view_name,
+                table_embeddings,
+                table["table_name"]
+            )
         logging.info(f"Table {table} indexed")
 
     def on_load(self):

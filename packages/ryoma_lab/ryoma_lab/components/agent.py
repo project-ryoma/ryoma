@@ -65,7 +65,7 @@ def show_agent_grid():
     """Create a content grid."""
     return rx.vstack(
         rx.chakra.flex(
-            rx.foreach(AgentState.agents, agent_card, width="100"), width="100%"
+            rx.foreach(AgentState.agents, agent_card), width="100%"
         ),
         width="100%",
         overflow_x="scroll",

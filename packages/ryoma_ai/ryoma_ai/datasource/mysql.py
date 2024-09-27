@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 import ibis
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -10,10 +10,13 @@ from ibis import BaseBackend
 from pyhocon import ConfigFactory
 
 from ryoma_ai.datasource.base import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class MySqlDataSource(SqlDataSource):
+    def get_query_plan(self,
+                       query: str) -> Any:
+        pass
+
     def __init__(
         self,
         database: Optional[str] = None,
@@ -31,7 +34,8 @@ class MySqlDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> BaseBackend:
+    def connect(self,
+                **kwargs) -> BaseBackend:
         return ibis.mysql.connect(
             user=self.username,
             password=self.password,
@@ -41,35 +45,12 @@ class MySqlDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def get_metadata(self, **kwargs) -> Union[Catalog, Schema, Table]:
-        logging.info("Getting metadata from Mysql")
-        conn = self.connect()
-
-        def get_table_metadata(database: str) -> list[Table]:
-            tables = []
-            for table in conn.list_tables(database=database):
-                table_schema = conn.get_schema(table, database=database)
-                tb = Table(
-                    table_name=table,
-                    columns=[
-                        Column(
-                            name=name,
-                            type=table_schema[name].name,
-                            nullable=table_schema[name].nullable,
-                        )
-                        for name in table_schema
-                    ],
-                )
-                tables.append(tb)
-            return tables
-
-        tables = get_table_metadata(self.database)
-        return Schema(database_name=self.database, tables=tables)
-
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def get_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self,
+                     loader: Loader,
+                     where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )
