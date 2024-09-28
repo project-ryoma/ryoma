@@ -10,7 +10,7 @@ def calculate_entropy(probabilities: np.array) -> float:
 
 
 # calculate the entropy of the vector of list, avoid the case of 0 * log(0), not using numpy
-def calculate_entropy_list(probs: List[float]) -> float:
+def calculate_entropy_list(probs: list[float]) -> float:
     return -sum(pro * math.log2(pro) for pro in probs if pro > 0)
 
 
@@ -25,7 +25,7 @@ def test_calculate_entropy():
 
 def find_best_split(
     data: np.ndarray, labels: np.array, feature_idx: int
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     # get the unique values of the feature
     unique_values = np.unique(data[:, feature_idx])
     best_entropy = math.inf
@@ -82,7 +82,7 @@ def test_find_best_split():
 # get the splitted datasets by the best split value
 def split_datasets(
     data: np.ndarray, split_value: float, feature_idx: int
-) -> List[np.ndarray]:
+) -> list[np.ndarray]:
     max_threshold = data[:, feature_idx] < split_value
     left_indices = np.where(max_threshold)
     right_indices = np.where(~max_threshold)

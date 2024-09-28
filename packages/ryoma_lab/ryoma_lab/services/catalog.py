@@ -2,8 +2,12 @@ from typing import List, Optional
 
 import reflex as rx
 from databuilder.models.table_metadata import ColumnMetadata
-from ryoma_lab.models.data_catalog import (CatalogTable, ColumnTable,
-                                           SchemaTable, TableTable)
+from ryoma_lab.models.data_catalog import (
+    CatalogTable,
+    ColumnTable,
+    SchemaTable,
+    TableTable,
+)
 from sqlalchemy.orm import joinedload
 from sqlmodel import select
 

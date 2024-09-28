@@ -3,11 +3,12 @@
 import reflex as rx
 from ryoma_lab import styles
 from ryoma_lab.components.loading_icon import loading_icon
-from ryoma_lab.components.model_selector import (chat_model_selector,
-                                                 embedding_model_selector)
+from ryoma_lab.components.model_selector import (
+    chat_model_selector,
+    embedding_model_selector,
+)
 from ryoma_lab.components.react_resizable_panels import resizable_panels as rzp
-from ryoma_lab.components.workspace.file_directory_sidebar import \
-    file_directory_sidebar
+from ryoma_lab.components.workspace.file_directory_sidebar import file_directory_sidebar
 from ryoma_lab.components.workspace.notebook import notebook
 from ryoma_lab.states.agent import AgentState
 from ryoma_lab.states.base import BaseState

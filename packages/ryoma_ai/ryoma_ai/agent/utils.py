@@ -1,8 +1,12 @@
 import logging
 from typing import Dict, Optional
 
-from jupyter_ai_magics.utils import (AnyProvider, decompose_model_id,
-                                     get_em_providers, get_lm_providers)
+from jupyter_ai_magics.utils import (
+    AnyProvider,
+    decompose_model_id,
+    get_em_providers,
+    get_lm_providers,
+)
 
 
 def load_model_provider(

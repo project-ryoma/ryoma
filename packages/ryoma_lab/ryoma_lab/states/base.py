@@ -3,8 +3,10 @@
 from typing import List, Optional
 
 import reflex as rx
-from fastapi_users.db import (SQLAlchemyBaseOAuthAccountTableUUID,
-                              SQLAlchemyBaseUserTableUUID)
+from fastapi_users.db import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, select
 

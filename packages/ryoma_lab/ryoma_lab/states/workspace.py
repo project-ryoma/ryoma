@@ -7,9 +7,15 @@ from feast import FeatureStore
 from IPython.core.displaypub import DisplayPublisher
 from IPython.core.interactiveshell import InteractiveShell
 from ryoma_ai.datasource.base import DataSource
-from ryoma_lab.models.cell import (Cell, CellOutput, DataframeOutput,
-                                   ErrorOutput, ExecuteResultOutput,
-                                   StreamOutput, UnknownOutput)
+from ryoma_lab.models.cell import (
+    Cell,
+    CellOutput,
+    DataframeOutput,
+    ErrorOutput,
+    ExecuteResultOutput,
+    StreamOutput,
+    UnknownOutput,
+)
 from ryoma_lab.models.data_catalog import CatalogTable, SchemaTable
 from ryoma_lab.models.kernel import Kernel
 from ryoma_lab.models.tool import Tool, ToolOutput
