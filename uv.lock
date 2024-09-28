@@ -643,6 +643,19 @@ toml = [
 ]
 
 [[package]]
+name = "coverage-badge"
+version = "1.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "coverage" },
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/be/8f/e92b0a010c76b0da82709838b3f3ae9aec638d0c44dbfb1186a5751f5d2e/coverage_badge-1.1.2.tar.gz", hash = "sha256:fe7ed58a3b72dad85a553b64a99e963dea3847dcd0b8ddd2b38a00333618642c", size = 6335 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/3d/5642a1a06191b2e1e0f87a2e824e6d3eb7c32c589a68ed4d1dcbd3324d63/coverage_badge-1.1.2-py2.py3-none-any.whl", hash = "sha256:d8413ce51c91043a1692b943616b450868cbeeb0ea6a0c54a32f8318c9c96ff7", size = 6493 },
+]
+
+[[package]]
 name = "cryptography"
 version = "43.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -4072,6 +4085,7 @@ source = { editable = "." }
 dependencies = [
     { name = "black" },
     { name = "click" },
+    { name = "coverage-badge" },
     { name = "flake8" },
     { name = "isort" },
     { name = "mypy" },
@@ -4089,6 +4103,7 @@ dependencies = [
 requires-dist = [
     { name = "black", specifier = ">=23.3.0" },
     { name = "click", specifier = ">=8.0.0" },
+    { name = "coverage-badge", specifier = ">=1.1.2" },
     { name = "flake8", specifier = ">=3.9.2" },
     { name = "isort", specifier = ">=5.9.3" },
     { name = "mypy", specifier = ">=0.910" },

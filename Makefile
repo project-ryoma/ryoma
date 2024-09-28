@@ -35,7 +35,7 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 unit-test:
-	PYTHONPATH=$(PYTHONPATH) uv run pytest -c pyproject.toml --cov-report=html --cov=ryoma tests/unit_tests
+	PYTHONPATH=$(PYTHONPATH) uv run pytest -c pyproject.toml --cov-report=html --cov=packages tests/unit_tests
 	uv run coverage-badge -o assets/images/coverage.svg -f
 
 .PHONY: check-codestyle
