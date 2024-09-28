@@ -4,7 +4,7 @@ data = {
     "catalog_name": "main",
     "schemas": [
         {
-            "name": "",
+            "schema_name": "",
             "tables": [
                 {
                     "table_name": "author",
@@ -25,5 +25,5 @@ def test_catalog_model():
     catalog = Catalog(**data)
     assert catalog.catalog_name == "main"
     assert len(catalog.schemas) == 1
-    assert catalog.schemas[0].name == ""
+    assert catalog.schemas[0].schema_name == ""
     assert len(catalog.schemas[0].tables) == 1
