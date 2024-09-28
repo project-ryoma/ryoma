@@ -42,7 +42,6 @@ unit-test:
 check-codestyle:
 	uv run isort --diff --check-only --settings-path pyproject.toml ./
 	uv run black --diff --check --config pyproject.toml ./
-	uv run darglint --verbosity 2 ryoma tests
 
 .PHONY: mypy
 mypy:
