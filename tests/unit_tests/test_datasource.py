@@ -7,6 +7,14 @@ from ryoma_ai.datasource.metadata import Catalog
 
 
 class MockSqlDataSource(SqlDataSource):
+    def get_query_plan(self,
+                       query: str) -> Any:
+        pass
+
+    def crawl_metadata(self,
+                       **kwargs):
+        pass
+
     def connect(self) -> Any:
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
@@ -26,11 +34,12 @@ def mock_sql_data_source():
 
 
 def test_execute_query(mock_sql_data_source):
-    with patch("ryoma_ai.type.base.SqlDataSource.query") as mock_execute:
+    with patch("ryoma_ai.datasource.base.SqlDataSource.query") as mock_execute:
         mock_execute.return_value = "success"
         results = mock_sql_data_source.query("SELECT * FROM table")
     assert results == "success"
 
 
-def test_datasource_field_exists():
-    assert hasattr(SqlDataSource, "__fields__")
+def test_sql_datasource_field_exists(mock_sql_data_source):
+    assert hasattr(mock_sql_data_source, "database")
+    assert hasattr(mock_sql_data_source, "db_schema")
