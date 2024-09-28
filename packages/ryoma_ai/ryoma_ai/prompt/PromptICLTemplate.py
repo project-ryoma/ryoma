@@ -3,7 +3,7 @@ import numpy as np
 from ryoma_ai.prompt.utils import count_tokens, get_tokenizer, jaccard_similarity
 
 
-class BasicICLPrompt(object):
+class BasicICLPrompt:
     NUM_EXAMPLE = None
     SEP_EXAMPLE = "\n\n"
 

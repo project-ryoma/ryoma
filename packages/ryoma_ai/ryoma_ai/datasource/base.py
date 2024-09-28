@@ -18,9 +18,9 @@ class DataSource(ABC):
         raise NotImplementedError("connect is not implemented for this data source")
 
     @abstractmethod
-    def get_metadata(self, **kwargs):
+    def get_catalog(self, **kwargs):
         raise NotImplementedError(
-            "get_metadata is not implemented for this data source"
+            "get_catalog is not implemented for this data source"
         )
 
 
@@ -35,7 +35,7 @@ class SqlDataSource(DataSource):
         raise NotImplementedError("connect is not implemented for this data source")
 
     def query(self, query, result_format="pandas", **kwargs) -> IbisTable:
-        logging.info("Executing query: {}".format(query))
+        logging.info(f"Executing query: {query}")
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
             raise Exception("Ibis connection is not a SQLBackend")
@@ -48,7 +48,7 @@ class SqlDataSource(DataSource):
             result = result.to_pandas()
         return result
 
-    def get_metadata(
+    def get_catalog(
         self,
         catalog: Optional[str] = None,
     ):

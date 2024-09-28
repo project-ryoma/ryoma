@@ -11,6 +11,7 @@ from feast import Entity, FeatureStore, FeatureView, Field, FileSource, RepoConf
 from feast.data_format import ParquetFormat
 from feast.data_source import DataSource as FeastDataSource
 from feast.data_source import PushSource, RequestSource
+from feast.repo_config import FeastConfigBaseModel
 from feast.repo_operations import (
     apply_total
 )
@@ -66,7 +67,7 @@ class VectorStoreService:
         self.session.query(VectorStore).filter_by(project_name=project_name).delete()
         self.session.commit()
 
-    def save_store(
+    def create_store(
             self,
             project_name: str,
             online_store: str,
@@ -74,6 +75,16 @@ class VectorStoreService:
             offline_store: str,
             offline_store_configs: dict[str, str],
     ) -> None:
+        self.apply_feature_store(
+            project_name,
+            online_store,
+            online_store_configs,
+            offline_store,
+            offline_store_configs,
+        )
+
+        logging.info("Feast feature store applied successfully.")
+
         self.session.add(
             VectorStore(
                 project_name=project_name,
@@ -101,8 +112,19 @@ class VectorStoreService:
         return response.to_dict()
 
     def apply_feature_store(self,
-                            repo_config_input: dict[str, str]) -> FeatureStore:
-        repo_config = self.build_feast_repo_config(**repo_config_input)
+                            project_name: str,
+                            online_store: str,
+                            online_store_configs: dict[str, str],
+                            offline_store: str,
+                            offline_store_configs: dict[str, str]
+                            ) -> FeatureStore:
+        repo_config = self.build_feast_repo_config(
+            project_name,
+            online_store,
+            online_store_configs,
+            offline_store,
+            offline_store_configs,
+        )
         repo_path = Path(os.path.join(Path.cwd(), "data"))
         try:
             apply_total(repo_config, repo_path, skip_source_validation=True)
@@ -130,7 +152,8 @@ class VectorStoreService:
                 "path": self.vector_store_configs.path,
             },
             "online_store": self.build_online_store_configs(
-                online_store, online_store_configs
+                online_store,
+                online_store_configs,
             ),
             "entity_key_serialization_version": 3,
         }
@@ -151,23 +174,23 @@ class VectorStoreService:
             self,
             online_store: str,
             online_store_configs: dict[str, str]
-    ) -> dict[str, str]:
+    ) -> FeastConfigBaseModel:
         if online_store == "postgres":
-            return {
-                "type": online_store,
-                "host": online_store_configs.get("host"),
-                "port": online_store_configs.get("port"),
-                "database": online_store_configs.get("database"),
-                "user": online_store_configs.get("user"),
-                "password": online_store_configs.get("password"),
-                "pgvector_enabled": "true",
-                "vector_len": online_store_configs.get("dimension"),
-            }
+            from feast.infra.online_stores.contrib.postgres import PostgreSQLOnlineStoreConfig
+            # return {
+            #     "type": online_store,
+            #     "host": online_store_configs.get("host"),
+            #     "port": online_store_configs.get("port"),
+            #     "database": online_store_configs.get("database"),
+            #     "user": online_store_configs.get("user"),
+            #     "password": online_store_configs.get("password"),
+            #     "pgvector_enabled": "true",
+            #     "vector_len": online_store_configs.get("dimension"),
+            # }
+            return PostgreSQLOnlineStoreConfig.parse_obj(online_store_configs)
         elif online_store == "sqlite":
-            return {
-                "type": online_store,
-                "path": online_store_configs.get("path"),
-            }
+            from feast.infra.online_stores.sqlite import SqliteOnlineStoreConfig
+            return SqliteOnlineStoreConfig.parse_obj(online_store_configs)
         else:
             raise ValueError(f"Online store {online_store} not supported")
 

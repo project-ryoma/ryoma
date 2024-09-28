@@ -102,7 +102,7 @@ class BaseAgent(RyomaAgent):
         return self
 
     def add_datasource(self, datasource: DataSource):
-        self.add_prompt_context(str(datasource.get_metadata()))
+        self.add_prompt_context(str(datasource.get_catalog()))
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         return self
 

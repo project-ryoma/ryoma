@@ -74,7 +74,7 @@ class CatalogState(DataSourceState):
                 self.current_catalog_id, datasource.db_schema
             )
         try:
-            datasource.get_metadata(loader=self._record_loader())
+            datasource.get_catalog(loader=self._record_loader())
 
             # reload the catalog entries
             self.load_catalogs()

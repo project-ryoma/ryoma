@@ -1,4 +1,4 @@
-class SqlExampleStyle(object):
+class SqlExampleStyle:
     """Only show sqls as examples"""
 
     def get_example_prefix(self):
@@ -8,7 +8,7 @@ class SqlExampleStyle(object):
         return example["query"]
 
 
-class QuestionSqlExampleStyle(object):
+class QuestionSqlExampleStyle:
     """Provide QA pair as examples"""
 
     def get_example_prefix(self):
@@ -19,7 +19,7 @@ class QuestionSqlExampleStyle(object):
         return template_qa.format(example["question"], example["query"])
 
 
-class QuestionSqlWithRuleExampleStyle(object):
+class QuestionSqlWithRuleExampleStyle:
     """Provide QA pair as examples"""
 
     def get_example_prefix(self):
@@ -30,7 +30,7 @@ class QuestionSqlWithRuleExampleStyle(object):
         return template_qa.format(example["question"], example["query"])
 
 
-class CompleteExampleStyle(object):
+class CompleteExampleStyle:
     """Examples are in the same format as target question"""
 
     def get_example_prefix(self):
@@ -40,7 +40,7 @@ class CompleteExampleStyle(object):
         return f"{self.format_question(example)}\n{example['query']}"
 
 
-class NumberSignQuestionSqlExampleStyle(object):
+class NumberSignQuestionSqlExampleStyle:
     """
     Provide QA pair as examples
     """
@@ -53,7 +53,7 @@ class NumberSignQuestionSqlExampleStyle(object):
         return template_qa.format(example["question"], example["query"])
 
 
-class BaselineQuestionSqlExampleStyle(object):
+class BaselineQuestionSqlExampleStyle:
     """
     Provide QA pair as examples
     """

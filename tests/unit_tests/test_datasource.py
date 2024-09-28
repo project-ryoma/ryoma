@@ -2,7 +2,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from mock import patch
+from unittest.mock import patch
 
 from ryoma_ai.datasource.base import SqlDataSource
 from ryoma_ai.datasource.metadata import Catalog
@@ -17,7 +17,7 @@ class MockSqlDataSource(SqlDataSource):
         mock_connection.cursor.return_value = mock_cursor
         return mock_connection
 
-    def get_metadata(self, **kwargs) -> Catalog:
+    def get_catalog(self, **kwargs) -> Catalog:
         return Catalog()
 
 
