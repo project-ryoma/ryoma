@@ -7,12 +7,10 @@ from ryoma_ai.datasource.metadata import Catalog
 
 
 class MockSqlDataSource(SqlDataSource):
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         pass
 
-    def crawl_metadata(self,
-                       **kwargs):
+    def crawl_metadata(self, **kwargs):
         pass
 
     def connect(self) -> Any:
