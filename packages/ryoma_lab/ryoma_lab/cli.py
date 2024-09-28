@@ -2,7 +2,6 @@ import uuid
 
 import reflex as rx
 from reflex.reflex import cli
-
 from ryoma_lab.services.user import UserService
 from ryoma_lab.services.vector_store import VectorStoreService
 
@@ -30,7 +29,7 @@ def bootstrap():
                 "vector_enabled": True,
             },
             offline_store="",
-            offline_store_configs={}
+            offline_store_configs={},
         )
 
 

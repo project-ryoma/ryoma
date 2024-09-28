@@ -1,7 +1,6 @@
 """The settings page."""
 
 import reflex as rx
-
 from ryoma_lab.templates import ThemeState, template
 
 

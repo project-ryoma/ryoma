@@ -1,7 +1,6 @@
 from typing import Any
 
 import reflex as rx
-
 from ryoma_lab import styles
 
 

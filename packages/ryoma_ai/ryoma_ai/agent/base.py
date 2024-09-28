@@ -8,7 +8,6 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from pydantic import BaseModel
-
 from ryoma_ai.agent.utils import load_model_provider
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog

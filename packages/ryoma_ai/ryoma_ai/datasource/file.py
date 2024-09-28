@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 import pyarrow as pa
-
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Table
 

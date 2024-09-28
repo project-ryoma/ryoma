@@ -10,9 +10,7 @@ from ryoma_ai.datasource.metadata import Catalog
 
 
 class DynamodbDataSource(DataSource):
-    def __init__(self,
-                 region_name: str = None,
-                 **kwargs):
+    def __init__(self, region_name: str = None, **kwargs):
         super().__init__("nosql", **kwargs)
         self.region_name = region_name
         self.client = boto3.client("dynamodb", region_name=region_name)

@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Union
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-
 from ryoma_ai.agent.base import RyomaAgent
 from ryoma_ai.agent.utils import load_model_provider
 from ryoma_ai.models.agent import AgentType

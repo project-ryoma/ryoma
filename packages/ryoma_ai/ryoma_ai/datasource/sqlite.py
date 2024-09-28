@@ -3,7 +3,6 @@ from typing import Any
 import ibis
 from ibis import BaseBackend
 from pydantic import BaseModel, Field
-
 from ryoma_ai.datasource.base import SqlDataSource
 
 
@@ -12,12 +11,10 @@ class SqliteConfig(BaseModel):
 
 
 class SqliteDataSource(SqlDataSource):
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         pass
 
-    def crawl_metadata(self,
-                     **kwargs):
+    def crawl_metadata(self, **kwargs):
         pass
 
     def __init__(self, connection_url: str):

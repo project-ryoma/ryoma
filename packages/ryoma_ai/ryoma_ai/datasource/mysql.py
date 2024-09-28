@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union, Any
+from typing import Any, Optional, Union
 
 import ibis
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -8,13 +8,11 @@ from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
 from pyhocon import ConfigFactory
-
 from ryoma_ai.datasource.base import SqlDataSource
 
 
 class MySqlDataSource(SqlDataSource):
-    def get_query_plan(self,
-                       query: str) -> Any:
+    def get_query_plan(self, query: str) -> Any:
         pass
 
     def __init__(
@@ -34,8 +32,7 @@ class MySqlDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def connect(self,
-                **kwargs) -> BaseBackend:
+    def connect(self, **kwargs) -> BaseBackend:
         return ibis.mysql.connect(
             user=self.username,
             password=self.password,
@@ -48,9 +45,7 @@ class MySqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_metadata(self,
-                     loader: Loader,
-                     where_clause_suffix: Optional[str] = ""):
+    def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )

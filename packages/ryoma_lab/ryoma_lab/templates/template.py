@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Callable
 
 import reflex as rx
-
 from ryoma_lab import styles
 from ryoma_lab.components.sidebar import sidebar
 
