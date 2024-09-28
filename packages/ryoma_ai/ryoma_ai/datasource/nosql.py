@@ -17,6 +17,6 @@ class DynamodbDataSource(DataSource):
         self.region_name = region_name
         self.client = boto3.client("dynamodb", region_name=region_name)
 
-    def get_metadata(self, table_name: str) -> List[Catalog]:
+    def get_catalog(self, table_name: str) -> List[Catalog]:
         response = self.client.describe_table(TableName=table_name)
         return response["Table"]

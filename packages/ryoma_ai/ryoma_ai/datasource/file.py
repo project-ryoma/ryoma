@@ -28,7 +28,7 @@ class FileDataSource(DataSource):
         self.file_format = file_format
         self.file_name = file_name
 
-    def get_metadata(self, **kwargs) -> Table:
+    def get_catalog(self, **kwargs) -> Table:
         table_schema = self.to_arrow(**kwargs).schema
         return Table(
             table_name=self.file_name,

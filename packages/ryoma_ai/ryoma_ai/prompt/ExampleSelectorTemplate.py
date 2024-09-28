@@ -5,7 +5,7 @@ import numpy as np
 from ryoma_ai.prompt.utils import jaccard_similarity
 
 
-class BasicExampleSelector(object):
+class BasicExampleSelector:
     def __init__(self, data, *args, **kwargs):
         self.data = data
         self.train_json = self.data.get_train_json()

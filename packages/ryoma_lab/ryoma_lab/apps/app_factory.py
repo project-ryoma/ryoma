@@ -19,7 +19,7 @@ def create_marimo_app(
     *,
     quiet: bool = False,
     include_code: bool = False,
-    token: Optional[str] = None,
+    token: str | None = None,
 ) -> ASGIAppBuilder:
     user_config_mgr = UserConfigManager()
 
@@ -35,9 +35,9 @@ def create_marimo_app(
     # support directories or code in the future
     class Builder(ASGIAppBuilder):
         def __init__(self) -> None:
-            self._mount_configs: List[Tuple[str, str]] = []
+            self._mount_configs: list[tuple[str, str]] = []
 
-        def with_app(self, *, path: str, root: str) -> "ASGIAppBuilder":
+        def with_app(self, *, path: str, root: str) -> ASGIAppBuilder:
             self._mount_configs.append((path, root))
             return self
 

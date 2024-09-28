@@ -47,7 +47,7 @@ class SqlQueryTool(SqlDataSourceTool):
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")
             return result, artifact
         except Exception as e:
-            return "Received an error while executing the query: {}".format(str(e)), ""
+            return f"Received an error while executing the query: {str(e)}", ""
 
 
 class Column(BaseModel):

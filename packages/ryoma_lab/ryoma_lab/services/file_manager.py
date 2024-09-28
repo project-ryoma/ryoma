@@ -79,7 +79,7 @@ class FileManager(rx.Base):
 
     @staticmethod
     def read_notebook(full_path: str) -> List[Dict[str, Any]]:
-        with open(full_path, "r") as f:
+        with open(full_path) as f:
             nb = nbformat.read(f, as_version=4)
 
         cells = []
@@ -112,7 +112,7 @@ class FileManager(rx.Base):
 
     @staticmethod
     def read_python_file(full_path: str) -> List[Dict[str, Any]]:
-        with open(full_path, "r") as f:
+        with open(full_path) as f:
             file_content = f.read()
         return [
             {

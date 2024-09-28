@@ -83,7 +83,7 @@ class WorkflowAgent(BaseAgent):
         self.workflow = self._build_workflow(graph)
 
     def _bind_tools(self):
-        logging.info("Binding tools {} to model".format(self.tools))
+        logging.info(f"Binding tools {self.tools} to model")
         if hasattr(self.model, "bind_tools"):
             return self.model.bind_tools(self.tools)
         else:

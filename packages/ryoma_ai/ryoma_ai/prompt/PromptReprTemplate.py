@@ -1,7 +1,7 @@
 from ryoma_ai.prompt.utils import get_sql_for_database
 
 
-class BasicPrompt(object):
+class BasicPrompt:
     def __init__(self, *args, **kwargs):
         # used to avoid empty init function in 0-shot prompt
         pass
@@ -99,7 +99,7 @@ class BaselinePrompt(BasicPrompt):
         foreign_keys = list()
         for table in example["tables"]:
             for pair_str in table["table_info"]["foreign_key"]:
-                a, b = [_.strip() for _ in pair_str[1:-1].split(",")]
+                a, b = (_.strip() for _ in pair_str[1:-1].split(","))
                 foreign_keys.append(f"{a}={b}")
 
         # format prompt
@@ -165,7 +165,7 @@ class TextWithForeignKeyPrompt(BasicPrompt):
         foreign_keys = list()
         for table in example["tables"]:
             for pair_str in table["table_info"]["foreign_key"]:
-                a, b = [_.strip() for _ in pair_str[1:-1].split(",")]
+                a, b = (_.strip() for _ in pair_str[1:-1].split(","))
                 foreign_keys.append(f"{a}={b}")
         foreign_keys = f"{', '.join(foreign_keys)}"
 
@@ -204,7 +204,7 @@ class NumberSignWithForeignKeyPrompt(BasicPrompt):
         foreign_keys = list()
         for table in example["tables"]:
             for pair_str in table["table_info"]["foreign_key"]:
-                a, b = [_.strip() for _ in pair_str[1:-1].split(",")]
+                a, b = (_.strip() for _ in pair_str[1:-1].split(","))
                 foreign_keys.append(f"{a}={b}")
         foreign_keys = f"# Foreign_keys=({', '.join(foreign_keys)})"
 
@@ -264,7 +264,7 @@ class InstructionWithForeignKeyPrompt(BasicPrompt):
         foreign_keys = list()
         for table in example["tables"]:
             for pair_str in table["table_info"]["foreign_key"]:
-                a, b = [_.strip() for _ in pair_str[1:-1].split(",")]
+                a, b = (_.strip() for _ in pair_str[1:-1].split(","))
                 foreign_keys.append(f"{a}={b}")
         foreign_keys = f"{', '.join(foreign_keys)}"
 
@@ -508,7 +508,7 @@ class CBRPrompt(BasicPrompt):
         foreign_keys = list()
         for table in example["tables"]:
             for pair_str in table["table_info"]["foreign_key"]:
-                a, b = [_.strip() for _ in pair_str[1:-1].split(",")]
+                a, b = (_.strip() for _ in pair_str[1:-1].split(","))
                 foreign_keys.append(f"{a}={b}")
         foreign_keys = f"{', '.join(foreign_keys)}"
 

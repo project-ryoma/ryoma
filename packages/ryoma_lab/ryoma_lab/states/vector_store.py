@@ -104,7 +104,8 @@ class VectorStoreState(AIState):
         datasource_configs = self._get_datasource_configs(self.online_store)
         online_store_configs = {
             **datasource_configs,
-            "dimension": self.embedding_dimension,
+            "vec_enabled": True,
+            "vector_len": self.embedding_dimension,
         }
 
         repo_config_input = {
@@ -121,12 +122,8 @@ class VectorStoreState(AIState):
 
         try:
             with VectorStoreService() as vector_store_service:
-                vector_store_service.apply_feature_store(repo_config_input)
 
-                logging.info("Feature store applied successfully.")
-
-                # save the current_store to the catalog
-                vector_store_service.save_store(**repo_config_input)
+                vector_store_service.create_store(**repo_config_input)
             self.load_store()
         except Exception as e:
             logging.error(f"Error creating feature store: {e}")

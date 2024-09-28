@@ -255,8 +255,8 @@ def sql_normalization(sql):
         tables_aliases = Parser(s).tables_aliases
         new_tables_aliases = {}
         for i in range(1, 11):
-            if "t{}".format(i) in tables_aliases.keys():
-                new_tables_aliases["t{}".format(i)] = tables_aliases["t{}".format(i)]
+            if f"t{i}" in tables_aliases.keys():
+                new_tables_aliases[f"t{i}"] = tables_aliases[f"t{i}"]
         table_names = []
         for tok in sql_split(s):
             if "." in tok:
@@ -378,8 +378,8 @@ def sql2skeleton(sql: str, db_schema):
     # remove clauses in WHERE keywords
     ops = ["=", "!=", ">", ">=", "<", "<="]
     for op in ops:
-        if "_ {} _".format(op) in sql_skeleton:
-            sql_skeleton = sql_skeleton.replace("_ {} _".format(op), "_")
+        if f"_ {op} _" in sql_skeleton:
+            sql_skeleton = sql_skeleton.replace(f"_ {op} _", "_")
     while "where _ and _" in sql_skeleton or "where _ or _" in sql_skeleton:
         if "where _ and _" in sql_skeleton:
             sql_skeleton = sql_skeleton.replace("where _ and _", "where _")
