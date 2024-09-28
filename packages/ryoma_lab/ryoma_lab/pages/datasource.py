@@ -3,11 +3,8 @@
 import reflex as rx
 from ryoma_ai.datasource.factory import get_supported_datasources
 from ryoma_lab import styles
-from ryoma_lab.components.catalog import (
-    catalog_search,
-    render_catalog_body,
-    sync_data_catalog_render,
-)
+from ryoma_lab.components.catalog import (catalog_search, render_catalog_body,
+                                          sync_data_catalog_render)
 from ryoma_lab.states.ai import AIState
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSourceState, DataSourceTable

@@ -7,9 +7,7 @@ from openai_responses import OpenAIMock
 from ryoma_ai.agent.base import BaseAgent
 
 from tests.unit_tests.test_utils import (
-    create_chat_completion_response_stream,
-    mock_chat_response,
-)
+    create_chat_completion_response_stream, mock_chat_response)
 
 
 @pytest.fixture(autouse=True)

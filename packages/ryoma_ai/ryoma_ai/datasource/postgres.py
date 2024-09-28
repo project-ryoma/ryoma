@@ -68,9 +68,8 @@ class PostgresDataSource(SqlDataSource):
         )
 
     def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = None):
-        from databuilder.extractor.postgres_metadata_extractor import (
-            PostgresMetadataExtractor,
-        )
+        from databuilder.extractor.postgres_metadata_extractor import \
+            PostgresMetadataExtractor
 
         logging.info("Start crawling metadata from Postgres database")
         job_config = ConfigFactory.from_dict(

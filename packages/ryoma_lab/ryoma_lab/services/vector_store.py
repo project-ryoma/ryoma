@@ -7,7 +7,8 @@ from typing import Any, Optional, Union
 
 import pandas as pd
 import reflex as rx
-from feast import Entity, FeatureStore, FeatureView, Field, FileSource, RepoConfig
+from feast import (Entity, FeatureStore, FeatureView, Field, FileSource,
+                   RepoConfig)
 from feast.data_format import ParquetFormat
 from feast.data_source import DataSource as FeastDataSource
 from feast.data_source import PushSource, RequestSource
@@ -16,11 +17,8 @@ from feast.repo_operations import apply_total
 from feast.types import Array, Float32, UnixTimestamp
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
-from ryoma_lab.models.vector_store import (
-    FeatureViewModel,
-    VectorStore,
-    VectorStoreConfig,
-)
+from ryoma_lab.models.vector_store import (FeatureViewModel, VectorStore,
+                                           VectorStoreConfig)
 from ryoma_lab.services.datasource import DataSourceService
 from sqlmodel import select
 
@@ -167,9 +165,8 @@ class VectorStoreService:
         self, online_store: str, online_store_configs: dict[str, str]
     ) -> FeastConfigBaseModel:
         if online_store == "postgres":
-            from feast.infra.online_stores.contrib.postgres import (
-                PostgreSQLOnlineStoreConfig,
-            )
+            from feast.infra.online_stores.contrib.postgres import \
+                PostgreSQLOnlineStoreConfig
 
             # return {
             #     "type": online_store,
@@ -183,7 +180,8 @@ class VectorStoreService:
             # }
             return PostgreSQLOnlineStoreConfig.parse_obj(online_store_configs)
         elif online_store == "sqlite":
-            from feast.infra.online_stores.sqlite import SqliteOnlineStoreConfig
+            from feast.infra.online_stores.sqlite import \
+                SqliteOnlineStoreConfig
 
             return SqliteOnlineStoreConfig.parse_obj(online_store_configs)
         else:
@@ -191,9 +189,8 @@ class VectorStoreService:
 
     def get_feast_datasource_by_name(self, ds: str) -> Optional[FeastDataSource]:
         from feast import BigQuerySource, RedshiftSource, SnowflakeSource
-        from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import (
-            PostgreSQLSource,
-        )
+        from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import \
+            PostgreSQLSource
 
         feast_datasource_map = {
             "postgres": PostgreSQLSource,

@@ -1,16 +1,10 @@
 from enum import Enum
 
-from jupyter_ai_magics.embedding_providers import (
-    GPT4AllEmbeddingsProvider,
-    HfHubEmbeddingsProvider,
-)
-from jupyter_ai_magics.providers import (
-    AI21Provider,
-    GPT4AllProvider,
-    HfHubProvider,
-    QianfanProvider,
-    TogetherAIProvider,
-)
+from jupyter_ai_magics.embedding_providers import (GPT4AllEmbeddingsProvider,
+                                                   HfHubEmbeddingsProvider)
+from jupyter_ai_magics.providers import (AI21Provider, GPT4AllProvider,
+                                         HfHubProvider, QianfanProvider,
+                                         TogetherAIProvider)
 
 
 class BedrockProvider:
