@@ -46,9 +46,8 @@ class MySqlDataSource(SqlDataSource):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     def crawl_metadata(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
-        from databuilder.extractor.mysql_metadata_extractor import (
-            MysqlMetadataExtractor,
-        )
+        from databuilder.extractor.mysql_metadata_extractor import \
+            MysqlMetadataExtractor
 
         logging.info("Crawling data catalog from Mysql")
         job_config = ConfigFactory.from_dict(

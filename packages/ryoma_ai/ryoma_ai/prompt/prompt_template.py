@@ -1,10 +1,7 @@
 from typing import Optional, Union
 
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    FewShotPromptTemplate,
-    PromptTemplate,
-)
+from langchain_core.prompts import (ChatPromptTemplate, FewShotPromptTemplate,
+                                    PromptTemplate)
 from ryoma_ai.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
 
 

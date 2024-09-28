@@ -2,7 +2,8 @@
 
 import reflex as rx
 from ryoma_lab.components.code_editor import codeeditor
-from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
+from ryoma_lab.states.prompt_template import (PromptTemplate,
+                                              PromptTemplateState)
 from ryoma_lab.templates import template
 
 

@@ -1,7 +1,8 @@
 from typing import Dict, Optional
 
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.tool.sql_tool import CreateTableTool, QueryProfileTool, SqlQueryTool
+from ryoma_ai.tool.sql_tool import (CreateTableTool, QueryProfileTool,
+                                    SqlQueryTool)
 
 
 class SqlAgent(WorkflowAgent):
