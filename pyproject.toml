@@ -34,3 +34,6 @@ ryoma_lab = { workspace = true}
 
 [tool.uv.workspace]
 members = ["packages/ryoma_ai", "packages/ryoma_lab"]
+
+[tool.isort]
+profile = "black"
