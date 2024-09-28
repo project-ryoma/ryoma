@@ -1,7 +1,6 @@
 import pytest
-from sqlalchemy import create_engine
-
 from ryoma_ai.datasource.postgres import PostgresDataSource
+from sqlalchemy import create_engine
 
 
 @pytest.fixture
@@ -22,7 +21,7 @@ def test_postgres_connection(postgres):
 
 
 def test_postgres_get_metadata(postgres):
-    metadata = postgres.get_metadata()
+    metadata = postgres.get_catalog()
     assert metadata is not None
     assert len(metadata.tables) > 0
 

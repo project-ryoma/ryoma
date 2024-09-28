@@ -7,27 +7,27 @@ PYTHONPATH := '.'
 IMAGE := ryoma
 VERSION := latest
 
-.PHONY: poetry-download
-poetry-download:
-	curl -sSL https://install.python-poetry.org | $(PYTHON) -
+.PHONY: uv-download
+uv-download:
+	curl -LsSf https://astral.sh/uv/install.sh | sh
 
 #* Installation
 .PHONY: install
 install:
-	poetry lock -n && poetry export --without-hashes > requirements.txt
-	poetry install -n
-	poetry run mypy --install-types --non-interactive ./
+	uv lock && uv pip compile pyproject.toml -o requirements.txt
+	uv sync
+	#uv run mypy --install-types --non-interactive ./
 
 .PHONY: pre-commit-install
 pre-commit-install:
-	poetry run pre-commit install
+	uv run pre-commit install
 
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	poetry run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
-	poetry run isort --settings-path pyproject.toml ./
-	poetry run black --config pyproject.toml ./
+	uv run pyupgrade --exit-zero-even-if-changed --py310-plus **/*.py
+	uv run isort --settings-path pyproject.toml ./
+	uv run black --config pyproject.toml ./
 
 .PHONY: formatting
 formatting: codestyle
@@ -35,32 +35,30 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 unit-test:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=ryoma tests/unit_tests
-	poetry run coverage-badge -o assets/images/coverage.svg -f
+	PYTHONPATH=$(PYTHONPATH) uv run pytest -c pyproject.toml --cov-report=html --cov=packages tests/unit_tests
+	uv run coverage-badge -o assets/images/coverage.svg -f
 
 .PHONY: check-codestyle
 check-codestyle:
-	poetry run isort --diff --check-only --settings-path pyproject.toml ./
-	poetry run black --diff --check --config pyproject.toml ./
-	poetry run darglint --verbosity 2 ryoma tests
+	uv run isort --diff --check-only --settings-path pyproject.toml ./
+	uv run black --diff --check --config pyproject.toml ./
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file pyproject.toml ./
+	uv run mypy --config-file pyproject.toml ./
 
 .PHONY: check-safety
 check-safety:
-	poetry check
-	poetry run safety check --full-report
-	poetry run bandit -ll --recursive ryoma tests
+	uv run safety check --full-report
+	uv run bandit -ll --recursive ryoma tests
 
 .PHONY: lint
 lint: test check-codestyle mypy check-safety
 
 .PHONY: update-dev-deps
 update-dev-deps:
-	poetry add -D bandit@latest darglint@latest "isort[colors]@latest" mypy@latest pre-commit@latest pydocstyle@latest pylint@latest pytest@latest pyupgrade@latest safety@latest coverage@latest coverage-badge@latest pytest-html@latest pytest-cov@latest
-	poetry add -D --allow-prereleases black@latest
+	uv add -D bandit@latest darglint@latest "isort[colors]@latest" mypy@latest pre-commit@latest pydocstyle@latest pylint@latest pytest@latest pyupgrade@latest safety@latest coverage@latest coverage-badge@latest pytest-html@latest pytest-cov@latest
+	uv add -D --allow-prereleases black@latest
 
 #* Docker
 # Example: make docker-build VERSION=latest
@@ -114,20 +112,20 @@ cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove 
 
 .PHONY: start-ryoma-lab
 start-ryoma-lab:
-	poetry run reflex run
+	uv run reflex run
 
 .PHONY: build
 build:
-	poetry build
+	uv build
 
 .PHONY: publish
 publish:
-	poetry publish
+	uv publish
 
 .PHONY: init-data
 init-data:
-	poetry run init-data
+	uv run init-data
 
 .PHONY: migrate
 migrate:
-	poetry run reflex db migrate
+	uv run reflex db migrate

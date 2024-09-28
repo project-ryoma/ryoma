@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.agent.sql import SqlAgent
 
