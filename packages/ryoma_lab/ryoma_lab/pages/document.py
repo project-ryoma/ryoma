@@ -1,7 +1,6 @@
 """The home page of the app."""
 
 import reflex as rx
-
 from ryoma_lab import styles
 from ryoma_lab.templates import template
 

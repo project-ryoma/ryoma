@@ -1,7 +1,6 @@
 """The AI Page."""
 
 import reflex as rx
-
 from ryoma_lab.components.agent import agent_component
 from ryoma_lab.components.embedding import embedding_component
 from ryoma_lab.components.prompt_template import prompt_templatec_component

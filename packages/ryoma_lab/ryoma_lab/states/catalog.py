@@ -7,7 +7,6 @@ from databuilder.loader.generic_loader import GenericLoader
 from databuilder.models.table_metadata import TableMetadata
 from langchain_core.embeddings import Embeddings
 from pyhocon import ConfigTree
-
 from ryoma_lab.models.data_catalog import TableTable
 from ryoma_lab.services import embedding as embedding_service
 from ryoma_lab.services.catalog import CatalogService
@@ -107,7 +106,7 @@ Columns: {table["columns"]}
                 self.vector_store_project_name,
                 self.feature_view_name,
                 table_embeddings,
-                table["table_name"]
+                table["table_name"],
             )
         logging.info(f"Table {table} indexed")
 

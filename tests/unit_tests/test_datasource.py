@@ -1,9 +1,7 @@
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch
-
 from ryoma_ai.datasource.base import SqlDataSource
 from ryoma_ai.datasource.metadata import Catalog
 

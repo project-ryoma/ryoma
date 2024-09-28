@@ -1,5 +1,4 @@
 import reflex as rx
-
 from ryoma_lab import styles
 from ryoma_lab.components.model_selector import embedding_model_selector
 from ryoma_lab.components.upload import upload_render

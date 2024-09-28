@@ -12,20 +12,17 @@ from feast.data_format import ParquetFormat
 from feast.data_source import DataSource as FeastDataSource
 from feast.data_source import PushSource, RequestSource
 from feast.repo_config import FeastConfigBaseModel
-from feast.repo_operations import (
-    apply_total
-)
+from feast.repo_operations import apply_total
 from feast.types import Array, Float32, UnixTimestamp
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
-from sqlmodel import select
-
 from ryoma_lab.models.vector_store import (
     FeatureViewModel,
     VectorStore,
     VectorStoreConfig,
 )
 from ryoma_lab.services.datasource import DataSourceService
+from sqlmodel import select
 
 
 class VectorStoreService:
@@ -36,10 +33,7 @@ class VectorStoreService:
     def __enter__(self):
         return self
 
-    def __exit__(self,
-                 exc_type,
-                 exc_val,
-                 exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.close()
 
     @staticmethod
@@ -56,24 +50,22 @@ class VectorStoreService:
     def load_stores(self) -> list[VectorStore]:
         return list(self.session.exec(select(VectorStore)).all())
 
-    def get_store(self,
-                  project_name: str) -> Optional[VectorStore]:
+    def get_store(self, project_name: str) -> Optional[VectorStore]:
         return self.session.exec(
             select(VectorStore).filter(VectorStore.project_name == project_name)
         ).first()
 
-    def delete_store(self,
-                     project_name: str):
+    def delete_store(self, project_name: str):
         self.session.query(VectorStore).filter_by(project_name=project_name).delete()
         self.session.commit()
 
     def create_store(
-            self,
-            project_name: str,
-            online_store: str,
-            online_store_configs: dict[str, str],
-            offline_store: str,
-            offline_store_configs: dict[str, str],
+        self,
+        project_name: str,
+        online_store: str,
+        online_store_configs: dict[str, str],
+        offline_store: str,
+        offline_store_configs: dict[str, str],
     ) -> None:
         self.apply_feature_store(
             project_name,
@@ -97,12 +89,12 @@ class VectorStoreService:
         self.session.commit()
 
     def retrieve_vector_features(
-            self,
-            fs: FeatureStore,
-            feature: str,
-            query: list[float],
-            top_k: int = 3,
-            distance_metric: str = "L2",
+        self,
+        fs: FeatureStore,
+        feature: str,
+        query: list[float],
+        top_k: int = 3,
+        distance_metric: str = "L2",
     ) -> dict:
         logging.info(f"Retrieving online documents for {feature} with vector")
         response = fs.retrieve_online_documents(
@@ -111,13 +103,14 @@ class VectorStoreService:
         logging.info(f"Retrieved online documents: {response.to_dict()}")
         return response.to_dict()
 
-    def apply_feature_store(self,
-                            project_name: str,
-                            online_store: str,
-                            online_store_configs: dict[str, str],
-                            offline_store: str,
-                            offline_store_configs: dict[str, str]
-                            ) -> FeatureStore:
+    def apply_feature_store(
+        self,
+        project_name: str,
+        online_store: str,
+        online_store_configs: dict[str, str],
+        offline_store: str,
+        offline_store_configs: dict[str, str],
+    ) -> FeatureStore:
         repo_config = self.build_feast_repo_config(
             project_name,
             online_store,
@@ -134,12 +127,12 @@ class VectorStoreService:
             raise e
 
     def build_feast_repo_config(
-            self,
-            project_name,
-            online_store: str,
-            online_store_configs: dict[str, str],
-            offline_store: Optional[str] = None,
-            offline_store_configs: Optional[dict[str, str]] = None,
+        self,
+        project_name,
+        online_store: str,
+        online_store_configs: dict[str, str],
+        offline_store: Optional[str] = None,
+        offline_store_configs: Optional[dict[str, str]] = None,
     ) -> RepoConfig:
         logging.info(
             f"Building feast repo config with current_store name: {project_name}"
@@ -171,12 +164,13 @@ class VectorStoreService:
         return RepoConfig(**configs)
 
     def build_online_store_configs(
-            self,
-            online_store: str,
-            online_store_configs: dict[str, str]
+        self, online_store: str, online_store_configs: dict[str, str]
     ) -> FeastConfigBaseModel:
         if online_store == "postgres":
-            from feast.infra.online_stores.contrib.postgres import PostgreSQLOnlineStoreConfig
+            from feast.infra.online_stores.contrib.postgres import (
+                PostgreSQLOnlineStoreConfig,
+            )
+
             # return {
             #     "type": online_store,
             #     "host": online_store_configs.get("host"),
@@ -190,12 +184,12 @@ class VectorStoreService:
             return PostgreSQLOnlineStoreConfig.parse_obj(online_store_configs)
         elif online_store == "sqlite":
             from feast.infra.online_stores.sqlite import SqliteOnlineStoreConfig
+
             return SqliteOnlineStoreConfig.parse_obj(online_store_configs)
         else:
             raise ValueError(f"Online store {online_store} not supported")
 
-    def get_feast_datasource_by_name(self,
-                                     ds: str) -> Optional[FeastDataSource]:
+    def get_feast_datasource_by_name(self, ds: str) -> Optional[FeastDataSource]:
         from feast import BigQuerySource, RedshiftSource, SnowflakeSource
         from feast.infra.offline_stores.contrib.postgres_offline_store.postgres_source import (
             PostgreSQLSource,
@@ -212,25 +206,26 @@ class VectorStoreService:
         return feast_datasource_map[ds]
 
     def get_feature_store(
-            self,
-            store: VectorStore,
+        self,
+        store: VectorStore,
     ) -> FeatureStore:
         repo_config = self.build_feast_repo_config(
             project_name=store.project_name,
             online_store=store.online_store,
-            online_store_configs=eval(store.online_store_configs)
-            if store.online_store_configs
-            else "{}",
+            online_store_configs=(
+                eval(store.online_store_configs) if store.online_store_configs else "{}"
+            ),
             offline_store=store.offline_store,
-            offline_store_configs=eval(store.offline_store_configs)
-            if store.offline_store_configs
-            else "{}",
+            offline_store_configs=(
+                eval(store.offline_store_configs)
+                if store.offline_store_configs
+                else "{}"
+            ),
         )
         return FeatureStore(config=repo_config)
 
     def get_feature_views(
-            self,
-            fs: Union[VectorStore, FeatureStore]
+        self, fs: Union[VectorStore, FeatureStore]
     ) -> list[FeatureViewModel]:
         if isinstance(fs, VectorStore):
             fs = self.get_feature_store(fs)
@@ -258,18 +253,14 @@ class VectorStoreService:
         return vector_feature_views
 
     def get_feature_view_by_name(
-            self,
-            fs: FeatureStore,
-            feature_view_name: str
+        self, fs: FeatureStore, feature_view_name: str
     ) -> Optional[FeatureView]:
         for feature_view in fs.list_feature_views():
             if feature_view.name == feature_view_name:
                 return feature_view
         return None
 
-    def load_feature_dataframe(self,
-                               source_dir: str,
-                               file_type: str) -> pd.DataFrame:
+    def load_feature_dataframe(self, source_dir: str, file_type: str) -> pd.DataFrame:
         if file_type == "parquet":
             return pd.read_parquet(source_dir)
         elif file_type == "csv":
@@ -279,9 +270,7 @@ class VectorStoreService:
         raise ValueError(f"Unsupported file type: {file_type}")
 
     def validate_feature_dataframe(
-            self,
-            feature_df: pd.DataFrame,
-            feature_view: FeatureViewModel
+        self, feature_df: pd.DataFrame, feature_view: FeatureViewModel
     ):
         required_columns = [
             "event_timestamp",
@@ -301,10 +290,7 @@ class VectorStoreService:
             raise ValueError("Missing required columns")
 
     def process_file_source(
-            self,
-            feature_view: FeatureViewModel,
-            file_path: str,
-            file_type: str
+        self, feature_view: FeatureViewModel, file_path: str, file_type: str
     ) -> pd.DataFrame:
         try:
             df = self.load_feature_dataframe(file_path, file_type)
@@ -315,9 +301,7 @@ class VectorStoreService:
             raise e
 
     def process_pdf_source(
-            self,
-            feature_view: FeatureViewModel,
-            source_path: str
+        self, feature_view: FeatureViewModel, source_path: str
     ) -> dict[str, list[Any]]:
         try:
             docs = PyPDFLoader(source_path).load()
@@ -331,9 +315,9 @@ class VectorStoreService:
             raise e
 
     def apply_embedding(
-            self,
-            embedding_client: Embeddings,
-            inputs_data: Union[dict[str, list[Any]], pd.DataFrame],
+        self,
+        embedding_client: Embeddings,
+        inputs_data: Union[dict[str, list[Any]], pd.DataFrame],
     ) -> Union[dict[str, list[Any]], pd.DataFrame]:
         logging.info("Run embedding before indexing feature")
         inputs_data["feature"] = inputs_data["feature"].apply(
@@ -341,17 +325,16 @@ class VectorStoreService:
         )
         return inputs_data
 
-    def get_source_path(self,
-                        feature_view: FeatureViewModel) -> str:
+    def get_source_path(self, feature_view: FeatureViewModel) -> str:
         root_dir = rx.get_upload_dir()
         source_dir = f"{root_dir}/{feature_view['name']}/{feature_view['source']}"
         return source_dir
 
     def index_feature_from_source(
-            self,
-            fs: FeatureStore,
-            feature_view: FeatureViewModel,
-            embedding_client: Optional[Embeddings] = None,
+        self,
+        fs: FeatureStore,
+        feature_view: FeatureViewModel,
+        embedding_client: Optional[Embeddings] = None,
     ):
         logging.info(f"Loading feature view {feature_view}")
         if feature_view["source_type"] == "PushSource":
@@ -377,9 +360,7 @@ class VectorStoreService:
             self.index_feature_from_offline_source(fs, feature_view)
 
     def index_feature_from_offline_source(
-            self,
-            fs: FeatureStore,
-            feature_view: FeatureViewModel
+        self, fs: FeatureStore, feature_view: FeatureViewModel
     ):
         logging.info(f"Materializing offline feature view {feature_view}")
         fs.materialize_incremental(
@@ -388,10 +369,10 @@ class VectorStoreService:
         )
 
     def index_feature_from_input_content(
-            self,
-            fs: FeatureStore,
-            feature_view: Union[str, FeatureViewModel],
-            inputs: Optional[Union[dict[str, list[Any]], pd.DataFrame]] = None,
+        self,
+        fs: FeatureStore,
+        feature_view: Union[str, FeatureViewModel],
+        inputs: Optional[Union[dict[str, list[Any]], pd.DataFrame]] = None,
     ):
         feature_view_name = feature_view
         if isinstance(feature_view, FeatureViewModel):
@@ -403,14 +384,14 @@ class VectorStoreService:
         )
 
     def create_vector_feature_view(
-            self,
-            fs: FeatureStore,
-            feature_view_name: str,
-            feature_name: str,
-            source_type: str,
-            source_configs: dict[str, Any],
-            entity: tuple[str, str],
-            files: Optional[list[str]] = None,
+        self,
+        fs: FeatureStore,
+        feature_view_name: str,
+        feature_name: str,
+        source_type: str,
+        source_configs: dict[str, Any],
+        entity: tuple[str, str],
+        files: Optional[list[str]] = None,
     ):
         # entity = create_entity(entity[0], entity[1])
         schema = self.create_vector_feature_schema(feature_name)
@@ -431,17 +412,13 @@ class VectorStoreService:
             ]
         )
 
-    def create_entity(self,
-                      entity_name: str,
-                      entity_key: str):
+    def create_entity(self, entity_name: str, entity_key: str):
         if not entity_name or not entity_key:
             raise ValueError("Entity name and key are required")
         return Entity(name=entity_name, join_keys=[entity_key])
 
     def create_vector_feature_schema(
-            self,
-            feature_name: str,
-            entity: Optional[Entity] = None
+        self, feature_name: str, entity: Optional[Entity] = None
     ):
         schema = [
             Field(name=feature_name, dtype=Array(Float32)),
@@ -452,12 +429,12 @@ class VectorStoreService:
         return schema
 
     def create_feature_source(
-            self,
-            feature_view_name: str,
-            feature_schema: list[Field],
-            source_type: str,
-            feature_source_configs: dict[str, Any],
-            files: list[str],
+        self,
+        feature_view_name: str,
+        feature_schema: list[Field],
+        source_type: str,
+        feature_source_configs: dict[str, Any],
+        files: list[str],
     ) -> FeastDataSource:
         if not source_type:
             return RequestSource(
@@ -484,15 +461,14 @@ class VectorStoreService:
             raise ValueError(f"Data source for {source_type} not supported")
 
     def create_additional_tags(
-            self,
-            feature_datasource: str,
-            files: list[str],
+        self,
+        feature_datasource: str,
+        files: list[str],
     ) -> dict[str, str]:
         if feature_datasource == "files":
             return {"push_source_type": self.get_file_type(files[0])}
 
-    def get_file_type(self,
-                      file: str) -> str:
+    def get_file_type(self, file: str) -> str:
         supported_file_types = {
             ".txt": "txt",
             ".csv": "csv",
@@ -505,10 +481,10 @@ class VectorStoreService:
         return supported_file_types.get(file_type, "txt")
 
     def build_vector_feature_inputs(
-            self,
-            feature_view: FeatureView,
-            inputs: list[float],
-            entity_value: Optional[str] = None,
+        self,
+        feature_view: FeatureView,
+        inputs: list[float],
+        entity_value: Optional[str] = None,
     ):
         logging.info("Building vector feature inputs with feature view: ")
         logging.info(feature_view)
@@ -523,15 +499,17 @@ class VectorStoreService:
         }
 
     def index_feature_view(
-            self,
-            vector_store_project_name: str,
-            feature_view_name: str,
-            embeddings: list[float],
-            entity_value: Optional[str] = None,
+        self,
+        vector_store_project_name: str,
+        feature_view_name: str,
+        embeddings: list[float],
+        entity_value: Optional[str] = None,
     ):
         store = self.get_store(vector_store_project_name)
         fs = self.get_feature_store(store)
         feature_view = self.get_feature_view_by_name(fs, feature_view_name)
-        inputs = self.build_vector_feature_inputs(feature_view, embeddings, entity_value)
+        inputs = self.build_vector_feature_inputs(
+            feature_view, embeddings, entity_value
+        )
         self.index_feature_from_input_content(fs, feature_view_name, inputs)
         logging.info(f"Feature view {feature_view_name} indexed")

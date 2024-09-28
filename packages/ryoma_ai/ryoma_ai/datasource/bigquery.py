@@ -8,7 +8,6 @@ from databuilder.task.task import DefaultTask
 from ibis import BaseBackend, Table
 from langchain_core.pydantic_v1 import Field
 from pyhocon import ConfigFactory
-
 from ryoma_ai.datasource.base import SqlDataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema
 

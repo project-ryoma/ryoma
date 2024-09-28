@@ -1,7 +1,6 @@
 import random
 
 import numpy as np
-
 from ryoma_ai.prompt.utils import jaccard_similarity
 
 

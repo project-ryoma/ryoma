@@ -1,7 +1,6 @@
 """Sidebar component for the app."""
 
 import reflex as rx
-
 from ryoma_lab import styles
 from ryoma_lab.components.chat_navbar import navbar
 from ryoma_lab.states.base import BaseState

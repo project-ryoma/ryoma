@@ -1,7 +1,6 @@
 from enum import Enum
 
 from pydantic import BaseModel
-
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.file import FileDataSource

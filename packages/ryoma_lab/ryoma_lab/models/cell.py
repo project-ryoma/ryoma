@@ -22,9 +22,9 @@ class StreamOutput(CellOutput):
 
 
 class ExecuteResultOutput(CellOutput):
-    output_type: Literal[
-        "stream", "execute_result", "dataframe", "error"
-    ] = "execute_result"
+    output_type: Literal["stream", "execute_result", "dataframe", "error"] = (
+        "execute_result"
+    )
     execute_result: Union[dict[str, Any], None] = None
 
 

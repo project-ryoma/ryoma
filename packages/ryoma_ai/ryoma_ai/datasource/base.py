@@ -5,7 +5,6 @@ from typing import Any, Optional
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
-
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
@@ -19,9 +18,7 @@ class DataSource(ABC):
 
     @abstractmethod
     def get_catalog(self, **kwargs):
-        raise NotImplementedError(
-            "get_catalog is not implemented for this data source"
-        )
+        raise NotImplementedError("get_catalog is not implemented for this data source")
 
 
 class SqlDataSource(DataSource):
