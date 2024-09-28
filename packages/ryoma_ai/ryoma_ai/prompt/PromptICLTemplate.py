@@ -1,6 +1,5 @@
 import numpy as np
-from ryoma_ai.prompt.utils import (count_tokens, get_tokenizer,
-                                   jaccard_similarity)
+from ryoma_ai.prompt.utils import count_tokens, get_tokenizer, jaccard_similarity
 
 
 class BasicICLPrompt:

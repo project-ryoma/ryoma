@@ -25,7 +25,7 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	uv run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
+	uv run pyupgrade --exit-zero-even-if-changed --py310-plus **/*.py
 	uv run isort --settings-path pyproject.toml ./
 	uv run black --config pyproject.toml ./
 

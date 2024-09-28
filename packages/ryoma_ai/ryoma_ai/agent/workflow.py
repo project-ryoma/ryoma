@@ -6,8 +6,11 @@ from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.runnables import (RunnableConfig, RunnableLambda,
-                                      RunnableSerializable)
+from langchain_core.runnables import (
+    RunnableConfig,
+    RunnableLambda,
+    RunnableSerializable,
+)
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
