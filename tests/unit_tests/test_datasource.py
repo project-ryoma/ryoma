@@ -13,7 +13,7 @@ class MockSqlDataSource(SqlDataSource):
     def crawl_metadata(self, **kwargs):
         pass
 
-    def connect(self) -> Any:
+    def _connect(self) -> Any:
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
         mock_cursor.fetchall.return_value = [("result1",), ("result2",)]
