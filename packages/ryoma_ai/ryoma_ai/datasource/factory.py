@@ -1,14 +1,15 @@
 from enum import Enum
 
 from pydantic import BaseModel
-from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.datasource.base import DataSource, SqlDataSource
 from ryoma_ai.datasource.bigquery import BigqueryDataSource
-from ryoma_ai.datasource.file import FileDataSource
-from ryoma_ai.datasource.mysql import MySqlDataSource
-from ryoma_ai.datasource.nosql import DynamodbDataSource
+from ryoma_ai.datasource.duckdb import DuckDBConfig, DuckDBDataSource
+from ryoma_ai.datasource.file import FileConfig, FileDataSource
+from ryoma_ai.datasource.mysql import MySqlConfig, MySqlDataSource
+from ryoma_ai.datasource.nosql import DynamodbConfig, DynamodbDataSource
 from ryoma_ai.datasource.postgres import PostgresConfig, PostgresDataSource
 from ryoma_ai.datasource.snowflake import SnowflakeConfig, SnowflakeDataSource
-from ryoma_ai.datasource.sqlite import SqliteDataSource
+from ryoma_ai.datasource.sqlite import SqliteConfig, SqliteDataSource
 
 
 class DataSourceProvider(Enum):
@@ -19,11 +20,17 @@ class DataSourceProvider(Enum):
     file = FileDataSource
     dynamodb = DynamodbDataSource
     sqlite = SqliteDataSource
+    duckdb = DuckDBDataSource
 
 
 class DataSourceConfigProvider(Enum):
     postgres = PostgresConfig
     snowflake = SnowflakeConfig
+    file = FileConfig
+    mysql = MySqlConfig
+    dynamodb = DynamodbConfig
+    sqlite = SqliteConfig
+    duckdb = DuckDBConfig
 
 
 def get_supported_datasources():
@@ -32,7 +39,7 @@ def get_supported_datasources():
 
 class DataSourceFactory:
     @staticmethod
-    def create_datasource(datasource: str, *args, **kwargs) -> DataSource:
+    def create_datasource(datasource: str, *args, **kwargs) -> SqlDataSource:
         if not hasattr(DataSourceProvider, datasource):
             raise ValueError(f"Unsupported datasource: {datasource}")
 
@@ -45,7 +52,7 @@ class DataSourceFactory:
 
     @staticmethod
     def get_datasource_config(datasource: str):
-        if not hasattr(DataSourceConfigProvider, datasource):
+        if not hasattr(DataSourceProvider, datasource):
             raise ValueError(f"Unsupported datasource: {datasource}")
 
         config_class = DataSourceConfigProvider[datasource].value

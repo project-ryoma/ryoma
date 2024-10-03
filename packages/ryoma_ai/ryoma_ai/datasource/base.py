@@ -13,10 +13,6 @@ class DataSource(ABC):
         self.type = type
 
     @abstractmethod
-    def connect(self, **kwargs) -> Any:
-        raise NotImplementedError("connect is not implemented for this data source")
-
-    @abstractmethod
     def get_catalog(self, **kwargs):
         raise NotImplementedError("get_catalog is not implemented for this data source")
 
@@ -26,9 +22,15 @@ class SqlDataSource(DataSource):
         super().__init__(type="sql")
         self.database = database
         self.db_schema = db_schema
+        self.__connection = None
+
+    def connect(self, **kwargs) -> Any:
+        if not self.__connection:
+            self.__connection = self._connect()
+        return self.__connection
 
     @abstractmethod
-    def connect(self, **kwargs) -> SQLBackend:
+    def _connect(self, **kwargs) -> Any:
         raise NotImplementedError("connect is not implemented for this data source")
 
     def query(self, query, result_format="pandas", **kwargs) -> IbisTable:

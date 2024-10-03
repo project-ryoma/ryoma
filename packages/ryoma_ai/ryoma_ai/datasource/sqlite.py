@@ -21,5 +21,5 @@ class SqliteDataSource(SqlDataSource):
         super().__init__()
         self.connection_url = connection_url
 
-    def connect(self) -> BaseBackend:
+    def _connect(self) -> BaseBackend:
         return ibis.sqlite.connect(self.connection_url)

@@ -3,12 +3,18 @@ import re
 from typing import Any, Dict
 
 from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.factory import DataSourceFactory
 from ryoma_lab.services.kernel.base import BaseKernel
 from sqlalchemy.exc import SQLAlchemyError
 
 
 class SqlKernel(BaseKernel):
     datasource: SqlDataSource
+
+    def __init__(self, datasource: SqlDataSource, **kwargs):
+        if not datasource:
+            datasource = DataSourceFactory.create_datasource("duckdb")
+        super().__init__(datasource, **kwargs)
 
     def execute(self, query: str) -> Dict[str, Any]:
         logging.info(f"Executing SQL query: {query}")

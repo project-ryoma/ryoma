@@ -41,7 +41,7 @@ class PostgresDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
+    def _connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
         logging.info("Connecting to Postgres")
         if self.connection_url:
             logging.info("Connection URL provided, using it to connect")
