@@ -74,7 +74,6 @@ class CatalogState(DataSourceState):
             )
         try:
             datasource.get_catalog(loader=self._record_loader())
-
             # reload the catalog entries
             self.load_catalogs()
         except Exception as e:

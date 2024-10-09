@@ -5,6 +5,10 @@ from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Table
 
 
+class FileConfig:
+    pass
+
+
 class FileDataSource(DataSource):
     type: str = "file"
     file_path: str

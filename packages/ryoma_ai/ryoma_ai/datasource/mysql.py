@@ -32,7 +32,7 @@ class MySqlDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> BaseBackend:
+    def _connect(self, **kwargs) -> BaseBackend:
         return ibis.mysql.connect(
             user=self.username,
             password=self.password,
@@ -69,3 +69,7 @@ class MySqlDataSource(SqlDataSource):
             task=DefaultTask(extractor=MysqlMetadataExtractor(), loader=loader),
         )
         job.launch()
+
+
+class MySqlConfig:
+    pass

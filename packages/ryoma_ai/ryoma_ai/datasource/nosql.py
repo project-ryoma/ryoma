@@ -18,3 +18,7 @@ class DynamodbDataSource(DataSource):
     def get_catalog(self, table_name: str) -> List[Catalog]:
         response = self.client.describe_table(TableName=table_name)
         return response["Table"]
+
+
+class DynamodbConfig:
+    pass

@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 
 import reflex as rx
-from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.datasource.base import DataSource, SqlDataSource
 from ryoma_ai.datasource.factory import DataSourceFactory
 from ryoma_lab.models.datasource import DataSourceTable
 from sqlmodel import select
@@ -63,7 +63,7 @@ class DataSourceService:
         return False
 
     @staticmethod
-    def connect_datasource(datasource_type: str, configs: dict) -> DataSource:
+    def connect_datasource(datasource_type: str, configs: dict) -> SqlDataSource:
         try:
             source = DataSourceFactory.create_datasource(datasource_type, **configs)
             source.connect()

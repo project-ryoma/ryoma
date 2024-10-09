@@ -7,6 +7,8 @@ from ryoma_ai.datasource.base import DataSource
 
 
 class BaseKernel:
+    datasource: DataSource
+
     def __init__(self, datasource: Optional[DataSource] = None, **kwargs):
         self.datasource = datasource
 

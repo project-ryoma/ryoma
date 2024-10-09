@@ -44,7 +44,7 @@ class SnowflakeDataSource(SqlDataSource):
         self.role = role or "PUBLIC_ROLE"
         self.connection_url = connection_url
 
-    def connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
+    def _connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
         if self.connection_url:
             logging.info("Connection URL provided, using it to connect")
             return ibis.connect(self.connection_url)
