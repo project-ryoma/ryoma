@@ -76,7 +76,7 @@ docker-build:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
 		-t $(IMAGE):$(VERSION) . \
-		-f ./python/Dockerfile
+		-f ./Dockerfile
 
 .PHONY: docker-run
 docker-run:
