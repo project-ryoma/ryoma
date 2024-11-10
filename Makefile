@@ -7,6 +7,14 @@ PYTHONPATH := '.'
 IMAGE := ryoma
 VERSION := latest
 
+.PHONY: poetry-download
+poetry-download:
+	curl -sSL https://install.python-poetry.org | python3 -
+
+.PHONY: poetry-remove
+poetry-remove:
+	curl -sSL https://install.python-poetry.org | python3 - --uninstall
+
 .PHONY: uv-download
 uv-download:
 	curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -68,7 +76,7 @@ docker-build:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
 		-t $(IMAGE):$(VERSION) . \
-		-f ./python/Dockerfile
+		-f ./Dockerfile
 
 .PHONY: docker-run
 docker-run:
