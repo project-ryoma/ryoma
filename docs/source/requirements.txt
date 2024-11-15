@@ -1,0 +1,11 @@
+furo
+markupsafe
+matplotlib
+myst-parser[linkify]
+pillow
+pydot
+sphinx-copybutton
+sphinx-exec-code
+sphinx-gallery
+sphinx-tabs
+sphinx
