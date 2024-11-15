@@ -12,10 +12,10 @@ import warnings
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-project = 'Ryoma'
-copyright = '2024, WuHen-Li'
-author = 'WuHen-Li'
-release = 'v1.0.0-beta'
+project = "Ryoma"
+copyright = "2024, WuHen-Li"
+author = "WuHen-Li"
+release = "v1.0.0-beta"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
