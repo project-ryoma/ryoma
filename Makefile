@@ -48,8 +48,8 @@ unit-test:
 
 .PHONY: check-codestyle
 check-codestyle:
-	uv run isort --diff --check-only --skip-glob docs/ --settings-path pyproject.toml ./
-	uv run black --diff --check --exclude docs/ --config pyproject.toml ./ 
+	uv run isort --diff --check-only --settings-path pyproject.toml ./
+	uv run black --diff --check --config pyproject.toml ./ 
 
 .PHONY: mypy
 mypy:
