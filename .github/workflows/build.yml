@@ -31,7 +31,6 @@ jobs:
     - name: Install dependencies
       run: |
         make install
-
     - name: Run style checks
       run: |
         make check-codestyle
