@@ -1,6 +1,6 @@
 (ryoma-architecture)=
 
-# Architecture 
+# Architecture
 
 Ryoma architecture diagram documentation.
 

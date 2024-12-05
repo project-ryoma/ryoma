@@ -27,4 +27,3 @@ ryoma_lab run
 The app will start running on `http://localhost:3000/`. You can open this URL in your browser to start using Ryoma Lab.
 
 ## Components
-

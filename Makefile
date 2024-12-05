@@ -7,14 +7,6 @@ PYTHONPATH := '.'
 IMAGE := ryoma
 VERSION := latest
 
-.PHONY: poetry-download
-poetry-download:
-	curl -sSL https://install.python-poetry.org | python3 -
-
-.PHONY: poetry-remove
-poetry-remove:
-	curl -sSL https://install.python-poetry.org | python3 - --uninstall
-
 .PHONY: uv-download
 uv-download:
 	curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -23,6 +15,7 @@ uv-download:
 .PHONY: install
 install:
 	uv lock && uv pip compile pyproject.toml -o requirements.txt
+	uv pip install pre-commit
 	uv sync
 	#uv run mypy --install-types --non-interactive ./
 
@@ -49,7 +42,7 @@ unit-test:
 .PHONY: check-codestyle
 check-codestyle:
 	uv run isort --diff --check-only --settings-path pyproject.toml ./
-	uv run black --diff --check --config pyproject.toml ./ 
+	uv run black --diff --check --config pyproject.toml ./
 
 .PHONY: mypy
 mypy:

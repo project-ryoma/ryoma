@@ -15,5 +15,3 @@ This document describes the architecture of the project.
 ![img.png](img.png)
 
 E2E user flow of Ryoma is shown in the above diagram.
-
-

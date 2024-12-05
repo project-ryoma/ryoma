@@ -1,6 +1,6 @@
 (ryoma-reference)=
 
-# Reference 
+# Reference
 
 Ryoma reference documentation.
 

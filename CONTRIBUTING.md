@@ -2,27 +2,21 @@
 
 ## Dependencies
 
-We use `poetry` to manage the [dependencies](https://github.com/python-poetry/poetry).
-If you dont have `poetry`, you should install with `make poetry-download`.
+We use `uv` to manage the [dependencies](https://astral.sh/uv).
+If you dont have `uv`, you should install with `make uv-download`.
 
 ## Project Startup
 
 [`Makefile`](https://github.com/ryoma/ryoma/blob/master/Makefile) contains a lot of functions for faster development.
 
 <details>
-<summary>1. Download and remove Poetry</summary>
+<summary>1. Download uv</summary>
 <p>
 
-To download and install Poetry run:
+To download and install uv run:
 
 ```bash
-make poetry-download
-```
-
-To uninstall
-
-```bash
-make poetry-remove
+make uv-download
 ```
 
 </p>

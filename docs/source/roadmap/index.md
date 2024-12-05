@@ -1,6 +1,6 @@
 (ryoma-roadmap)=
 
-# Roadmap 
+# Roadmap
 
 Ryoma roadmap.
 

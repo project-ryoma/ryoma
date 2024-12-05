@@ -4,8 +4,8 @@ matplotlib
 myst-parser[linkify]
 pillow
 pydot
+sphinx
 sphinx-copybutton
 sphinx-exec-code
 sphinx-gallery
 sphinx-tabs
-sphinx
