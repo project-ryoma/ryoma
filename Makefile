@@ -78,11 +78,6 @@ docker-build:
 		-t $(IMAGE):$(VERSION) . \
 		-f ./Dockerfile
 
-.PHONY: docker-run
-docker-run:
-	@echo run docker $(IMAGE):$(VERSION) ...
-	docker run -t $(IMAGE):$(VERSION)
-
 # Example: make docker-remove VERSION=latest
 # Example: make docker-remove IMAGE=some_name VERSION=0.1.0
 .PHONY: docker-remove
