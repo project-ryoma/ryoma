@@ -11,7 +11,10 @@ def datasource_selector() -> rx.Component:
     """The type selector."""
     return rx.hstack(
         rx.select.root(
-            rx.select.trigger(placeholder="Select your data source"),
+            rx.select.trigger(
+                placeholder="Select Data Source",
+                width="10em"
+            ),
             rx.select.content(
                 rx.select.group(
                     rx.select.label("Connected Data Source"),
@@ -40,9 +43,13 @@ def datasource_selector() -> rx.Component:
         rx.cond(
             WorkspaceState.schemas.length() > 0,
             rx.select.root(
-                rx.select.trigger(placeholder="Select your schema"),
+                rx.select.trigger(
+                    placeholder="Select your schema",
+                    width="10em"
+                ),
                 rx.select.content(
                     rx.select.group(
+                        rx.select.label("Schema"),
                         rx.foreach(
                             WorkspaceState.schemas,
                             lambda schema: rx.select.item(
@@ -80,6 +87,7 @@ def notebook_panel() -> rx.Component:
                 default_value="sql",
                 placeholder="Select Kernel",
                 on_change=WorkspaceState.set_kernel_type,
+                width="10em",
                 size="2",
                 min_width="10em",
             ),
@@ -209,7 +217,7 @@ def notebook() -> rx.Component:
     return rx.vstack(
         rx.box(
             rx.heading(
-                "Notebook",
+                "Kernel",
                 width="100%",
                 size="4",
                 padding_y="5px",

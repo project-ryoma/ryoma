@@ -5,7 +5,7 @@ from typing import Any, Iterator, Optional, Union
 
 import reflex as rx
 from langchain_core.messages import AIMessage, ToolMessage
-from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.base import ChatAgent
 from ryoma_ai.agent.embedding import EmbeddingAgent
 from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
@@ -70,7 +70,7 @@ class ChatState(WorkspaceState):
     # agent states
     current_chat_agent_type: str = ""
 
-    _current_chat_agent: Optional[Union[BaseAgent, WorkflowAgent]] = None
+    _current_chat_agent: Optional[Union[ChatAgent, WorkflowAgent]] = None
 
     _current_embedding_agent: Optional[EmbeddingAgent] = None
 

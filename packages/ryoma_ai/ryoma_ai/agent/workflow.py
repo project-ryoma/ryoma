@@ -17,7 +17,7 @@ from langgraph.graph import StateGraph
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
-from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.base import ChatAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
@@ -45,7 +45,7 @@ def handle_tool_error(state) -> dict:
     }
 
 
-class WorkflowAgent(BaseAgent):
+class WorkflowAgent(ChatAgent):
     tools: List[BaseTool]
     graph: StateGraph
     workflow: CompiledGraph
@@ -139,7 +139,8 @@ class WorkflowAgent(BaseAgent):
         return []
 
     def add_datasource(self, datasource: DataSource):
-        super().add_datasource(datasource)
+        self.add_prompt_context(str(datasource.get_catalog()))
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         for tool in self.tools:
             if hasattr(tool, "type"):
                 tool.datasource = datasource

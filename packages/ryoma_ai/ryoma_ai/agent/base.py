@@ -8,26 +8,24 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from pydantic import BaseModel
-from ryoma_ai.agent.utils import load_model_provider
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog
+from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.prompt.prompt_template import PromptTemplateFactory
 
 
-class RyomaAgent:
+class BaseAgent:
     """
     Base class for all agents in Ryoma. Inherits from this class can be used to create custom agents.
     """
 
-    type: AgentType = AgentType.ryoma
+    type: AgentType = AgentType.base
     description: str = "Ryoma Agent is your best friend!"
 
 
-class BaseAgent(RyomaAgent):
-    type: AgentType = AgentType.base
+class ChatAgent(BaseAgent):
+    type: AgentType = AgentType.chat
     description: str = (
-        "Base Agent supports all the basic functionalities of a chat agent."
+        "Chat Agent supports all the basic functionalities of a chat agent."
     )
     config: Dict[str, Any]
     model: RunnableSerializable
@@ -98,16 +96,6 @@ class BaseAgent(RyomaAgent):
 
     def add_prompt_context(self, prompt_context: str):
         self.prompt_template_factory.add_context_prompt(prompt_context)
-        return self
-
-    def add_datasource(self, datasource: DataSource):
-        self.add_prompt_context(str(datasource.get_catalog()))
-        self.final_prompt_template = self.prompt_template_factory.build_prompt()
-        return self
-
-    def add_data_catalog(self, catalog: Catalog):
-        self.add_prompt_context(str(catalog))
-        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         return self
 
     def _format_messages(self, messages: str):

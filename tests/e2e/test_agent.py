@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.base import ChatAgent
 from ryoma_ai.agent.sql import SqlAgent
 
 
@@ -14,7 +14,7 @@ def setup_openai_api_key():
 
 def test_base_agent():
     # Create an simple ryoma_ai Agent with GPT-3.5-turbo model
-    ryoma_agent = BaseAgent("gpt-3.5-turbo")
+    ryoma_agent = ChatAgent("gpt-3.5-turbo")
     result = ryoma_agent.stream(
         "I want to get the top 5 customers which making the most purchases"
     )
