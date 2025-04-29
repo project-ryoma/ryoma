@@ -34,8 +34,8 @@ jobs:
       - name: Login to Azure Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ryomaregistry.azurecr.io
-          username: ryomaregistry
+          registry: ryoma.azurecr.io
+          username: ryoma
           password: ${{ secrets.AZURE_CR_PASSWORD }}
 
       - name: docker build image
@@ -44,11 +44,11 @@ jobs:
   
       - name: Set up Docker Build
         run: |
-          docker tag ryoma-api ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
+          docker tag ryoma-api ryoma.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
   
       - name: Publish to Azure Container Registry
         run: |
-          docker push ryomaregistry.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
+          docker push ryoma.azurecr.io/ryoma-dataapp:${{ env.COMMIT_SHA }}
 
 #  deploy:
 #    runs-on: ubuntu-latest
