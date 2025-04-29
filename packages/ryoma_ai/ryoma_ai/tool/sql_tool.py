@@ -3,7 +3,6 @@ import pickle
 from abc import ABC
 from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
-from langchain_community.vectorstores import FAISS
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 from ryoma_ai.datasource.base import SqlDataSource

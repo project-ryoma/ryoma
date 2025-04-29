@@ -4,7 +4,7 @@ import openai
 import openai_responses
 import pytest
 from openai_responses import OpenAIMock
-from ryoma_ai.agent.base import BaseAgent
+from ryoma_ai.agent.base import ChatAgent
 
 from tests.unit_tests.test_utils import (
     create_chat_completion_response_stream,
@@ -44,7 +44,7 @@ def test_create_chat_completion_stream(openai_mock: OpenAIMock):
 
 @pytest.fixture
 def agent():
-    return BaseAgent("gpt-3.5-turbo")
+    return ChatAgent("gpt-3.5-turbo")
 
 
 @openai_responses.mock()

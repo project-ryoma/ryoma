@@ -50,7 +50,7 @@ class WorkspaceState(BaseState):
     file_manager: FileManager = FileManager(base_directory=".")
     sidebar_width: str = "250px"
     is_sidebar_open: bool = True
-    notebook_filename: str = "notebook.ipynb"
+    notebook_filename: str = "my_query.sql"
 
     def search_files(self, search_term: str):
         self.search_prefix = search_term

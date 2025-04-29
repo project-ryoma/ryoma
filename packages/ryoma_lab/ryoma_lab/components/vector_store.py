@@ -121,7 +121,7 @@ def setup_store():
         rx.dialog.trigger(
             rx.button(
                 rx.flex(
-                    "Setup Store", rx.icon(tag="plus", width=24, height=24), spacing="3"
+                    "New Project", rx.icon(tag="plus", width=24, height=24), spacing="3"
                 ),
                 size="4",
                 radius="full",
@@ -130,13 +130,13 @@ def setup_store():
         ),
         rx.dialog.content(
             rx.dialog.title(
-                "Create Store",
+                "Create a project",
                 size="1",
                 font_family="Inter",
                 padding_top="1em",
             ),
             rx.dialog.description(
-                "Create a Vector Store to store your embedding features.",
+                "Create a project to store your RAG data.",
                 size="2",
                 mb="4",
                 padding_bottom="1em",
@@ -144,14 +144,14 @@ def setup_store():
             rx.flex(
                 rx.chakra.heading("Project Name *", size="sm"),
                 rx.input(
-                    placeholder="Enter the name of the current_store",
+                    placeholder="Enter the name of your project",
                     on_blur=VectorStoreState.set_project_name,
                     required=True,
                 ),
-                rx.chakra.heading("Online Store *", size="sm"),
+                rx.chakra.heading("Database *", size="sm"),
                 rx.select.root(
                     rx.select.trigger(
-                        placeholder="Select the data source as the online store for the embeddings",
+                        placeholder="Select the database as your online store for the embeddings",
                     ),
                     rx.select.content(
                         rx.select.group(
@@ -172,7 +172,7 @@ def setup_store():
                 rx.flex(
                     rx.dialog.close(
                         rx.button(
-                            "Create Store",
+                            "Create a project",
                             size="2",
                             on_click=VectorStoreState.create_store,
                         ),
