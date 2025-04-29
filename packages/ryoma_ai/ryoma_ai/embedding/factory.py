@@ -1,4 +1,4 @@
-from ryoma_ai.embedding.client import LangchainEmbeddingClient, EmbeddingClient
+from ryoma_ai.embedding.client import EmbeddingClient, LangchainEmbeddingClient
 from ryoma_ai.embedding.config import EmbeddingConfig
 from ryoma_ai.llm.provider import load_model_provider
 

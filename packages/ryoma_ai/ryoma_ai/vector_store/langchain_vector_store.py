@@ -1,6 +1,7 @@
+from typing import Dict, List, Optional
+
 from langchain_core.vectorstores import VectorStore as LCVectorStore
-from typing import List, Optional, Dict
-from ryoma_ai.vector_store.base import VectorStore, SearchResult
+from ryoma_ai.vector_store.base import SearchResult, VectorStore
 
 
 class LangchainVectorStore(VectorStore):
@@ -8,8 +9,7 @@ class LangchainVectorStore(VectorStore):
     Generic wrapper for any LangChain-compatible vector store.
     """
 
-    def __init__(self,
-                 impl: LCVectorStore):
+    def __init__(self, impl: LCVectorStore):
         self.impl = impl
 
     def index(

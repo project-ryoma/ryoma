@@ -1,11 +1,13 @@
-from langchain_community.vectorstores import Chroma, PGVector, Qdrant
 from langchain.embeddings.base import Embeddings
+from langchain_community.vectorstores import Chroma, PGVector, Qdrant
 from ryoma_ai.vector_store.base import VectorStore
 from ryoma_ai.vector_store.config import VectorStoreConfig
 from ryoma_ai.vector_store.langchain_vector_store import LangchainVectorStore
 
 
-def create_vector_store(config: VectorStoreConfig, embedding_function: Embeddings = None) -> VectorStore:
+def create_vector_store(
+    config: VectorStoreConfig, embedding_function: Embeddings = None
+) -> VectorStore:
     """
     Create a vector store backend based on type and config.
     """

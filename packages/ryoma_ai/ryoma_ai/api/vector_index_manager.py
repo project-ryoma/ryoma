@@ -1,6 +1,7 @@
 # ryoma_ai/api/vector_index_manager.py
 
 from typing import List, Optional
+
 from ryoma_ai.embedding.client import EmbeddingClient
 from ryoma_ai.vector_store.base import VectorStore
 
@@ -21,7 +22,9 @@ class VectorIndexManager:
         vector = self.embedder.embed(text)
         self.vector_store.index([doc_id], [vector], metadatas=[{"text": text}])
 
-    def index_text_batch(self, ids: List[str], texts: List[str], metadatas: Optional[List[dict]] = None):
+    def index_text_batch(
+        self, ids: List[str], texts: List[str], metadatas: Optional[List[dict]] = None
+    ):
         """
         Embed and index a batch of documents.
         """

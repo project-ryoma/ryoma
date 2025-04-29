@@ -11,10 +11,7 @@ def datasource_selector() -> rx.Component:
     """The type selector."""
     return rx.hstack(
         rx.select.root(
-            rx.select.trigger(
-                placeholder="Select Data Source",
-                width="10em"
-            ),
+            rx.select.trigger(placeholder="Select Data Source", width="10em"),
             rx.select.content(
                 rx.select.group(
                     rx.select.label("Connected Data Source"),
@@ -43,10 +40,7 @@ def datasource_selector() -> rx.Component:
         rx.cond(
             WorkspaceState.schemas.length() > 0,
             rx.select.root(
-                rx.select.trigger(
-                    placeholder="Select your schema",
-                    width="10em"
-                ),
+                rx.select.trigger(placeholder="Select your schema", width="10em"),
                 rx.select.content(
                     rx.select.group(
                         rx.select.label("Schema"),
@@ -55,7 +49,7 @@ def datasource_selector() -> rx.Component:
                             lambda schema: rx.select.item(
                                 schema.schema_name, value=schema.schema_name
                             ),
-                        )
+                        ),
                     ),
                     width="100%",
                     position="popper",
