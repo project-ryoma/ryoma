@@ -14,14 +14,14 @@ pip install ryoma_ai
 ## Usage
 
 ```python
-from ryoma_ai.datasource.postgresql import PostgresDataSource
+from ryoma_ai.datasource.postgres import PostgresDataSource
 from ryoma_ai.agent.sql import SqlAgent
 
 datasource = PostgresDataSource("postgresql://user:password@localhost/db")
 sql_agent = SqlAgent("gpt-3.5-turbo")
 .add_datasource(datasource)
-sql_agent.playground("Get the top 10 rows from the data source")
+sql_agent.stream("Get the top 10 rows from the data source")
 ```
 
 ## Documentation
-Visit the [documentation](https://ryoma-1.gitbook.io/ryoma) for more information.
+Visit the [documentation](https://project-ryoma.github.io/ryoma/) for more information.
