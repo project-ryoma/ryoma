@@ -13,8 +13,16 @@ class DataSource(ABC):
         self.type = type
 
     @abstractmethod
-    def get_catalog(self, **kwargs):
+    def get_catalog(self, **kwargs) -> Catalog:
         raise NotImplementedError("get_catalog is not implemented for this data source")
+
+    @abstractmethod
+    def crawl_catalogs(self,
+                       loader: Any,
+                       **kwargs) -> Optional[Catalog]:
+        raise NotImplementedError(
+            "crawl_metadata is not implemented for this data source."
+        )
 
 
 class SqlDataSource(DataSource):
@@ -50,9 +58,13 @@ class SqlDataSource(DataSource):
     def get_catalog(
         self,
         catalog: Optional[str] = None,
-    ):
+    ) -> Catalog:
         catalog = self.database if not catalog else catalog
-        return self.list_schemas(catalog=catalog, with_table=True, with_columns=True)
+        schemas = self.list_schemas(catalog=catalog, with_table=True, with_columns=True)
+        return Catalog(
+            catalog_name=catalog,
+            schemas=schemas,
+        )
 
     def list_catalogs(
         self,
@@ -136,8 +148,3 @@ class SqlDataSource(DataSource):
             "get_query_plan is not implemented for this data source."
         )
 
-    @abstractmethod
-    def crawl_metadata(self, **kwargs):
-        raise NotImplementedError(
-            "crawl_metadata is not implemented for this data source."
-        )

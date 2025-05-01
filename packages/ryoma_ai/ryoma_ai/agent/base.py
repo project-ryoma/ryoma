@@ -8,9 +8,12 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from pydantic import BaseModel
+
+from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.prompt.prompt_template import PromptTemplateFactory
+from ryoma_ai.vector_store.base import VectorStore
 
 
 class BaseAgent:
@@ -20,6 +23,30 @@ class BaseAgent:
 
     type: AgentType = AgentType.base
     description: str = "Ryoma Agent is your best friend!"
+
+    def __init__(
+        self,
+        datasource: Optional[DataSource] = None,
+        vector_store: Optional[VectorStore] = None,
+    ):
+        self.datasource = vector_store
+        self.vector_store = vector_store
+
+    def add_datasource(self,
+                       datasource: DataSource):
+        self.datasource = datasource
+        return self
+
+    def _get_datasource_context(self, on_demand=True):
+        if on_demand:
+            return str(self.datasource.get_catalogs())
+        else:
+            raise ValueError("Offline context is not supported yet.")
+
+    def add_vector_store(self,
+                         vector_store: VectorStore):
+        self.vector_store = vector_store
+        return self
 
 
 class ChatAgent(BaseAgent):
@@ -42,9 +69,13 @@ class ChatAgent(BaseAgent):
         context_prompt_templates: Optional[list[PromptTemplate]] = None,
         output_prompt_template: Optional[PromptTemplate] = None,
         output_parser: Optional[BaseModel] = None,
+        datasource: Optional[DataSource] = None,
+        vector_store: Optional[VectorStore] = None,
         **kwargs,
     ):
         logging.info(f"Initializing Agent with model: {model}")
+
+        super().__init__(datasource=datasource, vector_store=vector_store)
 
         # configs
         self.config = {
@@ -83,25 +114,52 @@ class ChatAgent(BaseAgent):
         return self.final_prompt_template | self.model
 
     def set_base_prompt(
-        self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None
+        self,
+        base_prompt: Optional[Union[str, ChatPromptTemplate]] = None
     ):
         self.prompt_template_factory.set_base_prompt(base_prompt)
         return self
 
     def set_context_prompt(
-        self, context: Optional[Union[str, ChatPromptTemplate]] = None
+        self,
+        context: Optional[Union[str, ChatPromptTemplate]] = None
     ):
         self.prompt_template_factory.add_context_prompt(context)
         return self
 
-    def add_prompt_context(self, prompt_context: str):
+    def add_prompt_context(self,
+                           prompt_context: str):
         self.prompt_template_factory.add_context_prompt(prompt_context)
         return self
 
-    def _format_messages(self, messages: str):
+    def _format_messages(self,
+                         messages: str):
         return {"messages": [HumanMessage(content=messages)]}
 
-    def stream(self, question: Optional[str] = "", display: Optional[bool] = True):
+    def _add_datasource_context(self):
+        self.add_prompt_context(str(self.datasource.get_catalog()))
+
+    def _add_retrieval_context(self, query: str):
+        if not self.vector_store:
+            raise ValueError(
+                "Unable to initialize vector store, please ensure you have valid configurations."
+            )
+        top_k_context = self.vector_store.search_datasource_catalog(query)
+        if not top_k_context:
+            raise ValueError("Unable to retrieve context from vector store.")
+        self.add_prompt_context(
+            f"Top-K context from vector store: {top_k_context}"
+        )
+
+    def stream(self,
+               question: Optional[str] = "",
+               retrieval: Optional[bool] = False,
+               display: Optional[bool] = True):
+        if retrieval:
+            self._add_retrieval_context(question)
+        else:
+            self._add_datasource_context()
+
         messages = self._format_messages(question)
         chain = self._build_chain()
         events = chain.stream(messages, self.config)
@@ -113,7 +171,15 @@ class ChatAgent(BaseAgent):
             events = self._parse_output(chain, events)
         return events
 
-    def invoke(self, question: Optional[str] = "", display: Optional[bool] = True):
+    def invoke(self,
+               question: Optional[str] = "",
+               retrieval: Optional[bool] = False,
+               display: Optional[bool] = True):
+        if retrieval:
+            self._add_retrieval_context(question)
+        else:
+            self._add_datasource_context()
+
         messages = self._format_messages(question)
         chain = self._build_chain()
         results = chain.invoke(messages, self.config)
@@ -128,7 +194,10 @@ class ChatAgent(BaseAgent):
     def get_current_state(self) -> None:
         return None
 
-    def _parse_output(self, chain, result: dict, max_iterations=10):
+    def _parse_output(self,
+                      chain,
+                      result: dict,
+                      max_iterations=10):
         iteration = 0
         while iteration < max_iterations:
             iteration += 1
@@ -142,7 +211,8 @@ class ChatAgent(BaseAgent):
                 ]
         return result
 
-    def set_output_parser(self, output_parser: BaseModel):
+    def set_output_parser(self,
+                          output_parser: BaseModel):
         self.output_parser = PydanticOutputParser(pydantic_object=output_parser)
         self.output_prompt = PromptTemplate(
             template="Return output in required format with given messages.\n{format_instructions}\n{messages}\n",

@@ -47,3 +47,14 @@ class LangchainVectorStore(VectorStore):
             )
             for i, doc in enumerate(results)
         ]
+
+    def search_documents(self, query: str, top_k: int = 5) -> List[SearchResult]:
+        results = self.impl.similarity_search(query, k=top_k)
+        return [
+            SearchResult(
+                id=doc.metadata.get("doc_id", f"result_{i}"),
+                score=0.0,
+                metadata={k: str(v) for k, v in doc.metadata.items()},
+            )
+            for i, doc in enumerate(results)
+        ]

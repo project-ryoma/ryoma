@@ -1,6 +1,5 @@
 import logging
 from enum import Enum
-from typing import Callable
 
 from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
@@ -18,7 +17,6 @@ from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
 from ryoma_ai.agent.base import ChatAgent
-from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
 
@@ -83,6 +81,10 @@ class WorkflowAgent(ChatAgent):
 
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
+        if self.datasource:
+            for tool in self.tools:
+                if hasattr(tool, "type"):
+                    tool.datasource = self.datasource
         if hasattr(self.model, "bind_tools"):
             return self.model.bind_tools(self.tools)
         else:
@@ -104,7 +106,7 @@ class WorkflowAgent(ChatAgent):
             return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
         workflow = StateGraph(MessageState)
 
-        workflow.add_node("agent", self.call_model)
+        workflow.add_node("agent", self.odel)
         workflow.add_node("tools", self.build_tool_node(self.tools))
 
         workflow.add_conditional_edges(
@@ -138,14 +140,6 @@ class WorkflowAgent(ChatAgent):
             return current_state_messages[-1].tool_calls
         return []
 
-    def add_datasource(self, datasource: DataSource):
-        self.add_prompt_context(str(datasource.get_catalog()))
-        self.final_prompt_template = self.prompt_template_factory.build_prompt()
-        for tool in self.tools:
-            if hasattr(tool, "type"):
-                tool.datasource = datasource
-        return self
-
     def _format_messages(self, question: str):
         current_state = self.get_current_state()
         if current_state.next and current_state.next[0] == "tools":
@@ -166,6 +160,7 @@ class WorkflowAgent(ChatAgent):
     def stream(
         self,
         question: Optional[str] = "",
+        retrieval: bool = False,
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,
@@ -178,6 +173,10 @@ class WorkflowAgent(ChatAgent):
             messages = None
         else:
             messages = self._format_messages(question)
+        if retrieval:
+            self._add_retrieval_context(question)
+        else:
+            self._add_datasource_context()
         events = self.workflow.stream(
             messages, config=self.config, stream_mode="values"
         )
@@ -203,6 +202,7 @@ class WorkflowAgent(ChatAgent):
     def invoke(
         self,
         question: Optional[str] = "",
+        retrieval: bool = False,
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,
@@ -215,6 +215,10 @@ class WorkflowAgent(ChatAgent):
             messages = None
         else:
             messages = self._format_messages(question)
+        if retrieval:
+            self._add_retrieval_context(question)
+        else:
+            self._add_datasource_context()
         result = self.workflow.invoke(messages, config=self.config)
         if display:
             _printed = set()
@@ -284,6 +288,7 @@ class WorkflowAgent(ChatAgent):
             raise ValueError(
                 f"Unable to initialize model, please ensure you have valid configurations."
             )
+        self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.final_prompt_template.append(
             MessagesPlaceholder(variable_name="messages", optional=True)
         )

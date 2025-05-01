@@ -10,7 +10,7 @@ class MockSqlDataSource(SqlDataSource):
     def get_query_plan(self, query: str) -> Any:
         pass
 
-    def crawl_metadata(self, **kwargs):
+    def crawl_catalogs(self, **kwargs):
         pass
 
     def _connect(self) -> Any:
