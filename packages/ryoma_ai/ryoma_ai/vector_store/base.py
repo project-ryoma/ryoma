@@ -2,14 +2,13 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from pyhocon import ConfigTree
 
 from databuilder.loader.base_loader import Loader
 from databuilder.loader.generic_loader import GenericLoader
 from databuilder.models.table_metadata import TableMetadata
-
+from pyhocon import ConfigTree
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Schema, Table, Column, Catalog
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 @dataclass
@@ -74,13 +73,21 @@ class VectorStore(ABC):
         logging.info(f"Indexing catalog entry to vector store: {record}")
         self.index_documents(
             ids=[record.name],
-            documents=[record.description.text if record.description else "No description available"],
-            metadatas=[{
-                "columns": [col.name for col in record.columns],
-                "schema": record.schema,
-                "is_view": record.is_view,
-                "attrs": str(record.attrs),
-            }],
+            documents=[
+                (
+                    record.description.text
+                    if record.description
+                    else "No description available"
+                )
+            ],
+            metadatas=[
+                {
+                    "columns": [col.name for col in record.columns],
+                    "schema": record.schema,
+                    "is_view": record.is_view,
+                    "attrs": str(record.attrs),
+                }
+            ],
         )
 
     def index_datasource(
@@ -107,7 +114,9 @@ class VectorStore(ABC):
                             documents=[document],
                         )
         else:
-            logging.info(f"Start crawling metadata for datasource {datasource} and indexing")
+            logging.info(
+                f"Start crawling metadata for datasource {datasource} and indexing"
+            )
             datasource.crawl_catalogs(
                 loader=self._record_indexer(),
             )
@@ -134,13 +143,15 @@ class VectorStore(ABC):
         """
         Build a document string from catalog, schema, table, column name and type.
         """
-        return f"Catalog: {catalog.catalog_name}" + \
-            f"\nSchema: {schema.schema_name}" + \
-            f"\nTable: {table.table_name}" + \
-            f"\nColumn: {column.column_name}" + \
-            f"\nType: {column.column_type}" + \
-            f"\nNullable: {column.nullable}" + \
-            f"\nDescription: {column.description or 'No description available'}"
+        return (
+            f"Catalog: {catalog.catalog_name}"
+            + f"\nSchema: {schema.schema_name}"
+            + f"\nTable: {table.table_name}"
+            + f"\nColumn: {column.column_name}"
+            + f"\nType: {column.column_type}"
+            + f"\nNullable: {column.nullable}"
+            + f"\nDescription: {column.description or 'No description available'}"
+        )
 
     def search_datasource_catalog(
         self,

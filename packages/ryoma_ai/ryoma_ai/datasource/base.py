@@ -17,9 +17,7 @@ class DataSource(ABC):
         raise NotImplementedError("get_catalog is not implemented for this data source")
 
     @abstractmethod
-    def crawl_catalogs(self,
-                       loader: Any,
-                       **kwargs) -> Optional[Catalog]:
+    def crawl_catalogs(self, loader: Any, **kwargs) -> Optional[Catalog]:
         raise NotImplementedError(
             "crawl_metadata is not implemented for this data source."
         )
@@ -147,4 +145,3 @@ class SqlDataSource(DataSource):
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
         )
-
