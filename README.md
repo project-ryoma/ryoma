@@ -39,7 +39,7 @@ pip install ryoma_ai[snowflake]
 
 ## Basic Example
 Below is an example of using SqlAgent to connect to a postgres database and ask a question.
-You can read more details in the [documentation](https://ryoma-1.gitbook.io/ryoma/).
+You can read more details in the [documentation](https://project-ryoma.github.io/ryoma/).
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
