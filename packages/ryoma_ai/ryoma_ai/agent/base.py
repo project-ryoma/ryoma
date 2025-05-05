@@ -1,12 +1,13 @@
 import logging
 import uuid
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
+from langchain_core.language_models.chat_models import BaseChatModel
 from pydantic import BaseModel
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.llm.provider import load_model_provider
@@ -22,18 +23,28 @@ class BaseAgent:
 
     type: AgentType = AgentType.base
     description: str = "Ryoma Agent is your best friend!"
+    datasources: List[DataSource] = []
+    vector_store: Optional[VectorStore] = None
 
     def __init__(
         self,
         datasource: Optional[DataSource] = None,
         vector_store: Optional[VectorStore] = None,
     ):
-        self.datasource = datasource
+        if datasource:
+            self.datasources.append(datasource)
         self.vector_store = vector_store
 
     def add_datasource(self, datasource: DataSource):
-        self.datasource = datasource
+        self.datasources.append(datasource)
         return self
+
+    def index_datasource(self, on_demand: bool = False):
+        if self.vector_store:
+            for datasource in self.datasources:
+                self.vector_store.index_datasource(datasource, on_demand=on_demand)
+        else:
+            raise ValueError("Vector store is not initialized.")
 
 
 class ChatAgent(BaseAgent):
@@ -42,7 +53,7 @@ class ChatAgent(BaseAgent):
         "Chat Agent supports all the basic functionalities of a chat agent."
     )
     config: Dict[str, Any]
-    model: RunnableSerializable
+    model: BaseChatModel
     model_parameters: Optional[Dict]
     prompt_template_factory: PromptTemplateFactory
     final_prompt_template: Optional[Union[PromptTemplate, ChatPromptTemplate]]
@@ -50,7 +61,7 @@ class ChatAgent(BaseAgent):
 
     def __init__(
         self,
-        model: Union[str, RunnableSerializable],
+        model: Union[str, BaseChatModel],
         model_parameters: Optional[Dict] = None,
         base_prompt_template: Optional[PromptTemplate] = None,
         context_prompt_templates: Optional[list[PromptTemplate]] = None,
@@ -75,7 +86,7 @@ class ChatAgent(BaseAgent):
         # model
         self.model_parameters = model_parameters
         if isinstance(model, str):
-            self.model: RunnableSerializable = load_model_provider(
+            self.model: BaseChatModel = load_model_provider(
                 model, model_parameters=model_parameters
             )
         else:
@@ -120,8 +131,9 @@ class ChatAgent(BaseAgent):
         return {"messages": [HumanMessage(content=messages)]}
 
     def _add_datasource_context(self):
-        if self.datasource:
-            self.add_prompt_context(str(self.datasource.get_catalog()))
+        if self.datasources and len(self.datasources) > 0:
+            for datasource in self.datasources:
+                self.add_prompt_context(str(datasource.get_catalog()))
 
     def _add_retrieval_context(self, query: str):
         if not self.vector_store:

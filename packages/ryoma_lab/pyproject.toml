@@ -18,7 +18,7 @@ dependencies = [
     "sql-metadata>=2.11.0",
     "feast==0.39.1",
     "amundsen-databuilder>=7.5.0",
-    "ibis-framework>=9.0.0",
+    "ibis-framework>=10.0.0",
     "fastapi-users[sqlalchemy,oauth]>=13.0.0",
     "pypdf>=4.3.1",
     "sql-formatter>=0.6.2",

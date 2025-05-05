@@ -58,7 +58,7 @@ class SqlDataSource(DataSource):
         catalog: Optional[str] = None,
     ) -> Catalog:
         catalog = self.database if not catalog else catalog
-        schemas = self.list_schemas(catalog=catalog, with_table=True, with_columns=True)
+        schemas = self.list_databases(catalog=catalog, with_table=True, with_columns=True)
         return Catalog(
             catalog_name=catalog,
             schemas=schemas,
@@ -79,57 +79,61 @@ class SqlDataSource(DataSource):
         ]
         if with_schema:
             for catalog in catalogs:
-                catalog.schemas = self.list_schemas(catalog=catalog.catalog_name)
+                catalog.schemas = self.list_databases(catalog=catalog.catalog_name)
         if with_table:
             for catalog in catalogs:
                 for schema in catalog.schemas:
                     schema.tables = self.list_tables(
                         catalog=catalog.catalog_name,
-                        schema=schema.schema_name,
+                        database=schema.schema_name,
                         with_columns=with_columns,
                     )
         return catalogs
 
-    def list_schemas(
+    def list_databases(
         self,
         catalog: Optional[str] = None,
         with_table: bool = False,
         with_columns: bool = False,
     ) -> list[Schema]:
         conn: CanListDatabase = self.connect()
-        if not hasattr(conn, "list_schemas"):
-            raise Exception("This data source does not support listing schemas")
-        catalog = catalog or self.database or conn.current_database
-        schemas = [
+        if not hasattr(conn, "list_databases"):
+            raise Exception("This data source does not support listing databases")
+        catalog = catalog or self.database or conn.current_catalog
+        databases = [
             Schema(schema_name=schema)
             for schema in conn.list_databases(catalog=catalog)
         ]
         if with_table:
-            for schema in schemas:
+            for schema in databases:
                 schema.tables = self.list_tables(
                     catalog=catalog,
-                    schema=schema.schema_name,
+                    database=schema.schema_name,
                     with_columns=with_columns,
                 )
-        return schemas
+        return databases
 
     def list_tables(
         self,
         catalog: Optional[str] = None,
-        schema: Optional[str] = None,
+        database: Optional[str] = None,
         with_columns: bool = False,
     ) -> list[Table]:
         conn = self.connect()
         catalog = catalog or self.database or conn.current_database
-        if schema is not None:
-            catalog = (catalog, schema)
+        if database is not None:
+            catalog = (catalog, database)
         tables = [
             Table(table_name=table, columns=[])
             for table in conn.list_tables(database=catalog)
         ]
         if with_columns:
             for table in tables:
-                table_schema = conn.get_schema(table, catalog=catalog)
+                try:
+                    table_schema = conn.get_schema(name=table.table_name, catalog=catalog, database=database)
+                except Exception as e:
+                    logging.error(f"Error getting schema for table {table.table_name}: {e}")
+                    continue
                 table.columns = [
                     Column(
                         name=name,

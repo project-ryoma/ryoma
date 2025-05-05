@@ -1,32 +1,27 @@
 import os
-
-from ryoma_ai.agent.pandas import PandasAgent
-from ryoma_ai.agent.python import PythonAgent
-from ryoma_ai.agent.sql import SqlAgent
+import pandas as pd
+from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.datasource.postgres import PostgresDataSource
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource
 
-# Snowflake
 
-# Snowflake connection parameters
-user = os.getenv("SNOWFLAKE_USER")
-password = os.getenv("SNOWFLAKE_PASSWORD")
-account = os.getenv("SNOWFLAKE_ACCOUNT")
-warehouse = os.getenv("SNOWFLAKE_WAREHOUSE")
-role = os.getenv("SNOWFLAKE_ROLE")
-database = os.getenv("SNOWFLAKE_DATABASE")
-schema = os.getenv("SNOWFLAKE_SCHEMA")
+def get_postgres_datasource():
+    return PostgresDataSource(
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=os.getenv("POSTGRES_PORT", 5432),
+        database=os.getenv("POSTGRES_DB", "postgres"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        db_schema=os.getenv("POSTGRES_SCHEMA", "public"),
+    )
 
-# Create a SnowflakeDataSource object
-snowflake_datasource = SnowflakeDataSource(
-    user=user,
-    password=password,
-    account=account,
-    warehouse=warehouse,
-    role=role,
-    database=database,
-    schema=schema,
+
+postgres_db = get_postgres_datasource()
+pandas_agent = PandasAgent("gpt-3.5-turbo")
+df = pd.DataFrame(
+    {
+        "artist": ["Artist A", "Artist B", "Artist C", "Artist A", "Artist B"],
+        "album": ["Album 1", "Album 2", "Album 3", "Album 4", "Album 5"],
+    }
 )
-
-sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(snowflake_datasource)
-sql_agent.stream("I want to get the top 5 customers which making the most purchases")
+pandas_agent.add_dataframe(df)
+pandas_agent.invoke("show me the artits with the most albums in descending order")

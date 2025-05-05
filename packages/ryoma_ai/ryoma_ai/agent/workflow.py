@@ -4,11 +4,11 @@ from enum import Enum
 from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
+from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
 from langchain_core.runnables import (
     RunnableConfig,
     RunnableLambda,
-    RunnableSerializable,
 )
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
@@ -52,7 +52,7 @@ class WorkflowAgent(ChatAgent):
     def __init__(
         self,
         tools: List[BaseTool],
-        model: Union[RunnableSerializable, str],
+        model: Union[BaseChatModel, str],
         model_parameters: Optional[Dict] = None,
         graph: Optional[StateGraph] = None,
         base_prompt_template: Optional[PromptTemplate] = None,
@@ -81,10 +81,10 @@ class WorkflowAgent(ChatAgent):
 
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
-        if self.datasource:
+        if self.datasources:
             for tool in self.tools:
                 if hasattr(tool, "type"):
-                    tool.datasource = self.datasource
+                    tool.datasource = self.datasources[0]
         if hasattr(self.model, "bind_tools"):
             return self.model.bind_tools(self.tools)
         else:
@@ -106,7 +106,7 @@ class WorkflowAgent(ChatAgent):
             return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
         workflow = StateGraph(MessageState)
 
-        workflow.add_node("agent", self.odel)
+        workflow.add_node("agent", self.call_model)
         workflow.add_node("tools", self.build_tool_node(self.tools))
 
         workflow.add_conditional_edges(
@@ -146,16 +146,15 @@ class WorkflowAgent(ChatAgent):
             # We are in the tool node, but the user has asked a new question
             # We need to deny the tool call and continue with the user's question
             tool_calls = self.get_current_tool_calls()
-            return {
-                "messages": [
+            return ChatPromptValue(message=[
                     ToolMessage(
                         tool_call_id=tool_calls[0]["id"],
                         content=f"Tool call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",
                     )
                 ]
-            }
+            )
         else:
-            return {"messages": [HumanMessage(content=question)]}
+            return ChatPromptValue(messages=[HumanMessage(content=question)])
 
     def stream(
         self,
@@ -180,8 +179,8 @@ class WorkflowAgent(ChatAgent):
         events = self.workflow.stream(
             messages, config=self.config, stream_mode="values"
         )
+        _printed = set()
         if display:
-            _printed = set()
             self._print_graph_events(events, _printed)
 
         if tool_mode == ToolMode.CONTINUOUS:
@@ -220,8 +219,8 @@ class WorkflowAgent(ChatAgent):
         else:
             self._add_datasource_context()
         result = self.workflow.invoke(messages, config=self.config)
+        _printed = set()
         if display:
-            _printed = set()
             self._print_graph_events(result, _printed)
 
         if tool_mode == ToolMode.CONTINUOUS:
@@ -303,14 +302,15 @@ class WorkflowAgent(ChatAgent):
         if isinstance(events, dict):
             events = [events]
         for event in events:
-            messages = self._get_event_message(event)
-            for message in messages:
-                if message.id not in printed:
-                    msg_repr = message.pretty_repr(html=True)
-                    if len(msg_repr) > max_length:
-                        msg_repr = msg_repr[:max_length] + " ... (truncated)"
-                    print(msg_repr)
-                    printed.add(message.id)
+            for value in event.values():
+                messages = self._get_event_message(value)
+                for message in messages:
+                    if message.id not in printed:
+                        msg_repr = message.pretty_repr(html=True)
+                        if len(msg_repr) > max_length:
+                            msg_repr = msg_repr[:max_length] + " ... (truncated)"
+                        print(msg_repr)
+                        printed.add(message.id)
 
     def _get_event_message(self, event):
         if "tools" in event:
