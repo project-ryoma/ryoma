@@ -16,7 +16,8 @@ from langgraph.graph import StateGraph
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
-from ryoma_ai.agent.base import ChatAgent
+from ryoma_ai.agent.chat_agent import ChatAgent
+from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
 
@@ -81,10 +82,11 @@ class WorkflowAgent(ChatAgent):
 
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
-        if self.datasources:
+        datasources = self.get_resources_by_type(DataSource)
+        for datasource in datasources:
             for tool in self.tools:
                 if hasattr(tool, "type"):
-                    tool.datasource = self.datasources[0]
+                    tool.datasource = datasource
         if hasattr(self.model, "bind_tools"):
             return self.model.bind_tools(self.tools)
         else:
@@ -159,7 +161,6 @@ class WorkflowAgent(ChatAgent):
     def stream(
         self,
         question: Optional[str] = "",
-        retrieval: bool = False,
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,
@@ -172,10 +173,6 @@ class WorkflowAgent(ChatAgent):
             messages = None
         else:
             messages = self._format_messages(question)
-        if retrieval:
-            self._add_retrieval_context(question)
-        else:
-            self._add_datasource_context()
         events = self.workflow.stream(
             messages, config=self.config, stream_mode="values"
         )
@@ -201,7 +198,6 @@ class WorkflowAgent(ChatAgent):
     def invoke(
         self,
         question: Optional[str] = "",
-        retrieval: bool = False,
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,
@@ -214,10 +210,6 @@ class WorkflowAgent(ChatAgent):
             messages = None
         else:
             messages = self._format_messages(question)
-        if retrieval:
-            self._add_retrieval_context(question)
-        else:
-            self._add_datasource_context()
         result = self.workflow.invoke(messages, config=self.config)
         _printed = set()
         if display:

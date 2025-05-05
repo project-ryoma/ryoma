@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from ryoma_ai.agent.pandas_agent import PandasAgent
+from ryoma_ai.agent.workflow import ToolMode
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
 
@@ -25,3 +26,4 @@ df = pd.DataFrame(
 )
 pandas_agent.add_dataframe(df)
 pandas_agent.invoke("show me the artits with the most albums in descending order")
+pandas_agent.invoke(tool_mode=ToolMode.ONCE)
