@@ -6,10 +6,18 @@ from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
+from pydantic import BaseModel
 
 
-class DataSource(ABC):
+class DataSource(BaseModel, ABC):
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "allow",  # allow undeclared attributes
+    }
+
     def __init__(self, type: str, **kwargs):
+        super().__init__(**kwargs)
         self.type = type
 
     @abstractmethod

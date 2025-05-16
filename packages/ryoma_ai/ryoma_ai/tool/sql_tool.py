@@ -5,7 +5,7 @@ from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.base import SqlDataSource, DataSource
 from sqlalchemy.engine import Result
 
 
@@ -15,9 +15,14 @@ class SqlDataSourceTool(BaseTool, ABC):
 
 class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql catalog.")
+    datasource: SqlDataSource = Field(description="sql data source")
+
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
 
 
-class SqlQueryTool(SqlDataSourceTool):
+class SqlQueryTool(BaseTool):
     """Tool for querying a SQL catalog."""
 
     name: str = "sql_database_query"
@@ -32,11 +37,12 @@ class SqlQueryTool(SqlDataSourceTool):
     def _run(
         self,
         query,
+        datasource: SqlDataSource,
         **kwargs,
     ) -> (str, str):
         """Execute the query, return the results or an error message."""
         try:
-            result = self.datasource.query(query)
+            result = datasource.query(query)
 
             # Serialize the result to a base64 encoded string as the artifact
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")

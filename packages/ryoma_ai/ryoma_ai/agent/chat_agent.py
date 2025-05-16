@@ -106,20 +106,17 @@ class ChatAgent(BaseAgent):
                          messages: str):
         return {"messages": [HumanMessage(content=messages)]}
 
-    def _add_datasource_context(self):
-        for ds in self.get_resources_by_type(DataSource):
-            self.add_prompt_context(str(ds.get_catalog()))
-
     def _add_retrieval_context(self,
-                               query: str):
+                               query: str,
+                               top_k: int = 5):
         if not self.vector_store:
             raise ValueError(
                 "Unable to initialize vector store, please ensure you have valid configurations."
             )
-        top_k_context = self.vector_store.search_datasource_catalog(query)
-        if not top_k_context:
-            raise ValueError("Unable to retrieve context from vector store.")
-        self.add_prompt_context(f"Top-K context from vector store: {top_k_context}")
+        top_k_columns = self.vector_store.retrieve_columns(query, top_k=top_k)
+        if not top_k_columns:
+            raise ValueError("Unable to retrieve top k columns from vector store.")
+        self.add_prompt_context(f"Top-K context from vector store: {top_k_columns}")
 
     def stream(
         self,

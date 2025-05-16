@@ -56,23 +56,26 @@ class BaseAgent:
         return self.resource_registry.get_by_type(cls)
 
     def index_datasource(self,
-                         datasource: DataSource):
+                         datasource: DataSource,
+                         on_demand: bool = False
+                         ):
         """
         Index a DataSource in the vector store.
 
         Args:
-              datasource: The DataSource to index.
+            datasource: The DataSource to index.
+            on_demand: Whether to index the DataSource on demand.
         """
         if not self.vector_store:
             raise ValueError("Vector store is not set.")
 
-        self.vector_store.index_datasource(datasource)
+        self.vector_store.index_data_source(datasource, on_demand=on_demand)
 
-    def index_all_datasources(self):
+    def index_all_data_sources(self):
         """
         Index all DataSources in the vector store.
         """
         if not self.vector_store:
             raise ValueError("Vector store is not set.")
         for datasource in self.get_resources_by_type(DataSource):
-            self.vector_store.index_datasource(datasource)
+            self.vector_store.index_data_source(datasource)

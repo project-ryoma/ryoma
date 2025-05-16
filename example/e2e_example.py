@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from ryoma_ai.agent.pandas_agent import PandasAgent
+from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import ToolMode
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
@@ -17,13 +18,24 @@ def get_postgres_datasource():
 
 
 postgres_db = get_postgres_datasource()
-pandas_agent = PandasAgent("gpt-3.5-turbo")
-df = pd.DataFrame(
-    {
-        "artist": ["Artist A", "Artist B", "Artist C", "Artist A", "Artist B"],
-        "album": ["Album 1", "Album 2", "Album 3", "Album 4", "Album 5"],
-    }
-)
-pandas_agent.add_dataframe(df)
-pandas_agent.invoke("show me the artits with the most albums in descending order")
-pandas_agent.invoke(tool_mode=ToolMode.ONCE)
+
+
+def run_pandas():
+    pandas_agent = PandasAgent("gpt-3.5-turbo")
+    df = pd.DataFrame(
+        {
+            "artist": ["Artist A", "Artist B", "Artist C", "Artist A", "Artist B"],
+            "album": ["Album 1", "Album 2", "Album 3", "Album 4", "Album 5"],
+        }
+    )
+    pandas_agent.add_dataframe(df)
+    pandas_agent.invoke("show me the artits with the most albums in descending order")
+    pandas_agent.invoke(tool_mode=ToolMode.ONCE)
+
+
+def run_sql():
+    sql_agent = SqlAgent("gpt-3.5-turbo")
+    sql_agent.add_datasource(postgres_db)
+    sql_agent.invoke("show me the tables in the database")
+
+run_sql()

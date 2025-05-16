@@ -90,7 +90,7 @@ class VectorStore(ABC):
             ],
         )
 
-    def index_datasource(
+    def index_data_source(
         self,
         datasource: DataSource,
         on_demand: bool = True,
@@ -153,12 +153,24 @@ class VectorStore(ABC):
             + f"\nDescription: {column.description or 'No description available'}"
         )
 
-    def search_datasource_catalog(
+    def retrieve_columns(
         self,
         query: str,
         top_k: int = 5,
-    ) -> List[SearchResult]:
+    ) -> List[Column]:
         """
-        Search the catalog of a data source.
+        Search the catalog of a data source and return the top k similar columns.
         """
-        return self.search_documents(query, top_k)
+        results = self.search_documents(query, top_k)
+        columns = []
+        for result in results:
+            metadata = result.metadata
+            column = Column(
+                column_name=result.id,
+                column_type=metadata.get("column_type", "unknown"),
+                nullable=metadata.get("nullable", False),
+                description=metadata.get("description", ""),
+            )
+            columns.append(column)
+        return columns
+
