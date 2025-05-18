@@ -3,7 +3,7 @@ from typing import Any
 import ibis
 from ibis import BaseBackend
 from pydantic import BaseModel, Field
-from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 
 
 class SqliteConfig(BaseModel):

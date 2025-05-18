@@ -5,7 +5,7 @@ from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from ryoma_ai.datasource.base import SqlDataSource, DataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 from sqlalchemy.engine import Result
 
 

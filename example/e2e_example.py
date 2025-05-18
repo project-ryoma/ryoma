@@ -38,4 +38,5 @@ def run_sql():
     sql_agent.add_datasource(postgres_db)
     sql_agent.invoke("show me the tables in the database")
 
-run_sql()
+run_pandas()
+

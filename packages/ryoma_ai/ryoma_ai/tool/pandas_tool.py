@@ -1,7 +1,7 @@
 from typing import Optional, Type
 
-from langchain_core.pydantic_v1 import BaseModel, Field
-from ryoma_ai.datasource.base import SqlDataSource
+from pydantic import BaseModel, Field
+from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.tool.python_tool import PythonTool
 
 

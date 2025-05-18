@@ -2,7 +2,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.metadata import Catalog
 
 

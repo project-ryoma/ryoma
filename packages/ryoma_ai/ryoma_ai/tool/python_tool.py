@@ -1,9 +1,9 @@
 import logging
 from typing import Any, Dict, Sequence, Type, Union
+from pydantic import BaseModel, Field
 
 from IPython import get_ipython
 from IPython.core.interactiveshell import ExecutionResult, InteractiveShell
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 
 log = logging.getLogger(__name__)

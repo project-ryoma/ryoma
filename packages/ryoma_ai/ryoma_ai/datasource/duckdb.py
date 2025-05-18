@@ -2,7 +2,7 @@ import inspect
 from typing import Any, Optional
 
 import duckdb
-from ryoma_ai.datasource.base import SqlDataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 
 
 class DuckDBConfig:
