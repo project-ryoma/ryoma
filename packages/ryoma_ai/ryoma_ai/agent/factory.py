@@ -7,7 +7,7 @@ from ryoma_ai.agent.embedding import EmbeddingAgent
 from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.python_agent import PythonAgent
 from ryoma_ai.agent.spark_agent import SparkAgent
-from ryoma_ai.agent.sql_agent import ChatAgent
+from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import WorkflowAgent
 
 

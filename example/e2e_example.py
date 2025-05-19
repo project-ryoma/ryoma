@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from ryoma_ai.agent.pandas_agent import PandasAgent
-from ryoma_ai.agent.sql_agent import ChatAgent
+from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import ToolMode
 from ryoma_ai.datasource.postgres import PostgresDataSource
 

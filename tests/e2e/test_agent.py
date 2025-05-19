@@ -2,7 +2,7 @@ import os
 
 import pytest
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_ai.agent.sql_agent import ChatAgent
+from ryoma_ai.agent.sql import SqlAgent
 
 
 @pytest.fixture(autouse=True)
