@@ -2,7 +2,6 @@ from enum import Enum
 
 from pydantic import BaseModel
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.duckdb import DuckDBConfig, DuckDBDataSource
 from ryoma_ai.datasource.file import FileConfig, FileDataSource
@@ -10,6 +9,7 @@ from ryoma_ai.datasource.mysql import MySqlConfig, MySqlDataSource
 from ryoma_ai.datasource.nosql import DynamodbConfig, DynamodbDataSource
 from ryoma_ai.datasource.postgres import PostgresConfig, PostgresDataSource
 from ryoma_ai.datasource.snowflake import SnowflakeConfig, SnowflakeDataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.sqlite import SqliteConfig, SqliteDataSource
 
 
