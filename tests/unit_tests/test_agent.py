@@ -4,7 +4,7 @@ import openai
 import openai_responses
 import pytest
 from openai_responses import OpenAIMock
-from ryoma_ai.agent.base import ChatAgent
+from ryoma_ai.agent.chat_agent import ChatAgent
 
 from tests.unit_tests.test_utils import (
     create_chat_completion_response_stream,

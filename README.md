@@ -42,7 +42,7 @@ Below is an example of using SqlAgent to connect to a postgres database and ask 
 You can read more details in the [documentation](https://project-ryoma.github.io/ryoma/).
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.agent.sql_agent import ChatAgent
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
 # Connect to a postgres catalog

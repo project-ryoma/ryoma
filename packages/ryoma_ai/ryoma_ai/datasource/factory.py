@@ -1,7 +1,8 @@
 from enum import Enum
 
 from pydantic import BaseModel
-from ryoma_ai.datasource.base import DataSource, SqlDataSource
+from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.duckdb import DuckDBConfig, DuckDBDataSource
 from ryoma_ai.datasource.file import FileConfig, FileDataSource

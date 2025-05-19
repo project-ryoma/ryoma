@@ -5,7 +5,7 @@ from typing import Any, Iterator, Optional, Union
 
 import reflex as rx
 from langchain_core.messages import AIMessage, ToolMessage
-from ryoma_ai.agent.base import ChatAgent
+from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.agent.embedding import EmbeddingAgent
 from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent

@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from ryoma_ai.agent.base import ChatAgent
+from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.api.agent_manager import AgentManager
 from ryoma_ai.embedding.config import EmbeddingConfig
 from ryoma_ai.embedding.factory import create_embedder

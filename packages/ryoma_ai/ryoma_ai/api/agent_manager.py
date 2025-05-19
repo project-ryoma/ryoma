@@ -1,5 +1,5 @@
 from ryoma_ai.agent.arrow_agent import ArrowAgent
-from ryoma_ai.agent.base import ChatAgent
+from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.spark_agent import SparkAgent
 

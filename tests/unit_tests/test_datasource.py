@@ -32,7 +32,7 @@ def mock_sql_data_source():
 
 
 def test_execute_query(mock_sql_data_source):
-    with patch("ryoma_ai.datasource.base.SqlDataSource.query") as mock_execute:
+    with patch("ryoma_ai.datasource.sql.SqlDataSource.query") as mock_execute:
         mock_execute.return_value = "success"
         results = mock_sql_data_source.query("SELECT * FROM table")
     assert results == "success"

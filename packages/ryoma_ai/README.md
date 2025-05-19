@@ -15,7 +15,7 @@ pip install ryoma_ai
 
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
-from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.agent.sql_agent import ChatAgent
 
 datasource = PostgresDataSource("postgresql://user:password@localhost/db")
 sql_agent = SqlAgent("gpt-3.5-turbo")
