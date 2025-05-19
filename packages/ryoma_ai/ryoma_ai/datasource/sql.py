@@ -5,8 +5,8 @@ from typing import Any, Optional
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 
 class SqlDataSource(DataSource):
@@ -44,7 +44,9 @@ class SqlDataSource(DataSource):
         catalog: Optional[str] = None,
     ) -> Catalog:
         catalog = self.database if not catalog else catalog
-        schemas = self.list_databases(catalog=catalog, with_table=True, with_columns=True)
+        schemas = self.list_databases(
+            catalog=catalog, with_table=True, with_columns=True
+        )
         return Catalog(
             catalog_name=catalog,
             schemas=schemas,
@@ -116,9 +118,13 @@ class SqlDataSource(DataSource):
         if with_columns:
             for table in tables:
                 try:
-                    table_schema = conn.get_schema(name=table.table_name, catalog=catalog, database=database)
+                    table_schema = conn.get_schema(
+                        name=table.table_name, catalog=catalog, database=database
+                    )
                 except Exception as e:
-                    logging.error(f"Error getting schema for table {table.table_name}: {e}")
+                    logging.error(
+                        f"Error getting schema for table {table.table_name}: {e}"
+                    )
                     continue
                 table.columns = [
                     Column(

@@ -4,12 +4,9 @@ from enum import Enum
 from IPython.display import Image, display
 from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
-from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.runnables import (
-    RunnableConfig,
-    RunnableLambda,
-)
+from langchain_core.prompt_values import ChatPromptValue
+from langchain_core.runnables import RunnableConfig, RunnableLambda
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
@@ -148,7 +145,8 @@ class WorkflowAgent(ChatAgent):
             # We are in the tool node, but the user has asked a new question
             # We need to deny the tool call and continue with the user's question
             tool_calls = self.get_current_tool_calls()
-            return ChatPromptValue(message=[
+            return ChatPromptValue(
+                message=[
                     ToolMessage(
                         tool_call_id=tool_calls[0]["id"],
                         content=f"Tool call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",

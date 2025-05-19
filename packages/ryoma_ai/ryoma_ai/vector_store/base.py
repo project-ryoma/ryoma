@@ -173,4 +173,3 @@ class VectorStore(ABC):
             )
             columns.append(column)
         return columns
-

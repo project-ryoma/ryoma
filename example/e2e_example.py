@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.sql import SqlAgent
@@ -38,5 +39,5 @@ def run_sql():
     sql_agent.add_datasource(postgres_db)
     sql_agent.invoke("show me the tables in the database")
 
-run_pandas()
 
+run_pandas()

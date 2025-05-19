@@ -2,8 +2,8 @@ import logging
 import re
 from typing import Any, Dict
 
-from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.factory import DataSourceFactory
+from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_lab.services.kernel.base import BaseKernel
 from sqlalchemy.exc import SQLAlchemyError
 

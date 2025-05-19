@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-from ryoma_ai.datasource.metadata import Catalog
 from pydantic import BaseModel
+from ryoma_ai.datasource.metadata import Catalog
 
 
 class DataSource(BaseModel, ABC):
@@ -25,4 +25,3 @@ class DataSource(BaseModel, ABC):
         raise NotImplementedError(
             "crawl_metadata is not implemented for this data source."
         )
-

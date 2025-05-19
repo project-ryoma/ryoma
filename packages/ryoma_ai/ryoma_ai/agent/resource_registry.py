@@ -17,7 +17,9 @@ class ResourceRegistry:
 
     def __init__(self):
         # Stores resources by Python's id(obj), using weak references.
-        self._by_id: weakref.WeakValueDictionary[int, Any] = weakref.WeakValueDictionary()
+        self._by_id: weakref.WeakValueDictionary[int, Any] = (
+            weakref.WeakValueDictionary()
+        )
 
         # Stores lists of resources by their type.
         self._by_type: defaultdict[type, List[Any]] = defaultdict(list)
@@ -25,9 +27,7 @@ class ResourceRegistry:
         # Optional: stores a mapping of custom names to object IDs.
         self._name_to_id: Dict[str, int] = {}
 
-    def register(self,
-                 obj: Any,
-                 name: Optional[str] = None) -> int:
+    def register(self, obj: Any, name: Optional[str] = None) -> int:
         """
         Register an object in the registry.
 
@@ -47,8 +47,7 @@ class ResourceRegistry:
 
         return obj_id
 
-    def get_by_id(self,
-                  obj_id: int) -> Optional[Any]:
+    def get_by_id(self, obj_id: int) -> Optional[Any]:
         """
         Retrieve an object by its id().
 
@@ -60,8 +59,7 @@ class ResourceRegistry:
         """
         return self._by_id.get(obj_id)
 
-    def get_by_type(self,
-                    cls: Type[T]) -> List[T]:
+    def get_by_type(self, cls: Type[T]) -> List[T]:
         """
         Retrieve all objects of a given type.
 
@@ -73,8 +71,7 @@ class ResourceRegistry:
         """
         return self._by_type.get(cls, [])
 
-    def get_by_name(self,
-                    name: str) -> Optional[Any]:
+    def get_by_name(self, name: str) -> Optional[Any]:
         """
         Retrieve a resource by its assigned name.
 

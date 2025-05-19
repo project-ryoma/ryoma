@@ -3,8 +3,8 @@ import pickle
 from abc import ABC
 from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
-from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
 from sqlalchemy.engine import Result
 
@@ -17,9 +17,7 @@ class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql catalog.")
     datasource: SqlDataSource = Field(description="sql data source")
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
 
 class SqlQueryTool(BaseTool):

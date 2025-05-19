@@ -16,9 +16,11 @@ class BaseAgent:
     resource_registry: ResourceRegistry
     vector_store: Optional[VectorStore] = None
 
-    def __init__(self,
-                 datasource: Optional[DataSource] = None,
-                 vector_store: Optional[VectorStore] = None):
+    def __init__(
+        self,
+        datasource: Optional[DataSource] = None,
+        vector_store: Optional[VectorStore] = None,
+    ):
         self.resource_registry = ResourceRegistry()
 
         if datasource:
@@ -27,10 +29,7 @@ class BaseAgent:
         if vector_store:
             self.vector_store = vector_store
 
-    def add_datasource(self,
-                       datasource: DataSource,
-                       index: bool = False
-                       ):
+    def add_datasource(self, datasource: DataSource, index: bool = False):
         """
         Register a DataSource as a resource.
 
@@ -46,19 +45,14 @@ class BaseAgent:
             self.index_datasource(datasource)
         return self
 
-    def register_resource(self,
-                          obj):
+    def register_resource(self, obj):
         self.resource_registry.register(obj)
         return id(obj)
 
-    def get_resources_by_type(self,
-                              cls):
+    def get_resources_by_type(self, cls):
         return self.resource_registry.get_by_type(cls)
 
-    def index_datasource(self,
-                         datasource: DataSource,
-                         on_demand: bool = False
-                         ):
+    def index_datasource(self, datasource: DataSource, on_demand: bool = False):
         """
         Index a DataSource in the vector store.
 
