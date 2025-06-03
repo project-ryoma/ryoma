@@ -14,7 +14,7 @@ class SqliteDataSource(SqlDataSource):
     def get_query_plan(self, query: str) -> Any:
         pass
 
-    def crawl_catalogs(self, **kwargs):
+    def crawl_catalog(self, **kwargs):
         pass
 
     def __init__(self, connection_url: str):

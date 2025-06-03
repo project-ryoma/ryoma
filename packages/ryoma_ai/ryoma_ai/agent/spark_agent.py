@@ -51,7 +51,7 @@ class SparkAgent(WorkflowAgent):
 
     def add_pandas_dataframe(self, dataframe: pd.DataFrame):
         df_id = f"df_{id(dataframe)}"
-        self.add_prompt_context(
+        self.add_prompt(
             f"""
         dataframe name: {df_id}
         dataframe metadata: {dataframe.info}

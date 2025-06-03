@@ -22,14 +22,13 @@ class FileDataSource(DataSource):
         file_name: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(
-            type="file",
-        )
-        if not file_name:
-            file_name = file_path
+        self.file_name = file_name or file_path
         self.file_path = file_path
         self.file_format = file_format
-        self.file_name = file_name
+        super().__init__(
+            name=self.file_name,
+            type="file",
+        )
 
     def get_catalog(self, **kwargs) -> Table:
         table_schema = self.to_arrow(**kwargs).schema

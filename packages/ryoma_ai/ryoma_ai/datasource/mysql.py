@@ -45,7 +45,7 @@ class MySqlDataSource(SqlDataSource):
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
-    def crawl_catalogs(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.mysql_metadata_extractor import (
             MysqlMetadataExtractor,
         )

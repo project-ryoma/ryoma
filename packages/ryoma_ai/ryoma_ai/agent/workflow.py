@@ -17,6 +17,7 @@ from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
+from ryoma_ai.vector_store.base import VectorStore
 
 
 class ToolMode(str, Enum):
@@ -44,7 +45,7 @@ def handle_tool_error(state) -> dict:
 class WorkflowAgent(ChatAgent):
     tools: List[BaseTool]
     graph: StateGraph
-    workflow: CompiledGraph
+    workflow: Optional[CompiledGraph]
     type: AgentType = AgentType.workflow
 
     def __init__(
@@ -52,11 +53,12 @@ class WorkflowAgent(ChatAgent):
         tools: List[BaseTool],
         model: Union[BaseChatModel, str],
         model_parameters: Optional[Dict] = None,
-        graph: Optional[StateGraph] = None,
         base_prompt_template: Optional[PromptTemplate] = None,
         context_prompt_templates: Optional[list[PromptTemplate]] = None,
         output_prompt_template: Optional[PromptTemplate] = None,
         output_parser: Optional[BaseModel] = None,
+        datasource: Optional[DataSource] = None,
+        vector_store: Optional[Union[dict, VectorStore]] = None,
         **kwargs,
     ):
         logging.info(f"Initializing Workflow Agent with model: {model}")
@@ -67,6 +69,8 @@ class WorkflowAgent(ChatAgent):
             context_prompt_templates,
             output_prompt_template,
             output_parser,
+            datasource=datasource,
+            vector_store=vector_store,
             **kwargs,
         )
 
@@ -75,15 +79,10 @@ class WorkflowAgent(ChatAgent):
             self.model = self._bind_tools()
 
         self.memory = MemorySaver()
-        self.workflow = self._build_workflow(graph)
+        self.workflow = None
 
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
-        datasources = self.get_resources_by_type(DataSource)
-        for datasource in datasources:
-            for tool in self.tools:
-                if hasattr(tool, "type"):
-                    tool.datasource = datasource
         if hasattr(self.model, "bind_tools"):
             return self.model.bind_tools(self.tools)
         else:
@@ -139,6 +138,13 @@ class WorkflowAgent(ChatAgent):
             return current_state_messages[-1].tool_calls
         return []
 
+    def build(self, graph: Optional[StateGraph] = None):
+        """
+        Build the agent chain. This method is called to finalize the agent setup.
+        """
+        self.workflow = self._build_workflow(graph)
+        return self
+
     def _format_messages(self, question: str):
         current_state = self.get_current_state()
         if current_state.next and current_state.next[0] == "tools":
@@ -189,8 +195,9 @@ class WorkflowAgent(ChatAgent):
                     self._print_graph_events(events, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
-            chain = self.output_prompt | self.model | self.output_parser
-            events = self._parse_output(chain, events, max_iterations=max_iterations)
+            events = self._parse_output(
+                self.agent, events, max_iterations=max_iterations
+            )
         return events
 
     def invoke(
@@ -225,8 +232,9 @@ class WorkflowAgent(ChatAgent):
                     self._print_graph_events(result, _printed)
                 current_state = self.get_current_state()
         if self.output_parser:
-            chain = self.output_prompt | self.model | self.output_parser
-            result = self._parse_output(chain, result, max_iterations=max_iterations)
+            result = self._parse_output(
+                self.agent, result, max_iterations=max_iterations
+            )
         return result
 
     @staticmethod
@@ -272,7 +280,7 @@ class WorkflowAgent(ChatAgent):
     def cancel_tool(self, tool_id: str):
         pass
 
-    def _build_chain(self):
+    def _build_agent(self):
         if not self.model:
             raise ValueError(
                 f"Unable to initialize model, please ensure you have valid configurations."
@@ -284,8 +292,8 @@ class WorkflowAgent(ChatAgent):
         return self.final_prompt_template | self.model
 
     def call_model(self, state: MessageState, config: RunnableConfig):
-        chain = self._build_chain()
-        response = chain.invoke(state, self.config)
+        agent = self._build_agent()
+        response = agent.invoke(state, self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):

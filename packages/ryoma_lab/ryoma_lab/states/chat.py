@@ -395,7 +395,7 @@ class ChatState(WorkspaceState):
                 )
 
             # TODO: add similar features to the prompt template
-            self._current_chat_agent.add_prompt_context(top_k_features)
+            self._current_chat_agent.add_prompt(top_k_features)
 
         async for value in self._invoke_agent(question):
             yield

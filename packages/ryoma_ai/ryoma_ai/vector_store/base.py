@@ -1,7 +1,7 @@
 import logging
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from databuilder.loader.base_loader import Loader
 from databuilder.loader.generic_loader import GenericLoader
@@ -93,61 +93,108 @@ class VectorStore(ABC):
     def index_data_source(
         self,
         datasource: DataSource,
-        on_demand: bool = True,
+        level: Literal["catalog", "schema", "table", "column"] = "catalog",
     ) -> None:
         """
         Index Catalog from a data source into the vector store.
         """
-        if on_demand:
-            catalog = datasource.get_catalog()
-            for schema in catalog.schemas:
+        catalog = datasource.get_catalog()
+        if level == "catalog":
+            self.index_documents(
+                ids=[self._build_id(catalog)],
+                documents=[self._build_document(catalog, level)],
+            )
+            return
+        for schema in catalog.schemas:
+            if level == "schema":
+                self.index_documents(
+                    ids=[self._build_id(catalog, schema)],
+                    documents=[self._build_document(catalog, level, schema)],
+                    metadatas=[
+                        {
+                            "level": "schema",
+                            "schema": schema.schema_name,
+                        }
+                    ],
+                )
+            else:
                 for table in schema.tables:
-                    for column in table.columns:
-                        document = self._build_document(
-                            catalog,
-                            schema,
-                            table,
-                            column,
-                        )
+                    if level == "table":
                         self.index_documents(
-                            ids=[self._build_id(catalog, schema, table, column)],
-                            documents=[document],
+                            ids=[self._build_id(catalog, schema, table)],
+                            documents=[
+                                self._build_document(catalog, level, schema, table)
+                            ],
+                            metadatas=[
+                                {
+                                    "level": "table",
+                                    "schema": schema.schema_name,
+                                    "table": table.table_name,
+                                }
+                            ],
                         )
-        else:
-            logging.info(
-                f"Start crawling metadata for datasource {datasource} and indexing"
-            )
-            datasource.crawl_catalogs(
-                loader=self._record_indexer(),
-            )
+                    else:
+                        for column in table.columns:
+                            if level == "column":
+                                self.index_documents(
+                                    ids=[
+                                        self._build_id(catalog, schema, table, column)
+                                    ],
+                                    documents=[
+                                        self._build_document(
+                                            catalog, level, schema, table, column
+                                        )
+                                    ],
+                                    metadatas=[
+                                        {
+                                            "level": "column",
+                                            "schema": schema.schema_name,
+                                            "table": table.table_name,
+                                        }
+                                    ],
+                                )
 
     def _build_id(
         self,
         catalog: Catalog,
-        schema: Schema,
-        table: Table,
-        column: Column,
+        schema: Optional[Schema] = None,
+        table: Optional[Table] = None,
+        column: Optional[Column] = None,
     ) -> str:
         """
         Build an ID string from catalog, schema, table, column name and type.
         """
-        return f"{catalog.catalog_name}.{schema.schema_name}.{table.table_name}.{column.column_name}"
+        id = f"{catalog.catalog_name}"
+        if schema:
+            id += f".{schema.schema_name}"
+        if table:
+            id += f".{table.table_name}"
+        if column:
+            id += f".{column.name}"
+        return id
 
     def _build_document(
         self,
         catalog: Catalog,
-        schema: Schema,
-        table: Table,
-        column: Column,
+        level: Literal["catalog", "schema", "table", "column"] = "catalog",
+        schema: Optional[Schema] = None,
+        table: Optional[Table] = None,
+        column: Optional[Column] = None,
     ) -> str:
         """
         Build a document string from catalog, schema, table, column name and type.
         """
-        return (
-            f"Catalog: {catalog.catalog_name}"
-            + f"\nSchema: {schema.schema_name}"
-            + f"\nTable: {table.table_name}"
-            + f"\nColumn: {column.column_name}"
+        res = f"Catalog: {catalog.catalog_name}"
+        if level == catalog:
+            return res + str(catalog)
+        res += schema.schema_name
+        if level == "schema":
+            return res + str(schema)
+        res += table.table_name
+        if level == "table":
+            return res + str(table)
+        return res + (
+            f"\nColumn: {column.column_name}"
             + f"\nType: {column.column_type}"
             + f"\nNullable: {column.nullable}"
             + f"\nDescription: {column.description or 'No description available'}"

@@ -5,6 +5,8 @@ from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import ToolMode
 from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_ai.vector_store.base import VectorStore
+from ryoma_ai.vector_store.factory import create_vector_store
 
 
 def get_postgres_datasource():
@@ -34,10 +36,27 @@ def run_pandas():
     pandas_agent.invoke(tool_mode=ToolMode.ONCE)
 
 
-def run_sql():
-    sql_agent = SqlAgent("gpt-3.5-turbo")
-    sql_agent.add_datasource(postgres_db)
+def run_sql_rag():
+    sql_agent = SqlAgent(
+        "gpt-3.5-turbo",
+        embedding={"model": "text-embedding-3-small"},
+        vector_store={
+            "type": "pgvector",
+        },
+    )
+    sql_agent.index_datasource(postgres_db, level="table")
+    catalog = sql_agent.search_catalogs(
+        "I want to get the top 10 artists with the most albums in descending order",
+        top_k=3,
+    )
+    sql_agent.add_prompt(catalog.prompt)
     sql_agent.invoke("show me the tables in the database")
 
 
-run_pandas()
+def run_sql():
+    sql_agent = SqlAgent("gpt-3.5-turbo")
+    sql_agent.add_prompt(postgres_db.prompt())
+    sql_agent.invoke("show me the tables in the database")
+
+
+run_sql()

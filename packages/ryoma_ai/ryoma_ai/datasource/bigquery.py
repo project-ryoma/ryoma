@@ -24,7 +24,7 @@ class BigqueryDataSource(SqlDataSource):
             **kwargs,
         )
 
-    def crawl_catalogs(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
+    def crawl_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = ""):
         from databuilder.extractor.bigquery_metadata_extractor import (
             BigQueryMetadataExtractor,
         )

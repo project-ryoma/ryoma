@@ -22,16 +22,14 @@ class LangchainVectorStore(VectorStore):
 
     def index_documents(
         self,
+        ids: List[str],
         documents: List[str],
         metadatas: Optional[List[Dict]] = None,
     ):
         """
         Embed and add text documents to the vector store.
         """
-        if metadatas is None:
-            metadatas = [{} for _ in documents]
-
-        self.impl.add_texts(documents, metadatas=metadatas)
+        self.impl.add_texts(documents, metadatas=metadatas, ids=ids)
 
     def search(
         self,

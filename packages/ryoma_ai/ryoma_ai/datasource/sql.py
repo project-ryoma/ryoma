@@ -42,14 +42,36 @@ class SqlDataSource(DataSource):
     def get_catalog(
         self,
         catalog: Optional[str] = None,
+        schema: Optional[str] = None,
+        table: Optional[str] = None,
     ) -> Catalog:
         catalog = self.database if not catalog else catalog
-        schemas = self.list_databases(
-            catalog=catalog, with_table=True, with_columns=True
-        )
+        if table:
+            schema = self.db_schema if not schema else schema
+            conn = self.connect()
+            table_schema = conn.get_schema(name=table, catalog=catalog, database=schema)
+            table = Table(
+                table_name=table,
+                columns=[
+                    Column(
+                        name=name,
+                        type=table_schema[name].name,
+                        nullable=table_schema[name].nullable,
+                    )
+                    for name in table_schema
+                ],
+            )
+            databases = Schema(schema_name=schema, tables=[table])
+        elif schema:
+            tables = self.list_tables(catalog, schema, with_columns=True)
+            databases = Schema(schema_name=schema, tables=tables)
+        else:
+            databases = self.list_databases(
+                catalog=catalog, with_table=True, with_columns=True
+            )
         return Catalog(
             catalog_name=catalog,
-            schemas=schemas,
+            schemas=databases,
         )
 
     def list_catalogs(
@@ -141,3 +163,7 @@ class SqlDataSource(DataSource):
         raise NotImplementedError(
             "get_query_plan is not implemented for this data source."
         )
+
+    def prompt(self, schema: Optional[str] = None, table: Optional[str] = None):
+        catalog = self.get_catalog(schema=schema)
+        return catalog.prompt

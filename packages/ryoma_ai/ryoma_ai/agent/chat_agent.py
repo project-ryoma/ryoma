@@ -2,6 +2,7 @@ import logging
 import uuid
 from typing import Any, Dict, Optional, Union
 
+from langchain_core.embeddings import Embeddings
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, HumanMessage
@@ -28,6 +29,7 @@ class ChatAgent(BaseAgent):
     prompt_template_factory: PromptTemplateFactory
     final_prompt_template: Optional[Union[PromptTemplate, ChatPromptTemplate]]
     output_parser: Optional[PydanticOutputParser]
+    agent: Optional[RunnableSerializable]
 
     def __init__(
         self,
@@ -38,12 +40,15 @@ class ChatAgent(BaseAgent):
         output_prompt_template: Optional[PromptTemplate] = None,
         output_parser: Optional[BaseModel] = None,
         datasource: Optional[DataSource] = None,
-        vector_store: Optional[VectorStore] = None,
+        embedding: Optional[Union[dict, Embeddings]] = None,
+        vector_store: Optional[Union[dict, VectorStore]] = None,
         **kwargs,
     ):
         logging.info(f"Initializing Agent with model: {model}")
 
-        super().__init__(datasource=datasource, vector_store=vector_store)
+        super().__init__(
+            datasource=datasource, embedding=embedding, vector_store=vector_store
+        )
 
         # configs
         self.config = {
@@ -70,8 +75,9 @@ class ChatAgent(BaseAgent):
         )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.output_parser = output_parser
+        self.agent = self._build_agent()
 
-    def _build_chain(self, **kwargs) -> RunnableSerializable:
+    def _build_agent(self, **kwargs) -> RunnableSerializable:
         if not self.model:
             raise ValueError(
                 f"Unable to initialize model, please ensure you have valid configurations."
@@ -87,14 +93,8 @@ class ChatAgent(BaseAgent):
         self.prompt_template_factory.set_base_prompt(base_prompt)
         return self
 
-    def set_context_prompt(
-        self, context: Optional[Union[str, ChatPromptTemplate]] = None
-    ):
-        self.prompt_template_factory.add_context_prompt(context)
-        return self
-
-    def add_prompt_context(self, prompt_context: str):
-        self.prompt_template_factory.add_context_prompt(prompt_context)
+    def add_prompt(self, prompt: Optional[Union[str, ChatPromptTemplate]]):
+        self.prompt_template_factory.add_context_prompt(prompt)
         return self
 
     def _format_messages(self, messages: str):
@@ -108,7 +108,7 @@ class ChatAgent(BaseAgent):
         top_k_columns = self.vector_store.retrieve_columns(query, top_k=top_k)
         if not top_k_columns:
             raise ValueError("Unable to retrieve top k columns from vector store.")
-        self.add_prompt_context(f"Top-K context from vector store: {top_k_columns}")
+        self.add_prompt(f"Top-K context from vector store: {top_k_columns}")
 
     def stream(
         self,
@@ -116,15 +116,21 @@ class ChatAgent(BaseAgent):
         display: Optional[bool] = True,
     ):
         messages = self._format_messages(question)
-        chain = self._build_chain()
-        events = chain.stream(messages, self.config)
+        events = self.agent.stream(messages, self.config)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
         if self.output_parser:
-            chain = self.output_prompt | self.model | self.output_parser
-            events = self._parse_output(chain, events)
+            events = self._parse_output(self.agent, events)
         return events
+
+    def build(self):
+        datasource = self.get_datasource()
+        if datasource:
+            prompt = datasource.prompt()
+            self.add_prompt(prompt)
+        self.agent = self._build_agent()
+        return self
 
     def invoke(
         self,
@@ -132,25 +138,24 @@ class ChatAgent(BaseAgent):
         display: Optional[bool] = True,
     ):
         messages = self._format_messages(question)
-        chain = self._build_chain()
-        results = chain.invoke(messages, self.config)
+
+        results = self.agent.invoke(messages, self.config)
         if display:
             for result in results:
                 print(result.content, end="", flush=True)
         if self.output_parser:
-            chain = self.output_prompt | self.model | self.output_parser
-            results = self._parse_output(chain, results)
+            results = self._parse_output(self.agent, results)
         return results
 
     def get_current_state(self) -> None:
         return None
 
-    def _parse_output(self, chain, result: dict, max_iterations=10):
+    def _parse_output(self, agent, result: dict, max_iterations=10):
         iteration = 0
         while iteration < max_iterations:
             iteration += 1
             try:
-                return chain.invoke({"messages": result["messages"]}, self.config)
+                return agent.invoke({"messages": result["messages"]}, self.config)
             except OutputParserException as e:
                 result["messages"] += [
                     AIMessage(

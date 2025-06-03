@@ -3,19 +3,18 @@ import pickle
 from abc import ABC
 from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
-from langchain_core.tools import BaseTool
+from langchain_core.tools import BaseTool, InjectedToolArg
 from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
 from sqlalchemy.engine import Result
-
-
-class SqlDataSourceTool(BaseTool, ABC):
-    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
+from typing_extensions import Annotated
 
 
 class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql catalog.")
-    datasource: SqlDataSource = Field(description="sql data source")
+    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+        description="sql data source that can be used to execute the query."
+    )
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -58,7 +57,10 @@ class Column(BaseModel):
     )
 
 
-class Table(BaseModel):
+class CreateTableInputSchema(BaseModel):
+    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+        description="sql data source that can be used to execute the query."
+    )
     table_name: str = Field(..., description="Name of the table")
     table_columns: Sequence[Column] = Field(
         ..., description="List of columns in the table"
@@ -66,20 +68,20 @@ class Table(BaseModel):
     table_type: Optional[str] = Field(..., description="Type of the table")
 
 
-class CreateTableTool(SqlDataSourceTool):
+class CreateTableTool(BaseTool):
     """Tool for creating a table in a SQL catalog."""
 
-    datasource: Optional[SqlDataSource] = Field(None, exclude=True)
     name: str = "create_table"
     description: str = """
     Create a table in the catalog.
     If the table already exists, an error message will be returned.
     input arguments are table_name and table_columns.
     """
-    args_schema: Type[BaseModel] = Table
+    args_schema: Type[BaseModel] = CreateTableInputSchema
 
     def _run(
         self,
+        datasource: SqlDataSource,
         table_name: str,
         table_columns: Sequence[Column],
         **kwargs,
@@ -88,14 +90,14 @@ class CreateTableTool(SqlDataSourceTool):
         columns = ",\n".join(
             f'{column.column_name} "{column.column_type}"' for column in table_columns
         )
-        return self.datasource.query(
+        return datasource.query(
             "CREATE TABLE {table_name} ({columns})".format(
                 table_name=table_name, columns=columns
             )
         )
 
 
-class QueryPlanTool(SqlDataSourceTool):
+class QueryPlanTool(BaseTool):
     """Tool for getting the query plan of a SQL query."""
 
     name: str = "query_plan"
@@ -108,13 +110,14 @@ class QueryPlanTool(SqlDataSourceTool):
     def _run(
         self,
         query: str,
+        datasource: SqlDataSource,
         **kwargs,
     ) -> str:
         """Execute the query, return the results or an error message."""
         return self.datasource.get_query_plan(query)
 
 
-class QueryProfileTool(SqlDataSourceTool):
+class QueryProfileTool(BaseTool):
     """Tool for getting the query profile of a SQL query."""
 
     name: str = "query_profile"
@@ -127,6 +130,7 @@ class QueryProfileTool(SqlDataSourceTool):
     def _run(
         self,
         query: str,
+        datasource: SqlDataSource,
         **kwargs,
     ) -> str:
         """Execute the query, return the results or an error message."""

@@ -45,7 +45,7 @@ class PandasAgent(WorkflowAgent):
         dataframe.info(buf=buffer)
         metadata_str = buffer.getvalue()
 
-        self.add_prompt_context(
+        self.add_prompt(
             f"""
             dataframe name: {df_name}
             dataframe metadata:\n{metadata_str}
