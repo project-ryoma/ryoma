@@ -1,20 +1,35 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table, ColumnProfile, TableProfile
+from ryoma_ai.datasource.profiler import DatabaseProfiler
 
 
 class SqlDataSource(DataSource):
-    def __init__(self, database: Optional[str] = None, db_schema: Optional[str] = None):
+    def __init__(
+        self,
+        database: Optional[str] = None,
+        db_schema: Optional[str] = None,
+        enable_profiling: bool = True,
+        profiler_config: Optional[Dict] = None
+    ):
         super().__init__(type="sql")
         self.database = database
         self.db_schema = db_schema
         self.__connection = None
+
+        # Initialize database profiler
+        self.enable_profiling = enable_profiling
+        if enable_profiling:
+            profiler_config = profiler_config or {}
+            self.profiler = DatabaseProfiler(**profiler_config)
+        else:
+            self.profiler = None
 
     def connect(self, **kwargs) -> Any:
         if not self.__connection:
@@ -167,3 +182,157 @@ class SqlDataSource(DataSource):
     def prompt(self, schema: Optional[str] = None, table: Optional[str] = None):
         catalog = self.get_catalog(schema=schema)
         return catalog.prompt
+
+    def profile_table(self, table_name: str, schema: Optional[str] = None, **kwargs) -> Dict:
+        """
+        Profile a table with comprehensive metadata extraction.
+
+        Args:
+            table_name: Name of the table to profile
+            schema: Optional schema name
+            **kwargs: Additional profiling options
+
+        Returns:
+            Dictionary containing comprehensive table and column profiles
+        """
+        if not self.enable_profiling or not self.profiler:
+            logging.warning("Profiling is disabled for this datasource")
+            return {}
+
+        try:
+            # Profile the table
+            table_profile = self.profiler.profile_table(self, table_name, schema)
+
+            # Get table schema to profile individual columns
+            catalog = self.get_catalog(schema=schema, table=table_name)
+            if not catalog.schemas:
+                return {"table_profile": table_profile.model_dump()}
+
+            table_obj = None
+            for schema_obj in catalog.schemas:
+                table_obj = schema_obj.get_table(table_name)
+                if table_obj:
+                    break
+
+            if not table_obj:
+                return {"table_profile": table_profile.model_dump()}
+
+            # Profile each column
+            column_profiles = {}
+            for column in table_obj.columns:
+                column_profile = self.profiler.profile_column(
+                    self, table_name, column.name, schema
+                )
+                column_profiles[column.name] = column_profile.model_dump()
+
+            return {
+                "table_profile": table_profile.model_dump(),
+                "column_profiles": column_profiles,
+                "profiling_summary": {
+                    "total_columns": len(column_profiles),
+                    "profiled_at": table_profile.profiled_at.isoformat() if table_profile.profiled_at else None,
+                    "row_count": table_profile.row_count,
+                    "completeness_score": table_profile.completeness_score
+                }
+            }
+
+        except Exception as e:
+            logging.error(f"Error profiling table {table_name}: {str(e)}")
+            return {"error": str(e)}
+
+    def profile_column(
+        self,
+        table_name: str,
+        column_name: str,
+        schema: Optional[str] = None
+    ) -> Dict:
+        """
+        Profile a single column with detailed statistics.
+
+        Args:
+            table_name: Name of the table
+            column_name: Name of the column
+            schema: Optional schema name
+
+        Returns:
+            Dictionary containing column profile
+        """
+        if not self.enable_profiling or not self.profiler:
+            logging.warning("Profiling is disabled for this datasource")
+            return {}
+
+        try:
+            column_profile = self.profiler.profile_column(self, table_name, column_name, schema)
+            return column_profile.model_dump()
+        except Exception as e:
+            logging.error(f"Error profiling column {column_name}: {str(e)}")
+            return {"error": str(e)}
+
+    def get_enhanced_catalog(
+        self,
+        catalog: Optional[str] = None,
+        schema: Optional[str] = None,
+        table: Optional[str] = None,
+        include_profiles: bool = True
+    ) -> Catalog:
+        """
+        Get catalog with enhanced profiling information.
+
+        Args:
+            catalog: Catalog name
+            schema: Schema name
+            table: Table name
+            include_profiles: Whether to include profiling data
+
+        Returns:
+            Enhanced catalog with profiling information
+        """
+        # Get basic catalog
+        basic_catalog = self.get_catalog(catalog, schema, table)
+
+        if not include_profiles or not self.enable_profiling:
+            return basic_catalog
+
+        # Enhance with profiling data
+        try:
+            for schema_obj in basic_catalog.schemas or []:
+                for table_obj in schema_obj.tables or []:
+                    # Add table profile
+                    if self.profiler:
+                        table_profile = self.profiler.profile_table(
+                            self, table_obj.table_name, schema_obj.schema_name
+                        )
+                        table_obj.profile = table_profile
+
+                        # Add column profiles
+                        for column in table_obj.columns:
+                            column_profile = self.profiler.profile_column(
+                                self, table_obj.table_name, column.name, schema_obj.schema_name
+                            )
+                            column.profile = column_profile
+
+            return basic_catalog
+
+        except Exception as e:
+            logging.error(f"Error enhancing catalog with profiles: {str(e)}")
+            return basic_catalog
+
+    def find_similar_columns(
+        self,
+        reference_column: str,
+        threshold: float = 0.8
+    ) -> List[str]:
+        """
+        Find columns similar to the reference column using LSH.
+
+        Args:
+            reference_column: Name of the reference column
+            threshold: Similarity threshold
+
+        Returns:
+            List of similar column names
+        """
+        if not self.enable_profiling or not self.profiler:
+            return []
+
+        return self.profiler.find_similar_columns(reference_column, threshold)

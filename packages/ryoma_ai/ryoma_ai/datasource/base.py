@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
+from databuilder.loader.base_loader import Loader
 from pydantic import BaseModel
 from ryoma_ai.datasource.metadata import Catalog
 
@@ -12,28 +13,28 @@ class DataSource(BaseModel, ABC):
         "extra": "allow",
     }
 
-    def __init__(self, type: str, **kwargs):
+    def __init__(self, type: str, **kwargs: Any):
         super().__init__(**kwargs)
         self.type = type
 
     @abstractmethod
-    def get_catalog(self, **kwargs) -> Catalog:
+    def get_catalog(self, **kwargs: Dict[str, Any]) -> Catalog:
         raise NotImplementedError("get_catalog is not implemented for this data source")
 
     @abstractmethod
-    def crawl_catalog(self, loader: Any, **kwargs) -> Optional[Catalog]:
+    def crawl_catalog(self, loader: Loader, **kwargs: Dict[str, Any]) -> Optional[Catalog]:
         raise NotImplementedError(
-            "crawl_metadata is not implemented for this data source."
+            "crawl_catalog is not implemented for this data source."
         )
 
     @abstractmethod
-    def prompt(self):
+    def prompt(self, schema: Optional[str] = None, table: Optional[str] = None) -> str:
         raise NotImplementedError(
-            "crawl_metadata is not implemented for this data source."
+            "prompt is not implemented for this data source."
         )
 
     @abstractmethod
-    def profile_table(self, table_name: str, **kwargs) -> dict:
+    def profile_table(self, table_name: str, **kwargs: Dict[str, Any]) -> dict:
         """
         Profile a table and return its metadata.
 
