@@ -31,3 +31,17 @@ class DataSource(BaseModel, ABC):
         raise NotImplementedError(
             "crawl_metadata is not implemented for this data source."
         )
+
+    @abstractmethod
+    def profile_table(self, table_name: str, **kwargs) -> dict:
+        """
+        Profile a table and return its metadata.
+
+        Args:
+            table_name (str): The name of the table to profile.
+            **kwargs: Additional parameters for profiling.
+
+        Returns:
+            dict: A dictionary containing the table's metadata.
+        """
+        raise NotImplementedError("profile_table is not implemented for this data source.")

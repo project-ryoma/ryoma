@@ -1,0 +1,139 @@
+graph TB
+    subgraph "User Interface"
+        UI[User Question Input]
+        UR[User Response Output]
+    end
+    
+    subgraph "Core SQL Agent"
+        SA[SqlAgent]
+        ESA[EnhancedSqlAgent]
+        RSA[ReFoRCESqlAgent]
+    end
+    
+    subgraph "Specialized Agents"
+        SLA[SchemaLinkingAgent]
+        QPA[QueryPlannerAgent]
+        SEH[SqlErrorHandler]
+        SSV[SqlSafetyValidator]
+    end
+    
+    subgraph "Enhanced Tools"
+        SQT[SqlQueryTool]
+        SAT[SchemaAnalysisTool]
+        QVT[QueryValidationTool]
+        TST[TableSelectionTool]
+        QOT[QueryOptimizationTool]
+        QET[QueryExplanationTool]
+    end
+    
+    subgraph "Research Innovations"
+        subgraph "Metadata Extraction Paper"
+            DBP[Database Profiling]
+            NSL[Novel Schema Linking]
+            QLA[Query Log Analysis]
+            STG[SQL-to-Text Generation]
+        end
+        
+        subgraph "ReFoRCE Paper"
+            DIC[Database Info Compression]
+            AFR[Answer Format Restriction]
+            ICE[Iterative Column Exploration]
+            SRW[Self-Refinement Workflow]
+            PVC[Parallelization & Consensus]
+        end
+    end
+    
+    subgraph "Data Layer"
+        DS[SqlDataSource]
+        DB[(Database)]
+        SC[Schema Catalog]
+    end
+    
+    subgraph "Safety & Security"
+        SFR[Safety Rules]
+        SEC[Security Validation]
+        ACL[Access Control]
+        AUD[Audit Logging]
+    end
+    
+    subgraph "State Management"
+        WFS[Workflow State]
+        CTX[Context Management]
+        ERR[Error Tracking]
+        RET[Retry Logic]
+    end
+    
+    %% Connections
+    UI --> SA
+    SA --> ESA
+    SA --> RSA
+    
+    ESA --> SLA
+    ESA --> QPA
+    ESA --> SEH
+    ESA --> SSV
+    
+    RSA --> SLA
+    RSA --> QPA
+    RSA --> SEH
+    RSA --> SSV
+    
+    SLA --> SQT
+    QPA --> SAT
+    SEH --> QVT
+    SSV --> TST
+    
+    ESA --> SQT
+    ESA --> SAT
+    ESA --> QVT
+    ESA --> TST
+    ESA --> QOT
+    ESA --> QET
+    
+    RSA --> DIC
+    RSA --> AFR
+    RSA --> ICE
+    RSA --> SRW
+    RSA --> PVC
+    
+    ESA --> DBP
+    ESA --> NSL
+    ESA --> QLA
+    ESA --> STG
+    
+    SQT --> DS
+    DS --> DB
+    DS --> SC
+    
+    SSV --> SFR
+    SSV --> SEC
+    SSV --> ACL
+    SSV --> AUD
+    
+    ESA --> WFS
+    RSA --> WFS
+    WFS --> CTX
+    WFS --> ERR
+    WFS --> RET
+    
+    ESA --> UR
+    RSA --> UR
+    
+    %% Styling
+    classDef userLayer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef coreAgent fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef specialized fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef tools fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef research fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef data fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    classDef safety fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    classDef state fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    
+    class UI,UR userLayer
+    class SA,ESA,RSA coreAgent
+    class SLA,QPA,SEH,SSV specialized
+    class SQT,SAT,QVT,TST,QOT,QET tools
+    class DBP,NSL,QLA,STG,DIC,AFR,ICE,SRW,PVC research
+    class DS,DB,SC data
+    class SFR,SEC,ACL,AUD safety
+    class WFS,CTX,ERR,RET state

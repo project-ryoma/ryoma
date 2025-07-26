@@ -1,0 +1,48 @@
+graph TD
+    A[User Question] --> B[compress_database_info]
+    B --> C[generate_format_restriction]
+    C --> D[explore_columns]
+    D --> E[parallel_generation]
+    E --> F[self_refinement]
+    F --> G[consensus_voting]
+    G --> H[final_validation]
+    H --> I[Final Answer]
+    
+    %% Detailed sub-processes
+    B --> B1[Pattern-based Table Grouping]
+    B --> B2[Schema Size Analysis]
+    B --> B3[Representative Selection]
+    
+    C --> C1[Format Analysis]
+    C --> C2[Column Specification]
+    C --> C3[Example Generation]
+    
+    D --> D1[Exploration Query Generation]
+    D --> D2[Query Execution]
+    D --> D3[Insight Extraction]
+    
+    E --> E1[Context Variation]
+    E --> E2[Parallel SQL Generation]
+    E --> E3[Candidate Collection]
+    
+    F --> F1[Self-Consistency Check]
+    F --> F2[Error Correction]
+    F --> F3[Query Refinement]
+    
+    G --> G1[Result Execution]
+    G --> G2[Result Comparison]
+    G --> G3[Majority Vote]
+    
+    H --> H1[Confidence Scoring]
+    H --> H2[Final Validation]
+    H --> H3[Response Formatting]
+    
+    %% Styling
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef mainProcess fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef subProcess fill:#e8f5e8,stroke:#2e7d32,stroke-width:1px
+    classDef innovation fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    
+    class A,I startEnd
+    class B,C,D,E,F,G,H mainProcess
+    class B1,B2,B3,C1,C2,C3,D1,D2,D3,E1,E2,E3,F1,F2,F3,G1,G2,G3,H1,H2,H3 subProcess

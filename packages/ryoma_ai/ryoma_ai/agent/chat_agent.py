@@ -124,14 +124,6 @@ class ChatAgent(BaseAgent):
             events = self._parse_output(self.agent, events)
         return events
 
-    def build(self):
-        datasource = self.get_datasource()
-        if datasource:
-            prompt = datasource.prompt()
-            self.add_prompt(prompt)
-        self.agent = self._build_agent()
-        return self
-
     def invoke(
         self,
         question: Optional[str] = "",
@@ -147,8 +139,23 @@ class ChatAgent(BaseAgent):
             results = self._parse_output(self.agent, results)
         return results
 
-    def get_current_state(self) -> None:
-        return None
+    def chat(
+        self,
+        question: Optional[str] = "",
+        display: Optional[bool] = True,
+        stream: Optional[bool] = False,
+    ):
+        if stream:
+            return self.stream(question, display)
+        return self.invoke(question, display)
+
+    def build(self):
+        datasource = self.get_datasource()
+        if datasource:
+            prompt = datasource.prompt()
+            self.add_prompt(prompt)
+        self.agent = self._build_agent()
+        return self
 
     def _parse_output(self, agent, result: dict, max_iterations=10):
         iteration = 0

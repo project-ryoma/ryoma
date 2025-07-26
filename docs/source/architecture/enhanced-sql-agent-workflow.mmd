@@ -1,0 +1,32 @@
+graph TD
+    A[User Question] --> B[analyze_question]
+    B --> C[schema_linking]
+    C --> D[query_planning]
+    D --> E[generate_sql]
+    E --> F[validate_safety]
+    
+    F --> G{Safety Check}
+    G -->|Pass| H[execute_query]
+    G -->|Fail| M[format_response]
+    
+    H --> I{Execution Result}
+    I -->|Success| M[format_response]
+    I -->|Error| J[handle_error]
+    I -->|Retry Needed| E
+    
+    J --> K{Should Retry?}
+    K -->|Yes, Retry < Max| E
+    K -->|No, Give Up| M
+    
+    M --> N[Final Answer]
+    
+    %% Styling
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class A,N startEnd
+    class B,C,D,E,H,J,M process
+    class F,G,I,K decision
+    class J error
