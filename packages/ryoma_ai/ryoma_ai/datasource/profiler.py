@@ -10,6 +10,9 @@ This module implements comprehensive database profiling capabilities based on th
 - String length & character-type stats
 - Top-k frequent values
 - Locality-sensitive hashing / MinHash sketches for approximate similarity
+
+This implementation leverages Ibis's native profiling capabilities where possible
+for better performance and backend compatibility.
 """
 
 import hashlib
@@ -66,6 +69,178 @@ class DatabaseProfiler:
             self.lsh_index = MinHashLSH(threshold=lsh_threshold, num_perm=num_hashes)
         
         self.logger = logging.getLogger(__name__)
+
+    def profile_table_with_ibis(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
+        """
+        Profile a table using Ibis's native profiling capabilities for better performance.
+
+        Args:
+            datasource: The SQL datasource to profile
+            table_name: Name of the table to profile
+            schema: Optional schema name
+
+        Returns:
+            TableProfile with comprehensive metadata using Ibis native methods
+        """
+        start_time = datetime.now()
+
+        try:
+            # Get the Ibis table object
+            conn = datasource.connect()
+
+            # Build the table reference
+            if schema:
+                ibis_table = conn.table(table_name, database=schema)
+            else:
+                ibis_table = conn.table(table_name)
+
+            # Use Ibis's native describe() method for comprehensive statistics
+            try:
+                describe_result = ibis_table.describe().to_pandas()
+                self.logger.info(f"Successfully used Ibis describe() for table {table_name}")
+
+                # Extract table-level metrics from describe result
+                row_count = int(describe_result['count'].iloc[0]) if not describe_result.empty else 0
+                column_count = len(describe_result)
+
+                # Calculate completeness from null fractions
+                if 'null_frac' in describe_result.columns:
+                    null_fractions = describe_result['null_frac'].fillna(0)
+                    completeness_score = float(1.0 - null_fractions.mean())
+                else:
+                    completeness_score = None
+
+                # Calculate consistency score (simplified)
+                consistency_score = self._calculate_consistency_from_describe(describe_result)
+
+            except Exception as e:
+                self.logger.warning(f"Ibis describe() failed for {table_name}: {e}, falling back to manual profiling")
+                return self.profile_table(datasource, table_name, schema)
+
+            # Get additional table-level information
+            try:
+                actual_row_count = int(ibis_table.count().to_pandas())
+            except Exception:
+                actual_row_count = row_count
+
+            duration = (datetime.now() - start_time).total_seconds()
+
+            return TableProfile(
+                table_name=table_name,
+                row_count=actual_row_count,
+                column_count=column_count,
+                completeness_score=completeness_score,
+                consistency_score=consistency_score,
+                profiled_at=datetime.now(),
+                profiling_duration_seconds=duration
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error profiling table {table_name} with Ibis: {str(e)}")
+            # Fall back to the original profiling method
+            return self.profile_table(datasource, table_name, schema)
+
+    def profile_column_with_ibis(
+        self,
+        datasource,
+        table_name: str,
+        column_name: str,
+        schema: Optional[str] = None
+    ) -> ColumnProfile:
+        """
+        Profile a single column using Ibis's native capabilities for better performance.
+
+        Args:
+            datasource: The SQL datasource to profile
+            table_name: Name of the table
+            column_name: Name of the column to profile
+            schema: Optional schema name
+
+        Returns:
+            ColumnProfile with detailed statistics using Ibis native methods
+        """
+        try:
+            # Get the Ibis table object
+            conn = datasource.connect()
+
+            if schema:
+                ibis_table = conn.table(table_name, database=schema)
+            else:
+                ibis_table = conn.table(table_name)
+
+            # Get the specific column
+            if column_name not in ibis_table.columns:
+                self.logger.warning(f"Column {column_name} not found in table {table_name}")
+                return ColumnProfile(column_name=column_name, profiled_at=datetime.now())
+
+            column = ibis_table[column_name]
+
+            # Use Ibis's native statistical methods
+            try:
+                # Basic statistics using Ibis native methods
+                row_count = int(ibis_table.count().to_pandas())
+
+                # Count non-null values
+                non_null_count = int(column.count().to_pandas())
+                null_count = row_count - non_null_count
+                null_percentage = (null_count / row_count) * 100 if row_count > 0 else 0
+
+                # Distinct count using Ibis
+                distinct_count = int(column.nunique().to_pandas())
+                distinct_ratio = distinct_count / non_null_count if non_null_count > 0 else 0
+
+                # Top-k frequent values using Ibis value_counts
+                top_k_values = self._get_top_k_values_ibis(column)
+
+                # Type-specific statistics using Ibis methods
+                numeric_stats = self._compute_numeric_stats_ibis(column)
+                date_stats = self._compute_date_stats_ibis(column)
+                string_stats = self._compute_string_stats_ibis(column, ibis_table)
+
+                # LSH sketch (still need to sample data for this)
+                lsh_sketch = None
+                if self.enable_lsh:
+                    try:
+                        # Sample data for LSH computation
+                        sample_data = column.limit(min(1000, self.sample_size)).to_pandas().dropna()
+                        if len(sample_data) > 0:
+                            lsh_sketch = self._compute_lsh_sketch(sample_data, column_name)
+                    except Exception as e:
+                        self.logger.debug(f"LSH computation failed for {column_name}: {e}")
+
+                # Semantic type inference
+                semantic_type = self._infer_semantic_type_ibis(column, column_name)
+
+                # Data quality score
+                data_quality_score = self._calculate_data_quality_score(
+                    null_percentage, distinct_ratio, non_null_count
+                )
+
+                return ColumnProfile(
+                    column_name=column_name,
+                    row_count=row_count,
+                    null_count=null_count,
+                    null_percentage=null_percentage,
+                    distinct_count=distinct_count,
+                    distinct_ratio=distinct_ratio,
+                    top_k_values=top_k_values,
+                    numeric_stats=numeric_stats,
+                    date_stats=date_stats,
+                    string_stats=string_stats,
+                    lsh_sketch=lsh_sketch,
+                    semantic_type=semantic_type,
+                    data_quality_score=data_quality_score,
+                    profiled_at=datetime.now(),
+                    sample_size=min(row_count, self.sample_size)
+                )
+
+            except Exception as e:
+                self.logger.warning(f"Ibis native profiling failed for column {column_name}: {e}, falling back")
+                return self.profile_column(datasource, table_name, column_name, schema)
+
+        except Exception as e:
+            self.logger.error(f"Error profiling column {column_name} with Ibis: {str(e)}")
+            return self.profile_column(datasource, table_name, column_name, schema)
 
     def profile_table(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
         """
@@ -492,12 +667,187 @@ class DatabaseProfiler:
         """Find columns similar to the given column using LSH."""
         if not self.enable_lsh or not hasattr(self, 'lsh_index'):
             return []
-        
+
         threshold = threshold or self.lsh_threshold
-        
+
         try:
             # This would require the column to be already indexed
             similar = self.lsh_index.query(column_name)
             return [col for col in similar if col != column_name]
         except:
             return []
+
+    # Ibis-specific helper methods
+    def _get_top_k_values_ibis(self, column) -> List[Dict[str, Any]]:
+        """Get top-k most frequent values using Ibis value_counts."""
+        try:
+            value_counts = column.value_counts().limit(self.top_k).to_pandas()
+            total_count = int(column.count().to_pandas())
+
+            result = []
+            for _, row in value_counts.iterrows():
+                value = row.iloc[0]  # First column is the value
+                count = int(row.iloc[1])  # Second column is the count
+                percentage = (count / total_count) * 100 if total_count > 0 else 0
+
+                result.append({
+                    "value": str(value) if value is not None else None,
+                    "count": count,
+                    "percentage": percentage
+                })
+
+            return result
+        except Exception as e:
+            self.logger.debug(f"Ibis value_counts failed: {e}")
+            return []
+
+    def _compute_numeric_stats_ibis(self, column) -> Optional[NumericStats]:
+        """Compute statistics for numeric columns using Ibis methods."""
+        try:
+            # Check if column is numeric by trying to compute mean
+            mean_val = column.mean().to_pandas()
+
+            # If we get here, it's numeric
+            min_val = float(column.min().to_pandas())
+            max_val = float(column.max().to_pandas())
+            mean_val = float(mean_val)
+            std_val = float(column.std().to_pandas())
+
+            # For percentiles, we might need to use a different approach
+            # Some backends support quantile, others don't
+            try:
+                # Try to get percentiles if supported
+                percentile_25 = float(column.quantile(0.25).to_pandas())
+                percentile_75 = float(column.quantile(0.75).to_pandas())
+                median = float(column.quantile(0.5).to_pandas())
+            except Exception:
+                # Fallback: use min/max as rough estimates
+                percentile_25 = min_val + (max_val - min_val) * 0.25
+                percentile_75 = min_val + (max_val - min_val) * 0.75
+                median = (min_val + max_val) / 2
+
+            return NumericStats(
+                min_value=min_val,
+                max_value=max_val,
+                mean=mean_val,
+                median=median,
+                std_dev=std_val,
+                percentile_25=percentile_25,
+                percentile_75=percentile_75
+            )
+        except Exception:
+            return None
+
+    def _compute_date_stats_ibis(self, column) -> Optional[DateStats]:
+        """Compute statistics for date/datetime columns using Ibis methods."""
+        try:
+            # Try to get min/max dates
+            min_date = column.min().to_pandas()
+            max_date = column.max().to_pandas()
+
+            # Convert to datetime if they're not already
+            if hasattr(min_date, 'to_pydatetime'):
+                min_date = min_date.to_pydatetime()
+            if hasattr(max_date, 'to_pydatetime'):
+                max_date = max_date.to_pydatetime()
+
+            # Calculate date range
+            if min_date and max_date:
+                date_range_days = (max_date - min_date).days
+            else:
+                date_range_days = None
+
+            # For date formats, we'd need to sample some data
+            common_formats = []
+            try:
+                sample_data = column.limit(100).to_pandas()
+                common_formats = self._detect_date_formats(sample_data.astype(str).tolist())
+            except Exception:
+                pass
+
+            return DateStats(
+                min_date=min_date,
+                max_date=max_date,
+                date_range_days=date_range_days,
+                common_date_formats=common_formats
+            )
+        except Exception:
+            return None
+
+    def _compute_string_stats_ibis(self, column, table) -> Optional[StringStats]:
+        """Compute statistics for string columns using Ibis methods."""
+        try:
+            # Check if it's a string column by trying string operations
+            # Get length statistics using Ibis string functions
+            length_col = column.length()
+
+            min_length = int(length_col.min().to_pandas())
+            max_length = int(length_col.max().to_pandas())
+            avg_length = float(length_col.mean().to_pandas())
+
+            # For character type analysis, we need to sample data
+            char_types = {}
+            patterns = []
+
+            try:
+                sample_data = column.limit(1000).to_pandas().dropna()
+                if len(sample_data) > 0:
+                    # Character type analysis
+                    char_types = defaultdict(int)
+                    for text in sample_data.head(100):  # Limit for performance
+                        text_str = str(text)
+                        for char in text_str:
+                            if char.isalpha():
+                                char_types['alphabetic'] += 1
+                            elif char.isdigit():
+                                char_types['numeric'] += 1
+                            elif char.isspace():
+                                char_types['whitespace'] += 1
+                            else:
+                                char_types['special'] += 1
+
+                    # Pattern detection
+                    patterns = self._detect_string_patterns(sample_data.head(100))
+            except Exception:
+                pass
+
+            return StringStats(
+                min_length=min_length,
+                max_length=max_length,
+                avg_length=avg_length,
+                character_types=dict(char_types),
+                common_patterns=patterns
+            )
+        except Exception:
+            return None
+
+    def _infer_semantic_type_ibis(self, column, column_name: str) -> Optional[str]:
+        """Infer semantic type using Ibis column operations."""
+        try:
+            # Sample some data for pattern analysis
+            sample_data = column.limit(100).to_pandas().dropna()
+
+            if len(sample_data) == 0:
+                return None
+
+            # Use the existing semantic type inference
+            return self._infer_semantic_type(sample_data, column_name)
+        except Exception:
+            return "general"
+
+    def _calculate_consistency_from_describe(self, describe_result: pd.DataFrame) -> float:
+        """Calculate consistency score from Ibis describe() result."""
+        try:
+            if describe_result.empty:
+                return 0.0
+
+            # Use null fractions as a proxy for consistency
+            if 'null_frac' in describe_result.columns:
+                null_fractions = describe_result['null_frac'].fillna(0)
+                # Lower null fractions indicate better consistency
+                consistency_score = float(1.0 - null_fractions.mean())
+                return max(0.0, min(1.0, consistency_score))
+
+            return 0.5  # Default moderate consistency
+        except Exception:
+            return 0.0

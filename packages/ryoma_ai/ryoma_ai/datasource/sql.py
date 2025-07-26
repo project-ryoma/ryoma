@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
@@ -200,8 +200,15 @@ class SqlDataSource(DataSource):
             return {}
 
         try:
-            # Profile the table
-            table_profile = self.profiler.profile_table(self, table_name, schema)
+            # Try Ibis-enhanced profiling first for better performance
+            try:
+                table_profile = self.profiler.profile_table_with_ibis(self, table_name, schema)
+                use_ibis_profiling = True
+                logging.info(f"Using Ibis-enhanced profiling for table {table_name}")
+            except Exception as e:
+                logging.warning(f"Ibis profiling failed, falling back to standard profiling: {e}")
+                table_profile = self.profiler.profile_table(self, table_name, schema)
+                use_ibis_profiling = False
 
             # Get table schema to profile individual columns
             catalog = self.get_catalog(schema=schema, table=table_name)
@@ -217,12 +224,17 @@ class SqlDataSource(DataSource):
             if not table_obj:
                 return {"table_profile": table_profile.model_dump()}
 
-            # Profile each column
+            # Profile each column using the appropriate method
             column_profiles = {}
             for column in table_obj.columns:
-                column_profile = self.profiler.profile_column(
-                    self, table_name, column.name, schema
-                )
+                if use_ibis_profiling:
+                    column_profile = self.profiler.profile_column_with_ibis(
+                        self, table_name, column.name, schema
+                    )
+                else:
+                    column_profile = self.profiler.profile_column(
+                        self, table_name, column.name, schema
+                    )
                 column_profiles[column.name] = column_profile.model_dump()
 
             return {
@@ -232,7 +244,8 @@ class SqlDataSource(DataSource):
                     "total_columns": len(column_profiles),
                     "profiled_at": table_profile.profiled_at.isoformat() if table_profile.profiled_at else None,
                     "row_count": table_profile.row_count,
-                    "completeness_score": table_profile.completeness_score
+                    "completeness_score": table_profile.completeness_score,
+                    "profiling_method": "ibis_enhanced" if use_ibis_profiling else "standard"
                 }
             }
 
@@ -262,7 +275,14 @@ class SqlDataSource(DataSource):
             return {}
 
         try:
-            column_profile = self.profiler.profile_column(self, table_name, column_name, schema)
+            # Try Ibis-enhanced profiling first
+            try:
+                column_profile = self.profiler.profile_column_with_ibis(self, table_name, column_name, schema)
+                logging.info(f"Using Ibis-enhanced profiling for column {column_name}")
+            except Exception as e:
+                logging.warning(f"Ibis column profiling failed, falling back: {e}")
+                column_profile = self.profiler.profile_column(self, table_name, column_name, schema)
+
             return column_profile.model_dump()
         except Exception as e:
             logging.error(f"Error profiling column {column_name}: {str(e)}")

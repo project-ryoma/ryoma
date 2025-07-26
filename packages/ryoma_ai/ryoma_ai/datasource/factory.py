@@ -5,6 +5,7 @@ from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.bigquery import BigqueryDataSource
 from ryoma_ai.datasource.duckdb import DuckDBConfig, DuckDBDataSource
 from ryoma_ai.datasource.file import FileConfig, FileDataSource
+from ryoma_ai.datasource.iceberg import IcebergConfig, IcebergDataSource
 from ryoma_ai.datasource.mysql import MySqlConfig, MySqlDataSource
 from ryoma_ai.datasource.nosql import DynamodbConfig, DynamodbDataSource
 from ryoma_ai.datasource.postgres import PostgresConfig, PostgresDataSource
@@ -22,6 +23,7 @@ class DataSourceProvider(Enum):
     dynamodb = DynamodbDataSource
     sqlite = SqliteDataSource
     duckdb = DuckDBDataSource
+    iceberg = IcebergDataSource
 
 
 class DataSourceConfigProvider(Enum):
@@ -32,6 +34,7 @@ class DataSourceConfigProvider(Enum):
     dynamodb = DynamodbConfig
     sqlite = SqliteConfig
     duckdb = DuckDBConfig
+    iceberg = IcebergConfig
 
 
 def get_supported_datasources():
