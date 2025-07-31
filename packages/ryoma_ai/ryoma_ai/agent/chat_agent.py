@@ -29,7 +29,6 @@ class ChatAgent(BaseAgent):
     prompt_template_factory: PromptTemplateFactory
     final_prompt_template: Optional[Union[PromptTemplate, ChatPromptTemplate]]
     output_parser: Optional[PydanticOutputParser]
-    agent: Optional[RunnableSerializable]
 
     def __init__(
         self,
@@ -75,9 +74,12 @@ class ChatAgent(BaseAgent):
         )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.output_parser = output_parser
-        self.agent = self._build_agent()
+        
+        # chain (lazy initialization)
+        self._chain = None
 
-    def _build_agent(self, **kwargs) -> RunnableSerializable:
+    def _build_chain(self, **kwargs) -> RunnableSerializable:
+        logging.info(f"Building llm chain with model: {self.model}")
         if not self.model:
             raise ValueError(
                 f"Unable to initialize model, please ensure you have valid configurations."
@@ -87,14 +89,23 @@ class ChatAgent(BaseAgent):
             return self.output_prompt | self.model | self.output_parser
         return self.final_prompt_template | self.model
 
+    @property
+    def chain(self) -> RunnableSerializable:
+        """Lazy initialization of the chain. Built only once when first accessed."""
+        if self._chain is None:
+            self._chain = self._build_chain()
+        return self._chain
+
     def set_base_prompt(
         self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None
     ):
         self.prompt_template_factory.set_base_prompt(base_prompt)
+        self._chain = None  # Invalidate chain to force rebuild
         return self
 
     def add_prompt(self, prompt: Optional[Union[str, ChatPromptTemplate]]):
         self.prompt_template_factory.add_context_prompt(prompt)
+        self._chain = None  # Invalidate chain to force rebuild
         return self
 
     def _format_messages(self, messages: str):
@@ -116,12 +127,12 @@ class ChatAgent(BaseAgent):
         display: Optional[bool] = True,
     ):
         messages = self._format_messages(question)
-        events = self.agent.stream(messages, self.config)
+        events = self.chain.stream(messages, self.config)
         if display:
             for event in events:
                 print(event.content, end="", flush=True)
         if self.output_parser:
-            events = self._parse_output(self.agent, events)
+            events = self._parse_output(self.chain, events)
         return events
 
     def invoke(
@@ -131,12 +142,12 @@ class ChatAgent(BaseAgent):
     ):
         messages = self._format_messages(question)
 
-        results = self.agent.invoke(messages, self.config)
+        results = self.chain.invoke(messages, self.config)
         if display:
             for result in results:
                 print(result.content, end="", flush=True)
         if self.output_parser:
-            results = self._parse_output(self.agent, results)
+            results = self._parse_output(self.chain, results)
         return results
 
     def chat(
@@ -148,14 +159,6 @@ class ChatAgent(BaseAgent):
         if stream:
             return self.stream(question, display)
         return self.invoke(question, display)
-
-    def build(self):
-        datasource = self.get_datasource()
-        if datasource:
-            prompt = datasource.prompt()
-            self.add_prompt(prompt)
-        self.agent = self._build_agent()
-        return self
 
     def _parse_output(self, agent, result: dict, max_iterations=10):
         iteration = 0
@@ -180,4 +183,5 @@ class ChatAgent(BaseAgent):
                 "format_instructions": self.output_parser.get_format_instructions()
             },
         )
+        self._chain = None  # Invalidate chain to force rebuild
         return self

@@ -1,16 +1,20 @@
 from typing import Dict, Optional, Union
 
 from langchain_core.embeddings import Embeddings
+from langgraph.graph import StateGraph
+from langgraph.graph.graph import CompiledGraph
+
 from ryoma_ai.agent.workflow import WorkflowAgent
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.agent.internals.reforce_sql_agent import ReFoRCESqlAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.tool.sql_tool import (
     CreateTableTool, QueryProfileTool, SqlQueryTool,
-    SchemaAnalysisTool, QueryValidationTool, TableSelectionTool,
+    SchemaAnalysisTool, QueryValidationTool,
     QueryOptimizationTool, QueryExplanationTool
 )
 from ryoma_ai.vector_store.base import VectorStore
+from ryoma_ai.models.agent import SqlAgentMode
 
 
 class SqlAgent(WorkflowAgent):
@@ -26,14 +30,13 @@ class SqlAgent(WorkflowAgent):
         datasource: Optional[DataSource] = None,
         embedding: Optional[Union[dict, Embeddings]] = None,
         vector_store: Optional[Union[dict, VectorStore]] = None,
-        use_enhanced_mode: bool = True,
-        use_reforce_mode: bool = False,
+        mode: Union[SqlAgentMode, str] = SqlAgentMode.basic,
         safety_config: Optional[Dict] = None,
         **kwargs,
     ):
-        if use_reforce_mode:
+        if mode == "reforce" or mode == SqlAgentMode.reforce:
             # Use the ReFoRCE SQL agent with state-of-the-art capabilities
-            self._enhanced_agent = ReFoRCESqlAgent(
+            self._agent = ReFoRCESqlAgent(
                 model=model,
                 model_parameters=model_parameters,
                 datasource=datasource,
@@ -43,12 +46,12 @@ class SqlAgent(WorkflowAgent):
             # Initialize with enhanced tools
             tools = [
                 SqlQueryTool(), CreateTableTool(), QueryProfileTool(),
-                SchemaAnalysisTool(), QueryValidationTool(), TableSelectionTool(),
+                SchemaAnalysisTool(), QueryValidationTool(),
                 QueryOptimizationTool(), QueryExplanationTool()
             ]
-        elif use_enhanced_mode:
+        elif mode == "enhanced" or mode == SqlAgentMode.enhanced:
             # Use the enhanced SQL agent with advanced capabilities
-            self._enhanced_agent = EnhancedSqlAgent(
+            self._agent = EnhancedSqlAgent(
                 model=model,
                 model_parameters=model_parameters,
                 datasource=datasource,
@@ -58,12 +61,12 @@ class SqlAgent(WorkflowAgent):
             # Initialize with enhanced tools
             tools = [
                 SqlQueryTool(), CreateTableTool(), QueryProfileTool(),
-                SchemaAnalysisTool(), QueryValidationTool(), TableSelectionTool(),
+                SchemaAnalysisTool(), QueryValidationTool(),
                 QueryOptimizationTool(), QueryExplanationTool()
             ]
         else:
             # Use basic tools for backward compatibility
-            self._enhanced_agent = None
+            self._agent = None
             tools = [SqlQueryTool(), CreateTableTool(), QueryProfileTool()]
 
         super().__init__(
@@ -75,48 +78,43 @@ class SqlAgent(WorkflowAgent):
             vector_store=vector_store,
         )
 
-        self.use_enhanced_mode = use_enhanced_mode
-        self.use_reforce_mode = use_reforce_mode
+        self.mode = mode
 
-    def invoke(self, input_data, **kwargs):
-        """Override invoke to use enhanced agent when available."""
-        if (self.use_reforce_mode or self.use_enhanced_mode) and self._enhanced_agent:
-            return self._enhanced_agent.invoke(input_data, **kwargs)
+    def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
+        """Build the workflow graph for the SQL agent."""
+        if self.mode == SqlAgentMode.reforce:
+            return self._agent.build_workflow(graph)
+        elif self.mode == SqlAgentMode.enhanced:
+            return self._agent.build_workflow(graph)
         else:
-            return super().invoke(input_data, **kwargs)
+            return super()._build_workflow(graph)
 
-    def stream(self, input_data, **kwargs):
-        """Override stream to use enhanced agent when available."""
-        if (self.use_reforce_mode or self.use_enhanced_mode) and self._enhanced_agent:
-            return self._enhanced_agent.stream(input_data, **kwargs)
-        else:
-            return super().stream(input_data, **kwargs)
 
     def enable_safety_rule(self, rule):
         """Enable a specific safety validation rule."""
-        if self._enhanced_agent and hasattr(self._enhanced_agent, 'safety_validator'):
-            self._enhanced_agent.safety_validator.enable_rule(rule)
+        if self._agent and hasattr(self._agent, 'safety_validator'):
+            self._agent.safety_validator.enable_rule(rule)
 
     def disable_safety_rule(self, rule):
         """Disable a specific safety validation rule."""
-        if self._enhanced_agent and hasattr(self._enhanced_agent, 'safety_validator'):
-            self._enhanced_agent.safety_validator.disable_rule(rule)
+        if self._agent and hasattr(self._agent, 'safety_validator'):
+            self._agent.safety_validator.disable_rule(rule)
 
     def set_safety_config(self, config: Dict):
         """Update safety configuration."""
-        if self._enhanced_agent and hasattr(self._enhanced_agent, 'safety_validator'):
-            self._enhanced_agent.safety_validator.set_safety_config(config)
+        if self._agent and hasattr(self._agent, 'safety_validator'):
+            self._agent.safety_validator.set_safety_config(config)
 
     def analyze_schema(self, question: str):
         """Analyze schema relationships for a question."""
-        if self._enhanced_agent and hasattr(self._enhanced_agent, 'schema_agent'):
-            return self._enhanced_agent.schema_agent.analyze_schema_relationships(question)
+        if self._agent and hasattr(self._agent, 'schema_agent'):
+            return self._agent.schema_agent.analyze_schema_relationships(question)
         else:
             raise NotImplementedError("Schema analysis requires enhanced mode")
 
     def create_query_plan(self, question: str, context: Optional[Dict] = None):
         """Create a query execution plan."""
-        if self._enhanced_agent and hasattr(self._enhanced_agent, 'query_planner'):
-            return self._enhanced_agent.query_planner.create_query_plan(question, context)
+        if self._agent and hasattr(self._agent, 'query_planner'):
+            return self._agent.query_planner.create_query_plan(question, context)
         else:
             raise NotImplementedError("Query planning requires enhanced mode")

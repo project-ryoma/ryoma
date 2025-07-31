@@ -10,7 +10,7 @@ from ryoma_ai.agent.internals.sql_safety_validator import SqlSafetyValidator, Sa
 from ryoma_ai.states import SqlAgentState
 from ryoma_ai.tool.sql_tool import (
     SqlQueryTool, CreateTableTool, QueryProfileTool,
-    SchemaAnalysisTool, QueryValidationTool, TableSelectionTool,
+    SchemaAnalysisTool, QueryValidationTool,
     QueryOptimizationTool, QueryExplanationTool
 )
 from ryoma_ai.datasource.sql import SqlDataSource
@@ -56,7 +56,6 @@ class EnhancedSqlAgent(WorkflowAgent):
             QueryProfileTool(),
             SchemaAnalysisTool(),
             QueryValidationTool(),
-            TableSelectionTool(),
             QueryOptimizationTool(),
             QueryExplanationTool(),
         ]
@@ -69,7 +68,7 @@ class EnhancedSqlAgent(WorkflowAgent):
             **kwargs,
         )
 
-    def _create_workflow(self) -> StateGraph:
+    def _build_workflow(self, graph: StateGraph) -> StateGraph:
         """Create the enhanced SQL agent workflow with multi-step reasoning."""
         workflow = StateGraph(SqlAgentState)
 

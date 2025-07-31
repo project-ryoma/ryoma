@@ -12,6 +12,13 @@ class AgentType(Enum):
     workflow = "workflow"
     custom = "custom"
 
+
+class SqlAgentMode(Enum):
+    basic = "basic"
+    enhanced = "enhanced"
+    reforce = "reforce"
+
+
 @dataclass
 class ColumnExplorationResult:
     """Result from column exploration phase."""

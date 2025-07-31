@@ -58,7 +58,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         self.max_refinement_iterations = max_refinement_iterations
         self.compression_threshold = compression_threshold
 
-    def _create_workflow(self) -> StateGraph:
+    def _build_workflow(self, graph: StateGraph) -> StateGraph:
         """Create the ReFoRCE workflow with advanced optimizations."""
         workflow = StateGraph(ReFoRCESqlAgentState)
 

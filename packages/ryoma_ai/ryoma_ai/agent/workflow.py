@@ -79,7 +79,7 @@ class WorkflowAgent(ChatAgent):
             self.model = self._bind_tools()
 
         self.memory = MemorySaver()
-        self.workflow = None
+        self._workflow = None
 
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
@@ -101,7 +101,7 @@ class WorkflowAgent(ChatAgent):
 
     def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         if graph:
-            return graph.compile(checkpointer=self.memory, interrupt_before=["tools"])
+            return graph.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
         workflow = StateGraph(MessageState)
 
         workflow.add_node("agent", self.call_model)
@@ -114,7 +114,14 @@ class WorkflowAgent(ChatAgent):
 
         workflow.set_entry_point("agent")
         workflow.add_edge("tools", "agent")
-        return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"])
+        return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
+
+    @property
+    def workflow(self) -> CompiledGraph:
+        """Lazy initialization of the workflow. Built only once when first accessed."""
+        if self._workflow is None:
+            self._workflow = self._build_workflow(None)
+        return self._workflow
 
     @staticmethod
     def init_state():
@@ -138,11 +145,12 @@ class WorkflowAgent(ChatAgent):
             return current_state_messages[-1].tool_calls
         return []
 
-    def build(self, graph: Optional[StateGraph] = None):
+    def build_workflow(self, graph: Optional[StateGraph] = None):
         """
-        Build the agent chain. This method is called to finalize the agent setup.
+        Rebuilds the workflow with the provided graph.
         """
-        self.workflow = self._build_workflow(graph)
+        logging.warning("Rebuilding workflow with provided graph. This will reset the current state.")
+        self._workflow = self._build_workflow(graph)
         return self
 
     def _format_messages(self, question: str):
@@ -151,16 +159,18 @@ class WorkflowAgent(ChatAgent):
             # We are in the tool node, but the user has asked a new question
             # We need to deny the tool call and continue with the user's question
             tool_calls = self.get_current_tool_calls()
-            return ChatPromptValue(
-                message=[
+            return {
+                "messages": [
                     ToolMessage(
                         tool_call_id=tool_calls[0]["id"],
                         content=f"Tool call denied by user. Reasoning: '{question}'. Continue assisting, accounting for the user's input.",
                     )
                 ]
-            )
+            }
         else:
-            return ChatPromptValue(messages=[HumanMessage(content=question)])
+            return {
+                "messages": [HumanMessage(content=question)]
+            }
 
     def stream(
         self,
@@ -237,8 +247,7 @@ class WorkflowAgent(ChatAgent):
             )
         return result
 
-    @staticmethod
-    def build_tool_node(tools):
+    def build_tool_node(self, tools):
         return ToolNode(tools).with_fallbacks(
             [RunnableLambda(handle_tool_error)], exception_key="error"
         )
@@ -280,7 +289,7 @@ class WorkflowAgent(ChatAgent):
     def cancel_tool(self, tool_id: str):
         pass
 
-    def _build_agent(self):
+    def _build_chain(self):
         if not self.model:
             raise ValueError(
                 f"Unable to initialize model, please ensure you have valid configurations."
@@ -292,8 +301,8 @@ class WorkflowAgent(ChatAgent):
         return self.final_prompt_template | self.model
 
     def call_model(self, state: MessageState, config: RunnableConfig):
-        agent = self._build_agent()
-        response = agent.invoke(state, self.config)
+        chain = self._build_chain()
+        response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events, printed, max_length=1500):
@@ -302,13 +311,15 @@ class WorkflowAgent(ChatAgent):
         for event in events:
             for value in event.values():
                 messages = self._get_event_message(value)
-                for message in messages:
-                    if message.id not in printed:
-                        msg_repr = message.pretty_repr(html=True)
-                        if len(msg_repr) > max_length:
-                            msg_repr = msg_repr[:max_length] + " ... (truncated)"
-                        print(msg_repr)
-                        printed.add(message.id)
+                if messages:
+                    for message in messages:
+                        # Check if message has id attribute (is a proper message object)
+                        if hasattr(message, 'id') and message.id not in printed:
+                            msg_repr = message.pretty_repr(html=True)
+                            if len(msg_repr) > max_length:
+                                msg_repr = msg_repr[:max_length] + " ... (truncated)"
+                            print(msg_repr)
+                            printed.add(message.id)
 
     def _get_event_message(self, event):
         if "tools" in event:

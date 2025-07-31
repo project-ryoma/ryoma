@@ -13,7 +13,7 @@ requires-python = ">=3.9"
 
 dependencies = [
     "alembic>=1.13.1",
-    "reflex>=0.6.8, <0.7.0",
+    "reflex>=0.7.0",
     "transformers>=4.40.2",
     "sql-metadata>=2.11.0",
     "feast==0.39.1",

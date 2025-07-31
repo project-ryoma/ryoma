@@ -6,32 +6,86 @@ SPDX-License-Identifier: Apache-2.0
 
 (l-main-doc-page)=
 
-# Ryoma documentation
+# 🚀 Ryoma AI Documentation
 
-# Introduction
+> **AI-Powered Data Analysis Platform**
+> Connect to databases, ask questions in natural language, and get intelligent insights
 
-## What is Ryoma?
+## 🎯 What is Ryoma?
 
-Ryoma is an AI powered data platform, that helps data users to efficiently use data. Ryoma allows data users to:
+Ryoma is a cutting-edge AI-powered data platform that revolutionizes how data users interact with their data. Built on state-of-the-art research, Ryoma enables:
 
-* Connect to data sources and ask questions in natural language
-* Run on Various Data APIs such as Pandas, Pyarrow, Spark, Pytorch etc.
-* Interactively code in Ryoma kernel with AI agent.
+### 🤖 **Intelligent SQL Generation**
+- **Enhanced SQL Agent** - Multi-step reasoning with safety validation
+- **ReFoRCE Agent** - Research-based self-refinement for maximum accuracy
+- **Natural Language Queries** - Ask questions in plain English, get SQL results
 
-**Note:** Ryoma today primarily addresses _data users_.
+### 📊 **Advanced Database Profiling**
+- **Comprehensive Metadata Extraction** - Automatic schema understanding
+- **Data Quality Assessment** - Multi-dimensional quality scoring
+- **Semantic Type Detection** - Automatic identification of emails, phones, IDs
+- **Column Similarity Analysis** - LSH-based relationship discovery
 
-![](assets/ryoma_marchitecture.png)
+### 🗄️ **Universal Database Support**
+- **PostgreSQL, MySQL, Snowflake, BigQuery** - Production-ready connectors
+- **SQLite, DuckDB** - Perfect for development and analytics
+- **Ibis Integration** - Native database optimizations for better performance
 
-## Who is Ryoma for?
+### 🛡️ **Enterprise-Ready Security**
+- **Query Validation** - Configurable safety policies
+- **Access Control** - Fine-grained permissions
+- **Audit Logging** - Complete query tracking
 
-Ryoma helps data users with data access and data analysis by leveraging AI. \
-Instead of writing code on jupyter notebook, data users can interactively code in Ryoma kernel with AI agent.
+![Ryoma Architecture](assets/ryoma_marchitecture.png)
 
-## How to get started?
+## 👥 Who is Ryoma for?
 
+### 📈 **Data Analysts**
+Transform natural language questions into complex SQL queries without deep SQL knowledge.
 
-The best way to learn Ryoma is to use it.
-Head over to our [Quickstart](https://docs.ryoma.dev/getting-started/quickstart) and try it out!
+### 🔬 **Data Scientists**
+Rapidly explore datasets and generate insights with AI-powered analysis.
+
+### 💼 **Business Users**
+Get answers from your data without waiting for technical teams.
+
+### 🏢 **Enterprise Teams**
+Deploy secure, scalable data analysis with comprehensive governance.
+
+## 🚀 Quick Start
+
+Get up and running in under 5 minutes:
+
+```python
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgres import PostgresDataSource
+
+# Connect to your database with profiling
+datasource = PostgresDataSource(
+    connection_string="postgresql://user:pass@localhost:5432/db",
+    enable_profiling=True  # Automatic metadata extraction
+)
+
+# Create enhanced SQL agent
+agent = SqlAgent(model="gpt-4", mode="enhanced")
+agent.add_datasource(datasource)
+
+# Ask questions in natural language
+response = agent.stream("Show me the top 10 customers by revenue this quarter")
+print(response)
+```
+
+## 🎯 Key Features
+
+| 🚀 Feature | 📝 Description | 🔗 Learn More |
+|------------|----------------|---------------|
+| **Enhanced SQL Agent** | Multi-step reasoning with safety validation | [Agent Guide →](reference/agent/sql.md) |
+| **Database Profiling** | Comprehensive metadata extraction | [Profiling Guide →](architecture/database-profiling.md) |
+| **Universal Connectors** | Support for all major databases | [Data Sources →](reference/data-sources/index.md) |
+| **Safety Framework** | Configurable validation and security | [Advanced Setup →](getting-started/advanced-setup.md) |
+| **Model Flexibility** | OpenAI, Anthropic, local models | [Models →](reference/models/index.md) |
+
+## 📚 Documentation Sections
 
 
 ```{toctree}

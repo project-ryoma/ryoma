@@ -1,44 +1,170 @@
 
-# Quick Start
+# 🚀 Quick Start
 
-This guide will walk you through setting up Ryoma and start coding with Ryoma.
+Get up and running with Ryoma in under 5 minutes! This guide covers the essentials to start analyzing data with AI.
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before you start, make sure you have the following installed:
+- **Python 3.9+** - Ryoma requires Python 3.9 or higher
+- **API Key** - OpenAI API key or other supported LLM provider
 
-- Python 3.9 or higher
+## 📦 Installation
 
-## Installation
-
-To install Ryoma, run the following command:
-
+### Basic Installation
 ```bash
 pip install ryoma_ai
 ```
 
-## Getting Started
+### With Database Support
+```bash
+# PostgreSQL support
+pip install ryoma_ai[postgres]
 
-To start using Ryoma, you can run the following code:
+# Snowflake support
+pip install ryoma_ai[snowflake]
 
+# All database connectors
+pip install ryoma_ai[all]
+```
+
+## 🎯 Basic Usage
+
+### 1. SQL Agent (Recommended)
+Connect to databases and ask questions in natural language:
 
 ```python
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgres import PostgresDataSource
 
+# Connect to your database
+datasource = PostgresDataSource(
+    connection_string="postgresql://user:pass@localhost:5432/db"
+)
+
+# Create enhanced SQL agent
+agent = SqlAgent(
+    model="gpt-4",
+    mode="enhanced"  # Uses advanced features
+)
+agent.add_datasource(datasource)
+
+# Ask questions in natural language
+response = agent.stream("Show me the top 10 customers by revenue this month")
+print(response)
+```
+
+### 2. Pandas Agent
+Analyze DataFrames with natural language:
+
+```python
 from ryoma_ai.agent.pandas import PandasAgent
 import pandas as pd
 
+# Create sample data
 df = pd.DataFrame({
     'customer_id': [1, 2, 3, 4, 5],
-    'purchase_amount': [100, 200, 300, 400, 500]
+    'revenue': [1000, 2500, 1800, 3200, 900],
+    'region': ['North', 'South', 'East', 'West', 'North']
 })
-pandas_agent = PandasAgent("gpt-3.5-turbo")
-    .add_dataframe(df)
 
-print(pandas_agent.stream("I want to get the top customer which making the most purchases"))
+# Create pandas agent
+agent = PandasAgent("gpt-4")
+agent.add_dataframe(df)
+
+# Analyze with natural language
+result = agent.stream("What's the average revenue by region?")
+print(result)
 ```
 
-This code will create a new agent that uses the GPT-3.5-turbo model and has a confidence threshold of 0.8.
+## 🚀 Advanced Features
 
-## Next Steps
+### Enhanced SQL Agent with Profiling
+```python
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.postgres import PostgresDataSource
 
-Now that you have successfully set up Ryoma, you can start exploring more features and functionalities. Check out the [documentation](https://docs.ryoma.dev) for more information.
+# Enable database profiling for better performance
+datasource = PostgresDataSource(
+    connection_string="postgresql://user:pass@localhost:5432/db",
+    enable_profiling=True  # Enables metadata extraction
+)
+
+# Use ReFoRCE mode for state-of-the-art performance
+agent = SqlAgent(
+    model="gpt-4",
+    mode="reforce",  # Advanced self-refinement
+    safety_config={
+        "enable_validation": True,
+        "max_retries": 3
+    }
+)
+agent.add_datasource(datasource)
+
+# Complex queries with automatic optimization
+response = agent.stream("""
+Find customers who made purchases in the last 30 days,
+group by region, and show the top 3 products by revenue
+""")
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+```bash
+# Set your API key
+export OPENAI_API_KEY="your-api-key-here"
+
+# Optional: Configure other providers
+export ANTHROPIC_API_KEY="your-anthropic-key"
+```
+
+### Agent Configuration
+```python
+# Custom configuration
+agent = SqlAgent(
+    model="gpt-4",
+    mode="enhanced",
+    model_parameters={
+        "temperature": 0.1,
+        "max_tokens": 2000
+    },
+    safety_config={
+        "enable_validation": True,
+        "allowed_operations": ["SELECT", "WITH"],
+        "max_rows": 10000
+    }
+)
+```
+
+## ✅ Verify Installation
+
+Run this quick test to ensure everything is working:
+
+```python
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource.sqlite import SqliteDataSource
+
+# Create in-memory SQLite database
+datasource = SqliteDataSource(":memory:")
+
+# Test agent creation
+agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")
+agent.add_datasource(datasource)
+
+print("✅ Ryoma is ready to use!")
+```
+
+## 🎯 Next Steps
+
+Now that you have Ryoma running, explore these advanced features:
+
+- **[Database Profiling](../architecture/database-profiling.md)** - Automatic metadata extraction
+- **[Enhanced SQL Agent](../architecture/enhanced-sql-agent.md)** - Advanced query generation
+- **[API Reference](../reference/index.md)** - Complete method documentation
+- **[Examples](examples.md)** - Real-world use cases
+
+## 🆘 Need Help?
+
+- **Documentation**: [docs.ryoma.dev](https://docs.ryoma.dev)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/project-ryoma/ryoma/issues)
+- **Community**: Join our discussions for support and tips

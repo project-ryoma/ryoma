@@ -3,17 +3,26 @@ import pickle
 from abc import ABC
 from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
-from langchain_core.tools import BaseTool, InjectedToolArg
+from langchain_core.tools import BaseTool
+from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
 from sqlalchemy.engine import Result
 from typing_extensions import Annotated
 
 
+def get_datasource_from_store(store) -> SqlDataSource:
+    """Helper function to extract datasource from store with consistent error handling."""
+    datasource_result = store.get(("datasource",), "main")
+    if not datasource_result:
+        raise ValueError("No datasource available in store")
+    return datasource_result.value
+
+
 class QueryInput(BaseModel):
     query: str = Field(description="sql query that can be executed by the sql catalog.")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="sql data source that can be used to execute the query."
+    store: Annotated[object, InjectedStore()] = Field(
+        ..., description="Store containing datasource for the query."
     )
 
     model_config = {"arbitrary_types_allowed": True}
@@ -34,11 +43,12 @@ class SqlQueryTool(BaseTool):
     def _run(
         self,
         query,
-        datasource: SqlDataSource,
+        store,
         **kwargs,
     ) -> (str, str):
         """Execute the query, return the results or an error message."""
         try:
+            datasource = get_datasource_from_store(store)
             result = datasource.query(query)
 
             # Serialize the result to a base64 encoded string as the artifact
@@ -58,8 +68,8 @@ class Column(BaseModel):
 
 
 class CreateTableInputSchema(BaseModel):
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="sql data source that can be used to execute the query."
+    store: Annotated[object, InjectedStore()] = Field(
+        description="Store containing datasource for the query."
     )
     table_name: str = Field(..., description="Name of the table")
     table_columns: Sequence[Column] = Field(
@@ -81,20 +91,24 @@ class CreateTableTool(BaseTool):
 
     def _run(
         self,
-        datasource: SqlDataSource,
+        store,
         table_name: str,
         table_columns: Sequence[Column],
         **kwargs,
     ) -> Union[str, Sequence[Dict[str, Any]], Result]:
         """Execute the query, return the results or an error message."""
-        columns = ",\n".join(
-            f'{column.column_name} "{column.column_type}"' for column in table_columns
-        )
-        return datasource.query(
-            "CREATE TABLE {table_name} ({columns})".format(
-                table_name=table_name, columns=columns
+        try:
+            datasource = get_datasource_from_store(store)
+            columns = ",\n".join(
+                f'{column.column_name} "{column.column_type}"' for column in table_columns
             )
-        )
+            return datasource.query(
+                "CREATE TABLE {table_name} ({columns})".format(
+                    table_name=table_name, columns=columns
+                )
+            )
+        except Exception as e:
+            return f"Error creating table: {str(e)}"
 
 
 class QueryPlanTool(BaseTool):
@@ -110,11 +124,15 @@ class QueryPlanTool(BaseTool):
     def _run(
         self,
         query: str,
-        datasource: SqlDataSource,
+        store,
         **kwargs,
     ) -> str:
         """Execute the query, return the results or an error message."""
-        return self.datasource.get_query_plan(query)
+        try:
+            datasource = get_datasource_from_store(store)
+            return datasource.get_query_plan(query)
+        except Exception as e:
+            return f"Error getting query plan: {str(e)}"
 
 
 class QueryProfileTool(BaseTool):
@@ -130,16 +148,20 @@ class QueryProfileTool(BaseTool):
     def _run(
         self,
         query: str,
-        datasource: SqlDataSource,
+        store,
         **kwargs,
     ) -> str:
         """Execute the query, return the results or an error message."""
-        return datasource.get_query_profile(query)
+        try:
+            datasource = get_datasource_from_store(store)
+            return datasource.get_query_profile(query)
+        except Exception as e:
+            return f"Error getting query profile: {str(e)}"
 
 
 class SchemaAnalysisInput(BaseModel):
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="sql data source that can be used to analyze the schema."
+    store: Annotated[object, InjectedStore()] = Field(
+        description="Store containing datasource for schema analysis."
     )
     table_name: Optional[str] = Field(None, description="Specific table to analyze")
     schema_name: Optional[str] = Field(None, description="Specific schema to analyze")
@@ -160,13 +182,14 @@ class SchemaAnalysisTool(BaseTool):
 
     def _run(
         self,
-        datasource: SqlDataSource,
+        store,
         table_name: Optional[str] = None,
         schema_name: Optional[str] = None,
         **kwargs,
     ) -> str:
         """Analyze schema and return detailed information."""
         try:
+            datasource = get_datasource_from_store(store)
             if table_name:
                 # Analyze specific table
                 catalog = datasource.get_catalog(schema=schema_name, table=table_name)
@@ -221,7 +244,7 @@ class SchemaAnalysisTool(BaseTool):
 
 class QueryValidationInput(BaseModel):
     query: str = Field(description="SQL query to validate")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+    datasource: Annotated[SqlDataSource, InjectedStore()] = Field(
         description="sql data source for validation context"
     )
     check_syntax: bool = Field(True, description="Check SQL syntax")
@@ -307,7 +330,7 @@ class QueryValidationTool(BaseTool):
 
 class TableSelectionInput(BaseModel):
     question: str = Field(description="Natural language question to find relevant tables for")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+    datasource: Annotated[SqlDataSource, InjectedStore()] = Field(
         description="sql data source to search tables in"
     )
     max_tables: int = Field(5, description="Maximum number of tables to return")
@@ -404,7 +427,7 @@ class TableSelectionTool(BaseTool):
 
 class QueryOptimizationInput(BaseModel):
     query: str = Field(description="SQL query to optimize")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+    datasource: Annotated[SqlDataSource, InjectedStore()] = Field(
         description="sql data source for optimization context"
     )
 
@@ -474,7 +497,7 @@ class QueryOptimizationTool(BaseTool):
 
 class QueryExplanationInput(BaseModel):
     query: str = Field(description="SQL query to explain")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
+    datasource: Annotated[SqlDataSource, InjectedStore()] = Field(
         description="sql data source for context"
     )
 

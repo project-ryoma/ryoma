@@ -30,8 +30,14 @@ class BaseAgent:
     ):
         self.resource_registry = ResourceRegistry()
 
+        # Initialize store for InjectedStore functionality
+        from langgraph.store.memory import InMemoryStore
+        self.store = InMemoryStore()
+
         if datasource:
             self._datasource = datasource
+            # Add datasource to store for InjectedStore
+            self.store.put(("datasource",), "main", datasource)
 
         if embedding:
             self.embedding = self.init_embedding(embedding)
@@ -76,6 +82,8 @@ class BaseAgent:
               self (for chaining)
         """
         self._datasource = datasource
+        # Add datasource to store for InjectedStore
+        self.store.put(("datasource",), "main", datasource)
         return self
 
     def get_datasource(self):
@@ -192,8 +200,3 @@ class BaseAgent:
 
         return filtered_catalog
 
-    def build(self):
-        """
-        Build the agent chain. This method should be overridden by subclasses to build the specific agent chain.
-        """
-        raise NotImplementedError("Subclasses must implement the build method.")
