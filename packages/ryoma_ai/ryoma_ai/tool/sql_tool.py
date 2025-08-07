@@ -7,6 +7,7 @@ from langchain_core.tools import BaseTool
 from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_ai.models.sql import SqlQueryResult, QueryStatus
 from sqlalchemy.engine import Result
 from typing_extensions import Annotated
 
@@ -33,7 +34,8 @@ class SqlQueryTool(BaseTool):
 
     name: str = "sql_database_query"
     description: str = """
-    Execute a SQL query against the catalog and get back the result..
+    Execute a SQL query against the catalog and get back the result.
+    Returns a structured result object with success/failure status.
     If the query is not correct, an error message will be returned.
     If an error is returned, rewrite the query, check the query, and try again.
     """
@@ -42,20 +44,59 @@ class SqlQueryTool(BaseTool):
 
     def _run(
         self,
-        query,
+        query: str,
         store,
         **kwargs,
-    ) -> (str, str):
-        """Execute the query, return the results or an error message."""
+    ) -> SqlQueryResult:
+        """Execute the query and return a structured result object."""
+        import time
+        start_time = time.time()
+
         try:
             datasource = get_datasource_from_store(store)
             result = datasource.query(query)
 
+            execution_time_ms = (time.time() - start_time) * 1000
+
+            # Try to get result metadata
+            row_count = None
+            column_count = None
+            if hasattr(result, 'shape'):
+                # DataFrame-like object
+                row_count = result.shape[0]
+                column_count = result.shape[1]
+            elif hasattr(result, '__len__'):
+                # List-like object
+                try:
+                    row_count = len(result)
+                    if row_count > 0 and hasattr(result[0], '__len__'):
+                        column_count = len(result[0])
+                except:
+                    pass
+
             # Serialize the result to a base64 encoded string as the artifact
             artifact = base64.b64encode(pickle.dumps(result)).decode("utf-8")
-            return result, artifact
+
+            return SqlQueryResult(
+                status=QueryStatus.SUCCESS,
+                data=result,
+                query=query,
+                execution_time_ms=execution_time_ms,
+                row_count=row_count,
+                column_count=column_count,
+                artifact=artifact
+            )
+
         except Exception as e:
-            return f"Received an error while executing the query: {str(e)}", ""
+            execution_time_ms = (time.time() - start_time) * 1000
+
+            return SqlQueryResult(
+                status=QueryStatus.ERROR,
+                query=query,
+                execution_time_ms=execution_time_ms,
+                error_message=str(e),
+                data={'raw_exception': e}
+            )
 
 
 class Column(BaseModel):

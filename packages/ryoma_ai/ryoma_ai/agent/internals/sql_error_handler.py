@@ -3,39 +3,10 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from ryoma_ai.datasource.sql import SqlDataSource
-
-
-class ErrorType(Enum):
-    SYNTAX_ERROR = "syntax_error"
-    SEMANTIC_ERROR = "semantic_error"
-    PERMISSION_ERROR = "permission_error"
-    DATA_ERROR = "data_error"
-    PERFORMANCE_ERROR = "performance_error"
-    CONNECTION_ERROR = "connection_error"
-    UNKNOWN_ERROR = "unknown_error"
-
-
-@dataclass
-class SqlError:
-    """Represents a SQL error with context and recovery suggestions."""
-    error_type: ErrorType
-    original_error: str
-    error_code: Optional[str]
-    line_number: Optional[int]
-    column_number: Optional[int]
-    problematic_sql: str
-    context: Dict[str, Any]
-
-
-@dataclass
-class RecoveryStrategy:
-    """Represents a strategy for recovering from a SQL error."""
-    strategy_id: str
-    description: str
-    corrected_sql: str
-    confidence: float
-    explanation: str
-    requires_user_input: bool = False
+from ryoma_ai.models.sql import (
+    SqlError, SqlErrorType, DatabaseType, RecoveryStrategy,
+    SqlQueryResult, QueryStatus
+)
 
 
 class SqlErrorHandler:
@@ -51,54 +22,61 @@ class SqlErrorHandler:
     def analyze_error(self, error_message: str, sql_query: str, context: Optional[Dict] = None) -> SqlError:
         """
         Analyze a SQL error and classify it with context.
-        
+
         Args:
             error_message: The error message from the database
             sql_query: The SQL query that caused the error
             context: Additional context like table names, column names
-            
+
         Returns:
             SqlError object with detailed analysis
         """
         error_type = self._classify_error(error_message)
         error_code = self._extract_error_code(error_message)
         line_number, column_number = self._extract_position(error_message)
-        
+
+        # Include sql_query in context for recovery strategies
+        context = context or {}
+        context['sql_query'] = sql_query
+
         return SqlError(
             error_type=error_type,
             original_error=error_message,
             error_code=error_code,
             line_number=line_number,
             column_number=column_number,
-            problematic_sql=sql_query,
-            context=context or {}
+            context=context
         )
 
     def suggest_recovery_strategies(self, sql_error: SqlError) -> List[RecoveryStrategy]:
         """
         Suggest recovery strategies for a SQL error.
-        
+
         Args:
             sql_error: The analyzed SQL error
-            
+
         Returns:
             List of recovery strategies ordered by confidence
         """
         strategies = []
-        
-        if sql_error.error_type == ErrorType.SYNTAX_ERROR:
-            strategies.extend(self._handle_syntax_error(sql_error))
-        elif sql_error.error_type == ErrorType.SEMANTIC_ERROR:
-            strategies.extend(self._handle_semantic_error(sql_error))
-        elif sql_error.error_type == ErrorType.PERMISSION_ERROR:
-            strategies.extend(self._handle_permission_error(sql_error))
-        elif sql_error.error_type == ErrorType.DATA_ERROR:
-            strategies.extend(self._handle_data_error(sql_error))
-        elif sql_error.error_type == ErrorType.PERFORMANCE_ERROR:
-            strategies.extend(self._handle_performance_error(sql_error))
+
+        # We need the original SQL query to generate recovery strategies
+        # For now, we'll use empty string as placeholder - this should be improved
+        sql_query = sql_error.context.get('sql_query', '') if sql_error.context else ''
+
+        if sql_error.error_type == SqlErrorType.SYNTAX_ERROR:
+            strategies.extend(self._handle_syntax_error(sql_error, sql_query))
+        elif sql_error.error_type == SqlErrorType.SEMANTIC_ERROR:
+            strategies.extend(self._handle_semantic_error(sql_error, sql_query))
+        elif sql_error.error_type == SqlErrorType.PERMISSION_ERROR:
+            strategies.extend(self._handle_permission_error(sql_error, sql_query))
+        elif sql_error.error_type == SqlErrorType.DATA_ERROR:
+            strategies.extend(self._handle_data_error(sql_error, sql_query))
+        elif sql_error.error_type == SqlErrorType.PERFORMANCE_ERROR:
+            strategies.extend(self._handle_performance_error(sql_error, sql_query))
         else:
-            strategies.extend(self._handle_generic_error(sql_error))
-        
+            strategies.extend(self._handle_generic_error(sql_error, sql_query))
+
         # Sort by confidence
         strategies.sort(key=lambda x: x.confidence, reverse=True)
         return strategies
@@ -106,29 +84,103 @@ class SqlErrorHandler:
     def auto_correct_query(self, sql_query: str, error_message: str, context: Optional[Dict] = None) -> Optional[str]:
         """
         Attempt to automatically correct a SQL query based on the error.
-        
+
         Args:
             sql_query: The original SQL query
             error_message: The error message
             context: Additional context
-            
+
         Returns:
             Corrected SQL query if possible, None otherwise
         """
         sql_error = self.analyze_error(error_message, sql_query, context)
         strategies = self.suggest_recovery_strategies(sql_error)
-        
+
         # Return the highest confidence strategy that doesn't require user input
         for strategy in strategies:
             if not strategy.requires_user_input and strategy.confidence > 0.7:
                 return strategy.corrected_sql
-        
+
         return None
 
-    def _initialize_error_patterns(self) -> Dict[ErrorType, List[str]]:
+    def _detect_database_type(self, exception: Exception, error_message: str) -> DatabaseType:
+        """
+        Detect database type from exception type or error message.
+        """
+        exception_name = exception.__class__.__name__
+        exception_module = exception.__class__.__module__
+
+        # Check for PostgreSQL exceptions (both psycopg2 and psycopg3)
+        if 'psycopg' in exception_module:
+            return DatabaseType.POSTGRESQL
+
+        # Check for MySQL exceptions
+        if 'mysql' in exception_module.lower() or 'MySQLdb' in exception_module:
+            return DatabaseType.MYSQL
+
+        # Check for SQLite exceptions
+        if 'sqlite' in exception_module.lower():
+            return DatabaseType.SQLITE
+
+        # Check for SQL Server exceptions
+        if 'pyodbc' in exception_module or 'sql server' in error_message.lower():
+            return DatabaseType.SQLSERVER
+
+        # Check for Oracle exceptions
+        if 'oracle' in exception_module.lower() or 'oracle' in error_message.lower():
+            return DatabaseType.ORACLE
+
+        # Fallback to error message analysis
+        error_lower = error_message.lower()
+        if 'postgres' in error_lower or 'postgresql' in error_lower:
+            return DatabaseType.POSTGRESQL
+        elif 'mysql' in error_lower:
+            return DatabaseType.MYSQL
+        elif 'sqlite' in error_lower:
+            return DatabaseType.SQLITE
+        elif 'sql server' in error_lower or 'sqlserver' in error_lower:
+            return DatabaseType.SQLSERVER
+        elif 'oracle' in error_lower:
+            return DatabaseType.ORACLE
+
+        return DatabaseType.UNKNOWN
+
+    def _extract_postgres_error_code(self, exception: Exception) -> Optional[str]:
+        """
+        Extract PostgreSQL error code (pgcode) from exception.
+        """
+        # Check for pgcode attribute (available in psycopg2 and psycopg3)
+        if hasattr(exception, 'pgcode'):
+            return exception.pgcode
+
+        # Fallback to error message parsing
+        error_message = str(exception)
+        pgcode_match = re.search(r'SQLSTATE\s+([A-Z0-9]{5})', error_message)
+        if pgcode_match:
+            return pgcode_match.group(1)
+
+        return None
+
+    def _extract_mysql_error_code(self, exception: Exception) -> Optional[str]:
+        """
+        Extract MySQL error code (errno) from exception.
+        """
+        # Check for errno attribute
+        if hasattr(exception, 'errno'):
+            return str(exception.errno)
+
+        # Fallback to error message parsing
+        error_message = str(exception)
+        errno_match = re.search(r'\(([0-9]+),', error_message)
+        if errno_match:
+            return errno_match.group(1)
+
+        return None
+
+    def _initialize_error_patterns(self) -> Dict[SqlErrorType, List[str]]:
         """Initialize patterns for error classification."""
         return {
-            ErrorType.SYNTAX_ERROR: [
+            SqlErrorType.SYNTAX_ERROR: [
                 r"syntax error",
                 r"unexpected token",
                 r"missing",
@@ -136,7 +188,7 @@ class SqlErrorHandler:
                 r"invalid syntax",
                 r"parse error"
             ],
-            ErrorType.SEMANTIC_ERROR: [
+            SqlErrorType.SEMANTIC_ERROR: [
                 r"table.*doesn't exist",
                 r"column.*doesn't exist",
                 r"unknown table",
@@ -144,26 +196,26 @@ class SqlErrorHandler:
                 r"ambiguous column",
                 r"function.*doesn't exist"
             ],
-            ErrorType.PERMISSION_ERROR: [
+            SqlErrorType.PERMISSION_ERROR: [
                 r"access denied",
                 r"permission denied",
                 r"insufficient privileges",
                 r"not authorized"
             ],
-            ErrorType.DATA_ERROR: [
+            SqlErrorType.DATA_ERROR: [
                 r"data too long",
                 r"out of range",
                 r"division by zero",
                 r"invalid date",
                 r"constraint violation"
             ],
-            ErrorType.PERFORMANCE_ERROR: [
+            SqlErrorType.PERFORMANCE_ERROR: [
                 r"timeout",
                 r"query too complex",
                 r"resource limit",
                 r"memory limit"
             ],
-            ErrorType.CONNECTION_ERROR: [
+            SqlErrorType.CONNECTION_ERROR: [
                 r"connection",
                 r"network",
                 r"server",
@@ -171,16 +223,16 @@ class SqlErrorHandler:
             ]
         }
 
-    def _classify_error(self, error_message: str) -> ErrorType:
+    def _classify_error(self, error_message: str) -> SqlErrorType:
         """Classify the error type based on the error message."""
         error_lower = error_message.lower()
-        
+
         for error_type, patterns in self.error_patterns.items():
             for pattern in patterns:
                 if re.search(pattern, error_lower):
                     return error_type
-        
-        return ErrorType.UNKNOWN_ERROR
+
+        return SqlErrorType.UNKNOWN_ERROR
 
     def _extract_error_code(self, error_message: str) -> Optional[str]:
         """Extract error code from error message if present."""
@@ -190,30 +242,30 @@ class SqlErrorHandler:
             r"code (\d+)",
             r"\[(\d+)\]"
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, error_message, re.IGNORECASE)
             if match:
                 return match.group(1)
-        
+
         return None
 
     def _extract_position(self, error_message: str) -> Tuple[Optional[int], Optional[int]]:
         """Extract line and column position from error message."""
         line_match = re.search(r"line (\d+)", error_message, re.IGNORECASE)
         column_match = re.search(r"column (\d+)", error_message, re.IGNORECASE)
-        
+
         line_number = int(line_match.group(1)) if line_match else None
         column_number = int(column_match.group(1)) if column_match else None
-        
+
         return line_number, column_number
 
-    def _handle_syntax_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_syntax_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle syntax errors with specific recovery strategies."""
         strategies = []
-        sql = sql_error.problematic_sql
+        sql = sql_query
         error_msg = sql_error.original_error.lower()
-        
+
         # Missing comma
         if "expected comma" in error_msg or "missing comma" in error_msg:
             corrected_sql = self._fix_missing_comma(sql)
@@ -224,7 +276,7 @@ class SqlErrorHandler:
                 confidence=0.8,
                 explanation="Added missing comma between columns or expressions"
             ))
-        
+
         # Missing parentheses
         if "missing" in error_msg and ("parenthes" in error_msg or "bracket" in error_msg):
             corrected_sql = self._fix_missing_parentheses(sql)
@@ -235,7 +287,7 @@ class SqlErrorHandler:
                 confidence=0.7,
                 explanation="Added missing opening or closing parentheses"
             ))
-        
+
         # Missing semicolon
         if "missing semicolon" in error_msg:
             corrected_sql = sql.rstrip() + ";"
@@ -246,15 +298,15 @@ class SqlErrorHandler:
                 confidence=0.9,
                 explanation="Added missing semicolon at end of query"
             ))
-        
+
         return strategies
 
-    def _handle_semantic_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_semantic_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle semantic errors like missing tables/columns."""
         strategies = []
-        sql = sql_error.problematic_sql
+        sql = sql_query
         error_msg = sql_error.original_error.lower()
-        
+
         # Table doesn't exist
         if "table" in error_msg and ("doesn't exist" in error_msg or "not found" in error_msg):
             table_name = self._extract_table_name_from_error(error_msg)
@@ -270,7 +322,7 @@ class SqlErrorHandler:
                         explanation=f"'{similar_table}' is a similar table name that exists",
                         requires_user_input=True
                     ))
-        
+
         # Column doesn't exist
         if "column" in error_msg and ("doesn't exist" in error_msg or "not found" in error_msg):
             column_name = self._extract_column_name_from_error(error_msg)
@@ -286,30 +338,30 @@ class SqlErrorHandler:
                         explanation=f"'{similar_column}' is a similar column name that exists",
                         requires_user_input=True
                     ))
-        
+
         return strategies
 
-    def _handle_permission_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_permission_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle permission errors."""
         strategies = []
-        
+
         strategies.append(RecoveryStrategy(
             strategy_id="request_permissions",
             description="Request necessary permissions from database administrator",
-            corrected_sql=sql_error.problematic_sql,
+            corrected_sql=sql_query,
             confidence=0.3,
             explanation="This query requires additional database permissions",
             requires_user_input=True
         ))
-        
+
         return strategies
 
-    def _handle_data_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_data_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle data-related errors."""
         strategies = []
-        sql = sql_error.problematic_sql
+        sql = sql_query
         error_msg = sql_error.original_error.lower()
-        
+
         # Division by zero
         if "division by zero" in error_msg:
             corrected_sql = self._add_zero_division_check(sql)
@@ -320,14 +372,14 @@ class SqlErrorHandler:
                 confidence=0.8,
                 explanation="Added CASE statement to handle division by zero"
             ))
-        
+
         return strategies
 
-    def _handle_performance_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_performance_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle performance-related errors."""
         strategies = []
-        sql = sql_error.problematic_sql
-        
+        sql = sql_query
+
         # Query timeout
         if "timeout" in sql_error.original_error.lower():
             # Add LIMIT clause if missing
@@ -340,22 +392,22 @@ class SqlErrorHandler:
                     confidence=0.7,
                     explanation="Added LIMIT to prevent timeout on large result sets"
                 ))
-        
+
         return strategies
 
-    def _handle_generic_error(self, sql_error: SqlError) -> List[RecoveryStrategy]:
+    def _handle_generic_error(self, sql_error: SqlError, sql_query: str) -> List[RecoveryStrategy]:
         """Handle generic or unknown errors."""
         strategies = []
-        
+
         strategies.append(RecoveryStrategy(
             strategy_id="manual_review",
             description="Manual review required",
-            corrected_sql=sql_error.problematic_sql,
+            corrected_sql=sql_query,
             confidence=0.1,
             explanation="This error requires manual analysis and correction",
             requires_user_input=True
         ))
-        
+
         return strategies
 
     def _fix_missing_comma(self, sql: str) -> str:
@@ -374,24 +426,24 @@ class SqlErrorHandler:
         """Attempt to fix missing parentheses."""
         open_count = sql.count('(')
         close_count = sql.count(')')
-        
+
         if open_count > close_count:
             return sql + ')' * (open_count - close_count)
         elif close_count > open_count:
             return '(' * (close_count - open_count) + sql
-        
+
         return sql
 
     def _add_zero_division_check(self, sql: str) -> str:
         """Add division by zero check to SQL."""
         # Find division operations and wrap them
         division_pattern = r'(\w+)\s*/\s*(\w+)'
-        
+
         def replace_division(match):
             numerator = match.group(1)
             denominator = match.group(2)
             return f"CASE WHEN {denominator} = 0 THEN NULL ELSE {numerator} / {denominator} END"
-        
+
         return re.sub(division_pattern, replace_division, sql)
 
     def _extract_table_name_from_error(self, error_msg: str) -> Optional[str]:
@@ -401,12 +453,12 @@ class SqlErrorHandler:
             r"table `([^`]+)`",
             r"table ([^\s]+)"
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, error_msg)
             if match:
                 return match.group(1)
-        
+
         return None
 
     def _extract_column_name_from_error(self, error_msg: str) -> Optional[str]:
@@ -416,32 +468,32 @@ class SqlErrorHandler:
             r"column `([^`]+)`",
             r"column ([^\s]+)"
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, error_msg)
             if match:
                 return match.group(1)
-        
+
         return None
 
     def _find_similar_table_names(self, table_name: str) -> List[str]:
         """Find similar table names in the database."""
         if not self.datasource:
             return []
-        
+
         try:
             catalog = self.datasource.get_catalog()
             all_tables = []
             for schema in catalog.schemas:
                 for table in schema.tables:
                     all_tables.append(table.table_name)
-            
+
             # Simple similarity based on edit distance or common substrings
             similar_tables = []
             for existing_table in all_tables:
                 if self._calculate_similarity(table_name, existing_table) > 0.6:
                     similar_tables.append(existing_table)
-            
+
             return similar_tables[:3]  # Return top 3 matches
         except:
             return []
@@ -450,11 +502,11 @@ class SqlErrorHandler:
         """Find similar column names in the tables used in the query."""
         if not self.datasource:
             return []
-        
+
         # Extract table names from SQL (simplified)
         table_names = re.findall(r'FROM\s+(\w+)', sql, re.IGNORECASE)
         table_names.extend(re.findall(r'JOIN\s+(\w+)', sql, re.IGNORECASE))
-        
+
         similar_columns = []
         try:
             for table_name in table_names:
@@ -466,22 +518,22 @@ class SqlErrorHandler:
                                 similar_columns.append(column.name)
         except:
             pass
-        
+
         return similar_columns[:3]
 
     def _calculate_similarity(self, str1: str, str2: str) -> float:
         """Calculate similarity between two strings (simplified)."""
         str1_lower = str1.lower()
         str2_lower = str2.lower()
-        
+
         # Simple similarity based on common characters
         if str1_lower == str2_lower:
             return 1.0
-        
+
         common_chars = set(str1_lower) & set(str2_lower)
         total_chars = set(str1_lower) | set(str2_lower)
-        
+
         if not total_chars:
             return 0.0
-        
+
         return len(common_chars) / len(total_chars)

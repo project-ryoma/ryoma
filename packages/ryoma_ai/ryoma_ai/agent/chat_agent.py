@@ -46,7 +46,7 @@ class ChatAgent(BaseAgent):
         logging.info(f"Initializing Agent with model: {model}")
 
         super().__init__(
-            datasource=datasource, embedding=embedding, vector_store=vector_store
+            datasource=datasource, embedding=embedding, vector_store=vector_store, **kwargs
         )
 
         # configs

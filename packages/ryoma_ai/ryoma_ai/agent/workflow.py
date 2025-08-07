@@ -13,6 +13,8 @@ from langgraph.graph import StateGraph
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.pregel import StateSnapshot
+from sympy import ccode
+
 from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
@@ -128,7 +130,19 @@ class WorkflowAgent(ChatAgent):
         return StateGraph(MessageState)
 
     def get_graph(self):
-        return self.workflow.get_graph(self.config)
+        """Get the workflow graph. Returns the graph structure for visualization."""
+        workflow = self.workflow
+        if hasattr(workflow, 'get_graph'):
+            # CompiledGraph has get_graph method that can take config
+            try:
+                return workflow.get_graph(self.config)
+            except TypeError:
+                # Some versions might not accept config parameter
+                return workflow.get_graph()
+        else:
+            # If it's a StateGraph, it should have been compiled already
+            raise AttributeError(f"Workflow object {type(workflow)} does not have get_graph method. "
+                               f"Expected CompiledGraph but got {type(workflow)}")
 
     def get_current_state(self) -> Optional[StateSnapshot]:
         return self.workflow.get_state(self.config)
@@ -155,6 +169,7 @@ class WorkflowAgent(ChatAgent):
 
     def _format_messages(self, question: str):
         current_state = self.get_current_state()
+        print("Current state:", current_state)
         if current_state.next and current_state.next[0] == "tools":
             # We are in the tool node, but the user has asked a new question
             # We need to deny the tool call and continue with the user's question
@@ -301,16 +316,17 @@ class WorkflowAgent(ChatAgent):
         return self.final_prompt_template | self.model
 
     def call_model(self, state: MessageState, config: RunnableConfig):
+        print("Calling model with state:", state)
         chain = self._build_chain()
         response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
-    def _print_graph_events(self, events, printed, max_length=1500):
+    def _print_graph_events(self, events: Union[MessageState, List[MessageState]], printed, max_length=1500):
+        print("Printing graph events: ", events)
         if isinstance(events, dict):
             events = [events]
         for event in events:
-            for value in event.values():
-                messages = self._get_event_message(value)
+                messages = self._get_event_message(event)
                 if messages:
                     for message in messages:
                         # Check if message has id attribute (is a proper message object)
@@ -321,14 +337,12 @@ class WorkflowAgent(ChatAgent):
                             print(msg_repr)
                             printed.add(message.id)
 
-    def _get_event_message(self, event):
+    def _get_event_message(self, event: MessageState):
         if "tools" in event:
             return event["tools"]["messages"]
-        if "agent" in event:
-            return event["agent"]["messages"]
         if "messages" in event:
             return event["messages"]
-        return event
+        return None
 
     def display_graph(self):
         display(Image(self.workflow.get_graph().draw_mermaid_png()))

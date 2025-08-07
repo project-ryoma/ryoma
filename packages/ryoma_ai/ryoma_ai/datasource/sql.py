@@ -67,14 +67,7 @@ class SqlDataSource(DataSource):
             table_schema = conn.get_schema(name=table, catalog=catalog, database=schema)
             table = Table(
                 table_name=table,
-                columns=[
-                    Column(
-                        name=name,
-                        type=table_schema[name].name,
-                        nullable=table_schema[name].nullable,
-                    )
-                    for name in table_schema
-                ],
+                columns=self._build_columns_from_schema(table_schema),
             )
             databases = Schema(schema_name=schema, tables=[table])
         elif schema:
@@ -88,6 +81,63 @@ class SqlDataSource(DataSource):
             catalog_name=catalog,
             schemas=databases,
         )
+
+    def _build_columns_from_schema(self, table_schema: Dict[str, Any]) -> List[Column]:
+        """
+        Helper method to build a list of Column objects from a table schema.
+
+        Args:
+            table_schema: Dictionary representing the table schema.
+
+        Returns:
+            List of Column objects.
+        """
+        columns = []
+        for name, col in table_schema.items():
+            column_type = col.name if hasattr(col, 'name') else str(col)
+            nullable = col.nullable if hasattr(col, 'nullable') else True
+            columns.append(Column(name=name, type=column_type, nullable=nullable))
+        return columns
+
+    def _is_system_table(self, table_name: str, schema_name: Optional[str] = None) -> bool:
+        """
+        Check if a table is a system table that should be filtered out.
+
+        Args:
+            table_name: Name of the table
+            schema_name: Optional schema name
+
+        Returns:
+            True if the table is a system table, False otherwise
+        """
+        # PostgreSQL system tables
+        pg_system_prefixes = ['pg_', 'information_schema']
+        pg_system_schemas = ['information_schema', 'pg_catalog', 'pg_toast']
+        
+        # MySQL system tables
+        mysql_system_schemas = ['information_schema', 'performance_schema', 'mysql', 'sys']
+        
+        # SQLite system tables
+        sqlite_system_prefixes = ['sqlite_']
+        
+        # SQL Server system tables
+        sqlserver_system_schemas = ['sys', 'INFORMATION_SCHEMA']
+        
+        # Check schema-based filtering
+        if schema_name:
+            if schema_name.lower() in pg_system_schemas + mysql_system_schemas + sqlserver_system_schemas:
+                return True
+        
+        # Check table name prefixes
+        table_lower = table_name.lower()
+        system_prefixes = pg_system_prefixes + sqlite_system_prefixes
+        
+        for prefix in system_prefixes:
+            if table_lower.startswith(prefix):
+                return True
+        
+        return False
+
 
     def list_catalogs(
         self,
@@ -118,16 +168,33 @@ class SqlDataSource(DataSource):
     def list_databases(
         self,
         catalog: Optional[str] = None,
-        with_table: bool = False,
+        with_table: bool = False,  
         with_columns: bool = False,
+        include_system_schemas: bool = False,
     ) -> list[Schema]:
         conn: CanListDatabase = self.connect()
         if not hasattr(conn, "list_databases"):
             raise Exception("This data source does not support listing databases")
-        catalog = catalog or self.database or conn.current_catalog
+        catalog = catalog or self.database or getattr(conn, 'current_catalog', None)
+        
+        all_schemas = conn.list_databases(catalog=catalog)
+        
+        # Filter out system schemas unless explicitly requested
+        if not include_system_schemas:
+            # Filter based on schema name patterns  
+            pg_system_schemas = ['information_schema', 'pg_catalog', 'pg_toast']
+            mysql_system_schemas = ['information_schema', 'performance_schema', 'mysql', 'sys']
+            sqlserver_system_schemas = ['sys', 'INFORMATION_SCHEMA']
+            system_schemas = pg_system_schemas + mysql_system_schemas + sqlserver_system_schemas
+            
+            all_schemas = [
+                schema for schema in all_schemas 
+                if schema.lower() not in [s.lower() for s in system_schemas]
+            ]
+        
         databases = [
             Schema(schema_name=schema)
-            for schema in conn.list_databases(catalog=catalog)
+            for schema in all_schemas
         ]
         if with_table:
             for schema in databases:
@@ -143,15 +210,27 @@ class SqlDataSource(DataSource):
         catalog: Optional[str] = None,
         database: Optional[str] = None,
         with_columns: bool = False,
+        include_system_tables: bool = False,
     ) -> list[Table]:
         conn = self.connect()
         catalog = catalog or self.database or conn.current_database
         if database is not None:
             catalog = (catalog, database)
+        
+        all_tables = conn.list_tables(database=catalog)
+        
+        # Filter out system tables unless explicitly requested
+        if not include_system_tables:
+            all_tables = [
+                table for table in all_tables 
+                if not self._is_system_table(table, database)
+            ]
+        
         tables = [
             Table(table_name=table, columns=[])
-            for table in conn.list_tables(database=catalog)
+            for table in all_tables
         ]
+        
         if with_columns:
             for table in tables:
                 try:
@@ -163,14 +242,7 @@ class SqlDataSource(DataSource):
                         f"Error getting schema for table {table.table_name}: {e}"
                     )
                     continue
-                table.columns = [
-                    Column(
-                        name=name,
-                        type=table_schema[name].name,
-                        nullable=table_schema[name].nullable,
-                    )
-                    for name in table_schema
-                ]
+                table.columns = self._build_columns_from_schema(table_schema=table_schema)
         return tables
 
     @abstractmethod

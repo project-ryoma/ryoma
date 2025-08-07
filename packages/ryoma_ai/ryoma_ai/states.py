@@ -7,23 +7,12 @@ from ryoma_ai.models.agent import FormatRestriction, ColumnExplorationResult
 from ryoma_ai.datasource.base import DataSource
 
 
-class MessageState(TypedDict):
+class MessageState(TypedDict, total=False):
     messages: Annotated[list, add_messages]
-
-    def human_message(self, content: str):
-        return [
-            message for message in self.messages if isinstance(message, HumanMessage)
-        ]
-
-    def ai_message(self, content: str):
-        return [message for message in self.messages if isinstance(message, AIMessage)]
-
-
-class SqlAgentState(TypedDict):
-    """State for the enhanced SQL agent workflow."""
-    messages: Annotated[List[BaseMessage], add_messages]
+    
+    # SQL Agent fields - optional for all agents
     original_question: str
-    current_step: str
+    current_step: str  
     schema_analysis: Optional[Dict]
     relevant_tables: Optional[List[Dict]]
     query_plan: Optional[Dict]
@@ -35,10 +24,8 @@ class SqlAgentState(TypedDict):
     final_answer: Optional[str]
     retry_count: int
     max_retries: int
-
-
-class ReFoRCESqlAgentState(SqlAgentState):
-    """Extended state for ReFoRCE SQL agent."""
+    
+    # ReFoRCE Agent fields - also optional
     compressed_schema: Optional[str]
     format_restriction: Optional[FormatRestriction]
     column_exploration: Optional[ColumnExplorationResult]

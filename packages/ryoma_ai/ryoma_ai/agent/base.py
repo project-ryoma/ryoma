@@ -1,6 +1,9 @@
 from typing import Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
+from langchain_core.stores import BaseStore, InMemoryStore
+from langgraph.store.memory import InMemoryStore
+
 from ryoma_ai.agent.resource_registry import ResourceRegistry
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
@@ -18,7 +21,6 @@ class BaseAgent:
 
     type: AgentType = AgentType.base
     description: str = "Ryoma Agent is your best friend!"
-    _datasource: Optional[DataSource] = None
     vector_store: Optional[VectorStore] = None
 
     def __init__(
@@ -26,18 +28,20 @@ class BaseAgent:
         datasource: Optional[DataSource] = None,
         embedding: Optional[Union[dict, Embeddings]] = None,
         vector_store: Optional[Union[dict, VectorStore]] = None,
+        store=None,
         **kwargs,
     ):
         self.resource_registry = ResourceRegistry()
 
-        # Initialize store for InjectedStore functionality
-        from langgraph.store.memory import InMemoryStore
-        self.store = InMemoryStore()
+        # Initialize store for InjectedStore functionality - use provided store or create new one
+        if store is not None:
+            self.store = store
+        else:
+            self.store = InMemoryStore()
 
         if datasource:
-            self._datasource = datasource
             # Add datasource to store for InjectedStore
-            self.store.put(("datasource",), "main", datasource)
+            self.add_datasource(datasource)
 
         if embedding:
             self.embedding = self.init_embedding(embedding)
@@ -71,7 +75,7 @@ class BaseAgent:
 
         return create_vector_store(config=config, embedding_function=embedding)
 
-    def datasource(self, datasource: DataSource):
+    def add_datasource(self, datasource: DataSource):
         """
         Register a DataSource as a resource.
 
@@ -81,13 +85,21 @@ class BaseAgent:
         Returns:
               self (for chaining)
         """
-        self._datasource = datasource
         # Add datasource to store for InjectedStore
         self.store.put(("datasource",), "main", datasource)
         return self
 
     def get_datasource(self):
-        return self._datasource
+        """
+        Get the registered DataSource.
+
+        Returns:
+            The registered DataSource.
+        """
+        datasource = self.store.get(("datasource",), "main").value
+        if not datasource:
+            raise ValueError("No DataSource registered.")
+        return datasource
 
     def register_resource(self, obj, name: str):
         self.resource_registry.register(obj, name)

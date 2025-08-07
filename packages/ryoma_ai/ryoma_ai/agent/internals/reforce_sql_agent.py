@@ -19,10 +19,11 @@ from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langgraph.graph.state import CompiledStateGraph
 
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.models.agent import FormatRestriction, ColumnExplorationResult
-from ryoma_ai.states import ReFoRCESqlAgentState
+from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import SqlQueryTool
 from ryoma_ai.datasource.sql import SqlDataSource
 
@@ -58,9 +59,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         self.max_refinement_iterations = max_refinement_iterations
         self.compression_threshold = compression_threshold
 
-    def _build_workflow(self, graph: StateGraph) -> StateGraph:
+    def _build_workflow(self, graph: StateGraph) -> CompiledStateGraph:
         """Create the ReFoRCE workflow with advanced optimizations."""
-        workflow = StateGraph(ReFoRCESqlAgentState)
+        workflow = StateGraph(MessageState)
 
         # Add nodes for ReFoRCE methodology
         workflow.add_node("compress_database_info", self._compress_database_info)
@@ -82,9 +83,21 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         workflow.add_edge("consensus_voting", "final_validation")
         workflow.add_edge("final_validation", END)
 
-        return workflow
+        return workflow.compile(
+            checkpointer=self.memory,
+            interrupt_before=[
+                "compress_database_info",
+                "generate_format_restriction",
+                "explore_columns",
+                "parallel_generation",
+                "self_refinement",
+                "consensus_voting",
+                "final_validation"
+            ],
+            store=self.store
+        )
 
-    def _compress_database_info(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _compress_database_info(self, state: MessageState) -> MessageState:
         """
         Compress database information using pattern-based table grouping.
 
@@ -139,7 +152,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _generate_format_restriction(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _generate_format_restriction(self, state: MessageState) -> MessageState:
         """
         Generate expected answer format restriction.
 
@@ -176,7 +189,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _explore_columns(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _explore_columns(self, state: MessageState) -> MessageState:
         """
         Perform iterative column exploration with execution feedback.
 
@@ -252,7 +265,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _parallel_generation(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _parallel_generation(self, state: MessageState) -> MessageState:
         """
         Generate multiple SQL candidates in parallel.
 
@@ -302,7 +315,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _self_refinement(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _self_refinement(self, state: MessageState) -> MessageState:
         """
         Apply self-refinement with self-consistency checks.
 
@@ -341,7 +354,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _consensus_voting(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _consensus_voting(self, state: MessageState) -> MessageState:
         """
         Apply majority-vote consensus mechanism.
 
@@ -420,7 +433,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         return state
 
-    def _final_validation(self, state: ReFoRCESqlAgentState) -> ReFoRCESqlAgentState:
+    def _final_validation(self, state: MessageState) -> MessageState:
         """Final validation and result formatting."""
         try:
             consensus_result = state.get("consensus_result")
@@ -887,4 +900,4 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
     def get_workflow_state_schema(self) -> type:
         """Return the state schema for this workflow."""
-        return ReFoRCESqlAgentState
+        return MessageState
