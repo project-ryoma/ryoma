@@ -1,19 +1,20 @@
 import logging
 from enum import Enum
+from typing import List, Optional, Union, Dict
 
 from IPython.display import Image, display
-from jupyter_ai_magics.providers import *
 from langchain.tools.render import render_text_description
+from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.prompt_values import ChatPromptValue
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableConfig, RunnableLambda
+from langgraph.types import Command, StateSnapshot
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.pregel import StateSnapshot
-from sympy import ccode
+from pydantic import BaseModel
 
 from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.datasource.base import DataSource
@@ -47,7 +48,7 @@ def handle_tool_error(state) -> dict:
 class WorkflowAgent(ChatAgent):
     tools: List[BaseTool]
     graph: StateGraph
-    workflow: Optional[CompiledGraph]
+    workflow: Optional[CompiledStateGraph]
     type: AgentType = AgentType.workflow
 
     def __init__(
@@ -101,7 +102,7 @@ class WorkflowAgent(ChatAgent):
             self.prompt_template_factory.add_context_prompt(tool_prompt_template)
             return self.model
 
-    def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
+    def _build_workflow(self, graph: StateGraph) -> CompiledStateGraph:
         if graph:
             return graph.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
         workflow = StateGraph(MessageState)
@@ -119,7 +120,7 @@ class WorkflowAgent(ChatAgent):
         return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
 
     @property
-    def workflow(self) -> CompiledGraph:
+    def workflow(self) -> CompiledStateGraph:
         """Lazy initialization of the workflow. Built only once when first accessed."""
         if self._workflow is None:
             self._workflow = self._build_workflow(None)
@@ -133,7 +134,7 @@ class WorkflowAgent(ChatAgent):
         """Get the workflow graph. Returns the graph structure for visualization."""
         workflow = self.workflow
         if hasattr(workflow, 'get_graph'):
-            # CompiledGraph has get_graph method that can take config
+            # CompiledStateGraph has get_graph method that can take config
             try:
                 return workflow.get_graph(self.config)
             except TypeError:
@@ -142,7 +143,7 @@ class WorkflowAgent(ChatAgent):
         else:
             # If it's a StateGraph, it should have been compiled already
             raise AttributeError(f"Workflow object {type(workflow)} does not have get_graph method. "
-                               f"Expected CompiledGraph but got {type(workflow)}")
+                               f"Expected CompiledStateGraph but got {type(workflow)}")
 
     def get_current_state(self) -> Optional[StateSnapshot]:
         return self.workflow.get_state(self.config)
@@ -194,17 +195,29 @@ class WorkflowAgent(ChatAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if (
-            not question
-            and tool_mode != ToolMode.DISALLOWED
-            and self.get_current_tool_calls()
-        ):
-            messages = None
+        # Handle Command objects for resume operations (human-in-the-loop)
+        if isinstance(question, Command):
+            events = self.workflow.stream(
+                question, config=self.config, stream_mode="values"
+            )
+        elif isinstance(question, dict) and "messages" in question:
+            # Handle direct state input (for initial invocations with MessageState)
+            events = self.workflow.stream(
+                question, config=self.config, stream_mode="values"
+            )
         else:
-            messages = self._format_messages(question)
-        events = self.workflow.stream(
-            messages, config=self.config, stream_mode="values"
-        )
+            # Handle regular string questions
+            if (
+                not question
+                and tool_mode != ToolMode.DISALLOWED
+                and self.get_current_tool_calls()
+            ):
+                messages = None
+            else:
+                messages = self._format_messages(question)
+            events = self.workflow.stream(
+                messages, config=self.config, stream_mode="values"
+            )
         _printed = set()
         if display:
             self._print_graph_events(events, _printed)
@@ -232,15 +245,23 @@ class WorkflowAgent(ChatAgent):
         max_iterations: int = 10,
         display=True,
     ):
-        if (
-            not question
-            and tool_mode != ToolMode.DISALLOWED
-            and self.get_current_tool_calls()
-        ):
-            messages = None
+        # Handle Command objects for resume operations (human-in-the-loop)
+        if isinstance(question, Command):
+            result = self.workflow.invoke(question, config=self.config)
+        elif isinstance(question, dict) and "messages" in question:
+            # Handle direct state input (for initial invocations with MessageState)
+            result = self.workflow.invoke(question, config=self.config)
         else:
-            messages = self._format_messages(question)
-        result = self.workflow.invoke(messages, config=self.config)
+            # Handle regular string questions
+            if (
+                not question
+                and tool_mode != ToolMode.DISALLOWED
+                and self.get_current_tool_calls()
+            ):
+                messages = None
+            else:
+                messages = self._format_messages(question)
+            result = self.workflow.invoke(messages, config=self.config)
         _printed = set()
         if display:
             self._print_graph_events(result, _printed)

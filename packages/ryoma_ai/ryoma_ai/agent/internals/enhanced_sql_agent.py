@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Any, Tuple
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph.state import CompiledStateGraph
+from langgraph.store.memory import InMemoryStore
+from langgraph.types import interrupt
 
 from ryoma_ai.agent.workflow import WorkflowAgent
 from ryoma_ai.agent.internals.schema_linking_agent import SchemaLinkingAgent
@@ -133,7 +135,7 @@ class EnhancedSqlAgent(WorkflowAgent):
 
         return workflow.compile(
             checkpointer=self.memory,
-            store=self.store
+            store=self.store,
         )
 
     def _initialize_state(self, state) -> MessageState:
@@ -357,7 +359,7 @@ class EnhancedSqlAgent(WorkflowAgent):
 
     def _execute_query(self,
                        state: MessageState) -> MessageState:
-        """Execute the validated SQL query."""
+        """Execute the validated SQL query with human approval."""
         sql_query = state.get("generated_sql", "")
         print("SQL Query for Execution:", sql_query)  # Debug print
         logger.debug("Step 6: Executing SQL query: %s", sql_query)
@@ -365,6 +367,44 @@ class EnhancedSqlAgent(WorkflowAgent):
         if not sql_query:
             state["execution_result"] = "No SQL query to execute"
             return state
+
+        # Request human approval before executing
+        approval_response = interrupt({
+            "type": "sql_execution_approval",
+            "sql_query": sql_query,
+            "question": state.get("question", ""),
+            "message": f"Please approve the following SQL query for execution:\n\n{sql_query}\n\nOptions:\n- 'yes' or 'approve' to execute\n- 'no' or 'deny' to reject\n- Provide edited SQL query to use instead"
+        })
+        
+        # Handle approval response
+        if isinstance(approval_response, str):
+            response_lower = approval_response.lower().strip()
+            if response_lower in ["no", "deny", "reject"]:
+                state["execution_result"] = "Query execution denied by user"
+                state["messages"].append(AIMessage(
+                    content="Query execution was denied by user."
+                ))
+                return state
+            elif response_lower not in ["yes", "approve", "ok"]:
+                # Treat as edited SQL query
+                sql_query = approval_response.strip()
+                state["generated_sql"] = sql_query
+                state["messages"].append(AIMessage(
+                    content=f"Using user-edited query: {sql_query}"
+                ))
+        elif isinstance(approval_response, dict):
+            if approval_response.get("action") == "deny":
+                state["execution_result"] = "Query execution denied by user"
+                state["messages"].append(AIMessage(
+                    content="Query execution was denied by user."
+                ))
+                return state
+            elif approval_response.get("edited_sql"):
+                sql_query = approval_response["edited_sql"]
+                state["generated_sql"] = sql_query
+                state["messages"].append(AIMessage(
+                    content=f"Using user-edited query: {sql_query}"
+                ))
 
         try:
             # Use the SQL query tool to execute
@@ -380,7 +420,7 @@ class EnhancedSqlAgent(WorkflowAgent):
                 state["current_step"] = "query_execution"
 
                 state["messages"].append(AIMessage(
-                    content=f"Query executed successfully ({result.row_count} rows returned)"
+                    content=f"Query approved and executed successfully ({result.row_count} rows returned)"
                 ))
             else:
                 # Handle query execution error
@@ -389,7 +429,8 @@ class EnhancedSqlAgent(WorkflowAgent):
                     "error_code": result.error_code,
                     "error_type": result.error_type,
                     "sql_query": sql_query,
-                    "step": "execution"
+                    "step": "execution",
+                    "sql_query_result": result  # Store full result for enhanced analysis
                 }
                 state["messages"].append(AIMessage(
                     content=f"Query execution failed: {result.error_message}"

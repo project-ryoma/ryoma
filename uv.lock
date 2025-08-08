@@ -4229,7 +4229,7 @@ requires-dist = [
     { name = "jupyter-ai-magics", specifier = ">=2.19.0" },
     { name = "langchain", specifier = ">=0.2.9,<0.3.0" },
     { name = "langchain-openai", specifier = ">=0.1.7" },
-    { name = "langgraph", specifier = ">=0.1.9" },
+    { name = "langgraph", specifier = ">=0.2.0" },
     { name = "mock", specifier = ">=5.1.0" },
     { name = "openai", specifier = ">=1.33.0" },
     { name = "pandas", specifier = ">=2.2.2" },
