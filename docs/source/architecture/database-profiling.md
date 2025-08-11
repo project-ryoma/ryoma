@@ -8,7 +8,7 @@
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable profiling with Ibis optimization
+# Enable optimized database profiling
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@host:5432/db",
     enable_profiling=True
@@ -32,38 +32,34 @@ print(f"Method: {profile['profiling_summary']['profiling_method']}")
 
 ## 🏗️ Architecture
 
-### Intelligent Profiling Engine
+### Optimized Ibis-Only Engine
 
 ```mermaid
 graph LR
-    A[📊 Profile Request] --> B{🔍 Ibis Available?}
-    B -->|✅ Yes| C[⚡ Ibis-Enhanced]
-    B -->|❌ No| D[🔧 Standard Mode]
-    C --> E{✅ Success?}
-    E -->|✅ Yes| F[📋 Results]
-    E -->|❌ No| D
-    D --> F
+    A[📊 Profile Request] --> B[⚡ Ibis Profiling]
+    B --> C[📋 Results]
 
     classDef request fill:#e3f2fd,stroke:#1976d2
-    classDef decision fill:#fff8e1,stroke:#f57c00
     classDef process fill:#f3e5f5,stroke:#7b1fa2
     classDef result fill:#e8f5e8,stroke:#388e3c
 
     class A request
-    class B,E decision
-    class C,D process
-    class F result
+    class B process
+    class C result
 ```
 
-### 🚀 Why Ibis Integration?
+**Key Optimization**: The profiler now **always uses database-native operations** for optimal performance and consistency. No fallback to basic profiling ensures predictable behavior and maximum efficiency.
+
+### 🚀 Why Database-Native Approach?
 
 | 💡 Benefit | 📝 Description |
 |------------|----------------|
-| **Server-side computation** | Statistics calculated in database |
-| **Optimized SQL generation** | Uses database query planner |
-| **Reduced network I/O** | Only results transferred |
-| **Native functions** | Leverages built-in DB functions |
-| **Automatic fallback** | Ensures 100% compatibility |
+| **Consistent performance** | Always uses optimal database-native methods |
+| **Server-side computation** | All statistics calculated in database |
+| **Optimized SQL generation** | Leverages database query planner |
+| **Reduced network I/O** | Only results transferred, not raw data |
+| **Native functions** | Uses built-in database statistical functions |
+| **Predictable behavior** | No fallback variations or performance surprises |
 
 ### 🔧 API Methods
 

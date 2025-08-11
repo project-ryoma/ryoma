@@ -12,7 +12,7 @@ The Database Profiling system provides comprehensive metadata extraction with tw
 - **Semantic type inference** - Automatic detection of emails, phones, URLs, etc.
 - **Data quality scoring** - Multi-dimensional quality assessment
 - **LSH similarity** - Locality-sensitive hashing for column similarity
-- **Ibis integration** - Native database optimizations for better performance
+- **Database-native operations** - Optimal performance with universal compatibility
 
 ### 🤖 **LLM-Enhanced Profiling** (Advanced Layer)
 - **Business purpose analysis** - LLM-generated field descriptions and context
@@ -23,20 +23,21 @@ The Database Profiling system provides comprehensive metadata extraction with tw
 
 ## 🚀 Quick Start
 
-### Basic Statistical Profiling
+### Optimized Database Profiling
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable statistical profiling
+# Enable optimized database-native profiling
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True
+    enable_profiling=True  # Always uses database-native operations
 )
 
-# Profile a table
+# Profile a table - automatically uses database-native methods
 profile = datasource.profile_table("customers")
 print(f"Rows: {profile['table_profile']['row_count']:,}")
 print(f"Completeness: {profile['table_profile']['completeness_score']:.2%}")
+print(f"Method: {profile['profiling_summary']['profiling_method']}")  # Always "native_optimized"
 ```
 
 ### LLM-Enhanced Profiling
@@ -66,21 +67,21 @@ print(f"SQL hints: {field_metadata.sql_generation_hints}")
 
 ### Custom Configuration
 ```python
-# Statistical profiling configuration
+# Optimized Ibis profiling configuration
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db",
     enable_profiling=True,
     profiler_config={
-        "sample_size": 10000,      # Rows to analyze
-        "top_k": 10,               # Top frequent values
-        "enable_lsh": True,        # Column similarity
+        "sample_size": 10000,      # Rows for LSH analysis (Ibis handles stats)
+        "top_k": 10,               # Top frequent values via Ibis value_counts
+        "enable_lsh": True,        # Column similarity matching
         "lsh_threshold": 0.8,      # Similarity threshold
         "num_hashes": 128,         # LSH precision
         "enable_llm_enhancement": True  # Enable LLM analysis
     }
 )
 
-# Enhanced profiler configuration
+# Enhanced profiler with Ibis base layer
 enhanced_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,
@@ -357,28 +358,28 @@ if similar_columns:
 
 ### Performance Tuning
 ```python
-# Development configuration (fast, statistical only)
+# Development configuration (fast Ibis profiling)
 dev_config = {
-    "sample_size": 1000,
-    "top_k": 5,
-    "enable_lsh": False,
+    "sample_size": 1000,    # For LSH only (Ibis handles all stats natively)
+    "top_k": 5,             # Ibis value_counts limit
+    "enable_lsh": False,    # Skip similarity analysis
     "enable_llm_enhancement": False
 }
 
-# Production configuration (balanced with LLM)
+# Production configuration (optimized Ibis + LLM)
 prod_config = {
-    "sample_size": 10000,
-    "top_k": 10,
-    "enable_lsh": True,
+    "sample_size": 10000,   # LSH sample size (Ibis stats are full table)
+    "top_k": 10,            # Ibis value_counts limit
+    "enable_lsh": True,     # Column similarity via LSH
     "lsh_threshold": 0.8,
     "enable_llm_enhancement": True,
     "analysis_sample_size": 50
 }
 
-# High accuracy configuration (thorough with full LLM analysis)
+# High accuracy configuration (full Ibis + comprehensive LLM)
 accuracy_config = {
-    "sample_size": 50000,
-    "top_k": 20,
+    "sample_size": 50000,   # Large LSH sample (Ibis always uses full data)
+    "top_k": 20,            # More frequent values via Ibis
     "enable_lsh": True,
     "lsh_threshold": 0.9,
     "num_hashes": 256,
@@ -386,11 +387,11 @@ accuracy_config = {
     "analysis_sample_size": 200
 }
 
-# LLM-focused configuration (comprehensive business analysis)
+# LLM-focused configuration (efficient Ibis + deep business analysis)
 llm_focused_config = {
-    "sample_size": 5000,  # Smaller statistical sample
+    "sample_size": 5000,    # Minimal LSH (Ibis stats are always complete)
     "enable_llm_enhancement": True,
-    "analysis_sample_size": 500,  # Larger LLM analysis sample
+    "analysis_sample_size": 500,  # Large LLM analysis sample
     "enable_business_context": True,
     "enable_join_analysis": True
 }
@@ -422,23 +423,23 @@ bigquery_ds = BigQueryDataSource(
 
 ## 🔧 Direct Profiler Usage
 
-### Basic Statistical Profiler
+### Optimized Ibis Profiler
 ```python
 from ryoma_ai.datasource.profiler import DatabaseProfiler
 
-# Create basic profiler instance
+# Create optimized profiler instance (always uses Ibis)
 profiler = DatabaseProfiler(
-    sample_size=10000,
-    top_k=10,
-    enable_lsh=True,
+    sample_size=10000,  # Used for LSH analysis only
+    top_k=10,           # Ibis value_counts limit
+    enable_lsh=True,    # Column similarity matching
     enable_llm_enhancement=False  # Statistical only
 )
 
-# Profile table directly
+# Profile table directly - uses Ibis native methods
 table_profile = profiler.profile_table(datasource, "customers")
 print(f"Profiled {table_profile.table_name} in {table_profile.profiling_duration_seconds:.2f}s")
 
-# Profile individual column
+# Profile individual column - uses Ibis statistical functions
 column_profile = profiler.profile_column(datasource, "customers", "email")
 print(f"Email quality score: {column_profile.data_quality_score:.3f}")
 ```
@@ -468,24 +469,24 @@ print(f"Field description: {enhanced_field.llm_description}")
 print(f"SQL hints: {enhanced_field.sql_generation_hints}")
 ```
 
-### Hybrid Approach
+### Hybrid Approach (Ibis + LLM)
 ```python
-# Use both profilers for comprehensive analysis
-base_profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)
+# Combine optimized Ibis profiling with LLM enhancement
+base_profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)  # Always uses Ibis
 enhanced_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,
-    base_profiler=base_profiler,  # Reuse base profiler
+    base_profiler=base_profiler,  # Reuse optimized Ibis profiler
     enable_llm_analysis=True
 )
 
-# Get both statistical and LLM-enhanced metadata
+# Get both Ibis statistical data and LLM-enhanced metadata
 enhanced_metadata = enhanced_profiler.profile_table_enhanced("customers")
 
-# Access base statistical data
+# Access Ibis-generated statistical data
 base_stats = enhanced_metadata.base_profile
-print(f"Row count: {base_stats.row_count:,}")
-print(f"Completeness: {base_stats.completeness_score:.2%}")
+print(f"Row count: {base_stats.row_count:,}")  # From Ibis COUNT()
+print(f"Completeness: {base_stats.completeness_score:.2%}")  # From Ibis NULL analysis
 
 # Access LLM-enhanced insights
 print(f"Business purpose: {enhanced_metadata.primary_purpose}")
@@ -653,15 +654,15 @@ else:
 ## 🎯 Best Practices
 
 ### 1. **Choose the Right Profiling Mode**
-- **Statistical only**: Fast development, basic metadata needs
-- **LLM-enhanced**: Production use, complex query generation
-- **Hybrid**: Best of both worlds with cached LLM analysis
+- **Ibis-only**: Fast, consistent, database-native profiling
+- **Ibis + LLM**: Production use with business context analysis
+- **Hybrid**: Optimized Ibis base with cached LLM enhancement
 
 ```python
-# Development: Fast statistical profiling
+# Development: Fast Ibis-only profiling
 dev_profiler = DatabaseProfiler(sample_size=1000, enable_llm_enhancement=False)
 
-# Production: Enhanced profiling with caching
+# Production: Ibis + LLM enhancement with caching
 prod_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,

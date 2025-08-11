@@ -18,7 +18,7 @@ for better performance and backend compatibility.
 """
 
 import re
-import statistics
+
 from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -79,9 +79,9 @@ class DatabaseProfiler:
         # Cache for LLM-enhanced metadata
         self._llm_cache: Dict[str, Dict[str, Any]] = {}
 
-    def profile_table_with_ibis(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
+    def profile_table(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
         """
-        Profile a table using Ibis's native profiling capabilities for better performance.
+        Profile a table using Ibis's native profiling capabilities for optimal performance.
 
         Args:
             datasource: The SQL datasource to profile
@@ -94,43 +94,40 @@ class DatabaseProfiler:
         start_time = datetime.now()
 
         try:
-            # Get the Ibis table object
+            # Get the database table object
             conn = datasource.connect()
 
             # Build the table reference
             if schema:
-                ibis_table = conn.table(table_name, database=schema)
+                table = conn.table(table_name, database=schema)
             else:
-                ibis_table = conn.table(table_name)
+                table = conn.table(table_name)
 
-            # Use Ibis's native describe() method for comprehensive statistics
-            try:
-                describe_result = ibis_table.describe().to_pandas()
-                self.logger.info(f"Successfully used Ibis describe() for table {table_name}")
+            # Use native describe() method for comprehensive statistics
+            describe_result = table.describe().to_pandas()
+            self.logger.info(f"Successfully profiled table {table_name} using native methods")
 
-                # Extract table-level metrics from describe result
-                row_count = int(describe_result['count'].iloc[0]) if not describe_result.empty else 0
-                column_count = len(describe_result)
+            # Extract table-level metrics from describe result
+            row_count = int(describe_result['count'].iloc[0]) if not describe_result.empty else 0
+            column_count = len(describe_result)
 
-                # Calculate completeness from null fractions
-                if 'null_frac' in describe_result.columns:
-                    null_fractions = describe_result['null_frac'].fillna(0)
-                    completeness_score = float(1.0 - null_fractions.mean())
+            # Calculate completeness from null fractions
+            if 'null_frac' in describe_result.columns:
+                null_fractions = describe_result['null_frac'].fillna(0)
+                completeness_score = float(1.0 - null_fractions.mean())
+            else:
+                # Fallback: calculate completeness from count vs non-null count
+                if 'count' in describe_result.columns and row_count > 0:
+                    non_null_counts = describe_result['count'].fillna(0)
+                    completeness_score = float(non_null_counts.mean() / row_count)
                 else:
-                    completeness_score = None
+                    completeness_score = 1.0
 
-                # Calculate consistency score (simplified)
-                consistency_score = self._calculate_consistency_from_describe(describe_result)
+            # Calculate consistency score from describe result
+            consistency_score = self._calculate_consistency_from_describe(describe_result)
 
-            except Exception as e:
-                self.logger.warning(f"Ibis describe() failed for {table_name}: {e}, falling back to manual profiling")
-                return self.profile_table(datasource, table_name, schema)
-
-            # Get additional table-level information
-            try:
-                actual_row_count = int(ibis_table.count().to_pandas())
-            except Exception:
-                actual_row_count = row_count
+            # Get actual row count
+            actual_row_count = int(table.count().to_pandas())
 
             duration = (datetime.now() - start_time).total_seconds()
 
@@ -145,11 +142,19 @@ class DatabaseProfiler:
             )
 
         except Exception as e:
-            self.logger.error(f"Error profiling table {table_name} with Ibis: {str(e)}")
-            # Fall back to the original profiling method
-            return self.profile_table(datasource, table_name, schema)
+            self.logger.error(f"Error profiling table {table_name}: {str(e)}")
+            # Return minimal profile on error
+            return TableProfile(
+                table_name=table_name,
+                row_count=0,
+                column_count=0,
+                completeness_score=0.0,
+                consistency_score=0.0,
+                profiled_at=datetime.now(),
+                profiling_duration_seconds=(datetime.now() - start_time).total_seconds()
+            )
 
-    def profile_column_with_ibis(
+    def profile_column(
         self,
         datasource,
         table_name: str,
@@ -157,7 +162,7 @@ class DatabaseProfiler:
         schema: Optional[str] = None
     ) -> ColumnProfile:
         """
-        Profile a single column using Ibis's native capabilities for better performance.
+        Profile a single column using database-native capabilities for optimal performance.
 
         Args:
             datasource: The SQL datasource to profile
@@ -166,45 +171,45 @@ class DatabaseProfiler:
             schema: Optional schema name
 
         Returns:
-            ColumnProfile with detailed statistics using Ibis native methods
+            ColumnProfile with detailed statistics using database-native methods
         """
         try:
-            # Get the Ibis table object
+            # Get the database table object
             conn = datasource.connect()
 
             if schema:
-                ibis_table = conn.table(table_name, database=schema)
+                table = conn.table(table_name, database=schema)
             else:
-                ibis_table = conn.table(table_name)
+                table = conn.table(table_name)
 
             # Get the specific column
-            if column_name not in ibis_table.columns:
+            if column_name not in table.columns:
                 self.logger.warning(f"Column {column_name} not found in table {table_name}")
                 return ColumnProfile(column_name=column_name, profiled_at=datetime.now())
 
-            column = ibis_table[column_name]
+            column = table[column_name]
 
-            # Use Ibis's native statistical methods
+            # Use database-native statistical methods
             try:
-                # Basic statistics using Ibis native methods
-                row_count = int(ibis_table.count().to_pandas())
+                # Basic statistics using native methods
+                row_count = int(table.count().to_pandas())
 
                 # Count non-null values
                 non_null_count = int(column.count().to_pandas())
                 null_count = row_count - non_null_count
                 null_percentage = (null_count / row_count) * 100 if row_count > 0 else 0
 
-                # Distinct count using Ibis
+                # Distinct count using native functions
                 distinct_count = int(column.nunique().to_pandas())
                 distinct_ratio = distinct_count / non_null_count if non_null_count > 0 else 0
 
-                # Top-k frequent values using Ibis value_counts
-                top_k_values = self._get_top_k_values_ibis(column)
+                # Top-k frequent values using native value_counts
+                top_k_values = self._get_top_k_values(column)
 
-                # Type-specific statistics using Ibis methods
-                numeric_stats = self._compute_numeric_stats_ibis(column)
-                date_stats = self._compute_date_stats_ibis(column)
-                string_stats = self._compute_string_stats_ibis(column, ibis_table)
+                # Type-specific statistics using native methods
+                numeric_stats = self._compute_numeric_stats(column)
+                date_stats = self._compute_date_stats(column)
+                string_stats = self._compute_string_stats(column)
 
                 # LSH sketch (still need to sample data for this)
                 lsh_sketch = None
@@ -218,7 +223,7 @@ class DatabaseProfiler:
                         self.logger.debug(f"LSH computation failed for {column_name}: {e}")
 
                 # Semantic type inference
-                semantic_type = self._infer_semantic_type_ibis(column, column_name)
+                semantic_type = self._infer_semantic_type(column, column_name)
 
                 # Data quality score
                 data_quality_score = self._calculate_data_quality_score(
@@ -244,281 +249,42 @@ class DatabaseProfiler:
                 )
 
             except Exception as e:
-                self.logger.warning(f"Ibis native profiling failed for column {column_name}: {e}, falling back")
-                return self.profile_column(datasource, table_name, column_name, schema)
-
-        except Exception as e:
-            self.logger.error(f"Error profiling column {column_name} with Ibis: {str(e)}")
-            return self.profile_column(datasource, table_name, column_name, schema)
-
-    def profile_table(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
-        """
-        Profile a complete table including all columns.
-
-        Args:
-            datasource: The SQL datasource to profile
-            table_name: Name of the table to profile
-            schema: Optional schema name
-
-        Returns:
-            TableProfile with comprehensive metadata
-        """
-        start_time = datetime.now()
-
-        try:
-            # Get table data sample
-            query = self._build_sample_query(table_name, schema)
-            df = datasource.query(query, result_format="pandas")
-
-            if df.empty:
-                self.logger.warning(f"Table {table_name} is empty")
-                return TableProfile(
-                    table_name=table_name,
+                self.logger.error(f"Native profiling failed for column {column_name}: {e}")
+                # Return minimal profile on error
+                return ColumnProfile(
+                    column_name=column_name,
                     row_count=0,
-                    column_count=0,
+                    null_count=0,
+                    null_percentage=100.0,
+                    distinct_count=0,
+                    distinct_ratio=0.0,
                     profiled_at=datetime.now(),
-                    profiling_duration_seconds=0.0
+                    sample_size=0
                 )
-
-            # Get actual row count
-            count_query = f"SELECT COUNT(*) as row_count FROM {self._quote_identifier(table_name, schema)}"
-            row_count_result = datasource.query(count_query, result_format="pandas")
-            actual_row_count = int(row_count_result.iloc[0]['row_count'])
-
-            # Calculate table-level metrics
-            completeness_scores = []
-            for column in df.columns:
-                null_ratio = df[column].isnull().sum() / len(df)
-                completeness_scores.append(1.0 - null_ratio)
-
-            completeness_score = statistics.mean(completeness_scores) if completeness_scores else 0.0
-
-            # Create table profile
-            duration = (datetime.now() - start_time).total_seconds()
-
-            return TableProfile(
-                table_name=table_name,
-                row_count=actual_row_count,
-                column_count=len(df.columns),
-                completeness_score=completeness_score,
-                consistency_score=self._calculate_consistency_score(df),
-                profiled_at=datetime.now(),
-                profiling_duration_seconds=duration
-            )
-
-        except Exception as e:
-            self.logger.error(f"Error profiling table {table_name}: {str(e)}")
-            return TableProfile(
-                table_name=table_name,
-                profiled_at=datetime.now(),
-                profiling_duration_seconds=(datetime.now() - start_time).total_seconds()
-            )
-
-    def profile_column(
-        self,
-        datasource,
-        table_name: str,
-        column_name: str,
-        schema: Optional[str] = None
-    ) -> ColumnProfile:
-        """
-        Profile a single column with comprehensive statistics.
-
-        Args:
-            datasource: The SQL datasource to profile
-            table_name: Name of the table
-            column_name: Name of the column to profile
-            schema: Optional schema name
-
-        Returns:
-            ColumnProfile with detailed statistics
-        """
-        try:
-            # Get column data sample
-            query = self._build_column_sample_query(table_name, column_name, schema)
-            df = datasource.query(query, result_format="pandas")
-
-            if df.empty or column_name not in df.columns:
-                self.logger.warning(f"Column {column_name} not found or empty")
-                return ColumnProfile(column_name=column_name, profiled_at=datetime.now())
-
-            column_data = df[column_name]
-
-            # Basic statistics
-            row_count = len(column_data)
-            null_count = column_data.isnull().sum()
-            null_percentage = (null_count / row_count) * 100 if row_count > 0 else 0
-
-            # Remove nulls for further analysis
-            non_null_data = column_data.dropna()
-            distinct_count = non_null_data.nunique()
-            distinct_ratio = distinct_count / len(non_null_data) if len(non_null_data) > 0 else 0
-
-            # Top-k frequent values
-            top_k_values = self._get_top_k_values(non_null_data)
-
-            # Type-specific statistics
-            numeric_stats = self._compute_numeric_stats(non_null_data)
-            date_stats = self._compute_date_stats(non_null_data)
-            string_stats = self._compute_string_stats(non_null_data)
-
-            # LSH sketch for similarity
-            lsh_sketch = None
-            if self.enable_lsh and len(non_null_data) > 0:
-                lsh_sketch = self._compute_lsh_sketch(non_null_data, column_name)
-
-            # Semantic type inference
-            semantic_type = self._infer_semantic_type(non_null_data, column_name)
-
-            # Data quality score
-            data_quality_score = self._calculate_data_quality_score(
-                null_percentage, distinct_ratio, len(non_null_data)
-            )
-
-            return ColumnProfile(
-                column_name=column_name,
-                row_count=row_count,
-                null_count=null_count,
-                null_percentage=null_percentage,
-                distinct_count=distinct_count,
-                distinct_ratio=distinct_ratio,
-                top_k_values=top_k_values,
-                numeric_stats=numeric_stats,
-                date_stats=date_stats,
-                string_stats=string_stats,
-                lsh_sketch=lsh_sketch,
-                semantic_type=semantic_type,
-                data_quality_score=data_quality_score,
-                profiled_at=datetime.now(),
-                sample_size=len(column_data)
-            )
 
         except Exception as e:
             self.logger.error(f"Error profiling column {column_name}: {str(e)}")
+            # Return minimal profile on error
             return ColumnProfile(
                 column_name=column_name,
-                profiled_at=datetime.now()
+                row_count=0,
+                null_count=0,
+                null_percentage=100.0,
+                distinct_count=0,
+                distinct_ratio=0.0,
+                profiled_at=datetime.now(),
+                sample_size=0
             )
 
-    def _build_sample_query(self, table_name: str, schema: Optional[str] = None) -> str:
-        """Build a query to sample data from a table."""
-        full_table_name = self._quote_identifier(table_name, schema)
-        return f"SELECT * FROM {full_table_name} LIMIT {self.sample_size}"
 
-    def _build_column_sample_query(
-        self,
-        table_name: str,
-        column_name: str,
-        schema: Optional[str] = None
-    ) -> str:
-        """Build a query to sample data from a specific column."""
-        full_table_name = self._quote_identifier(table_name, schema)
-        quoted_column = f'"{column_name}"'
-        return f"SELECT {quoted_column} FROM {full_table_name} LIMIT {self.sample_size}"
 
-    def _quote_identifier(self, table_name: str, schema: Optional[str] = None) -> str:
-        """Quote database identifiers properly."""
-        if schema:
-            return f'"{schema}"."{table_name}"'
-        return f'"{table_name}"'
 
-    def _get_top_k_values(self, data: pd.Series) -> List[Dict[str, Any]]:
-        """Get top-k most frequent values."""
-        if len(data) == 0:
-            return []
 
-        value_counts = data.value_counts().head(self.top_k)
-        return [
-            {
-                "value": str(value),
-                "count": int(count),
-                "percentage": (count / len(data)) * 100
-            }
-            for value, count in value_counts.items()
-        ]
 
-    def _compute_numeric_stats(self, data: pd.Series) -> Optional[NumericStats]:
-        """Compute statistics for numeric columns."""
-        try:
-            # Try to convert to numeric
-            numeric_data = pd.to_numeric(data, errors='coerce').dropna()
 
-            if len(numeric_data) == 0:
-                return None
 
-            return NumericStats(
-                min_value=float(numeric_data.min()),
-                max_value=float(numeric_data.max()),
-                mean=float(numeric_data.mean()),
-                median=float(numeric_data.median()),
-                std_dev=float(numeric_data.std()),
-                percentile_25=float(numeric_data.quantile(0.25)),
-                percentile_75=float(numeric_data.quantile(0.75))
-            )
-        except Exception:
-            return None
 
-    def _compute_date_stats(self, data: pd.Series) -> Optional[DateStats]:
-        """Compute statistics for date/datetime columns."""
-        try:
-            # Try to convert to datetime
-            date_data = pd.to_datetime(data, errors='coerce', infer_datetime_format=True).dropna()
 
-            if len(date_data) == 0:
-                return None
-
-            min_date = date_data.min()
-            max_date = date_data.max()
-            date_range = (max_date - min_date).days
-
-            # Detect common date formats
-            sample_strings = data.astype(str).head(100).tolist()
-            common_formats = self._detect_date_formats(sample_strings)
-
-            return DateStats(
-                min_date=min_date,
-                max_date=max_date,
-                date_range_days=date_range,
-                common_date_formats=common_formats
-            )
-        except Exception:
-            return None
-
-    def _compute_string_stats(self, data: pd.Series) -> Optional[StringStats]:
-        """Compute statistics for string columns."""
-        try:
-            string_data = data.astype(str)
-
-            if len(string_data) == 0:
-                return None
-
-            lengths = string_data.str.len()
-
-            # Character type analysis
-            char_types = defaultdict(int)
-            for text in string_data.head(1000):  # Sample for performance
-                for char in text:
-                    if char.isalpha():
-                        char_types['alphabetic'] += 1
-                    elif char.isdigit():
-                        char_types['numeric'] += 1
-                    elif char.isspace():
-                        char_types['whitespace'] += 1
-                    else:
-                        char_types['special'] += 1
-
-            # Common patterns detection
-            patterns = self._detect_string_patterns(string_data.head(1000))
-
-            return StringStats(
-                min_length=int(lengths.min()),
-                max_length=int(lengths.max()),
-                avg_length=float(lengths.mean()),
-                character_types=dict(char_types),
-                common_patterns=patterns
-            )
-        except Exception:
-            return None
 
     def _compute_lsh_sketch(self, data: pd.Series, column_name: str) -> Optional[LSHSketch]:
         """Compute LSH sketch for similarity matching."""
@@ -552,33 +318,7 @@ class DatabaseProfiler:
             return [text]
         return [text[i:i+k] for i in range(len(text) - k + 1)]
 
-    def _infer_semantic_type(self, data: pd.Series, column_name: str) -> Optional[str]:
-        """Infer semantic type of the column."""
-        if len(data) == 0:
-            return None
 
-        sample_data = data.head(100).astype(str)
-
-        # Email pattern
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if sample_data.str.match(email_pattern).mean() > 0.8:
-            return "email"
-
-        # Phone pattern
-        phone_pattern = r'^[\+]?[1-9]?[0-9]{7,15}$'
-        if sample_data.str.replace(r'[^\d+]', '', regex=True).str.match(phone_pattern).mean() > 0.8:
-            return "phone"
-
-        # URL pattern
-        url_pattern = r'^https?://'
-        if sample_data.str.match(url_pattern).mean() > 0.8:
-            return "url"
-
-        # ID pattern (based on column name and data characteristics)
-        if 'id' in column_name.lower() and data.nunique() / len(data) > 0.9:
-            return "identifier"
-
-        return "general"
 
     def _calculate_data_quality_score(
         self,
@@ -601,38 +341,7 @@ class DatabaseProfiler:
 
         return round(quality_score, 3)
 
-    def _calculate_consistency_score(self, df: pd.DataFrame) -> float:
-        """Calculate data consistency score for the table."""
-        if df.empty:
-            return 0.0
 
-        consistency_scores = []
-
-        for column in df.columns:
-            # Check for consistent data types within the column
-            non_null_data = df[column].dropna()
-            if len(non_null_data) == 0:
-                continue
-
-            # Try to infer consistent type
-            try:
-                # Check if all values can be converted to the same type
-                pd.to_numeric(non_null_data, errors='raise')
-                consistency_scores.append(1.0)  # All numeric
-            except:
-                try:
-                    pd.to_datetime(non_null_data, errors='raise')
-                    consistency_scores.append(1.0)  # All datetime
-                except:
-                    # Check string consistency (similar lengths, patterns)
-                    if non_null_data.dtype == 'object':
-                        lengths = non_null_data.astype(str).str.len()
-                        length_cv = lengths.std() / lengths.mean() if lengths.mean() > 0 else 1
-                        consistency_scores.append(max(0, 1 - length_cv))
-                    else:
-                        consistency_scores.append(0.5)  # Mixed types
-
-        return statistics.mean(consistency_scores) if consistency_scores else 0.0
 
     def _detect_date_formats(self, sample_strings: List[str]) -> List[str]:
         """Detect common date formats in string data."""
@@ -686,9 +395,9 @@ class DatabaseProfiler:
         except:
             return []
 
-    # Ibis-specific helper methods
-    def _get_top_k_values_ibis(self, column) -> List[Dict[str, Any]]:
-        """Get top-k most frequent values using Ibis value_counts."""
+    # Database-native helper methods
+    def _get_top_k_values(self, column) -> List[Dict[str, Any]]:
+        """Get top-k most frequent values using native value_counts."""
         try:
             value_counts = column.value_counts().limit(self.top_k).to_pandas()
             total_count = int(column.count().to_pandas())
@@ -707,11 +416,11 @@ class DatabaseProfiler:
 
             return result
         except Exception as e:
-            self.logger.debug(f"Ibis value_counts failed: {e}")
+            self.logger.debug(f"Native value_counts failed: {e}")
             return []
 
-    def _compute_numeric_stats_ibis(self, column) -> Optional[NumericStats]:
-        """Compute statistics for numeric columns using Ibis methods."""
+    def _compute_numeric_stats(self, column) -> Optional[NumericStats]:
+        """Compute statistics for numeric columns using native methods."""
         try:
             # Check if column is numeric by trying to compute mean
             mean_val = column.mean().to_pandas()
@@ -747,8 +456,8 @@ class DatabaseProfiler:
         except Exception:
             return None
 
-    def _compute_date_stats_ibis(self, column) -> Optional[DateStats]:
-        """Compute statistics for date/datetime columns using Ibis methods."""
+    def _compute_date_stats(self, column) -> Optional[DateStats]:
+        """Compute statistics for date/datetime columns using native methods."""
         try:
             # Try to get min/max dates
             min_date = column.min().to_pandas()
@@ -783,11 +492,11 @@ class DatabaseProfiler:
         except Exception:
             return None
 
-    def _compute_string_stats_ibis(self, column, table) -> Optional[StringStats]:
-        """Compute statistics for string columns using Ibis methods."""
+    def _compute_string_stats(self, column) -> Optional[StringStats]:
+        """Compute statistics for string columns using native methods."""
         try:
             # Check if it's a string column by trying string operations
-            # Get length statistics using Ibis string functions
+            # Get length statistics using native string functions
             length_col = column.length()
 
             min_length = int(length_col.min().to_pandas())
@@ -830,8 +539,8 @@ class DatabaseProfiler:
         except Exception:
             return None
 
-    def _infer_semantic_type_ibis(self, column, column_name: str) -> Optional[str]:
-        """Infer semantic type using Ibis column operations."""
+    def _infer_semantic_type(self, column, column_name: str) -> Optional[str]:
+        """Infer semantic type using native column operations."""
         try:
             # Sample some data for pattern analysis
             sample_data = column.limit(100).to_pandas().dropna()
