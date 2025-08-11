@@ -190,7 +190,7 @@ class WorkflowAgent(ChatAgent):
 
     def stream(
         self,
-        question: Optional[str] = "",
+        question: Optional[Union[str, Command]] = "",
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,

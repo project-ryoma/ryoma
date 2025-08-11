@@ -89,7 +89,7 @@ class BaseAgent:
         self.store.put(("datasource",), "main", datasource)
         return self
 
-    def get_datasource(self):
+    def get_datasource(self) -> DataSource:
         """
         Get the registered DataSource.
 
@@ -125,7 +125,7 @@ class BaseAgent:
         """
         if not self.vector_store:
             raise ValueError("Vector store is not set.")
-        self.vector_store.index_data_source(datasource, level)
+        self.vector_store.index_datasource(datasource, level)
 
     def index_all_data_sources(self):
         """
@@ -134,7 +134,7 @@ class BaseAgent:
         if not self.vector_store:
             raise ValueError("Vector store is not set.")
         for datasource in self.get_resources_by_type(DataSource):
-            self.vector_store.index_data_source(datasource)
+            self.vector_store.index_datasource(datasource)
 
     def search_catalogs(self, query: str, top_k: int = 5, **kwargs) -> Catalog:
         """

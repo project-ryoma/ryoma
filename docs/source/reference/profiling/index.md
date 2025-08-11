@@ -4,21 +4,30 @@ Comprehensive database metadata extraction system based on research from "Automa
 
 ## 🎯 Overview
 
-The Database Profiling system provides:
-- **Statistical Analysis** - Row counts, NULL statistics, distinct-value ratios
-- **Type-Specific Profiling** - Numeric, date, and string analysis  
-- **Semantic Type Inference** - Automatic detection of emails, phones, URLs, etc.
-- **Data Quality Scoring** - Multi-dimensional quality assessment
-- **LSH Similarity** - Locality-sensitive hashing for column similarity
-- **Ibis Integration** - Native database optimizations for better performance
+The Database Profiling system provides comprehensive metadata extraction with two profiling modes:
+
+### 📊 **Statistical Profiling** (Base Layer)
+- **Row counts & NULL statistics** - Data completeness analysis
+- **Type-specific profiling** - Numeric, date, and string analysis
+- **Semantic type inference** - Automatic detection of emails, phones, URLs, etc.
+- **Data quality scoring** - Multi-dimensional quality assessment
+- **LSH similarity** - Locality-sensitive hashing for column similarity
+- **Ibis integration** - Native database optimizations for better performance
+
+### 🤖 **LLM-Enhanced Profiling** (Advanced Layer)
+- **Business purpose analysis** - LLM-generated field descriptions and context
+- **SQL generation hints** - Task-aligned metadata for better query generation
+- **Join candidate scoring** - Intelligent relationship discovery
+- **Usage pattern analysis** - Common query patterns and optimization suggestions
+- **Domain classification** - Business domain and data freshness assessment
 
 ## 🚀 Quick Start
 
-### Enable Profiling
+### Basic Statistical Profiling
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable profiling with default settings
+# Enable statistical profiling
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db",
     enable_profiling=True
@@ -30,9 +39,34 @@ print(f"Rows: {profile['table_profile']['row_count']:,}")
 print(f"Completeness: {profile['table_profile']['completeness_score']:.2%}")
 ```
 
+### LLM-Enhanced Profiling
+```python
+from ryoma_ai.agent.internals.enhanced_profiler import EnhancedDatabaseProfiler
+from ryoma_ai.models.openai import OpenAIModel
+
+# Create enhanced profiler with LLM analysis
+model = OpenAIModel("gpt-4")
+enhanced_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    enable_llm_analysis=True
+)
+
+# Get enhanced table metadata
+enhanced_metadata = enhanced_profiler.profile_table_enhanced("customers")
+print(f"Table purpose: {enhanced_metadata.primary_purpose}")
+print(f"Business domain: {enhanced_metadata.business_domain}")
+
+# Get enhanced field metadata
+field_metadata = enhanced_profiler.profile_field_enhanced("customers", "email")
+print(f"Field description: {field_metadata.llm_description}")
+print(f"Business purpose: {field_metadata.business_purpose}")
+print(f"SQL hints: {field_metadata.sql_generation_hints}")
+```
+
 ### Custom Configuration
 ```python
-# Advanced profiling configuration
+# Statistical profiling configuration
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db",
     enable_profiling=True,
@@ -41,9 +75,78 @@ datasource = PostgresDataSource(
         "top_k": 10,               # Top frequent values
         "enable_lsh": True,        # Column similarity
         "lsh_threshold": 0.8,      # Similarity threshold
-        "num_hashes": 128          # LSH precision
+        "num_hashes": 128,         # LSH precision
+        "enable_llm_enhancement": True  # Enable LLM analysis
     }
 )
+
+# Enhanced profiler configuration
+enhanced_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    enable_llm_analysis=True,
+    analysis_sample_size=100  # Sample size for LLM analysis
+)
+```
+
+## 🤖 LLM-Enhanced Profiling
+
+### Enhanced Field Metadata
+The `EnhancedDatabaseProfiler` provides AI-powered metadata generation:
+
+```python
+from ryoma_ai.agent.internals.enhanced_profiler import EnhancedDatabaseProfiler
+
+# Create enhanced profiler
+enhanced_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    enable_llm_analysis=True
+)
+
+# Get enhanced field analysis
+field_metadata = enhanced_profiler.profile_field_enhanced("orders", "customer_id")
+
+# Access enhanced information
+print(f"Description: {field_metadata.llm_description}")
+print(f"Business purpose: {field_metadata.business_purpose}")
+print(f"SQL hints: {field_metadata.sql_generation_hints}")
+print(f"Join score: {field_metadata.join_candidate_score}")
+print(f"Semantic tags: {field_metadata.semantic_tags}")
+print(f"Usage patterns: {field_metadata.usage_patterns}")
+```
+
+### Enhanced Table Metadata
+```python
+# Get comprehensive table analysis
+table_metadata = enhanced_profiler.profile_table_enhanced("customers")
+
+# Access table-level insights
+print(f"Table description: {table_metadata.table_description}")
+print(f"Primary purpose: {table_metadata.primary_purpose}")
+print(f"Business domain: {table_metadata.business_domain}")
+print(f"Data freshness: {table_metadata.data_freshness_assessment}")
+
+# Access join patterns
+for pattern in table_metadata.common_join_patterns:
+    print(f"Join pattern: {pattern}")
+
+# Access all field metadata
+for field_name, field_meta in table_metadata.field_metadata.items():
+    print(f"{field_name}: {field_meta.business_purpose}")
+```
+
+### SQL Generation Context
+Get optimized metadata for SQL generation tasks:
+
+```python
+# Get context optimized for SQL generation
+sql_context = enhanced_profiler.get_sql_generation_context("customers")
+
+# This provides metadata in a format optimized for text-to-SQL models
+print(f"Table context: {sql_context['table_context']}")
+print(f"Field contexts: {sql_context['field_contexts']}")
+print(f"Join suggestions: {sql_context['join_suggestions']}")
 ```
 
 ## 📋 Core Features
@@ -104,7 +207,7 @@ for schema in catalog.schemas:
 
 ## 🔍 Profiling Results
 
-### Table Profile Structure
+### Basic Table Profile Structure
 ```json
 {
   "table_profile": {
@@ -123,30 +226,62 @@ for schema in catalog.schemas:
 }
 ```
 
-### Column Profile Structure
+### Enhanced Table Metadata Structure
 ```json
 {
-  "column_name": "email",
-  "semantic_type": "email",
-  "data_quality_score": 0.92,
-  "row_count": 150000,
-  "null_count": 7800,
-  "null_percentage": 5.2,
-  "distinct_count": 147200,
-  "distinct_ratio": 0.98,
-  "top_k_values": [
-    {"value": "user@example.com", "count": 15, "percentage": 0.01}
+  "base_profile": {
+    "table_name": "customers",
+    "row_count": 150000,
+    "column_count": 12
+  },
+  "table_description": "Customer information table containing contact details and account data",
+  "primary_purpose": "Store customer profiles and contact information for CRM operations",
+  "business_domain": "Customer Relationship Management",
+  "data_freshness_assessment": "Updated daily via ETL pipeline",
+  "common_join_patterns": [
+    {
+      "target_table": "orders",
+      "join_column": "customer_id",
+      "join_type": "one_to_many",
+      "confidence": 0.95
+    }
   ],
-  "string_stats": {
-    "min_length": 8,
-    "max_length": 64,
-    "avg_length": 24.5,
-    "character_types": {
-      "alphabetic": 15420,
-      "numeric": 3240,
-      "special": 890
+  "field_metadata": {
+    "customer_id": {
+      "llm_description": "Unique identifier for customer records",
+      "business_purpose": "Primary key for customer identification",
+      "sql_generation_hints": ["Use for JOINs", "Always include in GROUP BY"],
+      "join_candidate_score": 0.98
     }
   }
+}
+```
+
+### Enhanced Field Metadata Structure
+```json
+{
+  "base_profile": {
+    "column_name": "email",
+    "semantic_type": "email",
+    "data_quality_score": 0.92,
+    "null_percentage": 5.2,
+    "distinct_ratio": 0.98
+  },
+  "llm_description": "Customer email addresses for communication and account identification",
+  "business_purpose": "Primary contact method for customer communications and login",
+  "sql_generation_hints": [
+    "Use for customer identification",
+    "Good for filtering active customers",
+    "Consider NULL handling in queries"
+  ],
+  "join_candidate_score": 0.85,
+  "semantic_tags": ["contact_info", "identifier", "communication"],
+  "data_quality_assessment": "High quality with 95% completeness and valid email format",
+  "usage_patterns": [
+    "Frequently used in WHERE clauses",
+    "Common in customer lookup queries",
+    "Often joined with user_accounts table"
+  ]
 }
 ```
 
@@ -222,28 +357,42 @@ if similar_columns:
 
 ### Performance Tuning
 ```python
-# Development configuration (fast)
+# Development configuration (fast, statistical only)
 dev_config = {
     "sample_size": 1000,
     "top_k": 5,
-    "enable_lsh": False
+    "enable_lsh": False,
+    "enable_llm_enhancement": False
 }
 
-# Production configuration (balanced)
+# Production configuration (balanced with LLM)
 prod_config = {
     "sample_size": 10000,
     "top_k": 10,
     "enable_lsh": True,
-    "lsh_threshold": 0.8
+    "lsh_threshold": 0.8,
+    "enable_llm_enhancement": True,
+    "analysis_sample_size": 50
 }
 
-# High accuracy configuration (thorough)
+# High accuracy configuration (thorough with full LLM analysis)
 accuracy_config = {
     "sample_size": 50000,
     "top_k": 20,
     "enable_lsh": True,
     "lsh_threshold": 0.9,
-    "num_hashes": 256
+    "num_hashes": 256,
+    "enable_llm_enhancement": True,
+    "analysis_sample_size": 200
+}
+
+# LLM-focused configuration (comprehensive business analysis)
+llm_focused_config = {
+    "sample_size": 5000,  # Smaller statistical sample
+    "enable_llm_enhancement": True,
+    "analysis_sample_size": 500,  # Larger LLM analysis sample
+    "enable_business_context": True,
+    "enable_join_analysis": True
 }
 ```
 
@@ -273,15 +422,16 @@ bigquery_ds = BigQueryDataSource(
 
 ## 🔧 Direct Profiler Usage
 
-### Standalone Profiler
+### Basic Statistical Profiler
 ```python
 from ryoma_ai.datasource.profiler import DatabaseProfiler
 
-# Create profiler instance
+# Create basic profiler instance
 profiler = DatabaseProfiler(
     sample_size=10000,
     top_k=10,
-    enable_lsh=True
+    enable_lsh=True,
+    enable_llm_enhancement=False  # Statistical only
 )
 
 # Profile table directly
@@ -291,6 +441,55 @@ print(f"Profiled {table_profile.table_name} in {table_profile.profiling_duration
 # Profile individual column
 column_profile = profiler.profile_column(datasource, "customers", "email")
 print(f"Email quality score: {column_profile.data_quality_score:.3f}")
+```
+
+### Enhanced Profiler with LLM Analysis
+```python
+from ryoma_ai.agent.internals.enhanced_profiler import EnhancedDatabaseProfiler
+from ryoma_ai.models.openai import OpenAIModel
+
+# Create enhanced profiler with LLM capabilities
+model = OpenAIModel("gpt-4")
+enhanced_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    enable_llm_analysis=True,
+    analysis_sample_size=100
+)
+
+# Profile table with LLM enhancement
+enhanced_table = enhanced_profiler.profile_table_enhanced("customers")
+print(f"Table purpose: {enhanced_table.primary_purpose}")
+print(f"Business domain: {enhanced_table.business_domain}")
+
+# Profile field with LLM enhancement
+enhanced_field = enhanced_profiler.profile_field_enhanced("customers", "email")
+print(f"Field description: {enhanced_field.llm_description}")
+print(f"SQL hints: {enhanced_field.sql_generation_hints}")
+```
+
+### Hybrid Approach
+```python
+# Use both profilers for comprehensive analysis
+base_profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)
+enhanced_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    base_profiler=base_profiler,  # Reuse base profiler
+    enable_llm_analysis=True
+)
+
+# Get both statistical and LLM-enhanced metadata
+enhanced_metadata = enhanced_profiler.profile_table_enhanced("customers")
+
+# Access base statistical data
+base_stats = enhanced_metadata.base_profile
+print(f"Row count: {base_stats.row_count:,}")
+print(f"Completeness: {base_stats.completeness_score:.2%}")
+
+# Access LLM-enhanced insights
+print(f"Business purpose: {enhanced_metadata.primary_purpose}")
+print(f"Data freshness: {enhanced_metadata.data_freshness_assessment}")
 ```
 
 ### Batch Profiling
@@ -308,6 +507,74 @@ for table_name in tables_to_profile:
     table_info = profile["table_profile"]
     print(f"  Rows: {table_info['row_count']:,}")
     print(f"  Completeness: {table_info['completeness_score']:.2%}")
+```
+
+## 🤖 LLM-Enhanced Features
+
+### Business Purpose Analysis
+The enhanced profiler uses LLM analysis to understand the business context of your data:
+
+```python
+# Get business context for a field
+field_metadata = enhanced_profiler.profile_field_enhanced("orders", "total_amount")
+
+print(f"Business purpose: {field_metadata.business_purpose}")
+# Output: "Monetary value of customer orders for revenue tracking and financial reporting"
+
+print(f"Usage patterns: {field_metadata.usage_patterns}")
+# Output: ["Used in revenue calculations", "Filtered for large orders", "Aggregated for reporting"]
+```
+
+### SQL Generation Optimization
+Enhanced metadata provides specific hints for better SQL generation:
+
+```python
+# Get SQL-optimized context
+sql_context = enhanced_profiler.get_sql_generation_context("customers")
+
+# Use in SQL agent for better query generation
+from ryoma_ai.agent.sql import SqlAgent
+
+agent = SqlAgent(model="gpt-4", mode="enhanced")
+agent.add_datasource(datasource)
+
+# The agent automatically uses enhanced metadata for:
+# - Better table selection based on business purpose
+# - Smarter column selection using SQL hints
+# - Optimized joins using join candidate scores
+# - Appropriate filtering based on data quality scores
+
+response = agent.stream("Find high-value customers from last quarter")
+```
+
+### Join Pattern Discovery
+Automatically discover and score potential join relationships:
+
+```python
+# Get table metadata with join patterns
+table_metadata = enhanced_profiler.profile_table_enhanced("customers")
+
+for pattern in table_metadata.common_join_patterns:
+    print(f"Can join with {pattern['target_table']} on {pattern['join_column']}")
+    print(f"Join type: {pattern['join_type']}, Confidence: {pattern['confidence']:.2%}")
+```
+
+### Data Quality Assessment
+LLM-powered data quality analysis provides actionable insights:
+
+```python
+field_metadata = enhanced_profiler.profile_field_enhanced("customers", "phone")
+
+print(f"Quality assessment: {field_metadata.data_quality_assessment}")
+# Output: "Moderate quality with 15% missing values and inconsistent formatting.
+#          Recommend data cleaning for phone number standardization."
+
+# Use quality scores for column selection
+high_quality_fields = [
+    field_name for field_name, field_meta in table_metadata.field_metadata.items()
+    if field_meta.base_profile.data_quality_score > 0.8
+]
+print(f"High quality fields: {high_quality_fields}")
 ```
 
 ## 📊 Integration with SQL Agent
@@ -385,25 +652,62 @@ else:
 
 ## 🎯 Best Practices
 
-### 1. **Configure Appropriately**
-- Use smaller samples for development
-- Enable LSH for large schemas
-- Adjust thresholds based on your data
+### 1. **Choose the Right Profiling Mode**
+- **Statistical only**: Fast development, basic metadata needs
+- **LLM-enhanced**: Production use, complex query generation
+- **Hybrid**: Best of both worlds with cached LLM analysis
 
-### 2. **Monitor Performance**
-- Track profiling duration
+```python
+# Development: Fast statistical profiling
+dev_profiler = DatabaseProfiler(sample_size=1000, enable_llm_enhancement=False)
+
+# Production: Enhanced profiling with caching
+prod_profiler = EnhancedDatabaseProfiler(
+    datasource=datasource,
+    model=model,
+    enable_llm_analysis=True,
+    analysis_sample_size=100
+)
+```
+
+### 2. **Optimize LLM Usage**
+- Cache enhanced metadata to reduce API calls
+- Use appropriate sample sizes for LLM analysis
+- Enable LLM analysis only for critical tables
+
+```python
+# Cache enhanced metadata
+enhanced_metadata = enhanced_profiler.profile_table_enhanced("customers")
+# Subsequent calls use cached results
+
+# Selective LLM analysis
+important_tables = ["customers", "orders", "products"]
+for table in important_tables:
+    enhanced_profiler.profile_table_enhanced(table)
+```
+
+### 3. **Leverage Enhanced Insights**
+- Use business purpose for better table selection
+- Apply SQL hints for query optimization
+- Utilize join scores for relationship discovery
+
+```python
+# Use enhanced metadata in SQL generation
+sql_context = enhanced_profiler.get_sql_generation_context("customers")
+# Pass to SQL agent for better query generation
+```
+
+### 4. **Monitor Performance and Costs**
+- Track LLM API usage and costs
+- Monitor profiling duration for large tables
 - Cache profiles for frequently used tables
-- Use appropriate sample sizes
+- Set up alerts for profiling failures
 
-### 3. **Leverage Results**
-- Use quality scores for column selection
-- Apply semantic types for better formatting
-- Utilize similarity for schema linking
-
-### 4. **Production Deployment**
+### 5. **Production Deployment**
 - Schedule regular profile updates
-- Monitor profiling overhead
-- Set up alerts for failures
+- Use hybrid approach for cost optimization
+- Implement proper error handling and fallbacks
+- Monitor data quality trends over time
 
 ## 🔗 Related Documentation
 

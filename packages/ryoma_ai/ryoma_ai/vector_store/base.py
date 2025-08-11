@@ -90,7 +90,7 @@ class VectorStore(ABC):
             ],
         )
 
-    def index_data_source(
+    def index_datasource(
         self,
         datasource: DataSource,
         level: Literal["catalog", "schema", "table", "column"] = "catalog",
