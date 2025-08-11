@@ -99,7 +99,6 @@ from ryoma_ai.datasource.bigquery import BigQueryDataSource
 # Connect to healthcare data
 datasource = BigQueryDataSource(
     project_id="healthcare-analytics",
-    enable_profiling=True,
     profiler_config={"sample_size": 50000}  # Large dataset
 )
 

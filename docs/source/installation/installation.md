@@ -46,8 +46,7 @@ pip install ryoma_ai[postgres]
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
 datasource = PostgresDataSource(
-    connection_string="postgresql://user:password@localhost:5432/database",
-    enable_profiling=True  # Enable metadata extraction
+    connection_string="postgresql://user:password@localhost:5432/database"
 )
 ```
 
@@ -64,8 +63,7 @@ datasource = SnowflakeDataSource(
     user="your-user",
     password="your-password",
     database="your-database",
-    warehouse="your-warehouse",
-    enable_profiling=True
+    warehouse="your-warehouse"
 )
 ```
 
@@ -79,8 +77,7 @@ from ryoma_ai.datasource.bigquery import BigQueryDataSource
 
 datasource = BigQueryDataSource(
     project_id="your-project-id",
-    credentials_path="/path/to/service-account.json",
-    enable_profiling=True
+    credentials_path="/path/to/service-account.json"
 )
 ```
 
@@ -133,7 +130,7 @@ print(f"Ryoma AI version: {ryoma_ai.__version__}")
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.datasource.sqlite import SqliteDataSource
 
-datasource = SqliteDataSource(":memory:", enable_profiling=True)
+datasource = SqliteDataSource(":memory:")
 agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")
 agent.add_datasource(datasource)
 

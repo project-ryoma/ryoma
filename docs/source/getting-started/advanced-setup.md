@@ -57,7 +57,6 @@ from ryoma_ai.datasource.postgres import PostgresDataSource
 
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@host:5432/db",
-    enable_profiling=True,
     profiler_config={
         "sample_size": 10000,      # Rows to analyze
         "top_k": 10,               # Top frequent values
@@ -77,7 +76,6 @@ datasource = SnowflakeDataSource(
     password="your-password",
     database="your-database",
     warehouse="your-warehouse",
-    enable_profiling=True,
     connection_config={
         "pool_size": 5,
         "max_overflow": 10,
@@ -93,7 +91,6 @@ from ryoma_ai.datasource.bigquery import BigQueryDataSource
 datasource = BigQueryDataSource(
     project_id="your-project",
     credentials_path="/path/to/service-account.json",
-    enable_profiling=True,
     query_config={
         "use_query_cache": True,
         "maximum_bytes_billed": 1000000000  # 1GB limit

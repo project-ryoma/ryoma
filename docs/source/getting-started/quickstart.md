@@ -83,10 +83,9 @@ print(result)
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable database profiling for better performance
+# Connect to database with automatic profiling
 datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True  # Enables metadata extraction
+    connection_string="postgresql://user:pass@localhost:5432/db"
 )
 
 # Use ReFoRCE mode for state-of-the-art performance

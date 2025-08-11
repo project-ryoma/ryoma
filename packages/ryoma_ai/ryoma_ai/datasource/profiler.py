@@ -276,16 +276,6 @@ class DatabaseProfiler:
                 sample_size=0
             )
 
-
-
-
-
-
-
-
-
-
-
     def _compute_lsh_sketch(self, data: pd.Series, column_name: str) -> Optional[LSHSketch]:
         """Compute LSH sketch for similarity matching."""
         try:
@@ -318,8 +308,6 @@ class DatabaseProfiler:
             return [text]
         return [text[i:i+k] for i in range(len(text) - k + 1)]
 
-
-
     def _calculate_data_quality_score(
         self,
         null_percentage: float,
@@ -340,7 +328,6 @@ class DatabaseProfiler:
         quality_score = (completeness * 0.5 + uniqueness * 0.3 + sample_score * 0.2)
 
         return round(quality_score, 3)
-
 
 
     def _detect_date_formats(self, sample_strings: List[str]) -> List[str]:

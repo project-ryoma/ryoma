@@ -25,11 +25,10 @@ def demo_comprehensive_profiling():
     print("🔍 Database Profiling Demo")
     print("=" * 50)
     
-    # Initialize datasource with profiling enabled
+    # Initialize datasource with automatic profiling
     # You can use any SQL datasource (PostgreSQL, MySQL, SQLite, etc.)
     datasource = SqliteDataSource(
         connection_url="sqlite:///example.db",
-        enable_profiling=True,
         profiler_config={
             "sample_size": 10000,
             "top_k": 10,

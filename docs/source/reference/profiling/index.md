@@ -27,10 +27,9 @@ The Database Profiling system provides comprehensive metadata extraction with tw
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable optimized database-native profiling
+# Create datasource with automatic profiling capabilities
 datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True  # Always uses database-native operations
+    connection_string="postgresql://user:pass@localhost:5432/db"
 )
 
 # Profile a table - automatically uses database-native methods
@@ -67,13 +66,12 @@ print(f"SQL hints: {field_metadata.sql_generation_hints}")
 
 ### Custom Configuration
 ```python
-# Optimized Ibis profiling configuration
+# Custom profiling configuration
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True,
     profiler_config={
-        "sample_size": 10000,      # Rows for LSH analysis (Ibis handles stats)
-        "top_k": 10,               # Top frequent values via Ibis value_counts
+        "sample_size": 10000,      # Rows for LSH analysis
+        "top_k": 10,               # Top frequent values
         "enable_lsh": True,        # Column similarity matching
         "lsh_threshold": 0.8,      # Similarity threshold
         "num_hashes": 128,         # LSH precision
@@ -402,7 +400,6 @@ llm_focused_config = {
 # PostgreSQL with advanced features
 postgres_ds = PostgresDataSource(
     connection_string="postgresql://localhost:5432/db",
-    enable_profiling=True,
     profiler_config={
         "use_pg_stats": True,      # Leverage pg_stats views
         "use_histograms": True,    # Use histogram data
@@ -413,7 +410,6 @@ postgres_ds = PostgresDataSource(
 # BigQuery with ML functions
 bigquery_ds = BigQueryDataSource(
     project_id="my-project",
-    enable_profiling=True,
     profiler_config={
         "use_ml_functions": True,  # Use ML.FEATURE_INFO
         "sample_size": 20000

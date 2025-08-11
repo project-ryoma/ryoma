@@ -15,7 +15,6 @@ class SqlDataSource(DataSource):
         self,
         database: Optional[str] = None,
         db_schema: Optional[str] = None,
-        enable_profiling: bool = True,
         profiler_config: Optional[Dict] = None
     ):
         super().__init__(type="sql")
@@ -24,12 +23,8 @@ class SqlDataSource(DataSource):
         self.__connection = None
 
         # Initialize database profiler
-        self.enable_profiling = enable_profiling
-        if enable_profiling:
-            profiler_config = profiler_config or {}
-            self.profiler = DatabaseProfiler(**profiler_config)
-        else:
-            self.profiler = None
+        profiler_config = profiler_config or {}
+        self.profiler = DatabaseProfiler(**profiler_config)
 
     def connect(self, **kwargs) -> Any:
         if not self.__connection:
@@ -267,9 +262,6 @@ class SqlDataSource(DataSource):
         Returns:
             Dictionary containing comprehensive table and column profiles
         """
-        if not self.enable_profiling or not self.profiler:
-            logging.warning("Profiling is disabled for this datasource")
-            return {}
 
         try:
             # Try Ibis-enhanced profiling first for better performance
@@ -342,9 +334,6 @@ class SqlDataSource(DataSource):
         Returns:
             Dictionary containing column profile
         """
-        if not self.enable_profiling or not self.profiler:
-            logging.warning("Profiling is disabled for this datasource")
-            return {}
 
         try:
             # Try Ibis-enhanced profiling first
@@ -382,7 +371,7 @@ class SqlDataSource(DataSource):
         # Get basic catalog
         basic_catalog = self.get_catalog(catalog, schema, table)
 
-        if not include_profiles or not self.enable_profiling:
+        if not include_profiles:
             return basic_catalog
 
         # Enhance with profiling data
@@ -424,7 +413,5 @@ class SqlDataSource(DataSource):
         Returns:
             List of similar column names
         """
-        if not self.enable_profiling or not self.profiler:
-            return []
 
         return self.profiler.find_similar_columns(reference_column, threshold)

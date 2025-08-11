@@ -8,10 +8,9 @@
 ```python
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Enable optimized database profiling
+# Create datasource with automatic profiling
 datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@host:5432/db",
-    enable_profiling=True
+    connection_string="postgresql://user:pass@host:5432/db"
 )
 
 # Profile table - automatic method selection
@@ -178,8 +177,7 @@ profiler_config = {
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
 datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@host:5432/db",
-    enable_profiling=True
+    connection_string="postgresql://user:pass@host:5432/db"
 )
 
 # Profile table
