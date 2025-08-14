@@ -29,6 +29,7 @@ dependencies = [
     "pytest-cov>=5.0.0",
     "openai-responses>=0.10.0",
     "coverage-badge>=1.1.2",
+    "reflex-chakra>=0.7.0",
 ]
 
 [tool.uv.sources]

@@ -1,30 +1,18 @@
 from typing import Optional
+from datetime import datetime
 
 import reflex as rx
 
 
-class VectorStoreConfig(rx.Base):
+class DocumentProject(rx.Model, table=True):
     """
-    VectorStoreConfig is a model that holds the configuration for storying the registry data.
-    It will be used by feast to apply the feature store.
+    Represents a document project/workspace that uses vector storage.
+    Multiple projects can exist, each with their own document collections.
+    The actual vector store configuration comes from rxconfig.py.
     """
-
-    registry_type: str
-    path: str
-
-
-class FeatureViewModel(rx.Model):
-    name: str
-    feature: str
-    entities: Optional[str] = ""
-    source: str = ""
-    source_type: str = ""
-    push_source_type: str = ""
-
-
-class VectorStore(rx.Model, table=True):
-    project_name: str
-    online_store: str
-    online_store_configs: Optional[str]
-    offline_store: str
-    offline_store_configs: Optional[str]
+    project_name: str  # Unique identifier for the project/workspace
+    description: Optional[str] = None  # Human-readable description
+    document_count: int = 0  # Number of documents indexed
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    is_active: bool = True

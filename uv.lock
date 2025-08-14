@@ -3932,6 +3932,18 @@ wheels = [
 ]
 
 [[package]]
+name = "reflex-chakra"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "reflex" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a7/91/ccb9296288b3c43ccffa888ea7714b3752152979aa76a83000303c17823c/reflex_chakra-0.7.0.tar.gz", hash = "sha256:0802904969bb784856d1cd21b3e33d29b3e26d4038c113fdc599b37f54b5067b", size = 69023 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/d4/c6b79128fec25f3056149588b2c67e63efe1c224b5aad05cc562f5938692/reflex_chakra-0.7.0-py3-none-any.whl", hash = "sha256:aa91a36303fbc23c181019082bf12663fa0ba90f8196b74e40790f3621c9bdd1", size = 174785 },
+]
+
+[[package]]
 name = "reflex-hosting-cli"
 version = "0.1.53"
 source = { registry = "https://pypi.org/simple" }
@@ -4255,6 +4267,7 @@ dependencies = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pyupgrade" },
+    { name = "reflex-chakra" },
     { name = "ryoma-ai" },
     { name = "ryoma-lab", extra = ["bigquery", "mysql", "postgres", "pyspark", "snowflake", "sqlite"] },
     { name = "setuptools" },
@@ -4273,6 +4286,7 @@ requires-dist = [
     { name = "pytest", specifier = ">=6.2.5" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
     { name = "pyupgrade", specifier = ">=2.26.0" },
+    { name = "reflex-chakra", specifier = ">=0.7.0" },
     { name = "ryoma-ai", editable = "packages/ryoma_ai" },
     { name = "ryoma-lab", extras = ["snowflake", "pyspark", "postgres", "sqlite", "mysql", "bigquery"], editable = "packages/ryoma_lab" },
     { name = "setuptools", specifier = ">=58.0.4" },

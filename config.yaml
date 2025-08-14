@@ -1,0 +1,18 @@
+# Ryoma Lab Configuration
+
+# Vector store configuration
+vector_store:
+  type: pgvector
+  url: postgresql://postgres:password@localhost:5432/vectordb
+  collection_name: ryoma_vectors
+  dimension: 768
+
+# Database configuration
+database:
+  url: sqlite:///./data/ryoma.db
+
+# Other app settings
+app:
+  name: ryoma_lab
+  debug: true
+  log_level: INFO

@@ -1,6 +1,7 @@
 """The Agent Page."""
 
 import reflex as rx
+import reflex_chakra as rc
 from ryoma_lab.components.reactflow import background, controls, react_flow
 from ryoma_lab.states.agent import Agent, AgentState
 from ryoma_lab.states.graph import GraphState
@@ -12,12 +13,12 @@ def agent_card(agent: Agent):
     """Create an agent card."""
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.chakra.card(
-                rx.chakra.text(
+            rc.card(
+                rc.text(
                     agent.description,
                     no_of_lines=3,
                 ),
-                header=rx.chakra.heading(agent.name, size="md", padding="2px"),
+                header=rc.heading(agent.name, size="md", padding="2px"),
                 direction="column",
                 overflow="auto",
                 height="300px",
@@ -63,7 +64,7 @@ def agent_card(agent: Agent):
 def show_agent_grid():
     """Create a content grid."""
     return rx.vstack(
-        rx.chakra.flex(rx.foreach(AgentState.agents, agent_card), width="100%"),
+        rc.flex(rx.foreach(AgentState.agents, agent_card), width="100%"),
         width="100%",
         overflow_x="scroll",
         padding="4px",

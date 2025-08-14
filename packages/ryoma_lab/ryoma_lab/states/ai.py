@@ -17,8 +17,11 @@ class AIState(BaseState):
         self.selected_model = model
         self.load_embedding()
 
-    def set_dimension(self, dimension: int):
-        self.dimension = dimension
+    def set_dimension(self, dimension: str):
+        try:
+            self.dimension = int(dimension) if dimension else 512
+        except ValueError:
+            self.dimension = 512
         self.load_embedding()
 
     def set_api_key(self, api_key: str):

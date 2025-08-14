@@ -49,8 +49,6 @@ attrs==24.2.0
     #   amundsen-common
     #   jsonschema
     #   referencing
-backports-tarfile==1.2.0
-    # via jaraco-context
 bcrypt==4.1.2
     # via pwdlib
 bidict==0.23.1
@@ -59,8 +57,6 @@ black==24.8.0
     # via ryoma-dev (pyproject.toml)
 blinker==1.8.2
     # via flask
-build==1.2.1
-    # via reflex
 cachetools==5.5.0
     # via google-auth
 certifi==2024.8.30
@@ -77,7 +73,6 @@ cffi==1.17.0
     #   snowflake-connector-python
 charset-normalizer==3.3.2
     # via
-    #   reflex
     #   requests
     #   snowflake-connector-python
 click==8.1.7
@@ -87,6 +82,7 @@ click==8.1.7
     #   dask
     #   feast
     #   flask
+    #   granian
     #   jupyter-ai-magics
     #   reflex-hosting-cli
     #   typer
@@ -114,6 +110,8 @@ dask-expr==1.1.10
     # via dask
 dataclasses-json==0.6.7
     # via langchain-community
+datasketch==1.6.5
+    # via ryoma-ai
 db-dtypes==1.3.0
     # via
     #   ibis-framework
@@ -126,8 +124,6 @@ distro==1.9.0
     # via openai
 dnspython==2.6.1
     # via email-validator
-docutils==0.21.2
-    # via readme-renderer
 duckdb==1.1.3
     # via ryoma-lab
 elasticsearch==7.9.1
@@ -145,11 +141,11 @@ fastapi==0.110.3
     #   fastapi-users
     #   feast
     #   reflex
-fastapi-users==13.0.0
+fastapi-users==14.0.1
     # via
     #   fastapi-users-db-sqlalchemy
     #   ryoma-lab
-fastapi-users-db-sqlalchemy==6.0.1
+fastapi-users-db-sqlalchemy==7.0.0
     # via fastapi-users
 fastjsonschema==2.20.0
     # via nbformat
@@ -225,6 +221,8 @@ googleapis-common-protos==1.65.0
     #   grpcio-status
 gpt4all==2.8.2
     # via ryoma-lab
+granian==2.5.0
+    # via reflex
 greenlet==3.0.3
     # via sqlalchemy
 grpcio==1.66.1
@@ -237,7 +235,7 @@ grpcio-status==1.62.3
     # via google-api-core
 grpcio-tools==1.62.3
     # via qdrant-client
-gunicorn==22.0.0
+gunicorn==23.0.0
     # via
     #   feast
     #   reflex
@@ -269,6 +267,7 @@ httpx==0.27.2
     #   reflex
     #   reflex-hosting-cli
     #   respx
+    #   ryoma-ai
 httpx-oauth==0.15.1
     # via fastapi-users
 huggingface-hub==0.24.6
@@ -293,8 +292,6 @@ importlib-metadata==8.4.0
     # via
     #   dask
     #   jupyter-ai-magics
-    #   keyring
-    #   twine
 iniconfig==2.0.0
     # via pytest
 ipython==8.27.0
@@ -306,12 +303,6 @@ isort==5.13.2
     # via ryoma-dev (pyproject.toml)
 itsdangerous==2.2.0
     # via flask
-jaraco-classes==3.4.0
-    # via keyring
-jaraco-context==6.0.1
-    # via keyring
-jaraco-functools==4.0.2
-    # via keyring
 jedi==0.19.1
     # via ipython
 jinja2==3.1.4
@@ -320,7 +311,6 @@ jinja2==3.1.4
     #   feast
     #   flask
     #   reflex
-    #   starlette-admin
     #   torch
 jiter==0.7.1
     # via openai
@@ -346,8 +336,6 @@ jupyter-ai-magics==2.24.0
     #   ryoma-lab
 jupyter-core==5.7.2
     # via nbformat
-keyring==25.3.0
-    # via twine
 langchain==0.2.15
     # via
     #   jupyter-ai-magics
@@ -391,8 +379,6 @@ langsmith==0.1.129
     #   langchain
     #   langchain-community
     #   langchain-core
-lazy-loader==0.4
-    # via reflex
 locket==1.0.0
     # via partd
 makefun==1.15.4
@@ -424,10 +410,7 @@ mmh3==4.1.0
 mock==5.1.0
     # via ryoma-ai
 more-itertools==10.4.0
-    # via
-    #   amundsen-databuilder
-    #   jaraco-classes
-    #   jaraco-functools
+    # via amundsen-databuilder
 mpmath==1.3.0
     # via sympy
 multidict==6.0.5
@@ -453,12 +436,11 @@ neo4j-driver==4.4.12
     # via amundsen-databuilder
 networkx==3.2.1
     # via torch
-nh3==0.2.18
-    # via readme-renderer
 numpy==1.26.4
     # via
     #   amundsen-databuilder
     #   dask
+    #   datasketch
     #   db-dtypes
     #   feast
     #   ibis-framework
@@ -490,7 +472,6 @@ ormsgpack==1.9.1
 packaging==24.2
     # via
     #   black
-    #   build
     #   dask
     #   db-dtypes
     #   google-cloud-bigquery
@@ -498,7 +479,6 @@ packaging==24.2
     #   huggingface-hub
     #   ibis-framework
     #   langchain-core
-    #   lazy-loader
     #   marshmallow
     #   pandas-gbq
     #   pytest
@@ -533,8 +513,6 @@ pillow==10.4.0
     # via sentence-transformers
 pip==24.2
     # via ryoma-dev (pyproject.toml)
-pkginfo==1.10.0
-    # via twine
 platformdirs==4.2.2
     # via
     #   black
@@ -580,7 +558,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pwdlib==0.2.0
+pwdlib==0.2.1
     # via fastapi-users
 py==1.11.0
     # via amundsen-databuilder
@@ -633,11 +611,10 @@ pygments==2.18.0
     # via
     #   feast
     #   ipython
-    #   readme-renderer
     #   rich
 pyhocon==0.3.61
     # via amundsen-databuilder
-pyjwt==2.8.0
+pyjwt==2.10.1
     # via
     #   fastapi-users
     #   snowflake-connector-python
@@ -652,8 +629,6 @@ pyparsing==3.1.4
     #   pyhocon
 pypdf==4.3.1
     # via ryoma-lab
-pyproject-hooks==1.1.0
-    # via build
 pyspark==3.5.3
     # via
     #   ibis-framework
@@ -674,14 +649,11 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
     # via uvicorn
 python-engineio==4.9.1
-    # via
-    #   python-socketio
-    #   reflex
-python-multipart==0.0.9
+    # via python-socketio
+python-multipart==0.0.20
     # via
     #   fastapi-users
     #   reflex
-    #   starlette-admin
 python-socketio==5.11.4
     # via reflex
 pytz==2024.1
@@ -706,20 +678,14 @@ pyyaml==6.0.2
     #   uvicorn
 qdrant-client==1.11.1
     # via langchain-qdrant
-readme-renderer==44.0
-    # via twine
 redis==5.0.8
     # via reflex
 referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-reflex==0.6.8
-    # via
-    #   reflex-chakra
-    #   ryoma-lab
-reflex-chakra==0.7.0
-    # via reflex
+reflex==0.7.6.post1
+    # via ryoma-lab
 reflex-hosting-cli==0.1.47
     # via reflex
 regex==2024.7.24
@@ -744,27 +710,21 @@ requests==2.32.3
     #   snowflake-connector-python
     #   tiktoken
     #   transformers
-    #   twine
 requests-oauthlib==2.0.0
     # via google-auth-oauthlib
 requests-toolbelt==1.0.0
-    # via
-    #   openai-responses
-    #   twine
+    # via openai-responses
 responses==0.25.3
     # via amundsen-databuilder
 respx==0.20.2
     # via openai-responses
 retrying==1.3.4
     # via amundsen-databuilder
-rfc3986==2.0.0
-    # via twine
 rich==13.8.0
     # via
     #   ibis-framework
     #   reflex
     #   reflex-hosting-cli
-    #   twine
     #   typer
 rpds-py==0.20.0
     # via
@@ -778,6 +738,7 @@ scikit-learn==1.5.1
     # via sentence-transformers
 scipy==1.13.1
     # via
+    #   datasketch
     #   scikit-learn
     #   sentence-transformers
 sentence-transformers==3.0.1
@@ -789,7 +750,6 @@ setuptools==80.0.1
     #   grpcio-tools
     #   pandas-gbq
     #   pydata-google-auth
-    #   reflex
 shellingham==1.5.4
     # via typer
 simple-websocket==1.0.0
@@ -840,11 +800,7 @@ sqlparse==0.5.1
 stack-data==0.6.3
     # via ipython
 starlette==0.37.2
-    # via
-    #   fastapi
-    #   starlette-admin
-starlette-admin==0.14.1
-    # via reflex
+    # via fastapi
 statsd==4.0.1
     # via amundsen-databuilder
 sympy==1.13.2
@@ -876,9 +832,7 @@ toml==0.10.2
     #   feast
     #   mypy
 tomlkit==0.13.2
-    # via
-    #   reflex
-    #   snowflake-connector-python
+    # via snowflake-connector-python
 toolz==0.12.1
     # via
     #   dask
@@ -907,11 +861,9 @@ transformers==4.44.2
     #   langchain-huggingface
     #   ryoma-lab
     #   sentence-transformers
-twine==5.1.1
-    # via reflex
 typeguard==4.3.0
     # via feast
-typer==0.12.5
+typer==0.16.0
     # via
     #   reflex
     #   ryoma-ai
@@ -958,15 +910,16 @@ urllib3==2.2.2
     #   qdrant-client
     #   requests
     #   responses
-    #   twine
 uvicorn==0.30.6
     # via
     #   feast
     #   reflex
 uvloop==0.20.0
     # via uvicorn
-watchfiles==0.24.0
-    # via uvicorn
+watchfiles==1.1.0
+    # via
+    #   granian
+    #   uvicorn
 wcwidth==0.2.13
     # via prompt-toolkit
 websockets==13.0.1
@@ -974,10 +927,8 @@ websockets==13.0.1
 werkzeug==3.0.4
     # via flask
 wheel==0.44.0
-    # via
-    #   amundsen-databuilder
-    #   reflex
-wrapt==1.16.0
+    # via amundsen-databuilder
+wrapt==1.17.2
     # via reflex
 wsproto==1.2.0
     # via simple-websocket

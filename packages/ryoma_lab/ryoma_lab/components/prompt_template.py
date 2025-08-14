@@ -1,6 +1,7 @@
 """The Prompt template Page."""
 
 import reflex as rx
+import reflex_chakra as rc
 from ryoma_lab.components.code_editor import codeeditor
 from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
 from ryoma_lab.templates import template
@@ -10,15 +11,15 @@ def prompt_card(pt: PromptTemplate):
     """Create a prompt card."""
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.chakra.card(
-                rx.chakra.vstack(
+            rc.card(
+                rc.vstack(
                     rx.foreach(
                         pt.prompt_lines.split("\n"),
-                        lambda line: rx.chakra.text(line, padding="2px"),
+                        lambda line: rc.text(line, padding="2px"),
                     ),
                     align_items="flex-start",
                 ),
-                header=rx.chakra.heading(pt.prompt_template_name, size="md"),
+                header=rc.heading(pt.prompt_template_name, size="md"),
                 # adjust the size and make it scrollable
                 direction="column",
                 overflow="auto",
@@ -32,10 +33,10 @@ def prompt_card(pt: PromptTemplate):
         rx.dialog.content(
             rx.dialog.title(pt.prompt_template_name, size="6"),
             rx.flex(
-                rx.chakra.badge(f"Representation: {pt.prompt_repr}"),
-                rx.chakra.badge(f"k_shot: {pt.k_shot}", color_scheme="purple"),
-                rx.chakra.badge(f"Type: {pt.selector_type}", color_scheme="blue"),
-                rx.chakra.badge(
+                rc.badge(f"Representation: {pt.prompt_repr}"),
+                rc.badge(f"k_shot: {pt.k_shot}", color_scheme="purple"),
+                rc.badge(f"Type: {pt.selector_type}", color_scheme="blue"),
+                rc.badge(
                     f"Type: {pt.prompt_template_type}", color_scheme="green"
                 ),
                 justify="between",
@@ -43,7 +44,7 @@ def prompt_card(pt: PromptTemplate):
                 direction="row",
                 padding="2px",
             ),
-            rx.chakra.vstack(
+            rc.vstack(
                 rx.foreach(pt.prompt_lines.split("\n"), lambda line: rx.text(line)),
                 align_items="flex-start",
                 font_size="sm",
@@ -61,7 +62,7 @@ def prompt_card(pt: PromptTemplate):
 
 def render_question():
     return rx.box(
-        rx.chakra.text("A list of built-in prompt templates for you to choose from."),
+        rc.text("A list of built-in prompt templates for you to choose from."),
         rx.badge(
             "Question: " + PromptTemplateState.question,
             variant="outline",
@@ -76,7 +77,7 @@ def render_builtin_prompt_templates() -> rx.Component:
     return rx.flex(
         render_question(),
         rx.box(
-            rx.chakra.flex(
+            rc.flex(
                 rx.foreach(
                     PromptTemplateState.prompt_templates,
                     lambda pt: rx.cond(
@@ -96,11 +97,11 @@ def render_builtin_prompt_templates() -> rx.Component:
 def render_custom_prompt_templates() -> rx.Component:
     return rx.flex(
         rx.box(
-            rx.chakra.text("A list of custom prompt templates that you have created."),
+            rc.text("A list of custom prompt templates that you have created."),
             margin_top="20px",
         ),
         rx.box(
-            rx.chakra.flex(
+            rc.flex(
                 rx.foreach(
                     PromptTemplateState.prompt_templates,
                     lambda pt: rx.cond(
@@ -200,7 +201,8 @@ def render_create_prompt_template() -> rx.Component:
                             min_height="20em",
                             extensions=rx.Var.create(
                                 '[loadLanguage("sql"), loadLanguage("python")]',
-                                _var_is_local=False,
+                                # TODO: Fix this to use the correct type
+                                # _var_is_local=False,
                             ),
                             on_change=PromptTemplateState.set_prompt_template_lines,
                         ),
@@ -227,8 +229,11 @@ def render_create_prompt_template() -> rx.Component:
                     spacing="3",
                     justify="end",
                 ),
-                on_escape_key_down=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
-                on_interact_outside=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
+                # TODO: reflex.utils.exceptions.EventFnArgMismatchError: Event on_escape_key_down only provides 0 arguments,
+                #  but <function render_create_prompt_template.<locals>.<lambda> at 0x31129b060> requires at least 1 arguments
+                #  to be passed to the event handler.
+                # on_escape_key_down=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
+                # on_interact_outside=lambda _: PromptTemplateState.toggle_create_prompt_template_dialog(),
             ),
             open=PromptTemplateState.create_prompt_template_dialog_open,
         ),

@@ -178,7 +178,8 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                     ),
                     extensions=rx.Var.create(
                         '[loadLanguage("sql"), loadLanguage("python")]',
-                        _var_is_local=False,
+                        # TODO: Fix this to use the correct type
+                        # _var_is_local=False,
                     ),
                 ),
                 codeeditor(

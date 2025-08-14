@@ -24,6 +24,8 @@ except ImportError:
     RestCatalog = None
     HiveCatalog = None
     GlueCatalog = None
+    IcebergTable = None
+    IcebergSchema = None
 
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import (
@@ -216,9 +218,9 @@ class IcebergDataSource(DataSource):
             return Table(table_name=table_name, columns=[])
 
     def _build_column_profile_from_iceberg(
-        self, 
-        field, 
-        iceberg_table: IcebergTable
+        self,
+        field,
+        iceberg_table: Any
     ) -> ColumnProfile:
         """Build column profile from Iceberg field and table statistics."""
         try:
@@ -309,9 +311,9 @@ class IcebergDataSource(DataSource):
             )
 
     def _build_table_profile_from_iceberg(
-        self, 
-        table_name: str, 
-        iceberg_table: IcebergTable
+        self,
+        table_name: str,
+        iceberg_table: Any
     ) -> TableProfile:
         """Build table profile from Iceberg metadata."""
         try:
@@ -351,7 +353,7 @@ class IcebergDataSource(DataSource):
                 profiled_at=datetime.now()
             )
 
-    def _get_identity_fields(self, iceberg_table: IcebergTable) -> set:
+    def _get_identity_fields(self, iceberg_table: Any) -> set:
         """Get identity/primary key field IDs from Iceberg table."""
         try:
             # Iceberg doesn't have traditional primary keys, but we can check partition specs

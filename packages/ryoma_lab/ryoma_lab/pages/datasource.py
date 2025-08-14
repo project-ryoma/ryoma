@@ -275,7 +275,7 @@ def data_source_table() -> rx.Component:
                 ),
             ),
             rx.table.body(rx.foreach(DataSourceState.datasources, show_datasource)),
-            size="6",
+            size="3",
             width="100%",
             justify="stretch",
             variant="surface",

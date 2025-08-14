@@ -1,7 +1,7 @@
 import { useColorMode as chakraUseColorMode } from "@chakra-ui/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { ColorModeContext, defaultColorMode } from "/utils/context.js";
+import { ColorModeContext, defaultColorMode } from "$/utils/context.js";
 
 export default function ChakraColorModeProvider({ children }) {
   const { theme, resolvedTheme, setTheme } = useTheme();

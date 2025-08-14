@@ -1,6 +1,7 @@
 """The workspace page."""
 
 import reflex as rx
+import reflex_chakra as rc
 from ryoma_lab import styles
 from ryoma_lab.components.loading_icon import loading_icon
 from ryoma_lab.components.model_selector import (
@@ -81,8 +82,8 @@ def action_bar() -> rx.Component:
     """The action bar to send a new message."""
     return rx.center(
         rx.vstack(
-            rx.chakra.form(
-                rx.chakra.form_control(
+            rc.form(
+                rc.form_control(
                     rx.flex(
                         rx.radix.text_area(
                             placeholder="Type something...",
@@ -133,8 +134,8 @@ def action_bar() -> rx.Component:
 
 def prompt_template_selector() -> rx.Component:
     """The prompt template selector."""
-    return rx.chakra.form(
-        rx.chakra.form_control(
+    return rc.form(
+        rc.form_control(
             rx.text(
                 "Prompt Template",
                 asi_="div",
@@ -173,7 +174,7 @@ def prompt_template_selector() -> rx.Component:
                                 ),
                             ),
                         ),
-                        rx.chakra.button(
+                        rc.button(
                             rx.flex("Create new prompt +", spacing="3"),
                             size="sm",
                             width="100%",
@@ -189,7 +190,7 @@ def prompt_template_selector() -> rx.Component:
                 ChatState.vector_feature_dialog_open,
                 rx.flex(
                     rx.form(
-                        rx.chakra.form_control(
+                        rc.form_control(
                             rx.text(
                                 "Embedding Model *",
                                 asi_="div",
@@ -291,7 +292,7 @@ def agent_selector() -> rx.Component:
                         AgentState.agent_names,
                         lambda agent_name: rx.select.item(agent_name, value=agent_name),
                     ),
-                    rx.chakra.button(
+                    rc.button(
                         "Create new agent +",
                         on_click=lambda: rx.redirect("/agent"),
                         size="sm",
@@ -332,8 +333,8 @@ def chat_model_selector_render() -> rx.Component:
 
 
 def chatbox_render() -> rx.Component:
-    return rx.chakra.flex(
-        rx.chakra.hstack(
+    return rc.flex(
+        rc.hstack(
             rx.flex(
                 chat_model_selector_render(),
                 agent_selector(),
@@ -343,7 +344,7 @@ def chatbox_render() -> rx.Component:
             ),
             rx.dialog.root(
                 rx.dialog.trigger(
-                    rx.chakra.button(
+                    rc.button(
                         rx.tooltip(
                             rx.icon("settings"),
                             content="Try advanced settings!",
@@ -389,7 +390,7 @@ def chatbox_render() -> rx.Component:
             spacing="4",
             align_items="start",
         ),
-        rx.chakra.vstack(
+        rc.vstack(
             chat_history(),
             action_bar(),
             background_color=rx.color("mauve", 2),
@@ -427,7 +428,7 @@ def chatbox_render() -> rx.Component:
 )
 def workspace() -> rx.Component:
     """The main app."""
-    return rx.chakra.flex(
+    return rc.flex(
         file_directory_sidebar(),
         rx.box(
             rzp.group(

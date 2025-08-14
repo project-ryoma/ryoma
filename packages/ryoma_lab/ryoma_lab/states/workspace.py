@@ -256,7 +256,7 @@ class WorkspaceState(BaseState):
         else:
             return UnknownOutput()
 
-    @rx.background
+    @rx.event(background=True)
     async def execute_cell(self, cell_index: int):
         if 0 <= cell_index < len(self.cells):
             async with self:

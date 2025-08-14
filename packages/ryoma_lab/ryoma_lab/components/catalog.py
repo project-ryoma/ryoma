@@ -1,6 +1,7 @@
 """The data catalog page """
 
 import reflex as rx
+import reflex_chakra as rc
 from ryoma_ai.datasource.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
@@ -25,32 +26,32 @@ def catalog_search():
 
 def render_catalog_list():
     return rx.vstack(
-        rx.chakra.accordion(
+        rc.accordion(
             rx.foreach(
                 CatalogState.catalogs,
-                lambda catalog: rx.chakra.accordion_item(
-                    rx.chakra.accordion_button(
-                        rx.chakra.accordion_icon(),
-                        rx.chakra.heading(catalog.catalog_name, size="md"),
+                lambda catalog: rc.accordion_item(
+                    rc.accordion_button(
+                        rc.accordion_icon(),
+                        rc.heading(catalog.catalog_name, size="md"),
                     ),
-                    rx.chakra.accordion_panel(
-                        rx.chakra.accordion(
+                    rc.accordion_panel(
+                        rc.accordion(
                             rx.foreach(
                                 catalog.schemas,
-                                lambda schema: rx.chakra.accordion_item(
-                                    rx.chakra.accordion_button(
-                                        rx.chakra.accordion_icon(),
-                                        rx.chakra.text(
+                                lambda schema: rc.accordion_item(
+                                    rc.accordion_button(
+                                        rc.accordion_icon(),
+                                        rc.text(
                                             schema.schema_name, font_size="md"
                                         ),
                                     ),
-                                    rx.chakra.accordion_panel(
-                                        rx.chakra.accordion(
+                                    rc.accordion_panel(
+                                        rc.accordion(
                                             rx.foreach(
                                                 schema.tables,
-                                                lambda table: rx.chakra.accordion_item(
-                                                    rx.chakra.accordion_button(
-                                                        rx.chakra.text(
+                                                lambda table: rc.accordion_item(
+                                                    rc.accordion_button(
+                                                        rc.text(
                                                             table.table_name,
                                                             font_size="xs",
                                                         ),
@@ -91,20 +92,20 @@ def render_metadata_content():
             CatalogState.table_metadata.description,
             rx.text(CatalogState.table_metadata.description),
         ),
-        rx.chakra.table(
-            rx.chakra.thead(
-                rx.chakra.th("Column Name"),
-                rx.chakra.th("Type"),
-                rx.chakra.th("Description"),
+        rc.table(
+            rc.thead(
+                rc.th("Column Name"),
+                rc.th("Type"),
+                rc.th("Description"),
                 background_color=rx.color("mauve", 6),
             ),
-            rx.chakra.tbody(
+            rc.tbody(
                 rx.foreach(
                     CatalogState.table_metadata.columns,
-                    lambda column: rx.chakra.tr(
-                        rx.chakra.td(column.name),
-                        rx.chakra.td(column.type),
-                        rx.chakra.td(column.description),
+                    lambda column: rc.tr(
+                        rc.td(column.name),
+                        rc.td(column.type),
+                        rc.td(column.description),
                     ),
                 ),
                 background_color=rx.color("mauve", 3),
