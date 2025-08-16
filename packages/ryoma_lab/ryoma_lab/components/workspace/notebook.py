@@ -176,17 +176,14 @@ def cell_render(cell: Cell, index: int) -> rx.Component:
                     on_change=lambda content: WorkspaceState.update_cell_content(
                         index, content
                     ),
-                    extensions=rx.Var.create(
-                        '[loadLanguage("sql"), loadLanguage("python")]',
-                        # TODO: Fix this to use the correct type
-                        # _var_is_local=False,
-                    ),
+                    # extensions=rx.Var.create("[loadLanguage('sql'), loadLanguage('python')]"),
                 ),
                 codeeditor(
                     value=cell.content,
                     on_change=lambda content: WorkspaceState.update_cell_content(
                         index, content
                     ),
+                    # extensions=rx.Var.create("[loadLanguage('sql'), loadLanguage('python')]"),
                 ),
             ),
             rx.cond(

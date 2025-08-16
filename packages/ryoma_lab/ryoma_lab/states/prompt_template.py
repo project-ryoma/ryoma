@@ -22,8 +22,8 @@ class PromptTemplateState(AIState):
     create_prompt_template_dialog_open: bool = False
 
     @rx.var
-    def get_language_extensions(self) -> List[str]:
-        return ["loadLanguage('sql')"]
+    def get_language_extensions(self) -> str:
+        return ""
 
     def copy_to_current_prompt_template(self, prompt_template_name: str):
         pt = next(

@@ -165,7 +165,7 @@ def sync_data_catalog_render(
                     rx.dialog.close(
                         rx.button(
                             "Cancel",
-                            variant="soft",
+                            variant="outline",
                             color_scheme="gray",
                         )
                     ),
@@ -207,7 +207,7 @@ def index_data_catalog_render(
                     ),
                     rx.select.content(
                         rx.foreach(
-                            VectorStoreState.vector_stores,
+                            VectorStoreState.document_projects,
                             lambda project: rx.select.item(
                                 project.project_name,
                                 value=project.project_name,
@@ -216,27 +216,6 @@ def index_data_catalog_render(
                     ),
                     value=CatalogState.vector_store_project_name,
                     on_change=CatalogState.set_vector_store_project_name,
-                ),
-                rx.cond(
-                    CatalogState.vector_store_project_name,
-                    rx.select.root(
-                        rx.select.trigger(
-                            placeholder="Select Feature View to store in Vector Store",
-                            width="100%",
-                            margin_top="1em",
-                        ),
-                        rx.select.content(
-                            rx.foreach(
-                                VectorStoreState.current_feature_views,
-                                lambda feature_view: rx.select.item(
-                                    feature_view.name,
-                                    value=feature_view.name,
-                                ),
-                            )
-                        ),
-                        value=CatalogState.feature_view_name,
-                        on_change=lambda x: CatalogState.set_feature_view_name(x),
-                    ),
                 ),
                 rx.flex(
                     rx.dialog.close(
@@ -249,7 +228,7 @@ def index_data_catalog_render(
                     rx.dialog.close(
                         rx.button(
                             "Cancel",
-                            variant="soft",
+                            variant="outline",
                             color_scheme="gray",
                         )
                     ),

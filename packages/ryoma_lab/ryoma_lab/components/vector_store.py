@@ -56,7 +56,7 @@ def upload_documents():
                     rx.dialog.close(
                         rc.button(
                             "Close",
-                            variant="soft",
+                            variant="outline",
                             color_scheme="gray",
                         ),
                     ),
@@ -115,7 +115,7 @@ def setup_project():
                     rx.dialog.close(
                         rx.button(
                             "Cancel",
-                            variant="soft",
+                            variant="outline",
                             color_scheme="gray",
                         )
                     ),
@@ -155,7 +155,10 @@ def index_documents_dialog() -> rx.Component:
                 padding_bottom="1em",
             ),
             rx.flex(
-                embedding_model_selector(),
+                embedding_model_selector(
+                    VectorStoreState.selected_model,
+                    VectorStoreState.set_selected_model,
+                ),
                 rx.flex(
                     rx.dialog.close(
                         rc.button(
@@ -184,14 +187,22 @@ def index_documents_dialog() -> rx.Component:
 def project_info_render(project) -> rx.Component:
     return rx.flex(
         rc.text(f"Documents: {project.document_count}", size="sm"),
-        rc.text(f"Description: {project.description or 'No description'}", size="sm"),
-        rc.text(f"Created: {project.created_at.strftime('%Y-%m-%d') if project.created_at else 'Unknown'}", size="sm"),
+        rx.cond(
+            project.description,
+            rc.text(f"Description: {project.description}", size="sm"),
+            rc.text("Description: No description", size="sm")
+        ),
+        rx.cond(
+            project.created_at,
+            rc.text(f"Created: {project.created_at}", size="sm"),
+            rc.text("Created: Unknown", size="sm")
+        ),
         rx.button(
             "Delete",
             color_scheme="red",
             variant="outline",
             size="1",
-            on_click=lambda: VectorStoreState.delete_project(project.project_name),
+            on_click=VectorStoreState.delete_project(project.project_name),
         ),
         direction="column",
         spacing="2",
@@ -249,10 +260,18 @@ def show_projects():
             ),
             rx.tabs.content(
                 show_project_details(),
-                value=VectorStoreState.current_project.project_name if VectorStoreState.current_project else "",
+                value=rx.cond(
+                    VectorStoreState.current_project,
+                    VectorStoreState.current_project.project_name,
+                    ""
+                ),
                 width="100%",
             ),
-            value=VectorStoreState.current_project.project_name if VectorStoreState.current_project else "",
+            value=rx.cond(
+                VectorStoreState.current_project,
+                VectorStoreState.current_project.project_name,
+                ""
+            ),
             on_change=VectorStoreState.set_current_project,
             orientation="horizontal",
             height="100vh",

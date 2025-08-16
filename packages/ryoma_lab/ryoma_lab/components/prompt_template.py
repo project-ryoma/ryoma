@@ -199,11 +199,7 @@ def render_create_prompt_template() -> rx.Component:
                             value=PromptTemplateState.prompt_template_lines,
                             width="100%",
                             min_height="20em",
-                            extensions=rx.Var.create(
-                                '[loadLanguage("sql"), loadLanguage("python")]',
-                                # TODO: Fix this to use the correct type
-                                # _var_is_local=False,
-                            ),
+                            # extensions=rx.Var.create("[loadLanguage('sql')]"),
                             on_change=PromptTemplateState.set_prompt_template_lines,
                         ),
                     ),
