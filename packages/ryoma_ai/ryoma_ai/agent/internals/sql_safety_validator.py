@@ -268,7 +268,6 @@ class SqlSafetyValidator:
         """Check for access to system tables."""
         violations = []
         query_lower = sql_query.lower()
-        print("Checking for system tables in query...", query_lower)
 
         for system_table in self.system_tables:
             if system_table.lower() in query_lower:

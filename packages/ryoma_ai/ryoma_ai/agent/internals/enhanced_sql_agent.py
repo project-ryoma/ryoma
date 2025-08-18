@@ -165,7 +165,8 @@ class EnhancedSqlAgent(WorkflowAgent):
             "safety_check": None,
             "final_answer": None,
             "retry_count": 0,
-            "max_retries": 3
+            "max_retries": 3,
+            "sql_approval_received": False
         }
 
         return initialized_state
@@ -273,7 +274,8 @@ class EnhancedSqlAgent(WorkflowAgent):
         context = {
             "relevant_tables": state.get("relevant_tables", []),
             "query_plan": state.get("query_plan", {}),
-            "retry_count": state.get("retry_count", 0)
+            "retry_count": state.get("retry_count", 0),
+            "error_info": state.get("error_info", {}).get("error_message", "") if state.get("error_info") else ""
         }
 
         # Use the chat agent to generate SQL
@@ -306,15 +308,10 @@ class EnhancedSqlAgent(WorkflowAgent):
         # Extract SQL content from message object if needed
         if hasattr(sql_query, 'content'):
             sql_content = sql_query.content
-            print('here1')
         elif isinstance(sql_query, str):
             sql_content = sql_query
-            print('here2')
         else:
             sql_content = str(sql_query)
-            print('here3')
-
-        print("SQL Content for Safety Validation:", sql_content)  # Debug print
 
         if not sql_content:
             state["safety_check"] = {"is_safe": False, "reason": "No SQL query generated"}
@@ -361,66 +358,56 @@ class EnhancedSqlAgent(WorkflowAgent):
                        state: MessageState) -> MessageState:
         """Execute the validated SQL query with human approval."""
         sql_query = state.get("generated_sql", "")
-        print("SQL Query for Execution:", sql_query)  # Debug print
         logger.debug("Step 6: Executing SQL query: %s", sql_query)
 
         if not sql_query:
             state["execution_result"] = "No SQL query to execute"
             return state
 
-        # Request human approval before executing
-        approval_response = interrupt({
-            "type": "sql_execution_approval",
-            "sql_query": sql_query,
-            "question": state.get("question", ""),
-            "message": f"Please approve the following SQL query for execution:\n\n{sql_query}\n\nOptions:\n- 'yes' or 'approve' to execute\n- 'no' or 'deny' to reject\n- Provide edited SQL query to use instead"
-        })
-        
-        # Handle approval response
-        if isinstance(approval_response, str):
-            response_lower = approval_response.lower().strip()
-            if response_lower in ["no", "deny", "reject"]:
-                state["execution_result"] = "Query execution denied by user"
-                state["messages"].append(AIMessage(
-                    content="Query execution was denied by user."
-                ))
-                return state
-            elif response_lower not in ["yes", "approve", "ok"]:
-                # Treat as edited SQL query
-                sql_query = approval_response.strip()
-                state["generated_sql"] = sql_query
-                state["messages"].append(AIMessage(
-                    content=f"Using user-edited query: {sql_query}"
-                ))
-        elif isinstance(approval_response, dict):
-            if approval_response.get("action") == "deny":
-                state["execution_result"] = "Query execution denied by user"
-                state["messages"].append(AIMessage(
-                    content="Query execution was denied by user."
-                ))
-                return state
-            elif approval_response.get("edited_sql"):
-                sql_query = approval_response["edited_sql"]
-                state["generated_sql"] = sql_query
-                state["messages"].append(AIMessage(
-                    content=f"Using user-edited query: {sql_query}"
-                ))
+        # Check if we already have approval or if this is the first time
+        if not state.get("sql_approval_received"):
+            # Request human approval using dynamic interrupt
+            approval_response = interrupt({
+                "type": "sql_execution_approval",
+                "sql_query": sql_query,
+                "question": state.get("original_question", ""),
+                "message": f"Please approve the following SQL query for execution:\n\n{sql_query}\n\nOptions:\n- 'approve' to execute\n- 'deny' to reject\n- Provide modified SQL query to use instead"
+            })
+
+            # Mark that we received approval to avoid re-interrupting
+            state["sql_approval_received"] = True
+
+            # Handle the approval response
+            if isinstance(approval_response, str):
+                response_lower = approval_response.lower().strip()
+                if response_lower in ["deny", "reject", "no"]:
+                    state["execution_result"] = "Query execution denied by user"
+                    state["messages"].append(AIMessage(
+                        content="Query execution was denied by user."
+                    ))
+                    return state
+                elif response_lower not in ["approve", "yes", "ok"]:
+                    # Treat as modified SQL query
+                    sql_query = approval_response.strip()
+                    state["generated_sql"] = sql_query
+                    state["messages"].append(AIMessage(
+                        content=f"Using user-modified query: {sql_query}"
+                    ))
 
         try:
-            # Use the SQL query tool to execute
+            # Execute the SQL query
             tool = SqlQueryTool()
             result = tool._run(
                 query=sql_query,
                 store=self.store
             )
-            print("result of query execution:", result)
 
             if result.is_success:
                 state["execution_result"] = result.data
                 state["current_step"] = "query_execution"
 
                 state["messages"].append(AIMessage(
-                    content=f"Query approved and executed successfully ({result.row_count} rows returned)"
+                    content=f"Query executed successfully ({result.row_count} rows returned)"
                 ))
             else:
                 # Handle query execution error
@@ -470,6 +457,7 @@ class EnhancedSqlAgent(WorkflowAgent):
                 error_info["sql_query"],
                 error_info.get("error_message", "")
             )
+            print("Corrected SQL:", corrected_sql)
 
             if corrected_sql:
                 state["generated_sql"] = corrected_sql
@@ -478,6 +466,8 @@ class EnhancedSqlAgent(WorkflowAgent):
                 ))
                 # Clear error info since we're retrying with corrected SQL
                 state["error_info"] = None
+                # Reset approval flag so the interrupt can be triggered again
+                state["sql_approval_received"] = False
             else:
                 # Provide manual suggestions
                 suggestions = [s.description for s in recovery_strategies[:3]]
@@ -559,14 +549,32 @@ class EnhancedSqlAgent(WorkflowAgent):
 
         if context.get("relevant_tables"):
             tables = context["relevant_tables"][:3]
-            prompt += "Relevant tables:\n"
+            prompt += "Available tables and their schemas:\n\n"
             for table in tables:
-                prompt += f"- {table['schema']}.{table['table']}: {table.get('reasoning', '')}\n"
-            prompt += "\n"
+                table_name = f"{table['schema']}.{table['table']}"
+                prompt += f"Table: {table_name}\n"
+
+                # Include detailed column information if available
+                if 'table_obj' in table and table['table_obj'] and hasattr(table['table_obj'], 'columns'):
+                    prompt += "Columns (use EXACT names with correct case):\n"
+                    for column in table['table_obj'].columns:
+                        nullable_info = "" if column.nullable else " NOT NULL"
+                        pk_info = " PRIMARY KEY" if column.primary_key else ""
+                        prompt += f"  - {column.name}: {column.type}{nullable_info}{pk_info}\n"
+                elif 'columns' in table:
+                    # Fallback to basic column list if available
+                    prompt += f"Columns (use EXACT names): {', '.join(table['columns'])}\n"
+
+                if table.get('reasoning'):
+                    prompt += f"Relevance: {table['reasoning']}\n"
+                prompt += "\n"
 
         if context.get("retry_count", 0) > 0:
-            prompt += f"This is retry attempt {context['retry_count']}. Please fix any previous issues.\n\n"
+            error_info = context.get("error_info", "")
+            prompt += f"This is retry attempt {context['retry_count']}. Previous error: {error_info}\n"
+            prompt += "IMPORTANT: Use the EXACT column names as shown above with correct capitalization.\n\n"
 
+        prompt += "IMPORTANT: Use the exact column names as specified above (case-sensitive).\n"
         prompt += "Generate only the SQL query, no explanations."
 
         return prompt
@@ -574,16 +582,29 @@ class EnhancedSqlAgent(WorkflowAgent):
     def _extract_sql_from_response(self,
                                    response: str) -> str:
         """Extract SQL query from LLM response."""
-        # Simple extraction - in practice, you might use more sophisticated parsing
-        lines = response.strip().split('\n')
-        sql_lines = []
+        import re
 
-        for line in lines:
-            line = line.strip()
-            if line and not line.startswith('#') and not line.startswith('--'):
-                sql_lines.append(line)
+        # First try to extract from code blocks
+        code_block_match = re.search(r'```(?:sql)?\s*(.*?)\s*```', response, re.DOTALL | re.IGNORECASE)
+        if code_block_match:
+            sql_content = code_block_match.group(1).strip()
+        else:
+            # Fallback to line-by-line extraction
+            lines = response.strip().split('\n')
+            sql_lines = []
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('#') and not line.startswith('--'):
+                    sql_lines.append(line)
+            sql_content = ' '.join(sql_lines)
 
-        return ' '.join(sql_lines)
+        # Clean up common issues
+        sql_content = sql_content.replace('```sql', '').replace('```', '').strip()
+
+        # Remove any leading language identifiers
+        sql_content = re.sub(r'^(sql\s+)', '', sql_content, flags=re.IGNORECASE)
+
+        return sql_content
 
     def _invoke_llm(self,
                     prompt: str) -> str:
@@ -592,7 +613,6 @@ class EnhancedSqlAgent(WorkflowAgent):
             message = message[0]
         if isinstance(message, BaseMessage):
             message = message.content
-        print("here, llm message:", message)
         return str(message)
 
     def get_workflow_state_schema(self) -> type:

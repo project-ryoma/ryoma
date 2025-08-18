@@ -194,7 +194,9 @@ class SqlErrorHandler:
                 r"unknown table",
                 r"unknown column",
                 r"ambiguous column",
-                r"function.*doesn't exist"
+                r"function.*doesn't exist",
+                r"column.*must appear in the group by clause",
+                r"perhaps you meant to reference the column"
             ],
             SqlErrorType.PERMISSION_ERROR: [
                 r"access denied",
@@ -323,8 +325,25 @@ class SqlErrorHandler:
                         requires_user_input=True
                     ))
 
+        # PostgreSQL case sensitivity hint (e.g., 'Perhaps you meant to reference the column "artist.Age"')
+        if "perhaps you meant to reference the column" in error_msg or "hint:" in error_msg:
+            # Use original error message to preserve case in hint extraction
+            suggested_column = self._extract_postgresql_column_hint(sql_error.original_error)
+            if suggested_column:
+                # Extract the column name without table prefix for replacement
+                column_part = suggested_column.split('.')[-1].strip('"')
+                corrected_sql = self._fix_postgresql_column_case(sql, column_part, suggested_column)
+                strategies.append(RecoveryStrategy(
+                    strategy_id="fix_postgresql_column_case",
+                    description=f"Fix column case sensitivity using PostgreSQL hint: {suggested_column}",
+                    corrected_sql=corrected_sql,
+                    confidence=0.9,  # High confidence since PostgreSQL provided the hint
+                    explanation=f"PostgreSQL suggested using {suggested_column} instead",
+                    requires_user_input=False  # Auto-fix since PostgreSQL provided the exact solution
+                ))
+
         # Column doesn't exist
-        if "column" in error_msg and ("doesn't exist" in error_msg or "not found" in error_msg):
+        elif "column" in error_msg and ("doesn't exist" in error_msg or "not found" in error_msg):
             column_name = self._extract_column_name_from_error(error_msg)
             if column_name and self.datasource:
                 similar_columns = self._find_similar_column_names(column_name, sql)
@@ -537,3 +556,46 @@ class SqlErrorHandler:
             return 0.0
 
         return len(common_chars) / len(total_chars)
+
+    def _extract_postgresql_column_hint(self, error_msg: str) -> Optional[str]:
+        """Extract the suggested column name from PostgreSQL hint message."""
+        # Pattern: 'Perhaps you meant to reference the column "artist.Age"'
+        # Also handles: 'HINT:  Perhaps you meant to reference the column "artist.Age".'
+        patterns = [
+            r'perhaps you meant to reference the column "([^"]+)"',
+            r'hint:.*perhaps you meant to reference the column "([^"]+)"'
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, error_msg, re.IGNORECASE)
+            if match:
+                return match.group(1)
+
+        return None
+
+    def _fix_postgresql_column_case(self, sql: str, original_column: str, suggested_column: str) -> str:
+        """Fix PostgreSQL column case sensitivity by replacing with suggested column."""
+        # Handle both bare column names and table.column references
+
+        # If suggested column has table prefix, extract the column name
+        if '.' in suggested_column:
+            _, column_name = suggested_column.split('.', 1)
+            column_name = column_name.strip('"')
+
+            # Replace patterns like "ORDER BY Age" with "ORDER BY \"Age\""
+            # Use the exact case from the PostgreSQL hint
+            patterns = [
+                rf'\b{re.escape(original_column)}\b',  # Bare column name
+                rf'\b\w+\.{re.escape(original_column)}\b',  # table.column
+            ]
+
+            for pattern in patterns:
+                if re.search(pattern, sql, re.IGNORECASE):
+                    # Replace with quoted column name, preserving case from hint
+                    sql = re.sub(pattern, f'"{column_name}"', sql, flags=re.IGNORECASE)
+                    break
+        else:
+            # Simple column name replacement with quotes, preserving case from hint
+            sql = re.sub(rf'\b{re.escape(original_column)}\b', f'"{suggested_column}"', sql, flags=re.IGNORECASE)
+
+        return sql

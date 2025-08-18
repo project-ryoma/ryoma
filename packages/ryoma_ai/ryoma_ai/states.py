@@ -9,10 +9,10 @@ from ryoma_ai.datasource.base import DataSource
 
 class MessageState(TypedDict, total=False):
     messages: Annotated[list, add_messages]
-    
+
     # SQL Agent fields - optional for all agents
     original_question: str
-    current_step: str  
+    current_step: str
     schema_analysis: Optional[Dict]
     relevant_tables: Optional[List[Dict]]
     query_plan: Optional[Dict]
@@ -24,7 +24,8 @@ class MessageState(TypedDict, total=False):
     final_answer: Optional[str]
     retry_count: int
     max_retries: int
-    
+    sql_approval_received: bool
+
     # ReFoRCE Agent fields - also optional
     compressed_schema: Optional[str]
     format_restriction: Optional[FormatRestriction]

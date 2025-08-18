@@ -84,6 +84,9 @@ class WorkflowAgent(ChatAgent):
         self.memory = MemorySaver()
         self._workflow = None
 
+        # Track printed messages to avoid duplicates across stream/invoke calls
+        self._printed_messages = set()
+
     def _bind_tools(self):
         logging.info(f"Binding tools {self.tools} to model")
         if hasattr(self.model, "bind_tools"):
@@ -170,7 +173,6 @@ class WorkflowAgent(ChatAgent):
 
     def _format_messages(self, question: str):
         current_state = self.get_current_state()
-        print("Current state:", current_state)
         if current_state.next and current_state.next[0] == "tools":
             # We are in the tool node, but the user has asked a new question
             # We need to deny the tool call and continue with the user's question
@@ -200,27 +202,16 @@ class WorkflowAgent(ChatAgent):
             events = self.workflow.stream(
                 question, config=self.config, stream_mode="values"
             )
-        elif isinstance(question, dict) and "messages" in question:
-            # Handle direct state input (for initial invocations with MessageState)
-            events = self.workflow.stream(
-                question, config=self.config, stream_mode="values"
-            )
         else:
-            # Handle regular string questions
-            if (
-                not question
-                and tool_mode != ToolMode.DISALLOWED
-                and self.get_current_tool_calls()
-            ):
-                messages = None
-            else:
-                messages = self._format_messages(question)
+            # Handle string questions as new questions - reset printed messages
+            self._printed_messages.clear()
+            messages = self._format_messages(question) if question else None
             events = self.workflow.stream(
                 messages, config=self.config, stream_mode="values"
             )
-        _printed = set()
+
         if display:
-            self._print_graph_events(events, _printed)
+            self._print_graph_events(events, self._printed_messages)
 
         if tool_mode == ToolMode.CONTINUOUS:
             current_state = self.get_current_state()
@@ -230,7 +221,7 @@ class WorkflowAgent(ChatAgent):
                 events = self.workflow.stream(None, config=self.config)
                 if display:
                     logging.info(f"Iteration {iterations}")
-                    self._print_graph_events(events, _printed)
+                    self._print_graph_events(events, self._printed_messages)
                 current_state = self.get_current_state()
         if self.output_parser:
             events = self._parse_output(
@@ -240,7 +231,7 @@ class WorkflowAgent(ChatAgent):
 
     def invoke(
         self,
-        question: Optional[str] = "",
+        question: Optional[Union[str, Command]] = "",
         tool_mode: str = ToolMode.DISALLOWED,
         max_iterations: int = 10,
         display=True,
@@ -248,23 +239,14 @@ class WorkflowAgent(ChatAgent):
         # Handle Command objects for resume operations (human-in-the-loop)
         if isinstance(question, Command):
             result = self.workflow.invoke(question, config=self.config)
-        elif isinstance(question, dict) and "messages" in question:
-            # Handle direct state input (for initial invocations with MessageState)
-            result = self.workflow.invoke(question, config=self.config)
         else:
-            # Handle regular string questions
-            if (
-                not question
-                and tool_mode != ToolMode.DISALLOWED
-                and self.get_current_tool_calls()
-            ):
-                messages = None
-            else:
-                messages = self._format_messages(question)
+            # Handle string questions as new questions - reset printed messages
+            self._printed_messages.clear()
+            messages = self._format_messages(question) if question else None
             result = self.workflow.invoke(messages, config=self.config)
-        _printed = set()
+
         if display:
-            self._print_graph_events(result, _printed)
+            self._print_graph_events(result, self._printed_messages)
 
         if tool_mode == ToolMode.CONTINUOUS:
             logging.info("Starting the iterative invocation process.")
@@ -275,7 +257,7 @@ class WorkflowAgent(ChatAgent):
                 result = self.workflow.invoke(None, config=self.config)
                 if display:
                     logging.info(f"Iteration {iterations}")
-                    self._print_graph_events(result, _printed)
+                    self._print_graph_events(result, self._printed_messages)
                 current_state = self.get_current_state()
         if self.output_parser:
             result = self._parse_output(
@@ -337,26 +319,25 @@ class WorkflowAgent(ChatAgent):
         return self.final_prompt_template | self.model
 
     def call_model(self, state: MessageState, config: RunnableConfig):
-        print("Calling model with state:", state)
         chain = self._build_chain()
         response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
     def _print_graph_events(self, events: Union[MessageState, List[MessageState]], printed, max_length=1500):
-        print("Printing graph events: ", events)
         if isinstance(events, dict):
             events = [events]
+
         for event in events:
-                messages = self._get_event_message(event)
-                if messages:
-                    for message in messages:
-                        # Check if message has id attribute (is a proper message object)
-                        if hasattr(message, 'id') and message.id not in printed:
-                            msg_repr = message.pretty_repr(html=True)
-                            if len(msg_repr) > max_length:
-                                msg_repr = msg_repr[:max_length] + " ... (truncated)"
-                            print(msg_repr)
-                            printed.add(message.id)
+            messages = self._get_event_message(event)
+            if messages:
+                for message in messages:
+                    # Check if message has id attribute (is a proper message object)
+                    if hasattr(message, 'id') and message.id not in printed:
+                        msg_repr = message.pretty_repr(html=True)
+                        if len(msg_repr) > max_length:
+                            msg_repr = msg_repr[:max_length] + " ... (truncated)"
+                        print(msg_repr)
+                        printed.add(message.id)
 
     def _get_event_message(self, event: MessageState):
         if "tools" in event:
