@@ -323,7 +323,7 @@ class WorkflowAgent(ChatAgent):
         response = chain.invoke(state, self.config)
         return {"messages": [response]}
 
-    def _print_graph_events(self, events: Union[MessageState, List[MessageState]], printed, max_length=1500):
+    def _print_graph_events(self, events, printed, max_length=1500):
         if isinstance(events, dict):
             events = [events]
 

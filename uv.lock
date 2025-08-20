@@ -4217,6 +4217,7 @@ name = "ryoma-ai"
 version = "0.0.2"
 source = { editable = "packages/ryoma_ai" }
 dependencies = [
+    { name = "click" },
     { name = "datasketch" },
     { name = "httpx" },
     { name = "ipython" },
@@ -4229,12 +4230,14 @@ dependencies = [
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "pydantic" },
+    { name = "rich" },
     { name = "typer" },
     { name = "types-setuptools" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.0.0" },
     { name = "datasketch", specifier = ">=1.6.5" },
     { name = "httpx", specifier = "==0.27.2" },
     { name = "ipython", specifier = ">=8.14.0" },
@@ -4247,6 +4250,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.2.2" },
     { name = "pyarrow", specifier = ">=16.1.0" },
     { name = "pydantic", specifier = ">=2.7.1" },
+    { name = "rich", specifier = ">=13.0.0" },
     { name = "typer", specifier = ">=0.12.3" },
     { name = "types-setuptools", specifier = ">=70.0.0.20240524" },
 ]

@@ -126,7 +126,7 @@ class EnhancedSqlAgent(WorkflowAgent):
             "handle_error",
             self._should_retry,
             {
-                "retry": "generate_sql",
+                "retry": "validate_safety",  # Route corrected SQL back to safety validation, not generation
                 "give_up": "format_response"
             }
         )
@@ -403,7 +403,8 @@ class EnhancedSqlAgent(WorkflowAgent):
             )
 
             if result.is_success:
-                state["execution_result"] = result.data
+                # Store the artifact instead of raw DataFrame to avoid serialization issues
+                state["execution_result"] = result.artifact if hasattr(result, 'artifact') and result.artifact else str(result.data)
                 state["current_step"] = "query_execution"
 
                 state["messages"].append(AIMessage(
@@ -457,7 +458,6 @@ class EnhancedSqlAgent(WorkflowAgent):
                 error_info["sql_query"],
                 error_info.get("error_message", "")
             )
-            print("Corrected SQL:", corrected_sql)
 
             if corrected_sql:
                 state["generated_sql"] = corrected_sql
@@ -466,8 +466,8 @@ class EnhancedSqlAgent(WorkflowAgent):
                 ))
                 # Clear error info since we're retrying with corrected SQL
                 state["error_info"] = None
-                # Reset approval flag so the interrupt can be triggered again
-                state["sql_approval_received"] = False
+                # Keep approval flag to avoid re-interrupting for the same corrected query
+                # The corrected query should go directly to execution
             else:
                 # Provide manual suggestions
                 suggestions = [s.description for s in recovery_strategies[:3]]
@@ -492,7 +492,7 @@ class EnhancedSqlAgent(WorkflowAgent):
         error_info = state.get("error_info")
         logger.debug("Step 7: Formatting final response")
 
-        if execution_result and not error_info:
+        if execution_result is not None and not error_info:
             # Successful execution
             final_answer = f"Query executed successfully:\n\n{execution_result}"
         elif not safety_check.get("execution_allowed", True):
@@ -524,7 +524,7 @@ class EnhancedSqlAgent(WorkflowAgent):
         """Check the result of query execution."""
         if state.get("error_info"):
             return "error"
-        elif state.get("execution_result"):
+        elif state.get("execution_result") is not None:
             return "success"
         else:
             return "retry"
