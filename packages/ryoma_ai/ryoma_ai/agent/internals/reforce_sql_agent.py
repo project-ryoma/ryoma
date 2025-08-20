@@ -463,7 +463,6 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         return state
 
     # Helper methods for ReFoRCE implementation
-
     def _build_full_schema_info(self, catalog) -> str:
         """Build complete schema information string."""
         schema_info = f"Database: {catalog.catalog_name}\n\n"

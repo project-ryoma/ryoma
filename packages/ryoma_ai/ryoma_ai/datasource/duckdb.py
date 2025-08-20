@@ -2,15 +2,16 @@ import inspect
 from typing import Any, Optional
 
 import duckdb
+from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
 
 
-class DuckDBConfig:
-    database: Optional[str] = ":memory:"
-    read_only: Optional[bool] = False
-    temp_directory: Optional[str] = None
-    extensions: Optional[list] = None
-    config: Optional[dict] = None
+class DuckDBConfig(BaseModel):
+    database: Optional[str] = Field(default=":memory:", description="DuckDB database file path or :memory: for in-memory")
+    read_only: Optional[bool] = Field(default=False, description="Open database in read-only mode")
+    temp_directory: Optional[str] = Field(default=None, description="Temporary directory for DuckDB operations")
+    extensions: Optional[list] = Field(default=None, description="List of DuckDB extensions to load")
+    config: Optional[dict] = Field(default=None, description="Additional DuckDB configuration options")
 
 
 class DuckDBDataSource(SqlDataSource):
