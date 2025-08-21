@@ -2,7 +2,7 @@
 Data source store using LangChain BaseStore for persistence and management.
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from uuid import uuid4
 import json

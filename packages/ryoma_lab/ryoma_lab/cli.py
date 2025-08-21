@@ -1,6 +1,4 @@
-import uuid
 
-import reflex as rx
 from reflex.reflex import cli
 from ryoma_lab.services.user import UserService
 from ryoma_lab.services.vector_store import VectorStoreService
@@ -25,7 +23,7 @@ def bootstrap():
             online_store="sqlite",
             online_store_configs={
                 "type": "sqlite",
-                "path": f"sqlite:///data/default.db",
+                "path": "sqlite:///data/default.db",
                 "vector_enabled": True,
             },
             offline_store="",

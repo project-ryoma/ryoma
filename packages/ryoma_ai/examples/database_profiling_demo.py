@@ -13,9 +13,6 @@ Features demonstrated:
 - Locality-sensitive hashing / MinHash sketches for approximate similarity
 """
 
-import json
-from datetime import datetime
-from ryoma_ai.datasource.postgres import PostgresDataSource
 from ryoma_ai.datasource.sqlite import SqliteDataSource
 
 
@@ -49,7 +46,7 @@ def demo_comprehensive_profiling():
     table_profile = datasource.profile_table(table_name)
     
     if "error" not in table_profile:
-        print(f"   ✅ Table profiled successfully")
+        print("   ✅ Table profiled successfully")
         print(f"   📈 Row count: {table_profile.get('profiling_summary', {}).get('row_count', 'N/A')}")
         print(f"   📊 Total columns: {table_profile.get('profiling_summary', {}).get('total_columns', 'N/A')}")
         print(f"   🎯 Completeness score: {table_profile.get('profiling_summary', {}).get('completeness_score', 'N/A')}")
@@ -139,7 +136,7 @@ def demo_individual_column_profiling():
         column_profile = datasource.profile_column(table_name, column_name)
         
         if "error" not in column_profile:
-            print(f"   ✅ Column profiled successfully")
+            print("   ✅ Column profiled successfully")
             print(f"   🏷️  Semantic type: {column_profile.get('semantic_type', 'general')}")
             print(f"   📊 Data quality: {column_profile.get('data_quality_score', 0):.3f}")
             print(f"   🔢 Distinct count: {column_profile.get('distinct_count', 'N/A')}")
@@ -148,7 +145,7 @@ def demo_individual_column_profiling():
             # Show type-specific statistics
             if column_profile.get('numeric_stats'):
                 stats = column_profile['numeric_stats']
-                print(f"   📈 Numeric stats:")
+                print("   📈 Numeric stats:")
                 print(f"      Min: {stats.get('min_value', 'N/A')}")
                 print(f"      Max: {stats.get('max_value', 'N/A')}")
                 print(f"      Mean: {stats.get('mean', 'N/A'):.2f}" if stats.get('mean') else "")
@@ -156,7 +153,7 @@ def demo_individual_column_profiling():
             
             if column_profile.get('string_stats'):
                 stats = column_profile['string_stats']
-                print(f"   📝 String stats:")
+                print("   📝 String stats:")
                 print(f"      Length range: {stats.get('min_length', 'N/A')} - {stats.get('max_length', 'N/A')}")
                 print(f"      Avg length: {stats.get('avg_length', 'N/A'):.1f}" if stats.get('avg_length') else "")
                 char_types = stats.get('character_types', {})
@@ -165,7 +162,7 @@ def demo_individual_column_profiling():
             
             if column_profile.get('date_stats'):
                 stats = column_profile['date_stats']
-                print(f"   📅 Date stats:")
+                print("   📅 Date stats:")
                 print(f"      Range: {stats.get('date_range_days', 'N/A')} days")
                 formats = stats.get('common_date_formats', [])
                 if formats:
@@ -174,7 +171,7 @@ def demo_individual_column_profiling():
             # Show top frequent values
             top_values = column_profile.get('top_k_values', [])
             if top_values:
-                print(f"   🔝 Top values:")
+                print("   🔝 Top values:")
                 for i, value_info in enumerate(top_values[:5], 1):
                     print(f"      {i}. {value_info['value']} ({value_info['count']} times, {value_info['percentage']:.1f}%)")
             

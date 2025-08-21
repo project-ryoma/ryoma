@@ -1,12 +1,12 @@
 from typing import Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
-from langchain_core.stores import BaseStore, InMemoryStore
+from langchain_core.stores import InMemoryStore
 from langgraph.store.memory import InMemoryStore
 
 from ryoma_ai.agent.resource_registry import ResourceRegistry
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
+from ryoma_ai.datasource.metadata import Catalog, Schema, Table
 from ryoma_ai.embedding.client import get_embedding_client
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.vector_store.base import VectorStore

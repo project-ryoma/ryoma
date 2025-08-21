@@ -1,11 +1,8 @@
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 import re
-from dataclasses import dataclass
-from enum import Enum
 from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.models.sql import (
-    SqlError, SqlErrorType, DatabaseType, RecoveryStrategy,
-    SqlQueryResult, QueryStatus
+    SqlError, SqlErrorType, DatabaseType, RecoveryStrategy
 )
 
 

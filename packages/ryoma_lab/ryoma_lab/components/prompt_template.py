@@ -4,7 +4,6 @@ import reflex as rx
 import reflex_chakra as rc
 from ryoma_lab.components.code_editor import codeeditor
 from ryoma_lab.states.prompt_template import PromptTemplate, PromptTemplateState
-from ryoma_lab.templates import template
 
 
 def prompt_card(pt: PromptTemplate):

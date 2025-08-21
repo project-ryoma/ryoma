@@ -1,6 +1,6 @@
 import reflex as rx
 import reflex_chakra as rc
-from ryoma_lab.states.workspace import ChatState, DataSourceState
+from ryoma_lab.states.workspace import ChatState
 
 
 def modal() -> rx.Component:

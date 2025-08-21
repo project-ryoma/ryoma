@@ -1,6 +1,5 @@
 import base64
 import pickle
-from abc import ABC
 from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 
 from langchain_core.tools import BaseTool
@@ -528,7 +527,7 @@ class QueryOptimizationTool(BaseTool):
             if not suggestions:
                 suggestions.append("• Query appears to follow good practices")
 
-            result = f"Query Optimization Suggestions:\n\n"
+            result = "Query Optimization Suggestions:\n\n"
             result += "\n".join(suggestions)
 
             return result

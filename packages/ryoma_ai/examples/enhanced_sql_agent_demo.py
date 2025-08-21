@@ -10,14 +10,12 @@ This demo showcases the new capabilities of the enhanced SQL Agent including:
 """
 
 import os
-from typing import Dict, Any
 
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.agent.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.agent.schema_linking_agent import SchemaLinkingAgent
 from ryoma_ai.agent.query_planner import QueryPlannerAgent
 from ryoma_ai.agent.sql_error_handler import SqlErrorHandler
-from ryoma_ai.agent.sql_safety_validator import SqlSafetyValidator, ValidationRule
+from ryoma_ai.agent.sql_safety_validator import SqlSafetyValidator
 from ryoma_ai.datasource.postgres import PostgresDataSource
 from ryoma_ai.tool.sql_tool import (
     SchemaAnalysisTool, QueryValidationTool, TableSelectionTool,

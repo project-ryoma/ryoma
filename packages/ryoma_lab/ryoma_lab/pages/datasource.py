@@ -46,7 +46,7 @@ def show_datasource_configs():
                     weight="bold",
                 ),
                 rx.input(
-                    placeholder=f"Enter the Connection URL for the data source",
+                    placeholder="Enter the Connection URL for the data source",
                     on_blur=DataSourceState.set_connection_url,
                     width="100%",
                 ),

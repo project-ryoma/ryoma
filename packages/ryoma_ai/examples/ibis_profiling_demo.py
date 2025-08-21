@@ -15,7 +15,6 @@ import logging
 from datetime import datetime
 import pandas as pd
 from ryoma_ai.datasource.sqlite import SqliteDataSource
-from ryoma_ai.datasource.postgres import PostgresDataSource
 
 # Enable detailed logging to see the profiling method selection
 logging.basicConfig(level=logging.INFO)
@@ -174,7 +173,7 @@ def demo_ibis_native_methods():
     # Demonstrate individual column methods
     age_col = table.age
     
-    print(f"Age column statistics:")
+    print("Age column statistics:")
     print(f"  Count: {age_col.count().to_pandas()}")
     print(f"  Min: {age_col.min().to_pandas()}")
     print(f"  Max: {age_col.max().to_pandas()}")
@@ -182,11 +181,11 @@ def demo_ibis_native_methods():
     print(f"  Std: {age_col.std().to_pandas():.2f}")
     print(f"  Unique count: {age_col.nunique().to_pandas()}")
     
-    print(f"\nEmail column value counts:")
+    print("\nEmail column value counts:")
     email_counts = table.email.value_counts().limit(5)
     print(email_counts)
     
-    print(f"\nCity column value counts:")
+    print("\nCity column value counts:")
     city_counts = table.city.value_counts()
     print(city_counts)
 

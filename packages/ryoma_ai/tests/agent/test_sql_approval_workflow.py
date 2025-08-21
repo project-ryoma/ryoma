@@ -7,7 +7,7 @@ human approval/denial, and final execution with proper error handling.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
 from langgraph.errors import GraphInterrupt
@@ -16,7 +16,6 @@ from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.agent.workflow import WorkflowAgent
 from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.models.sql import SqlQueryResult, QueryStatus
-from ryoma_ai.states import MessageState
 
 
 class TestSqlApprovalWorkflow:

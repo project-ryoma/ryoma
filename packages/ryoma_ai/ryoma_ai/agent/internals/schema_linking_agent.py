@@ -1,8 +1,8 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import re
 from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.datasource.sql import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Schema, Table, Column
+from ryoma_ai.datasource.metadata import Catalog, Table, Column
 
 
 class SchemaLinkingAgent(ChatAgent):

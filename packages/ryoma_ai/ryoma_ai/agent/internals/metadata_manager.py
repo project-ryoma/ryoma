@@ -11,12 +11,11 @@ Architecture:
 """
 
 import logging
-import json
 import time
 from enum import Enum
-from typing import Dict, List, Optional, Any, Set, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import asyncio
 
@@ -24,7 +23,6 @@ from langchain_core.language_models import BaseChatModel
 
 from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.datasource.profiler import DatabaseProfiler
-from ryoma_ai.datasource.metadata import ColumnProfile, TableProfile
 
 
 logger = logging.getLogger(__name__)

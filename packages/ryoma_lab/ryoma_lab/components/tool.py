@@ -2,7 +2,6 @@
 
 import reflex as rx
 from ryoma_lab.states.tool import Tool, ToolState
-from ryoma_lab.templates import template
 import reflex_chakra as rc
 
 

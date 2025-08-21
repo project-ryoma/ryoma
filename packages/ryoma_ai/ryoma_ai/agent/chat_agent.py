@@ -82,7 +82,7 @@ class ChatAgent(BaseAgent):
         logging.info(f"Building llm chain with model: {self.model}")
         if not self.model:
             raise ValueError(
-                f"Unable to initialize model, please ensure you have valid configurations."
+                "Unable to initialize model, please ensure you have valid configurations."
             )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         if self.output_parser:

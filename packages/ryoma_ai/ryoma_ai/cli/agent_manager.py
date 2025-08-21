@@ -84,7 +84,7 @@ class AgentManager:
                     self.current_agent = agent
                     self.current_classification = classification
                 except APIConnectionError:
-                    self.console.print(f"[red]OpenAI Connection Error, Did you forget to setup OpenAI token?[/red]")
+                    self.console.print("[red]OpenAI Connection Error, Did you forget to setup OpenAI token?[/red]")
                     return
                 except Exception:
                     self.console.print_exception()
@@ -289,7 +289,7 @@ class AgentManager:
             else:
                 return str(execution_result)
 
-        except Exception as e:
+        except Exception:
             # If anything fails, just return string representation
             return str(execution_result)
 
@@ -349,7 +349,7 @@ class AgentManager:
 
             # Show current classification if available
             if self.current_classification:
-                self.console.print(f"\n[bold]Last Classification:[/bold]")
+                self.console.print("\n[bold]Last Classification:[/bold]")
                 self.console.print(f"  Agent: {self.current_classification.suggested_agent}")
                 self.console.print(f"  Confidence: {self.current_classification.confidence:.2f}")
                 self.console.print(f"  Reasoning: {self.current_classification.reasoning}")
