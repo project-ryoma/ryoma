@@ -33,6 +33,7 @@ class AgentManager:
         self.agent_router: Optional[MultiAgentRouter] = None
         self.current_agent = None
         self.current_classification: Optional[TaskClassification] = None
+        self.agent_config: Dict[str, Any] = {}
 
     def setup_agent_manager(self, config: Dict[str, Any], datasource: DataSource) -> bool:
         """
@@ -50,6 +51,9 @@ class AgentManager:
             return False
 
         try:
+            # Store agent configuration
+            self.agent_config = config.get("agent", {})
+            
             self.agent_router = MultiAgentRouter(
                 model=config.get("model"),
                 datasource=datasource,
@@ -163,6 +167,11 @@ class AgentManager:
     def _handle_interrupt_approval(self, agent) -> str:
         """Handle interrupt-based approval in CLI."""
         try:
+            # Check if auto-approve is enabled
+            if self.agent_config.get("auto_approve_all", False):
+                self.console.print("[green]🔄 Auto-approve enabled - automatically approving query[/green]")
+                return 'approve'
+
             # Get the current workflow state
             current_state = agent.get_current_state()
 

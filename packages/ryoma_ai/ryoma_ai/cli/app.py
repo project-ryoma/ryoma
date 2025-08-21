@@ -11,12 +11,17 @@ from pathlib import Path
 
 import click
 from rich.console import Console
+from prompt_toolkit import prompt
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.shortcuts import CompleteStyle
 
 from ryoma_ai.cli.config_manager import ConfigManager
 from ryoma_ai.cli.command_handler import CommandHandler
 from ryoma_ai.cli.datasource_manager import DataSourceManager
 from ryoma_ai.cli.agent_manager import AgentManager
 from ryoma_ai.cli.display_manager import DisplayManager
+from ryoma_ai.cli.autocomplete_manager import AutocompleteManager
 
 
 class RyomaAI:
@@ -32,6 +37,7 @@ class RyomaAI:
         self.display_manager = DisplayManager(self.console)
         self.datasource_manager = DataSourceManager(self.console)
         self.agent_manager = AgentManager(self.console)
+        self.autocomplete_manager = AutocompleteManager()
         self.command_handler = CommandHandler(
             console=self.console,
             config_manager=self.config_manager,
@@ -39,6 +45,24 @@ class RyomaAI:
             agent_manager=self.agent_manager,
             display_manager=self.display_manager
         )
+        
+        # Setup prompt history and key bindings
+        self.history = InMemoryHistory()
+        self.key_bindings = self._setup_key_bindings()
+
+    def _setup_key_bindings(self) -> KeyBindings:
+        """Setup key bindings for the prompt."""
+        kb = KeyBindings()
+        
+        @kb.add('escape')
+        def _(event):
+            """Handle ESC key to cancel current input."""
+            event.app.exit(result="")
+        
+        # TAB completion is handled automatically by prompt_toolkit
+        # No need to bind it explicitly
+        
+        return kb
 
     def _signal_handler(self, signum, frame):
         """Handle interrupt signals."""
@@ -62,8 +86,18 @@ class RyomaAI:
         self.session_active = True
         while self.session_active:
             try:
-                from rich.prompt import Prompt
-                user_input = Prompt.ask("[bold cyan]ryoma-ai>[/bold cyan]").strip()
+                # Update dynamic completions based on current state
+                self._update_autocomplete_context()
+                
+                # Get user input with autocomplete support
+                user_input = prompt(
+                    "ryoma-ai> ",
+                    completer=self.autocomplete_manager.get_completer(),
+                    complete_style=CompleteStyle.MULTI_COLUMN,
+                    history=self.history,
+                    key_bindings=self.key_bindings,
+                    enable_history_search=True
+                ).strip()
 
                 if not user_input:
                     continue
@@ -78,6 +112,31 @@ class RyomaAI:
             except EOFError:
                 self.console.print("\n[yellow]Goodbye! 👋[/yellow]")
                 break
+            except Exception as e:
+                # Handle ESC key or other prompt cancellation
+                if str(e) == "" or "cancelled" in str(e).lower():
+                    self.console.print("\n[yellow]Input cancelled.[/yellow]")
+                    continue
+                else:
+                    self.console.print(f"\n[red]Error: {e}[/red]")
+                    continue
+
+    def _update_autocomplete_context(self) -> None:
+        """Update autocomplete context with current system state."""
+        try:
+            # Get available datasource IDs
+            datasource_ids = []
+            if hasattr(self.datasource_manager, 'datasource_store'):
+                registrations = self.datasource_manager.datasource_store.list_data_sources()
+                datasource_ids = [reg.id[:8] for reg in registrations]  # Use short IDs for completion
+
+            # Update dynamic completions
+            self.autocomplete_manager.update_dynamic_completions(
+                datasource_ids=datasource_ids
+            )
+        except Exception:
+            # If context update fails, continue with static completions
+            pass
 
     def _initialize_system(self):
         """Initialize the system components."""

@@ -43,6 +43,11 @@ class ConfigManager:
                 "database": "postgres",
                 "user": os.environ.get("POSTGRES_USER", ""),
                 "password": os.environ.get("POSTGRES_PASSWORD", "")
+            },
+            "agent": {
+                "auto_approve_all": False,
+                "retry_count": 3,
+                "timeout_seconds": 300
             }
         }
 

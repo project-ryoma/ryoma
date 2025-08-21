@@ -111,6 +111,13 @@ class CommandHandler:
         elif command == 'search-catalog':
             self._handle_search_catalog_command(args)
 
+        # Agent configuration commands
+        elif command == 'agent-config':
+            self._handle_agent_config_command(args)
+
+        elif command == 'auto-approve':
+            self._handle_auto_approve_command(args)
+
         else:
             self.console.print(f"[red]Unknown command: {command}[/red]")
             self.console.print("Type [bold]/help[/bold] for available commands")
@@ -220,3 +227,82 @@ class CommandHandler:
 
         results = self.catalog_manager.search_catalogs(args, top_k=5)
         self.display_manager.show_search_results(args, results)
+
+    def _handle_agent_config_command(self, args: str) -> None:
+        """Handle agent configuration commands."""
+        if not args:
+            # Show current agent configuration
+            agent_config = self.config_manager.get_config("agent", {})
+            if agent_config:
+                from rich.table import Table
+                
+                config_table = Table(title="🤖 Agent Configuration")
+                config_table.add_column("Setting", style="cyan")
+                config_table.add_column("Value", style="green")
+                
+                for key, value in agent_config.items():
+                    config_table.add_row(key, str(value))
+                
+                self.console.print(config_table)
+            else:
+                self.console.print("[yellow]No agent configuration found[/yellow]")
+            return
+
+        # Parse config setting: /agent-config setting_name value
+        parts = args.split(None, 1)
+        if len(parts) < 2:
+            self.display_manager.show_error("Usage: /agent-config <setting> <value>")
+            self.console.print("Available settings: auto_approve_all, retry_count, timeout_seconds")
+            return
+
+        setting = parts[0]
+        value_str = parts[1]
+
+        # Convert value to appropriate type
+        if setting == "auto_approve_all":
+            value = value_str.lower() in ['true', '1', 'yes', 'on', 'enable']
+        elif setting in ["retry_count", "timeout_seconds"]:
+            try:
+                value = int(value_str)
+            except ValueError:
+                self.display_manager.show_error(f"'{setting}' requires an integer value")
+                return
+        else:
+            self.display_manager.show_error(f"Unknown agent setting: {setting}")
+            self.console.print("Available settings: auto_approve_all, retry_count, timeout_seconds")
+            return
+
+        # Update the configuration
+        self.config_manager.update_config(f"agent.{setting}", value)
+        
+        # Reinitialize agent manager with new config
+        if self.datasource_manager.current_datasource:
+            self.agent_interface.setup_agent_manager(
+                config=self.config_manager.config,
+                datasource=self.datasource_manager.current_datasource
+            )
+
+        self.console.print(f"[green]✅ Updated agent.{setting} = {value}[/green]")
+
+    def _handle_auto_approve_command(self, args: str) -> None:
+        """Handle auto-approve toggle command."""
+        current_value = self.config_manager.get_config("agent.auto_approve_all", False)
+        
+        if args:
+            # Set specific value
+            new_value = args.lower() in ['true', '1', 'yes', 'on', 'enable']
+        else:
+            # Toggle current value
+            new_value = not current_value
+
+        self.config_manager.update_config("agent.auto_approve_all", new_value)
+        
+        # Reinitialize agent manager with new config
+        if self.datasource_manager.current_datasource:
+            self.agent_interface.setup_agent_manager(
+                config=self.config_manager.config,
+                datasource=self.datasource_manager.current_datasource
+            )
+
+        status = "enabled" if new_value else "disabled"
+        self.console.print(f"[green]✅ Auto-approve {status}[/green]")

@@ -41,6 +41,12 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
         info_table = Table(show_header=False, box=None)
         info_table.add_row("Model:", config.get("model", "gpt-4o"))
         info_table.add_row("Mode:", config.get("mode", "enhanced"))
+        
+        # Show agent configuration
+        agent_config = config.get("agent", {})
+        auto_approve = agent_config.get("auto_approve_all", False)
+        auto_approve_status = "✅ Enabled" if auto_approve else "❌ Disabled"
+        info_table.add_row("Auto-approve:", auto_approve_status)
 
         db_config = config.get("database", {})
         if db_config:
@@ -73,6 +79,16 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
 - **/index-catalog [datasource_id] [level]**: Index catalog for search
 - **/search-catalog <query>**: Search indexed catalogs
 
+## Agent Configuration:
+- **/agent-config**: Show current agent settings
+- **/agent-config <setting> <value>**: Update agent setting
+- **/auto-approve [true/false]**: Toggle auto-approve for SQL queries
+
+## Available Agent Settings:
+- **auto_approve_all**: Automatically approve all SQL queries (true/false)
+- **retry_count**: Number of retries for failed operations (integer)
+- **timeout_seconds**: Timeout for agent operations in seconds (integer)
+
 ## Available Agents:
 - **SQL Agent**: Database queries and data retrieval
 - **Python Agent**: Python code execution and scripts
@@ -87,7 +103,7 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
 
 ## Approval Workflow:
 - System routes to appropriate agent automatically
-- SQL operations require approval for safety
+- SQL operations require approval for safety (unless auto-approve is enabled)
 - Type **approve** to execute, **deny** to reject
         """
 
