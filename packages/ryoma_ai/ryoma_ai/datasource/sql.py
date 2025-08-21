@@ -29,6 +29,7 @@ class SqlDataSource(DataSource):
     def connect(self, **kwargs) -> Any:
         if not self.__connection:
             self.__connection = self._connect()
+        logging.info("Database connection established")
         return self.__connection
 
     @abstractmethod
@@ -108,29 +109,29 @@ class SqlDataSource(DataSource):
         # PostgreSQL system tables
         pg_system_prefixes = ['pg_', 'information_schema']
         pg_system_schemas = ['information_schema', 'pg_catalog', 'pg_toast']
-        
+
         # MySQL system tables
         mysql_system_schemas = ['information_schema', 'performance_schema', 'mysql', 'sys']
-        
+
         # SQLite system tables
         sqlite_system_prefixes = ['sqlite_']
-        
+
         # SQL Server system tables
         sqlserver_system_schemas = ['sys', 'INFORMATION_SCHEMA']
-        
+
         # Check schema-based filtering
         if schema_name:
             if schema_name.lower() in pg_system_schemas + mysql_system_schemas + sqlserver_system_schemas:
                 return True
-        
+
         # Check table name prefixes
         table_lower = table_name.lower()
         system_prefixes = pg_system_prefixes + sqlite_system_prefixes
-        
+
         for prefix in system_prefixes:
             if table_lower.startswith(prefix):
                 return True
-        
+
         return False
 
 
@@ -163,7 +164,7 @@ class SqlDataSource(DataSource):
     def list_databases(
         self,
         catalog: Optional[str] = None,
-        with_table: bool = False,  
+        with_table: bool = False,
         with_columns: bool = False,
         include_system_schemas: bool = False,
     ) -> list[Schema]:
@@ -171,22 +172,22 @@ class SqlDataSource(DataSource):
         if not hasattr(conn, "list_databases"):
             raise Exception("This data source does not support listing databases")
         catalog = catalog or self.database or getattr(conn, 'current_catalog', None)
-        
+
         all_schemas = conn.list_databases(catalog=catalog)
-        
+
         # Filter out system schemas unless explicitly requested
         if not include_system_schemas:
-            # Filter based on schema name patterns  
+            # Filter based on schema name patterns
             pg_system_schemas = ['information_schema', 'pg_catalog', 'pg_toast']
             mysql_system_schemas = ['information_schema', 'performance_schema', 'mysql', 'sys']
             sqlserver_system_schemas = ['sys', 'INFORMATION_SCHEMA']
             system_schemas = pg_system_schemas + mysql_system_schemas + sqlserver_system_schemas
-            
+
             all_schemas = [
-                schema for schema in all_schemas 
+                schema for schema in all_schemas
                 if schema.lower() not in [s.lower() for s in system_schemas]
             ]
-        
+
         databases = [
             Schema(schema_name=schema)
             for schema in all_schemas
@@ -211,21 +212,21 @@ class SqlDataSource(DataSource):
         catalog = catalog or self.database or conn.current_database
         if database is not None:
             catalog = (catalog, database)
-        
+
         all_tables = conn.list_tables(database=catalog)
-        
+
         # Filter out system tables unless explicitly requested
         if not include_system_tables:
             all_tables = [
-                table for table in all_tables 
+                table for table in all_tables
                 if not self._is_system_table(table, database)
             ]
-        
+
         tables = [
             Table(table_name=table, columns=[])
             for table in all_tables
         ]
-        
+
         if with_columns:
             for table in tables:
                 try:

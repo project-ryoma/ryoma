@@ -2,10 +2,6 @@ import logging
 from typing import Optional, Union
 
 import ibis
-from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.job.job import DefaultJob
-from databuilder.loader.base_loader import Loader
-from databuilder.task.task import DefaultTask
 from ibis import BaseBackend
 from ibis.backends.sql import SQLBackend
 from pydantic import BaseModel, Field
@@ -42,11 +38,9 @@ class PostgresDataSource(SqlDataSource):
         self.connection_url = connection_url
 
     def _connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
-        logging.info("Connecting to Postgres")
+        logging.info(f"Connecting to Postgres database: {self.database}")
         if self.connection_url:
-            logging.info("Connection URL provided, using it to connect")
             return ibis.connect(self.connection_url, **kwargs)
-        logging.info("Connection URL not provided, using individual parameters")
         conn = ibis.postgres.connect(
             user=self.user,
             password=self.password,
@@ -56,7 +50,6 @@ class PostgresDataSource(SqlDataSource):
             schema=self.db_schema,
             **kwargs,
         )
-        logging.info("Connected to Postgres")
         return conn
 
     def connection_string(self):
@@ -67,12 +60,15 @@ class PostgresDataSource(SqlDataSource):
             f"postgresql+psycopg2://{auth_part}{self.host}:{self.port}/{self.database}"
         )
 
-    def crawl_catalog(self, loader: Loader, where_clause_suffix: Optional[str] = None):
+    def crawl_catalog(self, loader, where_clause_suffix: Optional[str] = None):
+        from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
+        from databuilder.job.job import DefaultJob
+        from databuilder.task.task import DefaultTask
         from databuilder.extractor.postgres_metadata_extractor import (
             PostgresMetadataExtractor,
         )
+        logging.info(f"Crawling Postgres database: {self.database}")
 
-        logging.info("Start crawling metadata from Postgres database")
         job_config = ConfigFactory.from_dict(
             {
                 f"extractor.postgres_metadata.st.schemaname = '{self.db_schema or 'public'}'": where_clause_suffix,

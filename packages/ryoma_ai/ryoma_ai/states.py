@@ -1,10 +1,8 @@
 from typing import Dict, List, Optional, Any
 from langgraph.graph.message import add_messages
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from typing_extensions import Annotated, TypedDict
 
 from ryoma_ai.models.agent import FormatRestriction, ColumnExplorationResult
-from ryoma_ai.datasource.base import DataSource
 
 
 class MessageState(TypedDict, total=False):

@@ -4,7 +4,6 @@ Data source store using LangChain BaseStore for persistence and management.
 
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
-from dataclasses import dataclass, asdict
 from uuid import uuid4
 import json
 import logging
@@ -19,37 +18,9 @@ from ryoma_ai.store.exceptions import (
     DataSourceConnectionError,
     StoreException
 )
+from ryoma_ai.models.datasource import DataSourceRegistration
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class DataSourceRegistration:
-    """Data source registration information."""
-
-    id: str
-    name: str
-    type: str
-    config: Dict[str, Any]
-    created_at: datetime
-    updated_at: datetime
-    is_active: bool = True
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for storage."""
-        data = asdict(self)
-        data['created_at'] = self.created_at.isoformat()
-        data['updated_at'] = self.updated_at.isoformat()
-        return data
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DataSourceRegistration':
-        """Create from dictionary loaded from storage."""
-        data['created_at'] = datetime.fromisoformat(data['created_at'])
-        data['updated_at'] = datetime.fromisoformat(data['updated_at'])
-        return cls(**data)
 
 
 class DataSourceStore:
@@ -60,7 +31,8 @@ class DataSourceStore:
     with persistent storage and caching capabilities.
     """
 
-    def __init__(self, store: Optional[BaseStore[str, str]] = None):
+    def __init__(self,
+                 store: Optional[BaseStore[str, str]] = None):
         """
         Initialize the data source store.
 
@@ -177,7 +149,8 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to register data source '{name}'", e)
 
-    def get_data_source(self, data_source_id: str) -> DataSource:
+    def get_data_source(self,
+                        data_source_id: str) -> DataSource:
         """
         Get a data source instance by ID.
 
@@ -215,7 +188,8 @@ class DataSourceStore:
                 e
             )
 
-    def get_registration(self, data_source_id: str) -> DataSourceRegistration:
+    def get_registration(self,
+                         data_source_id: str) -> DataSourceRegistration:
         """
         Get data source registration information.
 
@@ -356,7 +330,8 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to update data source '{data_source_id}'", e)
 
-    def remove_data_source(self, data_source_id: str) -> None:
+    def remove_data_source(self,
+                           data_source_id: str) -> None:
         """
         Remove a data source from the store.
 
@@ -384,7 +359,8 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to remove data source '{data_source_id}'", e)
 
-    def test_connection(self, data_source_id: str) -> bool:
+    def test_connection(self,
+                        data_source_id: str) -> bool:
         """
         Test connection to a data source.
 

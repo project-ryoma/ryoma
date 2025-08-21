@@ -2,10 +2,8 @@
 Catalog store using LangChain stores and vector stores for indexing and search.
 """
 
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime
-from dataclasses import dataclass, asdict
-from uuid import uuid4
 import json
 import logging
 
@@ -20,34 +18,9 @@ from ryoma_ai.store.exceptions import (
     CatalogIndexError,
     StoreException
 )
+from ryoma_ai.models.catalog import CatalogIndex
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class CatalogIndex:
-    """Catalog index metadata."""
-
-    catalog_id: str
-    data_source_id: str
-    catalog_name: str
-    indexed_at: datetime
-    schema_count: int
-    table_count: int
-    column_count: int
-    index_level: str  # catalog, schema, table, column
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for storage."""
-        data = asdict(self)
-        data['indexed_at'] = self.indexed_at.isoformat()
-        return data
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'CatalogIndex':
-        """Create from dictionary loaded from storage."""
-        data['indexed_at'] = datetime.fromisoformat(data['indexed_at'])
-        return cls(**data)
 
 
 class CatalogStore:

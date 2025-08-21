@@ -34,9 +34,9 @@ class AgentManager:
         self.current_agent = None
         self.current_classification: Optional[TaskClassification] = None
 
-    def setup_agent_router(self, config: Dict[str, Any], datasource: DataSource) -> bool:
+    def setup_agent_manager(self, config: Dict[str, Any], datasource: DataSource) -> bool:
         """
-        Setup the multi-agent manager.
+        Setup the multi-agent routing manager.
 
         Args:
             config: Configuration dictionary

@@ -1,18 +1,26 @@
 
 # TODOs
 
-1. use the multi agent router in cli.
-2. try to make system able to add multiple data sources. the data sources are added to the store.
-3. the impl should be able to index and search the data sources / catalog in the store, so that the agent won't need to load all the datasources / catalog every time.
-4. update and add relevant tests. reorganize the test structure if needed.
-move root tests to each package tests folder.
-5. Add exception and error raise specifically when issue happens. Don't do fallback silently.
-6. update the documentation to reflect the changes made in the system.
+## Tasks
+1. For agent, should have a config that can auto approve all interrupt
+2. For the cli config, it should be able to pass in agent configs, that will be pass into agent manager, and the configs should be able to adjust the agent behavior. for example, how many retry when failed calling the llm
+3. For cli, support command suggestion, autocomplete.
+4. For cli, support esc to cancel the current run.
+5. Add github action to be able to automate the build, publish the python package, for ryoma_ai and ryoma_lab, based on the release branch. 
 
-### For any tasks, make sure:
-1. no fallback silently. If any exception happens, raise it specifically.
-2. try to implement in OOP way, so that future extension is easier.
-3. try to model data and logic in classes. Try to avoid directly using dict or list to hold important data.
-4. add type hints for functions and methods.
-5. add docstrings for all classes, functions and methods.
-6. add relevant tests for new features and logic.
+
+## backlogs
+1. the impl should be able to index and search the data sources / catalog in the store, so that the agent won't need to load all the datasources / catalog every time.
+2. update the documentation to reflect the changes made in the system.
+3. optimize and add more tests.
+4. fix the mypy for the entire project ryoma_ai
+5. fix the mypy for the entire project ryoma_lab
+
+## Important
+1. For any code, no fallback silently.
+2. If any exception happens, raise it specific Exception. if Exception doesn't exsits, create one.
+2. Always try to implement in OOP way, which means more module, and more class so that future extension is easier.
+3. try to model data and logic separately. Try to avoid directly using dict or list to hold data.
+4. Always add type hints for functions and methods.
+5. Always add docstrings for all classes, functions and methods.
+6. Always add relevant tests for new features and logic.

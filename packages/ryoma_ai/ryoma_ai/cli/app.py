@@ -84,7 +84,7 @@ class RyomaAI:
         # Setup data source connection
         if not self.datasource_manager.setup_from_config(self.config_manager.config["database"]):
             self.console.print("[yellow]Database connection failed. Use /setup to configure.[/yellow]")
-        elif not self.agent_manager.setup_agent_router(
+        elif not self.agent_manager.setup_agent_manager(
             config=self.config_manager.config,
             datasource=self.datasource_manager.current_datasource
         ):

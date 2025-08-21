@@ -134,7 +134,7 @@ class CommandHandler:
             # update the config manager with the new database settings
 
             # Reinitialize agent manager with new data source
-            if self.agent_interface.setup_agent_router(
+            if self.agent_interface.setup_agent_manager(
                 config=self.config_manager.config,
                 datasource=self.datasource_manager.current_datasource
             ):
@@ -150,7 +150,7 @@ class CommandHandler:
             if self.agent_interface.change_mode(args):
                 self.config_manager.update_config("mode", args)
                 # Reinitialize agent manager
-                self.agent_interface.setup_agent_router(
+                self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
                     datasource=self.datasource_manager.current_datasource
                 )
@@ -164,7 +164,7 @@ class CommandHandler:
             if self.agent_interface.change_model(args):
                 self.config_manager.update_config("model", args)
                 # Reinitialize agent manager
-                self.agent_interface.setup_agent_router(
+                self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
                     datasource=self.datasource_manager.current_datasource
                 )
@@ -177,7 +177,7 @@ class CommandHandler:
         if args:
             if self.datasource_manager.switch_datasource(args):
                 # Reinitialize agent manager with new data source
-                self.agent_interface.setup_agent_router(
+                self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
                     datasource=self.datasource_manager.current_datasource
                 )
