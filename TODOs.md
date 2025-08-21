@@ -2,11 +2,7 @@
 # TODOs
 
 ## Tasks
-1. For agent, should have a config that can auto approve all interrupt
-2. For the cli config, it should be able to pass in agent configs, that will be pass into agent manager, and the configs should be able to adjust the agent behavior. for example, how many retry when failed calling the llm
-3. For cli, support command suggestion, autocomplete.
-4. For cli, support esc to cancel the current run.
-5. Add github action to be able to automate the build, publish the python package, for ryoma_ai and ryoma_lab, based on the release branch. 
+
 
 
 ## backlogs
