@@ -1,0 +1,163 @@
+name: Build and Publish Packages
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Install dependencies
+      run: |
+        uv sync --all-extras
+    
+    - name: Lint with ruff
+      run: |
+        uv run ruff check packages/
+        uv run ruff format --check packages/
+    
+    - name: Type check with mypy
+      continue-on-error: true  # MyPy issues noted in TODOs
+      run: |
+        uv run mypy packages/ryoma_ai/ryoma_ai --ignore-missing-imports
+        uv run mypy packages/ryoma_lab/ryoma_lab --ignore-missing-imports
+    
+    - name: Test with pytest
+      run: |
+        uv run pytest tests/ -v --cov=packages/ryoma_ai/ryoma_ai --cov=packages/ryoma_lab/ryoma_lab
+    
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build ryoma_ai package
+      run: |
+        cd packages/ryoma_ai
+        python -m build
+    
+    - name: Build ryoma_lab package
+      run: |
+        cd packages/ryoma_lab
+        python -m build
+    
+    - name: Check packages
+      run: |
+        twine check packages/ryoma_ai/dist/*
+        twine check packages/ryoma_lab/dist/*
+    
+    - name: Upload ryoma_ai artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ryoma_ai-dist
+        path: packages/ryoma_ai/dist/
+        retention-days: 7
+    
+    - name: Upload ryoma_lab artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ryoma_lab-dist
+        path: packages/ryoma_lab/dist/
+        retention-days: 7
+
+  publish-test:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    environment: test-pypi
+    
+    steps:
+    - name: Download ryoma_ai artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ryoma_ai-dist
+        path: dist-ryoma-ai/
+    
+    - name: Download ryoma_lab artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ryoma_lab-dist
+        path: dist-ryoma-lab/
+    
+    - name: Publish ryoma_ai to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/
+        packages-dir: dist-ryoma-ai/
+        skip-existing: true
+    
+    - name: Publish ryoma_lab to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/
+        packages-dir: dist-ryoma-lab/
+        skip-existing: true
+
+  publish-prod:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: pypi
+    
+    steps:
+    - name: Download ryoma_ai artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ryoma_ai-dist
+        path: dist-ryoma-ai/
+    
+    - name: Download ryoma_lab artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ryoma_lab-dist
+        path: dist-ryoma-lab/
+    
+    - name: Publish ryoma_ai to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: dist-ryoma-ai/
+    
+    - name: Publish ryoma_lab to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: dist-ryoma-lab/

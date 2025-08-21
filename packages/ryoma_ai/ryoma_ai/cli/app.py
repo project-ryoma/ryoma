@@ -45,7 +45,7 @@ class RyomaAI:
             agent_manager=self.agent_manager,
             display_manager=self.display_manager
         )
-        
+
         # Setup prompt history and key bindings
         self.history = InMemoryHistory()
         self.key_bindings = self._setup_key_bindings()
@@ -53,15 +53,12 @@ class RyomaAI:
     def _setup_key_bindings(self) -> KeyBindings:
         """Setup key bindings for the prompt."""
         kb = KeyBindings()
-        
+
         @kb.add('escape')
         def _(event):
             """Handle ESC key to cancel current input."""
             event.app.exit(result="")
-        
-        # TAB completion is handled automatically by prompt_toolkit
-        # No need to bind it explicitly
-        
+
         return kb
 
     def _signal_handler(self, signum, frame):
@@ -88,7 +85,7 @@ class RyomaAI:
             try:
                 # Update dynamic completions based on current state
                 self._update_autocomplete_context()
-                
+
                 # Get user input with autocomplete support
                 user_input = prompt(
                     "ryoma-ai> ",

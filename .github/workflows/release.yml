@@ -1,37 +1,180 @@
-name: Release
+name: Release Management
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to release'
+        required: true
+        type: choice
+        options:
+          - ryoma_ai
+          - ryoma_lab
+          - both
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      pre_release:
+        description: 'Pre-release (alpha/beta/rc)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - alpha
+          - beta
+          - rc
 
 jobs:
-  release:
+  create-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-      - name: Build and publish
-        env:
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          poetry config pypi-token.pypi $PYPI_PASSWORD
-          poetry build
-          poetry publish
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install bump2version
+      run: pip install bump2version
+    
+    - name: Configure git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+    
+    - name: Bump ryoma_ai version
+      if: github.event.inputs.package == 'ryoma_ai' || github.event.inputs.package == 'both'
+      run: |
+        cd packages/ryoma_ai
+        current_version=$(grep 'version = ' pyproject.toml | cut -d '"' -f 2)
+        echo "Current ryoma_ai version: $current_version"
+        
+        # Create a simple bump2version config
+        cat > .bumpversion.cfg << EOF
+        [bumpversion]
+        current_version = $current_version
+        commit = False
+        tag = False
+        
+        [bumpversion:file:pyproject.toml]
+        search = version = "{current_version}"
+        replace = version = "{new_version}"
+        EOF
+        
+        if [ "${{ github.event.inputs.pre_release }}" != "" ]; then
+          bump2version --new-version "$current_version-${{ github.event.inputs.pre_release }}.1" patch
+        else
+          bump2version ${{ github.event.inputs.version_type }}
+        fi
+        
+        new_version=$(grep 'version = ' pyproject.toml | cut -d '"' -f 2)
+        echo "RYOMA_AI_VERSION=$new_version" >> $GITHUB_ENV
+        echo "New ryoma_ai version: $new_version"
+    
+    - name: Bump ryoma_lab version
+      if: github.event.inputs.package == 'ryoma_lab' || github.event.inputs.package == 'both'
+      run: |
+        cd packages/ryoma_lab
+        current_version=$(grep 'version = ' pyproject.toml | cut -d '"' -f 2)
+        echo "Current ryoma_lab version: $current_version"
+        
+        # Create a simple bump2version config
+        cat > .bumpversion.cfg << EOF
+        [bumpversion]
+        current_version = $current_version
+        commit = False
+        tag = False
+        
+        [bumpversion:file:pyproject.toml]
+        search = version = "{current_version}"
+        replace = version = "{new_version}"
+        EOF
+        
+        if [ "${{ github.event.inputs.pre_release }}" != "" ]; then
+          bump2version --new-version "$current_version-${{ github.event.inputs.pre_release }}.1" patch
+        else
+          bump2version ${{ github.event.inputs.version_type }}
+        fi
+        
+        new_version=$(grep 'version = ' pyproject.toml | cut -d '"' -f 2)
+        echo "RYOMA_LAB_VERSION=$new_version" >> $GITHUB_ENV
+        echo "New ryoma_lab version: $new_version"
+    
+    - name: Create release branch
+      run: |
+        if [ "${{ github.event.inputs.package }}" == "both" ]; then
+          branch_name="release/v${{ env.RYOMA_AI_VERSION }}-v${{ env.RYOMA_LAB_VERSION }}"
+          tag_name="v${{ env.RYOMA_AI_VERSION }}-v${{ env.RYOMA_LAB_VERSION }}"
+        elif [ "${{ github.event.inputs.package }}" == "ryoma_ai" ]; then
+          branch_name="release/ryoma-ai-v${{ env.RYOMA_AI_VERSION }}"
+          tag_name="ryoma-ai-v${{ env.RYOMA_AI_VERSION }}"
+        else
+          branch_name="release/ryoma-lab-v${{ env.RYOMA_LAB_VERSION }}"
+          tag_name="ryoma-lab-v${{ env.RYOMA_LAB_VERSION }}"
+        fi
+        
+        echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+        echo "TAG_NAME=$tag_name" >> $GITHUB_ENV
+        
+        git checkout -b $branch_name
+        git add .
+        git commit -m "Release $tag_name"
+        git push origin $branch_name
+    
+    - name: Generate changelog
+      run: |
+        # Simple changelog generation
+        cat > RELEASE_NOTES.md << EOF
+        # Release ${{ env.TAG_NAME }}
+        
+        ## Changes in this release
+        
+        ### Package: ${{ github.event.inputs.package }}
+        
+        EOF
+        
+        if [ "${{ github.event.inputs.package }}" == "ryoma_ai" ] || [ "${{ github.event.inputs.package }}" == "both" ]; then
+          echo "- ryoma_ai: ${{ env.RYOMA_AI_VERSION }}" >> RELEASE_NOTES.md
+        fi
+        
+        if [ "${{ github.event.inputs.package }}" == "ryoma_lab" ] || [ "${{ github.event.inputs.package }}" == "both" ]; then
+          echo "- ryoma_lab: ${{ env.RYOMA_LAB_VERSION }}" >> RELEASE_NOTES.md
+        fi
+        
+        cat >> RELEASE_NOTES.md << EOF
+        
+        ## Installation
+        
+        \`\`\`bash
+        pip install ryoma-ai==${{ env.RYOMA_AI_VERSION }}
+        pip install ryoma-lab==${{ env.RYOMA_LAB_VERSION }}
+        \`\`\`
+        
+        ## What's Changed
+        - Version bump: ${{ github.event.inputs.version_type }}
+        - Package(s): ${{ github.event.inputs.package }}
+        EOF
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        name: Release ${{ env.TAG_NAME }}
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: ${{ github.event.inputs.pre_release != '' }}
+        target_commitish: ${{ env.BRANCH_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
