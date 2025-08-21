@@ -281,7 +281,7 @@ class ChatState(WorkspaceState):
             # Add the tool call to the answer
             self.chats[self.current_chat][
                 -1
-            ].answer += f"\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
+            ].answer += "\nIn order to assist you further, I need to run a tool. I've added the tool code to a new cell in the notebook for you to review and run."
 
             # Add a new cell to the notebook with the tool code
             self.add_tool_cell(self.current_tool, self.execute_tool, self.update_tool)

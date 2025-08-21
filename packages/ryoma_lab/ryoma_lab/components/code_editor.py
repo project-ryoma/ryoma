@@ -1,4 +1,3 @@
-from typing import Any
 
 import reflex as rx
 

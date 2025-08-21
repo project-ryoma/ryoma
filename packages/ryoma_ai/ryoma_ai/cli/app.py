@@ -6,8 +6,6 @@ Main CLI application class that orchestrates the multi-agent system.
 """
 
 import signal
-from typing import Optional
-from pathlib import Path
 
 import click
 from rich.console import Console

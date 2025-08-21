@@ -310,7 +310,7 @@ class WorkflowAgent(ChatAgent):
     def _build_chain(self):
         if not self.model:
             raise ValueError(
-                f"Unable to initialize model, please ensure you have valid configurations."
+                "Unable to initialize model, please ensure you have valid configurations."
             )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.final_prompt_template.append(

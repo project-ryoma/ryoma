@@ -13,12 +13,12 @@ Key innovations implemented:
 - Parallelization with majority-vote consensus
 """
 
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 import re
 from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
 from langgraph.graph import StateGraph, END
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.messages import AIMessage
 from langgraph.graph.state import CompiledStateGraph
 
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent

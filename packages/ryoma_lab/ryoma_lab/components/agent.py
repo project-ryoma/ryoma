@@ -6,7 +6,6 @@ from ryoma_lab.components.reactflow import background, controls, react_flow
 from ryoma_lab.states.agent import Agent, AgentState
 from ryoma_lab.states.graph import GraphState
 from ryoma_lab.states.tool import ToolState
-from ryoma_lab.templates import template
 
 
 def agent_card(agent: Agent):

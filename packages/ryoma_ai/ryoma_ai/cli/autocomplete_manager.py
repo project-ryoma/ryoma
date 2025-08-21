@@ -4,7 +4,7 @@ Autocomplete Manager for Ryoma AI CLI
 Provides command suggestion and autocomplete functionality.
 """
 
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional, Tuple
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 

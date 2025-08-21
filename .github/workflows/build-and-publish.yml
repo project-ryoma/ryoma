@@ -96,42 +96,7 @@ jobs:
         path: packages/ryoma_lab/dist/
         retention-days: 7
 
-  publish-test:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
-    environment: test-pypi
-    
-    steps:
-    - name: Download ryoma_ai artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: ryoma_ai-dist
-        path: dist-ryoma-ai/
-    
-    - name: Download ryoma_lab artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: ryoma_lab-dist
-        path: dist-ryoma-lab/
-    
-    - name: Publish ryoma_ai to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository-url: https://test.pypi.org/legacy/
-        packages-dir: dist-ryoma-ai/
-        skip-existing: true
-    
-    - name: Publish ryoma_lab to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository-url: https://test.pypi.org/legacy/
-        packages-dir: dist-ryoma-lab/
-        skip-existing: true
-
-  publish-prod:
+  publish:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
@@ -150,14 +115,22 @@ jobs:
         name: ryoma_lab-dist
         path: dist-ryoma-lab/
     
+    - name: Extract version from tag
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        echo "RELEASE_TAG=$TAG_NAME" >> $GITHUB_ENV
+        echo "Publishing from tag: $TAG_NAME"
+    
     - name: Publish ryoma_ai to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: dist-ryoma-ai/
+        skip-existing: true
     
     - name: Publish ryoma_lab to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: dist-ryoma-lab/
+        skip-existing: true

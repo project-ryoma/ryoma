@@ -12,7 +12,7 @@ from rich.table import Table
 
 from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.store import DataSourceStore, DataSourceRegistration
+from ryoma_ai.store import DataSourceStore
 
 
 class DataSourceManager:

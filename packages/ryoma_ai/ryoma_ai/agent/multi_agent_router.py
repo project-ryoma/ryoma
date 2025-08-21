@@ -6,7 +6,7 @@ Uses LLM inference to intelligently route questions to appropriate specialized a
 """
 
 import json
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 from enum import Enum
 from dataclasses import dataclass
 

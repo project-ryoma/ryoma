@@ -1,16 +1,15 @@
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Optional
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph.state import CompiledStateGraph
-from langgraph.store.memory import InMemoryStore
 from langgraph.types import interrupt
 
 from ryoma_ai.agent.workflow import WorkflowAgent
 from ryoma_ai.agent.internals.schema_linking_agent import SchemaLinkingAgent
-from ryoma_ai.agent.internals.query_planner import QueryPlannerAgent, QueryComplexity
+from ryoma_ai.agent.internals.query_planner import QueryPlannerAgent
 from ryoma_ai.agent.internals.sql_error_handler import SqlErrorHandler
-from ryoma_ai.agent.internals.sql_safety_validator import SqlSafetyValidator, SafetyLevel
+from ryoma_ai.agent.internals.sql_safety_validator import SqlSafetyValidator
 from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import (
     SqlQueryTool, CreateTableTool, QueryProfileTool,
@@ -499,7 +498,7 @@ class EnhancedSqlAgent(WorkflowAgent):
             # Safety violation
             violations = safety_check.get("violations", [])
             violation_messages = [v["message"] for v in violations]
-            final_answer = f"Query blocked for safety reasons:\n" + "\n".join(violation_messages)
+            final_answer = "Query blocked for safety reasons:\n" + "\n".join(violation_messages)
         elif error_info:
             # Error occurred
             final_answer = f"Query failed with error: {error_info['error_message']}"

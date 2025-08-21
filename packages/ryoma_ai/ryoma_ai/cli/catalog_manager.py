@@ -4,7 +4,6 @@ Catalog Manager for Ryoma AI CLI
 Handles catalog indexing and search operations.
 """
 
-from typing import Optional
 
 from rich.console import Console
 

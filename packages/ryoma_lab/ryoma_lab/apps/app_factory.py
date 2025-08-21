@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from typing import List, Optional, Tuple
 
 import marimo._server.api.lifespans as lifespans
 from marimo._cli.cli import DEVELOPMENT_MODE

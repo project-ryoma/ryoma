@@ -1,5 +1,5 @@
 # metadata_agent.py
-from typing import Dict, List, Any
+from typing import Dict, Any
 from ryoma_ai.agent.chat_agent import ChatAgent
 
 

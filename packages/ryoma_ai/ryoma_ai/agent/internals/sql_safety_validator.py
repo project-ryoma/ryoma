@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Any
 import re
 from dataclasses import dataclass
 from enum import IntEnum, Enum
@@ -258,7 +258,7 @@ class SqlSafetyValidator:
             violations.append(SafetyViolation(
                 rule=ValidationRule.LIMIT_RESULT_SIZE,
                 severity=SafetyLevel.WARNING,
-                message=f"Query without LIMIT clause may return large result set",
+                message="Query without LIMIT clause may return large result set",
                 suggested_fix=f"Add LIMIT {max_rows} to prevent excessive memory usage"
             ))
 
@@ -359,7 +359,7 @@ class SqlSafetyValidator:
 
     def create_safety_report(self, validation_result: ValidationResult) -> str:
         """Create a human-readable safety report."""
-        report = f"SQL Safety Validation Report\n"
+        report = "SQL Safety Validation Report\n"
         report += f"{'=' * 40}\n\n"
 
         report += f"Overall Safety Level: {validation_result.safety_level.name_str.upper()}\n"

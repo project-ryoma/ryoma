@@ -8,7 +8,7 @@ SQL approval workflow would be used in real applications.
 
 import pytest
 from unittest.mock import Mock, patch, create_autospec
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from langgraph.types import Command
 from langgraph.errors import GraphInterrupt
 

@@ -7,7 +7,7 @@ occur during human-in-the-loop SQL execution approval.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
 from langgraph.errors import GraphInterrupt

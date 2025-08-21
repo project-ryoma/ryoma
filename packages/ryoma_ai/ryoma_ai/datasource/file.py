@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 import pyarrow as pa
 from ryoma_ai.datasource.base import DataSource

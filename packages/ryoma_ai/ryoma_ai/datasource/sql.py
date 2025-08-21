@@ -1,12 +1,12 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Optional, Dict, List
 
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table, ColumnProfile, TableProfile
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.datasource.profiler import DatabaseProfiler
 
 
