@@ -4228,6 +4228,7 @@ dependencies = [
     { name = "mock" },
     { name = "openai" },
     { name = "pandas" },
+    { name = "prompt-toolkit" },
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "rich" },
@@ -4235,11 +4236,61 @@ dependencies = [
     { name = "types-setuptools" },
 ]
 
+[package.optional-dependencies]
+bigquery = [
+    { name = "amundsen-databuilder", extra = ["bigquery"] },
+    { name = "feast" },
+    { name = "ibis-framework", extra = ["bigquery"] },
+]
+mysql = [
+    { name = "amundsen-databuilder" },
+    { name = "feast", extra = ["mysql"] },
+    { name = "ibis-framework", extra = ["mysql"] },
+]
+postgres = [
+    { name = "amundsen-databuilder" },
+    { name = "feast", extra = ["postgres"] },
+    { name = "ibis-framework", extra = ["postgres"] },
+    { name = "psycopg2" },
+]
+pyspark = [
+    { name = "feast" },
+    { name = "findspark" },
+    { name = "ibis-framework", extra = ["pyspark"] },
+    { name = "pyspark" },
+]
+snowflake = [
+    { name = "amundsen-databuilder", extra = ["snowflake"] },
+    { name = "feast", extra = ["snowflake"] },
+    { name = "ibis-framework", extra = ["snowflake"] },
+]
+sqlite = [
+    { name = "feast" },
+    { name = "ibis-framework", extra = ["sqlite"] },
+]
+
 [package.metadata]
 requires-dist = [
+    { name = "amundsen-databuilder", extras = ["bigquery"], marker = "extra == 'bigquery'", specifier = ">=7.5.0" },
+    { name = "amundsen-databuilder", extras = ["mysql"], marker = "extra == 'mysql'", specifier = ">=7.5.0" },
+    { name = "amundsen-databuilder", extras = ["postgres"], marker = "extra == 'postgres'", specifier = ">=7.5.0" },
+    { name = "amundsen-databuilder", extras = ["snowflake"], marker = "extra == 'snowflake'", specifier = ">=7.5.0" },
     { name = "click", specifier = ">=8.0.0" },
     { name = "datasketch", specifier = ">=1.6.5" },
+    { name = "feast", extras = ["bigquery"], marker = "extra == 'bigquery'", specifier = ">=0.39.1" },
+    { name = "feast", extras = ["mysql"], marker = "extra == 'mysql'", specifier = ">=0.39.1" },
+    { name = "feast", extras = ["postgres"], marker = "extra == 'postgres'", specifier = ">=0.39.1" },
+    { name = "feast", extras = ["pyspark"], marker = "extra == 'pyspark'", specifier = ">=0.39.1" },
+    { name = "feast", extras = ["snowflake"], marker = "extra == 'snowflake'", specifier = ">=0.39.1" },
+    { name = "feast", extras = ["sqlite"], marker = "extra == 'sqlite'", specifier = ">=0.39.1" },
+    { name = "findspark", marker = "extra == 'pyspark'", specifier = ">=1.4.2" },
     { name = "httpx", specifier = "==0.27.2" },
+    { name = "ibis-framework", extras = ["bigquery"], marker = "extra == 'bigquery'", specifier = ">=9.0.0" },
+    { name = "ibis-framework", extras = ["mysql"], marker = "extra == 'mysql'", specifier = ">=9.0.0" },
+    { name = "ibis-framework", extras = ["postgres"], marker = "extra == 'postgres'", specifier = ">=9.0.0" },
+    { name = "ibis-framework", extras = ["pyspark"], marker = "extra == 'pyspark'", specifier = ">=9.0.0" },
+    { name = "ibis-framework", extras = ["snowflake"], marker = "extra == 'snowflake'", specifier = ">=9.0.0" },
+    { name = "ibis-framework", extras = ["sqlite"], marker = "extra == 'sqlite'", specifier = ">=9.0.0" },
     { name = "ipython", specifier = ">=8.14.0" },
     { name = "jupyter-ai-magics", specifier = ">=2.19.0" },
     { name = "langchain", specifier = ">=0.2.9,<0.3.0" },
@@ -4248,8 +4299,11 @@ requires-dist = [
     { name = "mock", specifier = ">=5.1.0" },
     { name = "openai", specifier = ">=1.33.0" },
     { name = "pandas", specifier = ">=2.2.2" },
+    { name = "prompt-toolkit", specifier = ">=3.0.0" },
+    { name = "psycopg2", marker = "extra == 'postgres'", specifier = ">=2.9.2" },
     { name = "pyarrow", specifier = ">=16.1.0" },
     { name = "pydantic", specifier = ">=2.7.1" },
+    { name = "pyspark", marker = "extra == 'pyspark'", specifier = ">=3.2.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "typer", specifier = ">=0.12.3" },
     { name = "types-setuptools", specifier = ">=70.0.0.20240524" },

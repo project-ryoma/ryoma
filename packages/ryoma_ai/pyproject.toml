@@ -40,11 +40,12 @@ dependencies = [
   "datasketch>=1.6.5",
   "httpx==0.27.2",
   "click>=8.0.0",
-  "rich>=13.0.0"
+  "rich>=13.0.0",
+  "prompt-toolkit>=3.0.0"
 ]
 
 [project.scripts]
-ryoma-sql = "ryoma_ai.cli.main:main"
+ryoma = "ryoma_ai.cli.main:main"
 
 [project.optional-dependencies]
 snowflake = [
