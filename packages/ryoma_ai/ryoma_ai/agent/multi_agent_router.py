@@ -22,7 +22,7 @@ from ryoma_ai.llm.provider import load_model_provider
 class TaskType(Enum):
     """Task types for intelligent routing."""
     SQL_QUERY = "sql_query"
-    PYTHON_CODE = "python_code" 
+    PYTHON_CODE = "python_code"
     DATA_ANALYSIS = "data_analysis"
     GENERAL_CHAT = "general_chat"
 
@@ -38,10 +38,10 @@ class TaskClassification:
 
 class LLMTaskRouter:
     """LLM-based intelligent task router."""
-    
+
     def __init__(self, model: str = "gpt-4o", model_parameters: Optional[Dict] = None):
-        self.model = load_model_provider(model, model_parameters or {})
-        
+        self.model = load_model_provider(model, "chat", model_parameters or {})
+
         # Classification prompt template
         self.classification_prompt = """You are an intelligent task router that determines which specialized agent should handle a user's question.
 
@@ -53,7 +53,7 @@ Available agents and their capabilities:
    - Data filtering, aggregation, joins
    - Examples: "Show me all customers", "What are the top 5 products?", "Find orders from last month"
 
-2. **Python Agent** - Executes Python code and scripts  
+2. **Python Agent** - Executes Python code and scripts
    - Python code execution and debugging
    - Algorithm implementation
    - Script creation and automation
@@ -85,10 +85,10 @@ Response (JSON only):"""
         # Get LLM classification
         prompt = self.classification_prompt.format(question=user_input)
         response = self.model.invoke(prompt)
-        
+
         # Extract JSON from response
         response_text = response.content if hasattr(response, 'content') else str(response)
-        
+
         # Try to extract JSON if wrapped in other text
         start_idx = response_text.find('{')
         end_idx = response_text.rfind('}') + 1
@@ -96,21 +96,21 @@ Response (JSON only):"""
             json_str = response_text[start_idx:end_idx]
         else:
             json_str = response_text
-        
+
         result = json.loads(json_str)
-        
+
         task_type = TaskType(result.get("task_type", "general_chat"))
         confidence = float(result.get("confidence", 0.5))
         reasoning = result.get("reasoning", "LLM classification")
-        
+
         # Map task type to agent
         agent_mapping = {
             TaskType.SQL_QUERY: "sql",
             TaskType.PYTHON_CODE: "python",
-            TaskType.DATA_ANALYSIS: "pandas", 
+            TaskType.DATA_ANALYSIS: "pandas",
             TaskType.GENERAL_CHAT: "chat"
         }
-        
+
         return TaskClassification(
             task_type=task_type,
             confidence=confidence,
@@ -119,34 +119,34 @@ Response (JSON only):"""
         )
 
 
-class MultiAgentManager:
+class MultiAgentRouter:
     """Manages multiple agent instances following Claude Code patterns."""
-    
-    def __init__(self, model: str = "gpt-4o", datasource=None, **kwargs):
+
+    def __init__(self, model: str, datasource=None, **kwargs):
         self.model = model
         self.datasource = datasource
         self.model_parameters = kwargs.get('model_parameters')
-        
+
         # Agent registry (lazy initialization)
         self._agents: Dict[str, Any] = {}
         self.router = LLMTaskRouter(model, self.model_parameters)
-        
+
         # Shared execution context
         self.execution_context = {
             'conversation_history': [],
             'shared_variables': {},
             'current_datasource': datasource
         }
-    
+
     def get_agent(self, agent_type: str, **config_overrides) -> Any:
         """Get or create agent instance (lazy initialization)."""
         cache_key = f"{agent_type}_{hash(str(sorted(config_overrides.items())))}"
-        
+
         if cache_key not in self._agents:
             self._agents[cache_key] = self._create_agent(agent_type, **config_overrides)
-        
+
         return self._agents[cache_key]
-    
+
     def _create_agent(self, agent_type: str, **config_overrides) -> Any:
         """Create agent using factory pattern."""
         base_config = {
@@ -155,7 +155,7 @@ class MultiAgentManager:
             'datasource': self.datasource
         }
         base_config.update(config_overrides)
-        
+
         if agent_type == "sql":
             mode = SqlAgentMode(config_overrides.get('sql_mode', 'enhanced'))
             return SqlAgent(
@@ -183,24 +183,24 @@ class MultiAgentManager:
         else:
             # Fallback using AgentFactory
             return AgentFactory.create_agent(agent_type, **base_config)
-    
+
     def route_and_execute(self, user_input: str, **config_overrides) -> tuple[Any, TaskClassification, Any]:
         """Route question to appropriate agent and return results."""
         # Classify the task
         classification = self.router.classify_task(user_input)
-        
+
         # Get appropriate agent
         agent = self.get_agent(classification.suggested_agent, **config_overrides)
-        
+
         # Update execution context
         self.execution_context['conversation_history'].append({
             'input': user_input,
             'classification': classification,
             'agent_type': classification.suggested_agent
         })
-        
+
         return agent, classification, self.execution_context
-    
+
     def get_capabilities(self) -> Dict[str, Dict[str, List[str]]]:
         """Return capabilities for all agent types."""
         return {
@@ -208,7 +208,7 @@ class MultiAgentManager:
                 "capabilities": [
                     "Natural language to SQL conversion",
                     "Database schema exploration",
-                    "Data retrieval and filtering", 
+                    "Data retrieval and filtering",
                     "Aggregations and joins",
                     "Database operations with approval workflow"
                 ],
@@ -258,24 +258,24 @@ class MultiAgentManager:
                 ]
             }
         }
-    
+
     def switch_agent_context(self, from_agent: str, to_agent: str, context_data: Dict = None):
         """Switch between agents while preserving relevant context."""
         if context_data:
             self.execution_context['shared_variables'].update(context_data)
-        
+
         # Agent-specific context switching logic can be added here
         # For example, passing SQL results to pandas agent for analysis
-    
+
     def get_current_stats(self) -> Dict[str, Any]:
         """Get statistics about agent usage."""
         history = self.execution_context['conversation_history']
         agent_counts = {}
-        
+
         for entry in history:
             agent_type = entry['agent_type']
             agent_counts[agent_type] = agent_counts.get(agent_type, 0) + 1
-        
+
         return {
             'total_queries': len(history),
             'agent_usage': agent_counts,

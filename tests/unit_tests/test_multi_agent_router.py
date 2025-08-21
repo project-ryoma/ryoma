@@ -15,7 +15,7 @@ from ryoma_ai.agent.multi_agent_router import (
     TaskType,
     TaskClassification,
     LLMTaskRouter,
-    MultiAgentManager
+    MultiAgentRouter
 )
 
 
@@ -210,7 +210,7 @@ class TestMultiAgentManager(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.manager = MultiAgentManager(model="test-model")
+        self.manager = MultiAgentRouter(model="test-model")
         # Mock the router to avoid actual LLM calls
         self.manager.router = Mock()
     
@@ -313,7 +313,7 @@ class TestMultiAgentIntegration(unittest.TestCase):
     
     def setUp(self):
         """Set up integration test fixtures."""
-        self.manager = MultiAgentManager(model="test-model")
+        self.manager = MultiAgentRouter(model="test-model")
         self.manager.router.model = MockModel()
     
     def test_route_and_execute_workflow(self):
