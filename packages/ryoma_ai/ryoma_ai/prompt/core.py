@@ -3,7 +3,7 @@ Modern Prompt System - Core Components
 
 This module provides a clean, modular approach to prompt management with:
 - Clear separation of concerns
-- Registry-based pattern for extensibility  
+- Registry-based pattern for extensibility
 - Type safety and modern Python practices
 - Easy testing and maintenance
 """

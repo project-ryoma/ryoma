@@ -7,7 +7,6 @@ from ryoma_ai.datasource.metadata import Catalog
 
 
 class DataSource(BaseModel, ABC):
-
     model_config = {
         "arbitrary_types_allowed": True,
         "extra": "allow",

@@ -2,7 +2,7 @@
 Enhanced Database Profiler with LLM Summarization
 
 Builds on the existing DatabaseProfiler to implement the LLM-based metadata
-generation techniques from the AT&T research paper "Automatic Metadata 
+generation techniques from the AT&T research paper "Automatic Metadata
 Extraction for Text-to-SQL" (2505.19988v2).
 
 This module adds:
@@ -240,9 +240,9 @@ class EnhancedDatabaseProfiler:
         # Prepare statistics summary
         stats_summary = f"""
 Statistics:
-- Total records: {profile.row_count or 'Unknown'}
+- Total records: {profile.row_count or "Unknown"}
 - Null percentage: {profile.null_percentage or 0:.1f}%
-- Distinct values: {profile.distinct_count or 'Unknown'}
+- Distinct values: {profile.distinct_count or "Unknown"}
 - Distinct ratio: {profile.distinct_ratio or 0:.3f}
 """
 
@@ -268,10 +268,10 @@ String Stats:
 You are analyzing a database field to generate metadata optimized for text-to-SQL generation.
 Focus on information that would help an AI system understand how to use this field in SQL queries.
 
-Table: {table_name} {f'(Schema: {schema})' if schema else ''}
+Table: {table_name} {f"(Schema: {schema})" if schema else ""}
 Field: {profile.column_name}
-Data Type: {getattr(profile, 'data_type', 'Unknown')}
-Semantic Type: {profile.semantic_type or 'general'}
+Data Type: {getattr(profile, "data_type", "Unknown")}
+Semantic Type: {profile.semantic_type or "general"}
 
 {stats_summary}{type_specific_stats}
 
@@ -515,9 +515,9 @@ Consider how this field would be used in WHERE clauses, JOINs, GROUP BY, and SEL
         prompt = f"""
 Analyze this database table to understand its business purpose and usage patterns:
 
-Table: {table_name} {f'(Schema: {schema})' if schema else ''}
+Table: {table_name} {f"(Schema: {schema})" if schema else ""}
 Columns: {table_profile.column_count or 0}
-Rows: {table_profile.row_count or 'Unknown'}
+Rows: {table_profile.row_count or "Unknown"}
 
 Key Fields:
 {chr(10).join(field_summary[:10])}
@@ -608,10 +608,10 @@ Statistics:
 - Completeness: {enhanced_metadata.base_profile.completeness_score:.1%} if enhanced_metadata.base_profile.completeness_score else 'Unknown'
 
 Key Fields for SQL Generation:
-{chr(10).join(key_fields[:5]) if key_fields else '- No high-confidence join candidates identified'}
+{chr(10).join(key_fields[:5]) if key_fields else "- No high-confidence join candidates identified"}
 
 Join Patterns:
-{chr(10).join([f"- {p['field']}: {p['type']} (score: {p['score']:.2f})" for p in enhanced_metadata.common_join_patterns[:3]]) if enhanced_metadata.common_join_patterns else '- No join patterns identified'}
+{chr(10).join([f"- {p['field']}: {p['type']} (score: {p['score']:.2f})" for p in enhanced_metadata.common_join_patterns[:3]]) if enhanced_metadata.common_join_patterns else "- No join patterns identified"}
 
 Data Quality: {enhanced_metadata.data_freshness_assessment}
         """

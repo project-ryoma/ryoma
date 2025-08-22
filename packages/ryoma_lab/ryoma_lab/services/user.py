@@ -5,7 +5,6 @@ from ryoma_lab.states.base import User
 
 
 class UserService:
-
     def __init__(self):
         self.session = rx.session()
 

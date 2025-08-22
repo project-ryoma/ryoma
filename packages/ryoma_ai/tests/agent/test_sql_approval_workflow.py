@@ -334,7 +334,6 @@ class TestSqlApprovalIntegration:
                             with patch.object(
                                 full_workflow, "_validate_safety"
                             ) as mock_validate:
-
                                 # Set up mock returns
                                 mock_init.return_value = {
                                     "messages": [],
@@ -373,7 +372,6 @@ class TestSqlApprovalIntegration:
                                         "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
                                         return_value=mock_tool,
                                     ):
-
                                         # Create workflow and test execution
                                         full_workflow.build()
 

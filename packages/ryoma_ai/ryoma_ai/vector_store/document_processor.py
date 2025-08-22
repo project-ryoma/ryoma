@@ -48,7 +48,7 @@ class DocumentProcessor:
 
         if file_path.stat().st_size > self.config.max_file_size_mb * 1024 * 1024:
             raise ValueError(
-                f"File too large: {file_path.stat().st_size / (1024*1024):.1f}MB"
+                f"File too large: {file_path.stat().st_size / (1024 * 1024):.1f}MB"
             )
 
         # Extract text based on file type

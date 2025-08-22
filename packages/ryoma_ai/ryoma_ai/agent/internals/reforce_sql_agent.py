@@ -845,7 +845,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         if column_exploration and column_exploration.exploration_results:
             prompt += "Column exploration insights:\n"
             for i, result in enumerate(column_exploration.exploration_results[:3]):
-                prompt += f"Exploration {i+1}: {result[:200]}...\n"
+                prompt += f"Exploration {i + 1}: {result[:200]}...\n"
             prompt += "\n"
 
         if approach == "simplified":

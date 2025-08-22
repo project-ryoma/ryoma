@@ -26,7 +26,6 @@ class DuckDBConfig(BaseModel):
 
 
 class DuckDBDataSource(SqlDataSource):
-
     def get_query_plan(self, query: str) -> Any:
         pass
 

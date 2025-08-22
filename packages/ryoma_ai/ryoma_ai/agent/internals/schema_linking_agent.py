@@ -423,7 +423,7 @@ Update SQL to include additional relevant columns:
 
 User Query: {user_query}
 Detected Columns: {list(extended_cols)}
-Literals: {extracted['literals']}
+Literals: {extracted["literals"]}
 
 Original SQL: {current_sql}
 

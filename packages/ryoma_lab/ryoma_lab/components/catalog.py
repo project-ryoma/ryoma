@@ -1,4 +1,4 @@
-"""The data catalog page """
+"""The data catalog page"""
 
 import reflex as rx
 import reflex_chakra as rc

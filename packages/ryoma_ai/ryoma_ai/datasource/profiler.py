@@ -605,7 +605,7 @@ class DatabaseProfiler:
         """
         if not self.enable_llm_enhancement:
             return {
-                "description": f'Field containing {profile.semantic_type or "general"} data',
+                "description": f"Field containing {profile.semantic_type or 'general'} data",
                 "business_purpose": "Unknown",
                 "sql_hints": [],
                 "join_candidate_score": self._calculate_join_candidate_score(profile),
@@ -660,9 +660,9 @@ class DatabaseProfiler:
         # Prepare statistics summary
         stats_summary = f"""
 Statistics:
-- Total records: {profile.row_count or 'Unknown'}
+- Total records: {profile.row_count or "Unknown"}
 - Null percentage: {profile.null_percentage or 0:.1f}%
-- Distinct values: {profile.distinct_count or 'Unknown'}
+- Distinct values: {profile.distinct_count or "Unknown"}
 - Distinct ratio: {profile.distinct_ratio or 0:.3f}
 """
 
@@ -685,9 +685,9 @@ String Stats:
         prompt = f"""
 Analyze this database field to generate metadata optimized for text-to-SQL generation.
 
-Table: {table_name} {f'(Schema: {schema})' if schema else ''}
+Table: {table_name} {f"(Schema: {schema})" if schema else ""}
 Field: {profile.column_name}
-Semantic Type: {profile.semantic_type or 'general'}
+Semantic Type: {profile.semantic_type or "general"}
 
 {stats_summary}{type_specific_stats}
 

@@ -10,13 +10,13 @@ Key Components:
 
 Basic Usage:
     from ryoma_ai.prompt import prompt_manager, PromptType
-    
+
     # Create a SQL prompt
     prompt = prompt_manager.create_sql_prompt(
         schema="CREATE TABLE users (id INT, name VARCHAR(100))",
         question="What are all the user names?"
     )
-    
+
     # Create a chat prompt
     prompt = prompt_manager.create_chat_prompt(
         user_input="Hello, how can you help me?",

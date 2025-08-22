@@ -304,7 +304,6 @@ class QueryPlannerAgent(ChatAgent):
                 and len(step.depends_on) == 0
                 and steps[i + 1].depends_on == [step.step_id]
             ):
-
                 # Combine the steps
                 combined_step = QueryStep(
                     step_id=step.step_id,

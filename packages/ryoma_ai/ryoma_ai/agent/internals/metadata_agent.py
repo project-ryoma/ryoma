@@ -8,9 +8,9 @@ class MetadataSummarizationAgent(ChatAgent):
     def summarize_column(self, column_name: str, profile: Dict[str, Any]) -> str:
         prompt = f"""
         Column Name: {column_name}
-        Type: {profile.get('type')}
-        Null Ratio: {profile.get('null_ratio'):.2f}
-        Distinct Count: {profile.get('distinct_count')}
+        Type: {profile.get("type")}
+        Null Ratio: {profile.get("null_ratio"):.2f}
+        Distinct Count: {profile.get("distinct_count")}
         """
         if "min" in profile:
             prompt += f"Min: {profile['min']}, Max: {profile['max']}, Mean: {profile['mean']:.2f}\n"
