@@ -28,6 +28,14 @@ class MockModel:
         self.call_count = 0
         self.last_prompt = None
 
+        # Add default responses for test cases that should be SQL queries
+        self.default_sql_responses = {
+            "show me all customers from new york": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database query for customer data"}',
+            "what are the top 5 selling products?": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database query for product rankings"}',
+            "find orders placed in the last 30 days": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database query for recent orders"}',
+            "show me the data in artist table": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database table data retrieval"}',
+        }
+
     def invoke(self, prompt: str):
         """Mock invoke method that returns predefined responses."""
         self.call_count += 1
@@ -48,10 +56,23 @@ class MockModel:
         if question_line in self.responses:
             return MockResponse(self.responses[question_line])
 
+        # Check default SQL responses
+        if question_line in self.default_sql_responses:
+            return MockResponse(self.default_sql_responses[question_line])
+
         # Default classification logic
         if any(
             word in question_line
-            for word in ["show", "find", "select", "table", "database"]
+            for word in [
+                "show",
+                "find",
+                "select",
+                "table",
+                "database",
+                "data",
+                "artist",
+                "customers",
+            ]
         ):
             response = '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Contains SQL/database keywords"}'
         elif any(
@@ -303,7 +324,10 @@ class TestMultiAgentManager(unittest.TestCase):
     def test_agent_caching(self):
         """Test that agents are cached properly."""
         with patch.object(self.manager, "_create_agent") as mock_create:
-            mock_create.return_value = Mock()
+            # Create different mock agents for each call
+            mock_agent1 = Mock()
+            mock_agent2 = Mock()
+            mock_create.side_effect = [mock_agent1, mock_agent2]
 
             # First call should create agent
             agent1 = self.manager.get_agent("sql")
@@ -318,6 +342,7 @@ class TestMultiAgentManager(unittest.TestCase):
             agent3 = self.manager.get_agent("sql", sql_mode="basic")
             self.assertEqual(mock_create.call_count, 2)
             self.assertIsNot(agent1, agent3)
+            self.assertIs(agent3, mock_agent2)
 
 
 class TestMultiAgentIntegration(unittest.TestCase):

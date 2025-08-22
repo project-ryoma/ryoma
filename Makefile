@@ -60,8 +60,12 @@ check-safety:
 	uv run safety check --full-report
 	uv run bandit -ll --recursive ryoma tests
 
+.PHONY: ruff-check
+ruff-check:
+	uv run ruff check .
+
 .PHONY: lint
-lint: test check-codestyle mypy check-safety
+lint: test check-codestyle mypy ruff-check check-safety
 
 .PHONY: update-dev-deps
 update-dev-deps:
