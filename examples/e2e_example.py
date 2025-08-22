@@ -5,8 +5,6 @@ from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import ToolMode
 from ryoma_ai.datasource.postgres import PostgresDataSource
-from ryoma_ai.vector_store.base import VectorStore
-from ryoma_ai.vector_store.factory import create_vector_store
 
 
 def get_postgres_datasource():

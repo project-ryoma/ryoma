@@ -3,15 +3,14 @@
 Test the fixed CLI functionality
 """
 
-import os
 import sys
 from pathlib import Path
+
+from ryoma_ai.cli.app import RyomaAI
 
 # Add the ryoma_ai package to Python path
 ryoma_ai_path = Path(__file__).parent / "packages" / "ryoma_ai"
 sys.path.insert(0, str(ryoma_ai_path))
-
-from ryoma_ai.cli.app import RyomaAI
 
 
 def test_cli_with_sqlite():

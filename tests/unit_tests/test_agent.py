@@ -1,5 +1,3 @@
-import os
-
 import openai
 import openai_responses
 import pytest

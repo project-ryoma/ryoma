@@ -123,7 +123,7 @@ def demo_usage_patterns():
     print("\n\n💡 Common Usage Patterns")
     print("=" * 50)
 
-    mock_datasource = Mock(spec=SqlDataSource)
+    _ = Mock(spec=SqlDataSource)
 
     print("\n1. Simple SQL queries (Basic mode):")
     print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='basic')")

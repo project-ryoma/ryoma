@@ -4,24 +4,19 @@ Performance and stress tests for the InjectedStore system and SQL tools.
 Tests system performance under load, memory usage, latency, and throughput scenarios.
 """
 
-import asyncio
 import gc
 import statistics
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, List, Tuple
-from unittest.mock import MagicMock, Mock
+from typing import Dict, List
+from unittest.mock import Mock
 
 import psutil
 import pytest
 from langgraph.store.memory import InMemoryStore
-from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.tool.sql_tool import (
-    Column,
-    CreateTableTool,
     QueryPlanTool,
     SchemaAnalysisTool,
     SqlQueryTool,
@@ -309,7 +304,6 @@ class TestThroughputAndConcurrency:
         """Test WorkflowAgent performance under load."""
         from langchain_core.language_models.chat_models import BaseChatModel
         from langchain_core.messages import AIMessage
-        from ryoma_ai.agent.workflow import ToolMode, WorkflowAgent
 
         class FastMockModel(BaseChatModel):
             def __init__(self):
@@ -577,7 +571,7 @@ class TestLatencyAndResponseTime:
 if __name__ == "__main__":
     # Add performance markers for pytest-benchmark if available
     try:
-        import pytest_benchmark
+        import pytest_benchmark  # noqa: F401
 
         print("pytest-benchmark is available for advanced performance testing")
     except ImportError:

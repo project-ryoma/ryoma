@@ -5,11 +5,10 @@ These tests verify that the workflow agent properly handles model initialization
 failures and provides helpful error messages to users.
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.llm.provider import load_model_provider
 
 
 class TestWorkflowAgentErrorHandling:
@@ -166,7 +165,7 @@ class TestWorkflowAgentErrorHandling:
 
                 agent = WorkflowAgent(tools=[], model="openai:gpt-4")
 
-                chain = agent._build_chain()
+                agent._build_chain()
 
                 # Verify prompt template was built and messages placeholder was added
                 mock_factory.build_prompt.assert_called_once()

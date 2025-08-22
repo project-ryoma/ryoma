@@ -34,3 +34,12 @@ repos:
         entry: uv run black --config pyproject.toml
         types: [python]
         language: system
+
+  - repo: local
+    hooks:
+      - id: lint
+        name: lint
+        entry: make lint
+        types: [python]
+        language: system
+        pass_filenames: false

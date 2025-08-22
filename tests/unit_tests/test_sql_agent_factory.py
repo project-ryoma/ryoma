@@ -4,7 +4,6 @@ Tests for SqlAgent factory pattern implementation.
 Tests the factory pattern, agent creation, and mode-specific functionality.
 """
 
-from typing import Dict, Optional
 from unittest.mock import Mock, patch
 
 import pytest

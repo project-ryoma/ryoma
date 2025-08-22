@@ -49,7 +49,8 @@ unit-test:
 .PHONY: check-codestyle
 check-codestyle:
 	uv run isort --diff --check-only --settings-path pyproject.toml ./
-	uv run black --diff --check --config pyproject.toml ./ 
+	uv run black --diff --check --config pyproject.toml ./
+	uv run ruff check . 
 
 .PHONY: mypy
 mypy:
@@ -60,12 +61,8 @@ check-safety:
 	uv run safety check --full-report
 	uv run bandit -ll --recursive ryoma tests
 
-.PHONY: ruff-check
-ruff-check:
-	uv run ruff check .
-
 .PHONY: lint
-lint: test check-codestyle mypy ruff-check check-safety
+lint: test check-codestyle mypy check-safety
 
 .PHONY: update-dev-deps
 update-dev-deps:

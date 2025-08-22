@@ -6,7 +6,7 @@ provides appropriate error messages, and successfully initializes supported mode
 """
 
 import os
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from ryoma_ai.llm.provider import load_model_provider
@@ -159,11 +159,11 @@ class TestModelProvider:
             mock_openai.return_value = mock_instance
 
             # Test with None
-            result = load_model_provider(model_id, model_parameters=None)
+            load_model_provider(model_id, model_parameters=None)
             mock_openai.assert_called_with(model="gpt-4", **{})
 
             # Test with empty dict
-            result = load_model_provider(model_id, model_parameters={})
+            load_model_provider(model_id, model_parameters={})
             mock_openai.assert_called_with(model="gpt-4", **{})
 
     def test_special_model_names(self):

@@ -8,7 +8,7 @@ functionality without requiring actual API calls.
 
 import json
 import unittest
-from typing import Any, Dict
+from typing import Dict
 from unittest.mock import Mock, patch
 
 from ryoma_ai.agent.multi_agent_router import (
@@ -314,11 +314,11 @@ class TestMultiAgentManager(unittest.TestCase):
     def test_agent_creation(self, mock_python_agent, mock_sql_agent):
         """Test agent creation with mocked dependencies."""
         # Test SQL agent creation
-        sql_agent = self.manager._create_agent("sql")
+        self.manager._create_agent("sql")
         mock_sql_agent.assert_called_once()
 
         # Test Python agent creation
-        python_agent = self.manager._create_agent("python")
+        self.manager._create_agent("python")
         mock_python_agent.assert_called_once()
 
     def test_agent_caching(self):

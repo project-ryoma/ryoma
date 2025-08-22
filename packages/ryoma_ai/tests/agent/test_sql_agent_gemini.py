@@ -5,7 +5,7 @@ These tests verify that the SQL agent works correctly with Gemini models,
 including proper prompt handling, error scenarios, and SQL generation.
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from ryoma_ai.agent.sql import SQLAgent
@@ -78,7 +78,7 @@ class TestSQLAgentGeminiIntegration:
             with patch.object(agent, "chain") as mock_chain:
                 mock_chain.invoke.return_value.content = "SELECT name FROM users;"
 
-                result = agent.invoke(query)
+                agent.invoke(query)
 
                 # Verify prompt was created with correct parameters
                 mock_prompt_manager.create_sql_prompt.assert_called()
@@ -158,7 +158,7 @@ class TestSQLAgentGeminiIntegration:
 
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
-                result = agent.stream("What are the user names?", display=True)
+                agent.stream("What are the user names?", display=True)
 
             # Verify stream was called
             mock_chain.stream.assert_called_once()
@@ -228,7 +228,7 @@ class TestSQLAgentGeminiIntegration:
                 mock_response.content = "SELECT COUNT(*) FROM orders;"
                 mock_chain.invoke.return_value = mock_response
 
-                result = agent.invoke("How many orders are there?")
+                agent.invoke("How many orders are there?")
 
                 # Verify the new prompt system was used
                 mock_prompt_manager.create_sql_prompt.assert_called()
@@ -288,7 +288,7 @@ class TestSQLAgentErrorScenarios:
         mock_datasource = Mock(spec=SQLDatasource)
         mock_datasource.get_table_schema.side_effect = Exception("Connection failed")
 
-        agent = SQLAgent(model="gemini:gemini-2.0-flash", datasource=mock_datasource)
+        SQLAgent(model="gemini:gemini-2.0-flash", datasource=mock_datasource)
 
         # Test that datasource errors are propagated
         with pytest.raises(Exception, match="Connection failed"):

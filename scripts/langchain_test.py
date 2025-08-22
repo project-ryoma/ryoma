@@ -1,10 +1,7 @@
-import json
-
 from langchain.chains import create_sql_query_chain
 from langchain_community.tools import QuerySQLDataBaseTool
 from langchain_community.utilities import SQLDatabase
 from langchain_core.tools import tool
-from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_openai import ChatOpenAI
 
 
@@ -29,10 +26,6 @@ def multiply(a: int, b: int) -> int:
 #     "what's five times four"
 # ))
 
-
-from langchain.chains import create_sql_query_chain
-from langchain_community.utilities import SQLDatabase
-from langchain_openai import ChatOpenAI
 
 db = SQLDatabase.from_uri("")
 # print(db.dialect)

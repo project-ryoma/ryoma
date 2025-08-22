@@ -134,7 +134,7 @@ def example_iceberg_hive_catalog():
 
     # Show column profiles
     column_profiles = table_profile.get("column_profiles", {})
-    print(f"  Column Details:")
+    print("  Column Details:")
     for col_name, profile in column_profiles.items():
         null_pct = profile.get("null_percentage", 0)
         distinct_ratio = profile.get("distinct_ratio", 0)
@@ -172,12 +172,12 @@ def example_metadata_comparison():
     # Traditional SQL datasource (requires runtime profiling)
     from ryoma_ai.datasource.postgres import PostgresDataSource
 
-    postgres_ds = PostgresDataSource(
+    _ = PostgresDataSource(
         host="localhost", database="ecommerce", user="user", password="password"
     )
 
     # Iceberg datasource (uses native metadata)
-    iceberg_ds = IcebergDataSource(
+    _ = IcebergDataSource(
         catalog_name="ecommerce",
         catalog_type="rest",
         catalog_uri="http://localhost:8181",

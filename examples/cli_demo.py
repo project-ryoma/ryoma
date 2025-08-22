@@ -6,10 +6,7 @@ This script shows how to use the Ryoma SQL CLI programmatically,
 which can be useful for automation or integration into other tools.
 """
 
-import os
 import subprocess
-import sys
-from pathlib import Path
 
 
 def run_cli_command(command: str) -> str:
