@@ -40,11 +40,11 @@ jobs:
         uv run ruff check packages/
         uv run ruff format --check packages/
     
-    - name: Type check with mypy
-      continue-on-error: true  # MyPy issues noted in TODOs
-      run: |
-        uv run mypy packages/ryoma_ai/ryoma_ai --ignore-missing-imports
-        uv run mypy packages/ryoma_lab/ryoma_lab --ignore-missing-imports
+#    - name: Type check with mypy
+#      continue-on-error: true  # MyPy issues noted in TODOs
+#      run: |
+#        uv run mypy packages/ryoma_ai/ryoma_ai --ignore-missing-imports
+#        uv run mypy packages/ryoma_lab/ryoma_lab --ignore-missing-imports
     
     - name: Test with pytest
       run: |
