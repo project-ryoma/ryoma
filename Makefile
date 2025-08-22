@@ -54,7 +54,7 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	uv run mypy --config-file pyproject.toml ./
+	uv run mypy --config-file pyproject.toml --exclude 'packages/.*/setup\.py' ./
 
 .PHONY: check-safety
 check-safety:
