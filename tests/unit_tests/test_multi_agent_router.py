@@ -35,11 +35,11 @@ class MockModel:
             "find orders placed in the last 30 days": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database query for recent orders"}',
             "show me the data in artist table": '{"task_type": "sql_query", "confidence": 0.9, "reasoning": "Database table data retrieval"}',
         }
-        
+
         # Add default responses for general chat queries
         self.default_general_responses = {
             "what can you help me with?": '{"task_type": "general_chat", "confidence": 0.8, "reasoning": "General question about capabilities"}',
-            "explain machine learning concepts": '{"task_type": "general_chat", "confidence": 0.8, "reasoning": "Conceptual explanation request"}', 
+            "explain machine learning concepts": '{"task_type": "general_chat", "confidence": 0.8, "reasoning": "Conceptual explanation request"}',
             "best practices for data analysis": '{"task_type": "general_chat", "confidence": 0.8, "reasoning": "General advice request"}',
         }
 
@@ -66,7 +66,7 @@ class MockModel:
         # Check default SQL responses
         if question_line in self.default_sql_responses:
             return MockResponse(self.default_sql_responses[question_line])
-            
+
         # Check default general chat responses
         if question_line in self.default_general_responses:
             return MockResponse(self.default_general_responses[question_line])

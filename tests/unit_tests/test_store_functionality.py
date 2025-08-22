@@ -6,7 +6,7 @@ Tests store operations, error scenarios, data persistence, and recovery mechanis
 
 import threading
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from langgraph.store.memory import InMemoryStore
