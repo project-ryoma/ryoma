@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 import reflex as rx
 from ryoma_lab.models.vector_store import DocumentProject
@@ -20,7 +20,7 @@ class VectorStoreState(AIState):
     # UI state
     create_project_dialog_open: bool = False
     upload_dialog_open: bool = False
-    
+
     # File upload
     uploaded_files: List[str] = []
 
@@ -70,16 +70,16 @@ class VectorStoreState(AIState):
             with VectorStoreService() as service:
                 project = service.create_project(
                     project_name=self.project_name,
-                    description=self.project_description or None
+                    description=self.project_description or None,
                 )
                 self.document_projects.append(project)
                 self.current_project = project
                 logging.info(f"Created project: {self.project_name}")
-                
+
                 # Clear form
                 self.project_name = ""
                 self.project_description = ""
-                
+
         except Exception as e:
             logging.error(f"Error creating project: {e}")
             raise e
@@ -91,19 +91,21 @@ class VectorStoreState(AIState):
         try:
             with VectorStoreService() as service:
                 service.delete_project(project_name)
-                
+
             # Remove from local list
             self.document_projects = [
-                p for p in self.document_projects 
-                if p.project_name != project_name
+                p for p in self.document_projects if p.project_name != project_name
             ]
-            
+
             # Clear current project if it was deleted
-            if self.current_project and self.current_project.project_name == project_name:
+            if (
+                self.current_project
+                and self.current_project.project_name == project_name
+            ):
                 self.current_project = None
-                
+
             logging.info(f"Deleted project: {project_name}")
-            
+
         except Exception as e:
             logging.error(f"Error deleting project: {e}")
             raise e
@@ -113,13 +115,13 @@ class VectorStoreState(AIState):
         try:
             with VectorStoreService() as service:
                 self.document_projects = service.load_projects()
-                
+
             # Set current project if none selected
             if not self.current_project and self.document_projects:
                 self.current_project = self.document_projects[0]
-                
+
             logging.info(f"Loaded {len(self.document_projects)} projects")
-            
+
         except Exception as e:
             logging.error(f"Error loading projects: {e}")
             raise e
@@ -163,7 +165,9 @@ class VectorStoreState(AIState):
                 file_paths.append(str(outfile))
                 self.uploaded_files.append(file.filename)
 
-            logging.info(f"Uploaded {len(file_paths)} files to project {self.current_project.project_name}")
+            logging.info(
+                f"Uploaded {len(file_paths)} files to project {self.current_project.project_name}"
+            )
 
         except Exception as e:
             logging.error(f"Error uploading files: {e}")
@@ -174,11 +178,11 @@ class VectorStoreState(AIState):
         if not self.current_project:
             logging.error("No project selected for indexing")
             return
-            
+
         if not self.uploaded_files:
             logging.error("No files uploaded to index")
             return
-            
+
         if not self.selected_model:
             logging.error("No embedding model selected")
             return
@@ -187,37 +191,41 @@ class VectorStoreState(AIState):
             # Get file paths for uploaded files
             root_dir = rx.get_upload_dir()
             project_dir = f"{root_dir}/{self.current_project.project_name}"
-            file_paths = [f"{project_dir}/{filename}" for filename in self.uploaded_files]
-            
+            file_paths = [
+                f"{project_dir}/{filename}" for filename in self.uploaded_files
+            ]
+
             # Get embedding function from selected model
             embedding_function = self.get_embedding_function()
-            
+
             with VectorStoreService() as service:
                 total_chunks = service.index_documents(
                     project_name=self.current_project.project_name,
                     file_paths=file_paths,
                     embedding_function=embedding_function,
-                    metadata={"indexed_at": str(rx.utils.format.utcnow())}
+                    metadata={"indexed_at": str(rx.utils.format.utcnow())},
                 )
-                
+
                 # Update document count
                 project = service.get_project(self.current_project.project_name)
                 if project:
                     project.document_count += len(file_paths)
                     service.session.commit()
-                    
+
                     # Update local state
                     for i, p in enumerate(self.document_projects):
                         if p.project_name == self.current_project.project_name:
                             self.document_projects[i] = project
                             self.current_project = project
                             break
-                
-                logging.info(f"Successfully indexed {total_chunks} chunks from {len(file_paths)} files")
-                
+
+                logging.info(
+                    f"Successfully indexed {total_chunks} chunks from {len(file_paths)} files"
+                )
+
                 # Clear uploaded files after successful indexing
                 self.uploaded_files = []
-                
+
         except Exception as e:
             logging.error(f"Error indexing documents: {e}")
             raise e

@@ -61,12 +61,13 @@ class PostgresDataSource(SqlDataSource):
         )
 
     def crawl_catalog(self, loader, where_clause_suffix: Optional[str] = None):
-        from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-        from databuilder.job.job import DefaultJob
-        from databuilder.task.task import DefaultTask
         from databuilder.extractor.postgres_metadata_extractor import (
             PostgresMetadataExtractor,
         )
+        from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
+        from databuilder.job.job import DefaultJob
+        from databuilder.task.task import DefaultTask
+
         logging.info(f"Crawling Postgres database: {self.database}")
 
         job_config = ConfigFactory.from_dict(

@@ -6,7 +6,7 @@ from langchain_core.tools import BaseTool
 from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
 from ryoma_ai.datasource.sql import SqlDataSource
-from ryoma_ai.models.sql import SqlQueryResult, QueryStatus
+from ryoma_ai.models.sql import QueryStatus, SqlQueryResult
 from sqlalchemy.engine import Result
 from typing_extensions import Annotated
 
@@ -49,6 +49,7 @@ class SqlQueryTool(BaseTool):
     ) -> SqlQueryResult:
         """Execute the query and return a structured result object."""
         import time
+
         start_time = time.time()
 
         try:
@@ -60,17 +61,17 @@ class SqlQueryTool(BaseTool):
             # Try to get result metadata
             row_count = None
             column_count = None
-            if hasattr(result, 'shape'):
+            if hasattr(result, "shape"):
                 # DataFrame-like object
                 row_count = result.shape[0]
                 column_count = result.shape[1]
-            elif hasattr(result, '__len__'):
+            elif hasattr(result, "__len__"):
                 # List-like object
                 try:
                     row_count = len(result)
-                    if row_count > 0 and hasattr(result[0], '__len__'):
+                    if row_count > 0 and hasattr(result[0], "__len__"):
                         column_count = len(result[0])
-                except:
+                except (IndexError, TypeError, AttributeError):
                     pass
 
             # Serialize the result to a base64 encoded string as the artifact
@@ -83,7 +84,7 @@ class SqlQueryTool(BaseTool):
                 execution_time_ms=execution_time_ms,
                 row_count=row_count,
                 column_count=column_count,
-                artifact=artifact
+                artifact=artifact,
             )
 
         except Exception as e:
@@ -94,7 +95,7 @@ class SqlQueryTool(BaseTool):
                 query=query,
                 execution_time_ms=execution_time_ms,
                 error_message=str(e),
-                data={'raw_exception': e}
+                data={"raw_exception": e},
             )
 
 
@@ -140,7 +141,8 @@ class CreateTableTool(BaseTool):
         try:
             datasource = get_datasource_from_store(store)
             columns = ",\n".join(
-                f'{column.column_name} "{column.column_type}"' for column in table_columns
+                f'{column.column_name} "{column.column_type}"'
+                for column in table_columns
             )
             return datasource.query(
                 "CREATE TABLE {table_name} ({columns})".format(
@@ -277,7 +279,9 @@ class SchemaAnalysisTool(BaseTool):
         analysis += f"Schemas: {len(catalog.schemas)}, Total Tables: {total_tables}\n"
 
         for schema in catalog.schemas:
-            analysis += f"  Schema: {schema.schema_name} ({len(schema.tables)} tables)\n"
+            analysis += (
+                f"  Schema: {schema.schema_name} ({len(schema.tables)} tables)\n"
+            )
 
         return analysis
 
@@ -288,7 +292,9 @@ class QueryValidationInput(BaseModel):
         description="sql data source for validation context"
     )
     check_syntax: bool = Field(True, description="Check SQL syntax")
-    check_safety: bool = Field(True, description="Check for potentially dangerous operations")
+    check_safety: bool = Field(
+        True, description="Check for potentially dangerous operations"
+    )
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -334,11 +340,19 @@ class QueryValidationTool(BaseTool):
             return "FAIL - Empty query"
 
         # Check for balanced parentheses
-        if query.count('(') != query.count(')'):
+        if query.count("(") != query.count(")"):
             return "FAIL - Unbalanced parentheses"
 
         # Check for basic SQL keywords
-        sql_keywords = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER']
+        sql_keywords = [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "CREATE",
+            "DROP",
+            "ALTER",
+        ]
         if not any(keyword in query_upper for keyword in sql_keywords):
             return "FAIL - No valid SQL keywords found"
 
@@ -350,16 +364,16 @@ class QueryValidationTool(BaseTool):
         warnings = []
 
         # Check for dangerous operations
-        if 'DROP TABLE' in query_upper or 'DROP DATABASE' in query_upper:
+        if "DROP TABLE" in query_upper or "DROP DATABASE" in query_upper:
             warnings.append("WARNING - DROP operation detected")
 
-        if 'DELETE FROM' in query_upper and 'WHERE' not in query_upper:
+        if "DELETE FROM" in query_upper and "WHERE" not in query_upper:
             warnings.append("WARNING - DELETE without WHERE clause")
 
-        if 'UPDATE' in query_upper and 'WHERE' not in query_upper:
+        if "UPDATE" in query_upper and "WHERE" not in query_upper:
             warnings.append("WARNING - UPDATE without WHERE clause")
 
-        if 'TRUNCATE' in query_upper:
+        if "TRUNCATE" in query_upper:
             warnings.append("WARNING - TRUNCATE operation detected")
 
         if warnings:
@@ -369,7 +383,9 @@ class QueryValidationTool(BaseTool):
 
 
 class TableSelectionInput(BaseModel):
-    question: str = Field(description="Natural language question to find relevant tables for")
+    question: str = Field(
+        description="Natural language question to find relevant tables for"
+    )
     datasource: Annotated[SqlDataSource, InjectedStore()] = Field(
         description="sql data source to search tables in"
     )
@@ -408,7 +424,7 @@ class TableSelectionTool(BaseTool):
             for i, (table_info, score) in enumerate(relevant_tables, 1):
                 result += f"{i}. {table_info['schema']}.{table_info['table']} (relevance: {score:.2f})\n"
                 result += f"   Columns: {', '.join(table_info['columns'][:5])}"
-                if len(table_info['columns']) > 5:
+                if len(table_info["columns"]) > 5:
                     result += f" ... (+{len(table_info['columns']) - 5} more)"
                 result += "\n\n"
 
@@ -427,34 +443,39 @@ class TableSelectionTool(BaseTool):
             for table in schema.tables:
                 score = 0
                 table_info = {
-                    'schema': schema.schema_name,
-                    'table': table.table_name,
-                    'columns': [col.name for col in table.columns]
+                    "schema": schema.schema_name,
+                    "table": table.table_name,
+                    "columns": [col.name for col in table.columns],
                 }
 
                 # Score based on table name
-                table_name_words = set(table.table_name.lower().replace('_', ' ').split())
+                table_name_words = set(
+                    table.table_name.lower().replace("_", " ").split()
+                )
                 score += len(question_words.intersection(table_name_words)) * 3
 
                 # Score based on column names
                 for col in table.columns:
-                    col_words = set(col.name.lower().replace('_', ' ').split())
+                    col_words = set(col.name.lower().replace("_", " ").split())
                     score += len(question_words.intersection(col_words)) * 2
 
                 # Boost score for common business terms
                 business_terms = {
-                    'customer': ['customer', 'client', 'user'],
-                    'order': ['order', 'purchase', 'transaction'],
-                    'product': ['product', 'item', 'goods'],
-                    'sales': ['sales', 'revenue', 'amount'],
-                    'date': ['date', 'time', 'when']
+                    "customer": ["customer", "client", "user"],
+                    "order": ["order", "purchase", "transaction"],
+                    "product": ["product", "item", "goods"],
+                    "sales": ["sales", "revenue", "amount"],
+                    "date": ["date", "time", "when"],
                 }
 
                 for term_category, terms in business_terms.items():
                     if any(term in question_lower for term in terms):
                         if any(term in table.table_name.lower() for term in terms):
                             score += 2
-                        if any(any(term in col.name.lower() for term in terms) for col in table.columns):
+                        if any(
+                            any(term in col.name.lower() for term in terms)
+                            for col in table.columns
+                        ):
                             score += 1
 
                 if score > 0:
@@ -496,33 +517,48 @@ class QueryOptimizationTool(BaseTool):
             query_upper = query.upper()
 
             # Check for SELECT *
-            if 'SELECT *' in query_upper:
-                suggestions.append("• Avoid SELECT * - specify only needed columns for better performance")
+            if "SELECT *" in query_upper:
+                suggestions.append(
+                    "• Avoid SELECT * - specify only needed columns for better performance"
+                )
 
             # Check for missing WHERE clauses in large operations
-            if any(op in query_upper for op in ['DELETE', 'UPDATE']) and 'WHERE' not in query_upper:
+            if (
+                any(op in query_upper for op in ["DELETE", "UPDATE"])
+                and "WHERE" not in query_upper
+            ):
                 suggestions.append("• Add WHERE clause to limit affected rows")
 
             # Check for LIKE with leading wildcards
-            if 'LIKE \'%' in query or 'LIKE "%' in query:
-                suggestions.append("• Avoid LIKE patterns starting with % - consider full-text search or different indexing")
+            if "LIKE '%" in query or 'LIKE "%' in query:
+                suggestions.append(
+                    "• Avoid LIKE patterns starting with % - consider full-text search or different indexing"
+                )
 
             # Check for OR conditions that could use UNION
-            if query.count(' OR ') > 2:
-                suggestions.append("• Consider using UNION instead of multiple OR conditions for better index usage")
+            if query.count(" OR ") > 2:
+                suggestions.append(
+                    "• Consider using UNION instead of multiple OR conditions for better index usage"
+                )
 
             # Check for subqueries that could be JOINs
-            if 'IN (SELECT' in query_upper:
-                suggestions.append("• Consider replacing IN (SELECT...) with JOIN for better performance")
+            if "IN (SELECT" in query_upper:
+                suggestions.append(
+                    "• Consider replacing IN (SELECT...) with JOIN for better performance"
+                )
 
             # Check for ORDER BY without LIMIT
-            if 'ORDER BY' in query_upper and 'LIMIT' not in query_upper:
-                suggestions.append("• Consider adding LIMIT clause when using ORDER BY to avoid sorting large result sets")
+            if "ORDER BY" in query_upper and "LIMIT" not in query_upper:
+                suggestions.append(
+                    "• Consider adding LIMIT clause when using ORDER BY to avoid sorting large result sets"
+                )
 
             # Check for functions in WHERE clauses
-            function_patterns = ['UPPER(', 'LOWER(', 'SUBSTRING(', 'DATE(']
+            function_patterns = ["UPPER(", "LOWER(", "SUBSTRING(", "DATE("]
             if any(pattern in query_upper for pattern in function_patterns):
-                suggestions.append("• Avoid functions in WHERE clauses - consider computed columns or functional indexes")
+                suggestions.append(
+                    "• Avoid functions in WHERE clauses - consider computed columns or functional indexes"
+                )
 
             if not suggestions:
                 suggestions.append("• Query appears to follow good practices")
@@ -575,16 +611,20 @@ class QueryExplanationTool(BaseTool):
         explanation = "Query Explanation:\n\n"
 
         # Determine query type
-        if query_upper.startswith('SELECT'):
+        if query_upper.startswith("SELECT"):
             explanation += self._explain_select_query(query_clean)
-        elif query_upper.startswith('INSERT'):
+        elif query_upper.startswith("INSERT"):
             explanation += "This is an INSERT query that adds new data to a table.\n"
-        elif query_upper.startswith('UPDATE'):
-            explanation += "This is an UPDATE query that modifies existing data in a table.\n"
-        elif query_upper.startswith('DELETE'):
+        elif query_upper.startswith("UPDATE"):
+            explanation += (
+                "This is an UPDATE query that modifies existing data in a table.\n"
+            )
+        elif query_upper.startswith("DELETE"):
             explanation += "This is a DELETE query that removes data from a table.\n"
-        elif query_upper.startswith('CREATE'):
-            explanation += "This is a CREATE query that creates a new database object.\n"
+        elif query_upper.startswith("CREATE"):
+            explanation += (
+                "This is a CREATE query that creates a new database object.\n"
+            )
         else:
             explanation += "This query performs database operations.\n"
 
@@ -601,44 +641,52 @@ class QueryExplanationTool(BaseTool):
         query_upper = query.upper()
 
         # Analyze SELECT clause
-        if 'SELECT *' in query_upper:
+        if "SELECT *" in query_upper:
             explanation += "• Selects ALL columns from the table(s)\n"
-        elif 'SELECT DISTINCT' in query_upper:
+        elif "SELECT DISTINCT" in query_upper:
             explanation += "• Selects unique/distinct values (removes duplicates)\n"
         else:
             explanation += "• Selects specific columns\n"
 
         # Analyze FROM clause
-        if ' FROM ' in query_upper:
+        if " FROM " in query_upper:
             explanation += "• Retrieves data from specified table(s)\n"
 
         # Analyze JOIN operations
-        join_types = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN', 'CROSS JOIN']
+        join_types = [
+            "INNER JOIN",
+            "LEFT JOIN",
+            "RIGHT JOIN",
+            "FULL JOIN",
+            "CROSS JOIN",
+        ]
         joins_found = [join for join in join_types if join in query_upper]
         if joins_found:
-            explanation += f"• Combines data from multiple tables using {', '.join(joins_found)}\n"
+            explanation += (
+                f"• Combines data from multiple tables using {', '.join(joins_found)}\n"
+            )
 
         # Analyze WHERE clause
-        if ' WHERE ' in query_upper:
+        if " WHERE " in query_upper:
             explanation += "• Filters results based on specified conditions\n"
 
         # Analyze GROUP BY
-        if ' GROUP BY ' in query_upper:
+        if " GROUP BY " in query_upper:
             explanation += "• Groups results by specified columns for aggregation\n"
 
         # Analyze HAVING clause
-        if ' HAVING ' in query_upper:
+        if " HAVING " in query_upper:
             explanation += "• Filters grouped results based on aggregate conditions\n"
 
         # Analyze ORDER BY
-        if ' ORDER BY ' in query_upper:
-            if ' DESC' in query_upper:
+        if " ORDER BY " in query_upper:
+            if " DESC" in query_upper:
                 explanation += "• Sorts results in descending order\n"
             else:
                 explanation += "• Sorts results in ascending order\n"
 
         # Analyze LIMIT
-        if ' LIMIT ' in query_upper:
+        if " LIMIT " in query_upper:
             explanation += "• Limits the number of results returned\n"
 
         return explanation
@@ -649,19 +697,19 @@ class QueryExplanationTool(BaseTool):
         complexity_score = 0
 
         # Count complexity factors
-        if 'JOIN' in query_upper:
-            complexity_score += query_upper.count('JOIN') * 2
+        if "JOIN" in query_upper:
+            complexity_score += query_upper.count("JOIN") * 2
 
-        if 'SUBQUERY' in query_upper or '(SELECT' in query_upper:
+        if "SUBQUERY" in query_upper or "(SELECT" in query_upper:
             complexity_score += 3
 
-        if 'GROUP BY' in query_upper:
+        if "GROUP BY" in query_upper:
             complexity_score += 2
 
-        if 'HAVING' in query_upper:
+        if "HAVING" in query_upper:
             complexity_score += 2
 
-        if 'UNION' in query_upper:
+        if "UNION" in query_upper:
             complexity_score += 3
 
         # Determine complexity level

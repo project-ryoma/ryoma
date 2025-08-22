@@ -13,19 +13,19 @@ Key innovations implemented:
 - Parallelization with majority-vote consensus
 """
 
-from typing import Dict, List, Optional, Any
 import re
-from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
-from langgraph.graph import StateGraph, END
-from langchain_core.messages import AIMessage
-from langgraph.graph.state import CompiledStateGraph
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, List, Optional
 
+from langchain_core.messages import AIMessage
+from langgraph.graph import END, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
-from ryoma_ai.models.agent import FormatRestriction, ColumnExplorationResult
+from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_ai.models.agent import ColumnExplorationResult, FormatRestriction
 from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import SqlQueryTool
-from ryoma_ai.datasource.sql import SqlDataSource
 
 
 class ReFoRCESqlAgent(EnhancedSqlAgent):
@@ -65,7 +65,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         # Add nodes for ReFoRCE methodology
         workflow.add_node("compress_database_info", self._compress_database_info)
-        workflow.add_node("generate_format_restriction", self._generate_format_restriction)
+        workflow.add_node(
+            "generate_format_restriction", self._generate_format_restriction
+        )
         workflow.add_node("explore_columns", self._explore_columns)
         workflow.add_node("parallel_generation", self._parallel_generation)
         workflow.add_node("self_refinement", self._self_refinement)
@@ -92,9 +94,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                 "parallel_generation",
                 "self_refinement",
                 "consensus_voting",
-                "final_validation"
+                "final_validation",
             ],
-            store=self.store
+            store=self.store,
         )
 
     def _compress_database_info(self, state: MessageState) -> MessageState:
@@ -118,9 +120,11 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
             if schema_size <= self.compression_threshold:
                 state["compressed_schema"] = schema_info
-                state["messages"].append(AIMessage(
-                    content=f"Schema size ({schema_size} tokens) within limits, no compression needed"
-                ))
+                state["messages"].append(
+                    AIMessage(
+                        content=f"Schema size ({schema_size} tokens) within limits, no compression needed"
+                    )
+                )
                 return state
 
             # Apply pattern-based compression
@@ -128,27 +132,35 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
             # Apply schema linking for further reduction
             question = state["original_question"]
-            relevant_tables = self.schema_agent.suggest_table_selection(question, max_tables=10)
+            relevant_tables = self.schema_agent.suggest_table_selection(
+                question, max_tables=10
+            )
 
             # Build focused schema with only relevant tables
             focused_schema = self._build_focused_schema(catalog, relevant_tables)
 
             # Choose the most appropriate schema
-            final_schema = focused_schema if len(focused_schema) < len(compressed_schema) else compressed_schema
+            final_schema = (
+                focused_schema
+                if len(focused_schema) < len(compressed_schema)
+                else compressed_schema
+            )
 
             state["compressed_schema"] = final_schema
             state["current_step"] = "database_compression"
 
             compression_ratio = len(final_schema) / len(schema_info)
-            state["messages"].append(AIMessage(
-                content=f"Compressed schema from {schema_size} to {len(final_schema.split())} tokens (ratio: {compression_ratio:.2f})"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Compressed schema from {schema_size} to {len(final_schema.split())} tokens (ratio: {compression_ratio:.2f})"
+                )
+            )
 
         except Exception as e:
             state["compressed_schema"] = "Error in compression: " + str(e)
-            state["messages"].append(AIMessage(
-                content=f"Database compression failed: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(content=f"Database compression failed: {str(e)}")
+            )
 
         return state
 
@@ -171,9 +183,11 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
             state["format_restriction"] = format_restriction
             state["current_step"] = "format_restriction"
 
-            state["messages"].append(AIMessage(
-                content=f"Generated format restriction: {format_restriction.format_description}"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Generated format restriction: {format_restriction.format_description}"
+                )
+            )
 
         except Exception as e:
             # Create default format restriction
@@ -181,11 +195,13 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                 format_description="Default CSV format",
                 column_names=["result"],
                 data_types=["string"],
-                example_format="```csv\nresult\nvalue1\nvalue2\n```"
+                example_format="```csv\nresult\nvalue1\nvalue2\n```",
             )
-            state["messages"].append(AIMessage(
-                content=f"Format restriction generation failed, using default: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Format restriction generation failed, using default: {str(e)}"
+                )
+            )
 
         return state
 
@@ -200,7 +216,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
             compressed_schema = state.get("compressed_schema", "")
 
             # Generate exploration queries
-            exploration_queries = self._generate_exploration_queries(question, compressed_schema)
+            exploration_queries = self._generate_exploration_queries(
+                question, compressed_schema
+            )
 
             # Execute exploration queries and collect results
             exploration_results = []
@@ -231,37 +249,41 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
                 except Exception as e:
                     # Log exploration error but continue
-                    state["messages"].append(AIMessage(
-                        content=f"Exploration query failed: {str(e)}"
-                    ))
+                    state["messages"].append(
+                        AIMessage(content=f"Exploration query failed: {str(e)}")
+                    )
                     continue
 
             # Remove duplicates and limit results
-            relevant_columns = list(set(relevant_columns))[:20]  # Limit to top 20 columns
+            relevant_columns = list(set(relevant_columns))[
+                :20
+            ]  # Limit to top 20 columns
             exploration_results = exploration_results[:10]  # Limit to top 10 results
 
             state["column_exploration"] = ColumnExplorationResult(
                 exploration_queries=exploration_queries,
                 exploration_results=exploration_results,
                 relevant_columns=relevant_columns,
-                column_insights=column_insights
+                column_insights=column_insights,
             )
 
             state["current_step"] = "column_exploration"
-            state["messages"].append(AIMessage(
-                content=f"Explored {len(exploration_queries)} queries, found {len(relevant_columns)} relevant columns"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Explored {len(exploration_queries)} queries, found {len(relevant_columns)} relevant columns"
+                )
+            )
 
         except Exception as e:
             state["column_exploration"] = ColumnExplorationResult(
                 exploration_queries=[],
                 exploration_results=[],
                 relevant_columns=[],
-                column_insights={}
+                column_insights={},
             )
-            state["messages"].append(AIMessage(
-                content=f"Column exploration failed: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(content=f"Column exploration failed: {str(e)}")
+            )
 
         return state
 
@@ -296,22 +318,24 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                         if candidate:
                             candidates.append(candidate)
                     except Exception as e:
-                        state["messages"].append(AIMessage(
-                            content=f"Parallel generation error: {str(e)}"
-                        ))
+                        state["messages"].append(
+                            AIMessage(content=f"Parallel generation error: {str(e)}")
+                        )
 
             state["parallel_candidates"] = candidates
             state["current_step"] = "parallel_generation"
 
-            state["messages"].append(AIMessage(
-                content=f"Generated {len(candidates)} SQL candidates in parallel"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Generated {len(candidates)} SQL candidates in parallel"
+                )
+            )
 
         except Exception as e:
             state["parallel_candidates"] = []
-            state["messages"].append(AIMessage(
-                content=f"Parallel generation failed: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(content=f"Parallel generation failed: {str(e)}")
+            )
 
         return state
 
@@ -333,24 +357,28 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                     candidate,
                     state["original_question"],
                     state.get("format_restriction"),
-                    state.get("column_exploration")
+                    state.get("column_exploration"),
                 )
 
                 if refined_candidate:
                     refined_candidates.append(refined_candidate)
 
             state["parallel_candidates"] = refined_candidates
-            state["self_refinement_iterations"] = state.get("self_refinement_iterations", 0) + 1
+            state["self_refinement_iterations"] = (
+                state.get("self_refinement_iterations", 0) + 1
+            )
             state["current_step"] = "self_refinement"
 
-            state["messages"].append(AIMessage(
-                content=f"Refined {len(refined_candidates)} candidates (iteration {state['self_refinement_iterations']})"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Refined {len(refined_candidates)} candidates (iteration {state['self_refinement_iterations']})"
+                )
+            )
 
         except Exception as e:
-            state["messages"].append(AIMessage(
-                content=f"Self-refinement failed: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(content=f"Self-refinement failed: {str(e)}")
+            )
 
         return state
 
@@ -372,20 +400,26 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
             for candidate in candidates:
                 try:
                     # Validate safety first
-                    validation_result = self.safety_validator.validate_query(candidate["sql"])
+                    validation_result = self.safety_validator.validate_query(
+                        candidate["sql"]
+                    )
                     if not validation_result.execution_allowed:
                         continue
 
                     # Execute query
                     tool = SqlQueryTool()
-                    result = tool._run(query=candidate["sql"], datasource=self.get_datasource())
+                    result = tool._run(
+                        query=candidate["sql"], datasource=self.get_datasource()
+                    )
 
                     if result and "Error" not in result:
-                        candidate_results.append({
-                            "sql": candidate["sql"],
-                            "result": result,
-                            "result_hash": self._hash_result(result)
-                        })
+                        candidate_results.append(
+                            {
+                                "sql": candidate["sql"],
+                                "result": result,
+                                "result_hash": self._hash_result(result),
+                            }
+                        )
 
                 except Exception:
                     continue
@@ -408,8 +442,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
             # Get the SQL that produced the most common result
             consensus_candidate = next(
-                cr for cr in candidate_results
-                if cr["result_hash"] == most_common_hash
+                cr for cr in candidate_results if cr["result_hash"] == most_common_hash
             )
 
             # Calculate confidence score
@@ -420,16 +453,18 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
             state["confidence_score"] = confidence_score
             state["current_step"] = "consensus_voting"
 
-            state["messages"].append(AIMessage(
-                content=f"Consensus reached with {count}/{len(candidate_results)} agreement (confidence: {confidence_score:.2f})"
-            ))
+            state["messages"].append(
+                AIMessage(
+                    content=f"Consensus reached with {count}/{len(candidate_results)} agreement (confidence: {confidence_score:.2f})"
+                )
+            )
 
         except Exception as e:
             state["consensus_result"] = None
             state["confidence_score"] = 0.0
-            state["messages"].append(AIMessage(
-                content=f"Consensus voting failed: {str(e)}"
-            ))
+            state["messages"].append(
+                AIMessage(content=f"Consensus voting failed: {str(e)}")
+            )
 
         return state
 
@@ -494,8 +529,12 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                 if len(tables) > 1:
                     # Use representative table for the group
                     representative = tables[0]
-                    compressed_info += f"  Table Group: {pattern}* ({len(tables)} tables)\n"
-                    compressed_info += f"    Representative: {representative.table_name}\n"
+                    compressed_info += (
+                        f"  Table Group: {pattern}* ({len(tables)} tables)\n"
+                    )
+                    compressed_info += (
+                        f"    Representative: {representative.table_name}\n"
+                    )
                     for column in representative.columns[:5]:  # Limit columns
                         compressed_info += f"      - {column.name}: {column.type}\n"
                     if len(representative.columns) > 5:
@@ -507,7 +546,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                     for column in table.columns[:10]:  # Limit columns
                         compressed_info += f"    - {column.name}: {column.type}\n"
                     if len(table.columns) > 10:
-                        compressed_info += f"    ... (+{len(table.columns) - 10} more columns)\n"
+                        compressed_info += (
+                            f"    ... (+{len(table.columns) - 10} more columns)\n"
+                        )
 
                 compressed_info += "\n"
 
@@ -530,12 +571,12 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
     def _extract_table_pattern(self, table_name: str) -> str:
         """Extract naming pattern from table name."""
         # Remove common date patterns
-        pattern = re.sub(r'\d{4}\d{2}\d{2}', 'YYYYMMDD', table_name)
-        pattern = re.sub(r'\d{4}_\d{2}_\d{2}', 'YYYY_MM_DD', pattern)
-        pattern = re.sub(r'\d{8}', 'YYYYMMDD', pattern)
+        pattern = re.sub(r"\d{4}\d{2}\d{2}", "YYYYMMDD", table_name)
+        pattern = re.sub(r"\d{4}_\d{2}_\d{2}", "YYYY_MM_DD", pattern)
+        pattern = re.sub(r"\d{8}", "YYYYMMDD", pattern)
 
         # Remove other numeric patterns
-        pattern = re.sub(r'\d+', 'N', pattern)
+        pattern = re.sub(r"\d+", "N", pattern)
 
         return pattern
 
@@ -546,7 +587,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         relevant_table_names = {t["table"] for t in relevant_tables}
 
         for schema in catalog.schemas:
-            schema_tables = [t for t in schema.tables if t.table_name in relevant_table_names]
+            schema_tables = [
+                t for t in schema.tables if t.table_name in relevant_table_names
+            ]
 
             if schema_tables:
                 focused_info += f"Schema: {schema.schema_name}\n"
@@ -591,21 +634,33 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         """Parse format restriction from LLM response."""
         try:
             # Extract components using regex
-            desc_match = re.search(r'DESCRIPTION:\s*(.+)', response)
-            cols_match = re.search(r'COLUMNS:\s*(.+)', response)
-            types_match = re.search(r'TYPES:\s*(.+)', response)
-            example_match = re.search(r'EXAMPLE:\s*```csv\n(.+?)\n```', response, re.DOTALL)
+            desc_match = re.search(r"DESCRIPTION:\s*(.+)", response)
+            cols_match = re.search(r"COLUMNS:\s*(.+)", response)
+            types_match = re.search(r"TYPES:\s*(.+)", response)
+            example_match = re.search(
+                r"EXAMPLE:\s*```csv\n(.+?)\n```", response, re.DOTALL
+            )
 
             description = desc_match.group(1).strip() if desc_match else "CSV format"
-            columns = [c.strip() for c in cols_match.group(1).split(',')] if cols_match else ["result"]
-            types = [t.strip() for t in types_match.group(1).split(',')] if types_match else ["string"]
-            example = example_match.group(1).strip() if example_match else "result\nvalue"
+            columns = (
+                [c.strip() for c in cols_match.group(1).split(",")]
+                if cols_match
+                else ["result"]
+            )
+            types = (
+                [t.strip() for t in types_match.group(1).split(",")]
+                if types_match
+                else ["string"]
+            )
+            example = (
+                example_match.group(1).strip() if example_match else "result\nvalue"
+            )
 
             return FormatRestriction(
                 format_description=description,
                 column_names=columns,
                 data_types=types,
-                example_format=f"```csv\n{example}\n```"
+                example_format=f"```csv\n{example}\n```",
             )
         except Exception:
             # Return default format on parsing error
@@ -613,7 +668,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                 format_description="Default CSV format",
                 column_names=["result"],
                 data_types=["string"],
-                example_format="```csv\nresult\nvalue\n```"
+                example_format="```csv\nresult\nvalue\n```",
             )
 
     def _generate_exploration_queries(self, question: str, schema: str) -> List[str]:
@@ -646,17 +701,19 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         queries = []
 
         # Look for SQL code blocks
-        sql_blocks = re.findall(r'```sql\n(.*?)\n```', response, re.DOTALL)
+        sql_blocks = re.findall(r"```sql\n(.*?)\n```", response, re.DOTALL)
         for block in sql_blocks:
             queries.append(block.strip())
 
         # Also look for lines that look like SQL
-        lines = response.split('\n')
+        lines = response.split("\n")
         for line in lines:
             line = line.strip()
-            if (line.upper().startswith(('SELECT', 'WITH')) and
-                ';' in line and
-                len(line) > 10):
+            if (
+                line.upper().startswith(("SELECT", "WITH"))
+                and ";" in line
+                and len(line) > 10
+            ):
                 queries.append(line)
 
         return queries
@@ -668,10 +725,10 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         # Simple regex to find column references
         # This is a simplified approach - a full SQL parser would be better
         column_patterns = [
-            r'SELECT\s+(.+?)\s+FROM',
-            r'WHERE\s+(\w+)',
-            r'GROUP BY\s+(\w+)',
-            r'ORDER BY\s+(\w+)'
+            r"SELECT\s+(.+?)\s+FROM",
+            r"WHERE\s+(\w+)",
+            r"GROUP BY\s+(\w+)",
+            r"ORDER BY\s+(\w+)",
         ]
 
         for pattern in column_patterns:
@@ -679,8 +736,8 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
             for match in matches:
                 if isinstance(match, str):
                     # Clean up column names
-                    cols = [c.strip().strip('"\'`') for c in match.split(',')]
-                    columns.extend([c for c in cols if c and c != '*'])
+                    cols = [c.strip().strip("\"'`") for c in match.split(",")]
+                    columns.extend([c for c in cols if c and c != "*"])
 
         return list(set(columns))
 
@@ -690,24 +747,24 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         try:
             # Extract insights based on query type and result
-            if 'DISTINCT' in query.upper():
+            if "DISTINCT" in query.upper():
                 # Count distinct values
-                lines = result.strip().split('\n')
+                lines = result.strip().split("\n")
                 if len(lines) > 1:  # Has header
-                    insights['distinct_values'] = len(lines) - 1
+                    insights["distinct_values"] = len(lines) - 1
 
-            if 'COUNT' in query.upper():
+            if "COUNT" in query.upper():
                 # Extract count information
-                lines = result.strip().split('\n')
+                lines = result.strip().split("\n")
                 if len(lines) > 1:
                     try:
                         count = int(lines[1])
-                        insights['row_count'] = count
+                        insights["row_count"] = count
                     except ValueError:
                         pass
 
             # Store sample data
-            insights['sample_data'] = result[:500]  # First 500 chars
+            insights["sample_data"] = result[:500]  # First 500 chars
 
         except Exception:
             pass
@@ -719,43 +776,37 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         question: str,
         schema: str,
         format_restriction: Optional[FormatRestriction],
-        column_exploration: Optional[ColumnExplorationResult]
+        column_exploration: Optional[ColumnExplorationResult],
     ) -> List[Dict[str, Any]]:
         """Create multiple generation contexts for parallel processing."""
         base_context = {
             "question": question,
             "schema": schema,
             "format_restriction": format_restriction,
-            "column_exploration": column_exploration
+            "column_exploration": column_exploration,
         }
 
         # Create variations for parallel generation
         contexts = []
 
         # Context 1: Full information
-        contexts.append({
-            **base_context,
-            "approach": "comprehensive",
-            "focus": "accuracy"
-        })
+        contexts.append(
+            {**base_context, "approach": "comprehensive", "focus": "accuracy"}
+        )
 
         # Context 2: Simplified approach
-        contexts.append({
-            **base_context,
-            "approach": "simplified",
-            "focus": "clarity"
-        })
+        contexts.append({**base_context, "approach": "simplified", "focus": "clarity"})
 
         # Context 3: Performance-focused
-        contexts.append({
-            **base_context,
-            "approach": "optimized",
-            "focus": "performance"
-        })
+        contexts.append(
+            {**base_context, "approach": "optimized", "focus": "performance"}
+        )
 
-        return contexts[:self.max_parallel_threads]
+        return contexts[: self.max_parallel_threads]
 
-    def _generate_sql_candidate(self, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _generate_sql_candidate(
+        self, context: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         """Generate a single SQL candidate."""
         try:
             prompt = self._create_sql_generation_prompt_from_context(context)
@@ -766,14 +817,16 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                 return {
                     "sql": sql,
                     "context": context,
-                    "approach": context.get("approach", "default")
+                    "approach": context.get("approach", "default"),
                 }
         except Exception:
             pass
 
         return None
 
-    def _create_sql_generation_prompt_from_context(self, context: Dict[str, Any]) -> str:
+    def _create_sql_generation_prompt_from_context(
+        self, context: Dict[str, Any]
+    ) -> str:
         """Create SQL generation prompt from context."""
         question = context["question"]
         schema = context["schema"]
@@ -785,7 +838,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
 
         if format_restriction:
             prompt += f"Expected format: {format_restriction.format_description}\n"
-            prompt += f"Expected columns: {', '.join(format_restriction.column_names)}\n\n"
+            prompt += (
+                f"Expected columns: {', '.join(format_restriction.column_names)}\n\n"
+            )
 
         if column_exploration and column_exploration.exploration_results:
             prompt += "Column exploration insights:\n"
@@ -809,7 +864,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         candidate: Dict[str, Any],
         question: str,
         format_restriction: Optional[FormatRestriction],
-        column_exploration: Optional[ColumnExplorationResult]
+        column_exploration: Optional[ColumnExplorationResult],
     ) -> Optional[Dict[str, Any]]:
         """Refine a SQL candidate through self-consistency checks."""
         try:
@@ -831,44 +886,40 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
                         return {
                             **candidate,
                             "refined": True,
-                            "execution_result": result
+                            "execution_result": result,
                         }
                     else:
                         # Try to fix format issues
                         refined_sql = self._fix_format_issues(sql, format_restriction)
                         if refined_sql != sql:
-                            return {
-                                **candidate,
-                                "sql": refined_sql,
-                                "refined": True
-                            }
+                            return {**candidate, "sql": refined_sql, "refined": True}
 
             except Exception:
                 # Try error correction
-                corrected_sql = self.error_handler.auto_correct_query(sql, str(Exception))
+                corrected_sql = self.error_handler.auto_correct_query(
+                    sql, str(Exception)
+                )
                 if corrected_sql:
-                    return {
-                        **candidate,
-                        "sql": corrected_sql,
-                        "refined": True
-                    }
+                    return {**candidate, "sql": corrected_sql, "refined": True}
 
         except Exception:
             pass
 
         return None
 
-    def _validate_result_format(self, result: str, format_restriction: Optional[FormatRestriction]) -> bool:
+    def _validate_result_format(
+        self, result: str, format_restriction: Optional[FormatRestriction]
+    ) -> bool:
         """Validate if result matches expected format."""
         if not format_restriction:
             return True
 
         try:
-            lines = result.strip().split('\n')
+            lines = result.strip().split("\n")
             if len(lines) < 2:  # Need at least header and one data row
                 return False
 
-            header = lines[0].split(',')
+            header = lines[0].split(",")
             expected_columns = format_restriction.column_names
 
             # Check if columns match (allowing for reasonable variations)
@@ -877,7 +928,9 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         except Exception:
             return False
 
-    def _fix_format_issues(self, sql: str, format_restriction: Optional[FormatRestriction]) -> str:
+    def _fix_format_issues(
+        self, sql: str, format_restriction: Optional[FormatRestriction]
+    ) -> str:
         """Attempt to fix format issues in SQL."""
         if not format_restriction:
             return sql
@@ -893,7 +946,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         # Normalize the result for comparison
         normalized = result.strip().lower()
         # Remove extra whitespace
-        normalized = re.sub(r'\s+', ' ', normalized)
+        normalized = re.sub(r"\s+", " ", normalized)
 
         return hashlib.md5(normalized.encode()).hexdigest()
 

@@ -8,18 +8,17 @@ Main CLI application class that orchestrates the multi-agent system.
 import signal
 
 import click
-from rich.console import Console
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import CompleteStyle
-
-from ryoma_ai.cli.config_manager import ConfigManager
-from ryoma_ai.cli.command_handler import CommandHandler
-from ryoma_ai.cli.datasource_manager import DataSourceManager
+from rich.console import Console
 from ryoma_ai.cli.agent_manager import AgentManager
-from ryoma_ai.cli.display_manager import DisplayManager
 from ryoma_ai.cli.autocomplete_manager import AutocompleteManager
+from ryoma_ai.cli.command_handler import CommandHandler
+from ryoma_ai.cli.config_manager import ConfigManager
+from ryoma_ai.cli.datasource_manager import DataSourceManager
+from ryoma_ai.cli.display_manager import DisplayManager
 
 
 class RyomaAI:
@@ -41,7 +40,7 @@ class RyomaAI:
             config_manager=self.config_manager,
             datasource_manager=self.datasource_manager,
             agent_manager=self.agent_manager,
-            display_manager=self.display_manager
+            display_manager=self.display_manager,
         )
 
         # Setup prompt history and key bindings
@@ -52,7 +51,7 @@ class RyomaAI:
         """Setup key bindings for the prompt."""
         kb = KeyBindings()
 
-        @kb.add('escape')
+        @kb.add("escape")
         def _(event):
             """Handle ESC key to cancel current input."""
             event.app.exit(result="")
@@ -75,7 +74,9 @@ class RyomaAI:
         self._initialize_system()
 
         # Show help information
-        self.console.print("\nType [bold]/help[/bold] for commands or just ask a question - I'll route it to the best agent!\n")
+        self.console.print(
+            "\nType [bold]/help[/bold] for commands or just ask a question - I'll route it to the best agent!\n"
+        )
 
         # Main interaction loop
         self.session_active = True
@@ -91,7 +92,7 @@ class RyomaAI:
                     complete_style=CompleteStyle.MULTI_COLUMN,
                     history=self.history,
                     key_bindings=self.key_bindings,
-                    enable_history_search=True
+                    enable_history_search=True,
                 ).strip()
 
                 if not user_input:
@@ -121,9 +122,13 @@ class RyomaAI:
         try:
             # Get available datasource IDs
             datasource_ids = []
-            if hasattr(self.datasource_manager, 'datasource_store'):
-                registrations = self.datasource_manager.datasource_store.list_data_sources()
-                datasource_ids = [reg.id[:8] for reg in registrations]  # Use short IDs for completion
+            if hasattr(self.datasource_manager, "datasource_store"):
+                registrations = (
+                    self.datasource_manager.datasource_store.list_data_sources()
+                )
+                datasource_ids = [
+                    reg.id[:8] for reg in registrations
+                ]  # Use short IDs for completion
 
             # Update dynamic completions
             self.autocomplete_manager.update_dynamic_completions(
@@ -136,16 +141,24 @@ class RyomaAI:
     def _initialize_system(self):
         """Initialize the system components."""
         # Setup data source connection
-        if not self.datasource_manager.setup_from_config(self.config_manager.config["database"]):
-            self.console.print("[yellow]Database connection failed. Use /setup to configure.[/yellow]")
+        if not self.datasource_manager.setup_from_config(
+            self.config_manager.config["database"]
+        ):
+            self.console.print(
+                "[yellow]Database connection failed. Use /setup to configure.[/yellow]"
+            )
         elif not self.agent_manager.setup_agent_manager(
             config=self.config_manager.config,
-            datasource=self.datasource_manager.current_datasource
+            datasource=self.datasource_manager.current_datasource,
         ):
             self.console.print("[yellow]Agent initialization failed.[/yellow]")
         else:
-            self.console.print("[green]✅ Ready! Multi-agent system initialized.[/green]")
-            self.console.print("[dim]Available: SQL Agent, Python Agent, Data Analysis Agent, Chat Agent[/dim]")
+            self.console.print(
+                "[green]✅ Ready! Multi-agent system initialized.[/green]"
+            )
+            self.console.print(
+                "[dim]Available: SQL Agent, Python Agent, Data Analysis Agent, Chat Agent[/dim]"
+            )
 
     def stop(self):
         """Stop the CLI application."""
@@ -153,10 +166,15 @@ class RyomaAI:
 
 
 @click.command()
-@click.option('--model', '-m', default='gpt-4o', help='Language model to use')
-@click.option('--mode', default='enhanced', type=click.Choice(['basic', 'enhanced', 'reforce']), help='SQL agent mode')
-@click.option('--config', '-c', help='Config file path')
-@click.option('--setup', is_flag=True, help='Run interactive setup')
+@click.option("--model", "-m", default="gpt-4o", help="Language model to use")
+@click.option(
+    "--mode",
+    default="enhanced",
+    type=click.Choice(["basic", "enhanced", "reforce"]),
+    help="SQL agent mode",
+)
+@click.option("--config", "-c", help="Config file path")
+@click.option("--setup", is_flag=True, help="Run interactive setup")
 def main(model, mode, config, setup):
     """Ryoma AI Multi-Agent System - Intelligent routing to specialized agents."""
 
@@ -164,9 +182,9 @@ def main(model, mode, config, setup):
 
     # Override config if provided
     if model:
-        cli.config_manager.config['model'] = model
+        cli.config_manager.config["model"] = model
     if mode:
-        cli.config_manager.config['mode'] = mode
+        cli.config_manager.config["mode"] = mode
 
     if setup:
         cli.command_handler.interactive_setup()
@@ -174,5 +192,5 @@ def main(model, mode, config, setup):
         cli.start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

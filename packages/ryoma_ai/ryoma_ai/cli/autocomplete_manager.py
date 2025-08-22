@@ -5,6 +5,7 @@ Provides command suggestion and autocomplete functionality.
 """
 
 from typing import List, Optional, Tuple
+
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 
@@ -17,31 +18,86 @@ class RyomaAutoCompleter(Completer):
         self.commands = {
             # Basic commands
             "help": {"aliases": ["h"], "args": [], "description": "Show help message"},
-            "quit": {"aliases": ["exit", "q"], "args": [], "description": "Exit the CLI"},
-            "config": {"aliases": [], "args": [], "description": "Show current configuration"},
-            "setup": {"aliases": [], "args": [], "description": "Setup database connection"},
-            
+            "quit": {
+                "aliases": ["exit", "q"],
+                "args": [],
+                "description": "Exit the CLI",
+            },
+            "config": {
+                "aliases": [],
+                "args": [],
+                "description": "Show current configuration",
+            },
+            "setup": {
+                "aliases": [],
+                "args": [],
+                "description": "Setup database connection",
+            },
             # Model and mode commands
-            "mode": {"aliases": [], "args": ["basic", "enhanced", "reforce"], "description": "Change agent mode"},
-            "model": {"aliases": [], "args": ["gpt-4o", "gpt-4", "gpt-3.5-turbo", "claude-3"], "description": "Change language model"},
-            
+            "mode": {
+                "aliases": [],
+                "args": ["basic", "enhanced", "reforce"],
+                "description": "Change agent mode",
+            },
+            "model": {
+                "aliases": [],
+                "args": ["gpt-4o", "gpt-4", "gpt-3.5-turbo", "claude-3"],
+                "description": "Change language model",
+            },
             # Schema and agent commands
-            "schema": {"aliases": [], "args": [], "description": "Show database schema"},
-            "agents": {"aliases": [], "args": [], "description": "Show available agents"},
-            "stats": {"aliases": [], "args": [], "description": "Show agent usage statistics"},
-            
+            "schema": {
+                "aliases": [],
+                "args": [],
+                "description": "Show database schema",
+            },
+            "agents": {
+                "aliases": [],
+                "args": [],
+                "description": "Show available agents",
+            },
+            "stats": {
+                "aliases": [],
+                "args": [],
+                "description": "Show agent usage statistics",
+            },
             # Data source management
-            "datasources": {"aliases": [], "args": [], "description": "Show all registered data sources"},
-            "add-datasource": {"aliases": [], "args": [], "description": "Add a new data source interactively"},
-            "switch-datasource": {"aliases": [], "args": [], "description": "Switch to a different data source"},
-            
+            "datasources": {
+                "aliases": [],
+                "args": [],
+                "description": "Show all registered data sources",
+            },
+            "add-datasource": {
+                "aliases": [],
+                "args": [],
+                "description": "Add a new data source interactively",
+            },
+            "switch-datasource": {
+                "aliases": [],
+                "args": [],
+                "description": "Switch to a different data source",
+            },
             # Catalog management
-            "index-catalog": {"aliases": [], "args": ["catalog", "schema", "table", "column"], "description": "Index catalog for search"},
-            "search-catalog": {"aliases": [], "args": [], "description": "Search indexed catalogs"},
-            
+            "index-catalog": {
+                "aliases": [],
+                "args": ["catalog", "schema", "table", "column"],
+                "description": "Index catalog for search",
+            },
+            "search-catalog": {
+                "aliases": [],
+                "args": [],
+                "description": "Search indexed catalogs",
+            },
             # Agent configuration
-            "agent-config": {"aliases": [], "args": ["auto_approve_all", "retry_count", "timeout_seconds"], "description": "Configure agent settings"},
-            "auto-approve": {"aliases": [], "args": ["true", "false", "on", "off", "enable", "disable"], "description": "Toggle auto-approve for SQL queries"}
+            "agent-config": {
+                "aliases": [],
+                "args": ["auto_approve_all", "retry_count", "timeout_seconds"],
+                "description": "Configure agent settings",
+            },
+            "auto-approve": {
+                "aliases": [],
+                "args": ["true", "false", "on", "off", "enable", "disable"],
+                "description": "Toggle auto-approve for SQL queries",
+            },
         }
 
         # Create flat list of all commands including aliases
@@ -62,15 +118,25 @@ class RyomaAutoCompleter(Completer):
             List of completion suggestions
         """
         text = document.text
-        
+
         # Handle empty input - suggest common commands
         if not text or text == "/":
             return [
-                Completion("/help", start_position=-len(text), display_meta="Show help"),
-                Completion("/config", start_position=-len(text), display_meta="Show config"),
-                Completion("/agents", start_position=-len(text), display_meta="Show agents"),
-                Completion("/stats", start_position=-len(text), display_meta="Show stats"),
-                Completion("/setup", start_position=-len(text), display_meta="Setup database"),
+                Completion(
+                    "/help", start_position=-len(text), display_meta="Show help"
+                ),
+                Completion(
+                    "/config", start_position=-len(text), display_meta="Show config"
+                ),
+                Completion(
+                    "/agents", start_position=-len(text), display_meta="Show agents"
+                ),
+                Completion(
+                    "/stats", start_position=-len(text), display_meta="Show stats"
+                ),
+                Completion(
+                    "/setup", start_position=-len(text), display_meta="Setup database"
+                ),
             ]
 
         # Only complete if text starts with /
@@ -80,57 +146,71 @@ class RyomaAutoCompleter(Completer):
         # Remove the leading slash for processing
         command_text = text[1:]
         words = command_text.split()
-        
+
         if len(words) == 0:
             # Just typed "/", show all commands
             return self._get_command_completions("", 1)
         elif len(words) == 1:
             # Completing the command name
             partial_command = words[0]
-            return self._get_command_completions(partial_command, len(partial_command) + 1)
+            return self._get_command_completions(
+                partial_command, len(partial_command) + 1
+            )
         else:
             # Completing command arguments
             command = words[0]
             current_arg = words[-1] if words else ""
-            return self._get_argument_completions(command, current_arg, len(current_arg))
+            return self._get_argument_completions(
+                command, current_arg, len(current_arg)
+            )
 
-    def _get_command_completions(self, partial: str, start_offset: int) -> List[Completion]:
+    def _get_command_completions(
+        self, partial: str, start_offset: int
+    ) -> List[Completion]:
         """Get completions for command names."""
         completions = []
-        
+
         for cmd in self.all_commands:
             if cmd.startswith(partial.lower()):
                 # Find the canonical command name for description
                 canonical_cmd = self._get_canonical_command(cmd)
-                description = self.commands.get(canonical_cmd, {}).get("description", "")
-                
+                description = self.commands.get(canonical_cmd, {}).get(
+                    "description", ""
+                )
+
                 completion_text = f"/{cmd}"
-                completions.append(Completion(
-                    completion_text,
-                    start_position=-start_offset,
-                    display_meta=description
-                ))
-        
+                completions.append(
+                    Completion(
+                        completion_text,
+                        start_position=-start_offset,
+                        display_meta=description,
+                    )
+                )
+
         return completions
 
-    def _get_argument_completions(self, command: str, current_arg: str, start_offset: int) -> List[Completion]:
+    def _get_argument_completions(
+        self, command: str, current_arg: str, start_offset: int
+    ) -> List[Completion]:
         """Get completions for command arguments."""
         canonical_cmd = self._get_canonical_command(command)
-        
+
         if canonical_cmd not in self.commands:
             return []
-        
+
         args = self.commands[canonical_cmd]["args"]
         completions = []
-        
+
         for arg in args:
             if arg.startswith(current_arg.lower()):
-                completions.append(Completion(
-                    arg,
-                    start_position=-start_offset,
-                    display_meta=f"Option for {canonical_cmd}"
-                ))
-        
+                completions.append(
+                    Completion(
+                        arg,
+                        start_position=-start_offset,
+                        display_meta=f"Option for {canonical_cmd}",
+                    )
+                )
+
         return completions
 
     def _get_canonical_command(self, cmd: str) -> str:
@@ -159,7 +239,9 @@ class RyomaAutoCompleter(Completer):
         for cmd in self.all_commands:
             if cmd.startswith(command_text.lower()):
                 canonical_cmd = self._get_canonical_command(cmd)
-                description = self.commands.get(canonical_cmd, {}).get("description", "")
+                description = self.commands.get(canonical_cmd, {}).get(
+                    "description", ""
+                )
                 suggestions.append((f"/{cmd}", description))
 
         return suggestions[:5]  # Limit to 5 suggestions
@@ -193,9 +275,11 @@ class AutocompleteManager:
         """
         return self.completer.get_command_suggestions(partial_input)
 
-    def update_dynamic_completions(self, 
-                                   datasource_ids: Optional[List[str]] = None,
-                                   model_names: Optional[List[str]] = None) -> None:
+    def update_dynamic_completions(
+        self,
+        datasource_ids: Optional[List[str]] = None,
+        model_names: Optional[List[str]] = None,
+    ) -> None:
         """
         Update dynamic completions based on current system state.
 

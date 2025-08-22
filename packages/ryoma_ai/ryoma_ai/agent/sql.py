@@ -4,18 +4,25 @@ from typing import Dict, Optional, Union
 from langchain_core.embeddings import Embeddings
 from langgraph.graph import StateGraph
 from langgraph.graph.graph import CompiledGraph
-
+from ryoma_ai.agent.internals.enhanced_sql_agent import (
+    EnhancedSqlAgent as InternalEnhancedSqlAgent,
+)
+from ryoma_ai.agent.internals.reforce_sql_agent import (
+    ReFoRCESqlAgent as InternalReFoRCESqlAgent,
+)
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent as InternalEnhancedSqlAgent
-from ryoma_ai.agent.internals.reforce_sql_agent import ReFoRCESqlAgent as InternalReFoRCESqlAgent
 from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.models.agent import SqlAgentMode
 from ryoma_ai.tool.sql_tool import (
-    CreateTableTool, QueryProfileTool, SqlQueryTool,
-    SchemaAnalysisTool, QueryValidationTool,
-    QueryOptimizationTool, QueryExplanationTool
+    CreateTableTool,
+    QueryExplanationTool,
+    QueryOptimizationTool,
+    QueryProfileTool,
+    QueryValidationTool,
+    SchemaAnalysisTool,
+    SqlQueryTool,
 )
 from ryoma_ai.vector_store.base import VectorStore
-from ryoma_ai.models.agent import SqlAgentMode
 
 
 class SqlAgent(WorkflowAgent):
@@ -71,7 +78,7 @@ class SqlAgent(WorkflowAgent):
                 embedding=embedding,
                 vector_store=vector_store,
                 safety_config=safety_config,
-                **kwargs
+                **kwargs,
             )
         elif mode == SqlAgentMode.enhanced:
             return EnhancedSqlAgentImpl(
@@ -81,7 +88,7 @@ class SqlAgent(WorkflowAgent):
                 embedding=embedding,
                 vector_store=vector_store,
                 safety_config=safety_config,
-                **kwargs
+                **kwargs,
             )
         else:  # basic mode
             return BasicSqlAgent(
@@ -90,7 +97,7 @@ class SqlAgent(WorkflowAgent):
                 datasource=datasource,
                 embedding=embedding,
                 vector_store=vector_store,
-                **kwargs
+                **kwargs,
             )
 
 
@@ -121,34 +128,30 @@ class BasicSqlAgent(WorkflowAgent):
             datasource=datasource,
             embedding=embedding,
             vector_store=vector_store,
-            **kwargs
+            **kwargs,
         )
 
         self.mode = SqlAgentMode.basic
 
-    def enable_safety_rule(self,
-                           rule):
+    def enable_safety_rule(self, rule):
         """Basic mode doesn't support safety rules."""
         raise NotImplementedError("Safety rules require enhanced or reforce mode")
 
-    def disable_safety_rule(self,
-                            rule):
+    def disable_safety_rule(self, rule):
         """Basic mode doesn't support safety rules."""
         raise NotImplementedError("Safety rules require enhanced or reforce mode")
 
-    def set_safety_config(self,
-                          config: Dict):
+    def set_safety_config(self, config: Dict):
         """Basic mode doesn't support safety configuration."""
-        raise NotImplementedError("Safety configuration requires enhanced or reforce mode")
+        raise NotImplementedError(
+            "Safety configuration requires enhanced or reforce mode"
+        )
 
-    def analyze_schema(self,
-                       question: str):
+    def analyze_schema(self, question: str):
         """Basic mode doesn't support advanced schema analysis."""
         raise NotImplementedError("Schema analysis requires enhanced or reforce mode")
 
-    def create_query_plan(self,
-                          question: str,
-                          context: Optional[Dict] = None):
+    def create_query_plan(self, question: str, context: Optional[Dict] = None):
         """Basic mode doesn't support query planning."""
         raise NotImplementedError("Query planning requires enhanced or reforce mode")
 
@@ -173,9 +176,13 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
     ):
         # Enhanced tools with all capabilities
         tools = [
-            SqlQueryTool(), CreateTableTool(), QueryProfileTool(),
-            SchemaAnalysisTool(), QueryValidationTool(),
-            QueryOptimizationTool(), QueryExplanationTool()
+            SqlQueryTool(),
+            CreateTableTool(),
+            QueryProfileTool(),
+            SchemaAnalysisTool(),
+            QueryValidationTool(),
+            QueryOptimizationTool(),
+            QueryExplanationTool(),
         ]
 
         super().__init__(
@@ -185,7 +192,7 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
             datasource=datasource,
             embedding=embedding,
             vector_store=vector_store,
-            **kwargs
+            **kwargs,
         )
 
         self.mode = SqlAgentMode.enhanced
@@ -198,52 +205,53 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
                 datasource=datasource,
                 safety_config=safety_config,
                 store=self.store,  # Pass the store instance to share datasource
-                **kwargs
+                **kwargs,
             )
         except Exception as e:
             # Log the error for debugging but continue with basic functionality
             logging.warning(f"Failed to initialize internal enhanced agent: {e}")
             self._internal_agent = None
 
-    def _build_workflow(self,
-                        graph: StateGraph) -> CompiledGraph:
+    def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using enhanced capabilities."""
         return self._internal_agent._build_workflow(graph)
 
-    def enable_safety_rule(self,
-                           rule):
+    def enable_safety_rule(self, rule):
         """Enable a specific safety validation rule."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.enable_rule(rule)
 
-    def disable_safety_rule(self,
-                            rule):
+    def disable_safety_rule(self, rule):
         """Disable a specific safety validation rule."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.disable_rule(rule)
 
-    def set_safety_config(self,
-                          config: Dict):
+    def set_safety_config(self, config: Dict):
         """Update safety configuration."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.set_safety_config(config)
 
-    def analyze_schema(self,
-                       question: str):
+    def analyze_schema(self, question: str):
         """Analyze schema relationships for a question."""
-        if self._internal_agent and hasattr(self._internal_agent, 'schema_agent'):
-            return self._internal_agent.schema_agent.analyze_schema_relationships(question)
+        if self._internal_agent and hasattr(self._internal_agent, "schema_agent"):
+            return self._internal_agent.schema_agent.analyze_schema_relationships(
+                question
+            )
         else:
-            raise NotImplementedError("Schema analysis not available in this enhanced agent")
+            raise NotImplementedError(
+                "Schema analysis not available in this enhanced agent"
+            )
 
-    def create_query_plan(self,
-                          question: str,
-                          context: Optional[Dict] = None):
+    def create_query_plan(self, question: str, context: Optional[Dict] = None):
         """Create a query execution plan."""
-        if self._internal_agent and hasattr(self._internal_agent, 'query_planner'):
-            return self._internal_agent.query_planner.create_query_plan(question, context)
+        if self._internal_agent and hasattr(self._internal_agent, "query_planner"):
+            return self._internal_agent.query_planner.create_query_plan(
+                question, context
+            )
         else:
-            raise NotImplementedError("Query planning not available in this enhanced agent")
+            raise NotImplementedError(
+                "Query planning not available in this enhanced agent"
+            )
 
 
 class ReFoRCESqlAgentImpl(WorkflowAgent):
@@ -266,9 +274,13 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
     ):
         # ReFoRCE tools with all capabilities
         tools = [
-            SqlQueryTool(), CreateTableTool(), QueryProfileTool(),
-            SchemaAnalysisTool(), QueryValidationTool(),
-            QueryOptimizationTool(), QueryExplanationTool()
+            SqlQueryTool(),
+            CreateTableTool(),
+            QueryProfileTool(),
+            SchemaAnalysisTool(),
+            QueryValidationTool(),
+            QueryOptimizationTool(),
+            QueryExplanationTool(),
         ]
 
         super().__init__(
@@ -278,7 +290,7 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
             datasource=datasource,
             embedding=embedding,
             vector_store=vector_store,
-            **kwargs
+            **kwargs,
         )
 
         self.mode = SqlAgentMode.reforce
@@ -291,49 +303,50 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
                 datasource=datasource,
                 safety_config=safety_config,
                 store=self.store,  # Pass the store instance to share datasource
-                **kwargs
+                **kwargs,
             )
         except Exception as e:
             # Log the error for debugging but continue with basic functionality
             logging.warning(f"Failed to initialize internal ReFoRCE agent: {e}")
             self._internal_agent = None
 
-    def _build_workflow(self,
-                        graph: StateGraph) -> CompiledGraph:
+    def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using ReFoRCE capabilities."""
         return self._internal_agent._build_workflow(graph)
 
-    def enable_safety_rule(self,
-                           rule):
+    def enable_safety_rule(self, rule):
         """Enable a specific safety validation rule."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.enable_rule(rule)
 
-    def disable_safety_rule(self,
-                            rule):
+    def disable_safety_rule(self, rule):
         """Disable a specific safety validation rule."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.disable_rule(rule)
 
-    def set_safety_config(self,
-                          config: Dict):
+    def set_safety_config(self, config: Dict):
         """Update safety configuration."""
-        if self._internal_agent and hasattr(self._internal_agent, 'safety_validator'):
+        if self._internal_agent and hasattr(self._internal_agent, "safety_validator"):
             self._internal_agent.safety_validator.set_safety_config(config)
 
-    def analyze_schema(self,
-                       question: str):
+    def analyze_schema(self, question: str):
         """Analyze schema relationships for a question."""
-        if self._internal_agent and hasattr(self._internal_agent, 'schema_agent'):
-            return self._internal_agent.schema_agent.analyze_schema_relationships(question)
+        if self._internal_agent and hasattr(self._internal_agent, "schema_agent"):
+            return self._internal_agent.schema_agent.analyze_schema_relationships(
+                question
+            )
         else:
-            raise NotImplementedError("Schema analysis not available in this ReFoRCE agent")
+            raise NotImplementedError(
+                "Schema analysis not available in this ReFoRCE agent"
+            )
 
-    def create_query_plan(self,
-                          question: str,
-                          context: Optional[Dict] = None):
+    def create_query_plan(self, question: str, context: Optional[Dict] = None):
         """Create a query execution plan."""
-        if self._internal_agent and hasattr(self._internal_agent, 'query_planner'):
-            return self._internal_agent.query_planner.create_query_plan(question, context)
+        if self._internal_agent and hasattr(self._internal_agent, "query_planner"):
+            return self._internal_agent.query_planner.create_query_plan(
+                question, context
+            )
         else:
-            raise NotImplementedError("Query planning not available in this ReFoRCE agent")
+            raise NotImplementedError(
+                "Query planning not available in this ReFoRCE agent"
+            )

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import reflex as rx
-from ryoma_ai.prompt import prompt_manager, PromptType
+from ryoma_ai.prompt import PromptType, prompt_manager
 from ryoma_lab.models.prompt import PromptTemplate
 from ryoma_lab.services.prompt_template import PromptTemplateService
 from ryoma_lab.states.ai import AIState
@@ -57,7 +57,7 @@ class PromptTemplateState(AIState):
     @staticmethod
     def build_prompt(prompt_template: PromptTemplate, embedding_model: str, target):
         """Build a prompt using the new prompt manager system."""
-        
+
         # Map old prompt repr types to new PromptType
         type_mapping = {
             "SQL": PromptType.SQL_GENERATION,
@@ -65,34 +65,33 @@ class PromptTemplateState(AIState):
             "INSTRUCTION": PromptType.INSTRUCTION_FOLLOWING,
             "COT": PromptType.CHAIN_OF_THOUGHT,
         }
-        
+
         prompt_type = type_mapping.get(
-            prompt_template.prompt_repr.upper(), 
-            PromptType.CHAT
+            prompt_template.prompt_repr.upper(), PromptType.CHAT
         )
-        
+
         # Create context from target
         context = {
             "schema": target.get("schema", ""),
             "question": target.get("question", ""),
             "user_input": target.get("user_input", target.get("question", "")),
-            "context": target.get("context", "")
+            "context": target.get("context", ""),
         }
-        
+
         # Build prompt template
         chat_prompt = prompt_manager.create_prompt(
             prompt_type=prompt_type,
             context=context,
             num_examples=0,  # k_shot is always 0 in the old code
         )
-        
+
         # Format with target data and return as string
         try:
             formatted_messages = chat_prompt.format_messages(**target)
             # Convert messages to string format
             prompt_str = ""
             for message in formatted_messages:
-                if hasattr(message, 'content'):
+                if hasattr(message, "content"):
                     prompt_str += message.content + "\n"
                 else:
                     prompt_str += str(message) + "\n"

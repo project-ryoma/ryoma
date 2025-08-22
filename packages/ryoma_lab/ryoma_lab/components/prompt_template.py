@@ -35,9 +35,7 @@ def prompt_card(pt: PromptTemplate):
                 rc.badge(f"Representation: {pt.prompt_repr}"),
                 rc.badge(f"k_shot: {pt.k_shot}", color_scheme="purple"),
                 rc.badge(f"Type: {pt.selector_type}", color_scheme="blue"),
-                rc.badge(
-                    f"Type: {pt.prompt_template_type}", color_scheme="green"
-                ),
+                rc.badge(f"Type: {pt.prompt_template_type}", color_scheme="green"),
                 justify="between",
                 spacing="2",
                 direction="row",

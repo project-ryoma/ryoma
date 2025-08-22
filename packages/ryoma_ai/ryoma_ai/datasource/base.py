@@ -22,16 +22,16 @@ class DataSource(BaseModel, ABC):
         raise NotImplementedError("get_catalog is not implemented for this data source")
 
     @abstractmethod
-    def crawl_catalog(self, loader: Loader, **kwargs: Dict[str, Any]) -> Optional[Catalog]:
+    def crawl_catalog(
+        self, loader: Loader, **kwargs: Dict[str, Any]
+    ) -> Optional[Catalog]:
         raise NotImplementedError(
             "crawl_catalog is not implemented for this data source."
         )
 
     @abstractmethod
     def prompt(self, schema: Optional[str] = None, table: Optional[str] = None) -> str:
-        raise NotImplementedError(
-            "prompt is not implemented for this data source."
-        )
+        raise NotImplementedError("prompt is not implemented for this data source.")
 
     @abstractmethod
     def profile_table(self, table_name: str, **kwargs: Dict[str, Any]) -> dict:
@@ -45,4 +45,6 @@ class DataSource(BaseModel, ABC):
         Returns:
             dict: A dictionary containing the table's metadata.
         """
-        raise NotImplementedError("profile_table is not implemented for this data source.")
+        raise NotImplementedError(
+            "profile_table is not implemented for this data source."
+        )

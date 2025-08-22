@@ -1,8 +1,9 @@
-from typing import Dict, List, Optional
 import re
+from typing import Dict, List, Optional
+
 from ryoma_ai.agent.chat_agent import ChatAgent
+from ryoma_ai.datasource.metadata import Catalog, Column, Table
 from ryoma_ai.datasource.sql import SqlDataSource
-from ryoma_ai.datasource.metadata import Catalog, Table, Column
 
 
 class SchemaLinkingAgent(ChatAgent):
@@ -61,7 +62,7 @@ class SchemaLinkingAgent(ChatAgent):
             "relevant_tables": relevant_tables,
             "relationships": relationships,
             "join_strategies": join_strategies,
-            "confidence_score": self._calculate_confidence(relevant_tables, entities)
+            "confidence_score": self._calculate_confidence(relevant_tables, entities),
         }
 
     def suggest_table_selection(self, question: str, max_tables: int = 5) -> List[Dict]:
@@ -85,13 +86,15 @@ class SchemaLinkingAgent(ChatAgent):
             for table in schema.tables:
                 score = self._calculate_table_relevance(table, entities, question)
                 if score > 0:
-                    table_scores.append({
-                        "schema": schema.schema_name,
-                        "table": table.table_name,
-                        "score": score,
-                        "columns": [col.name for col in table.columns],
-                        "reasoning": self._explain_table_relevance(table, entities)
-                    })
+                    table_scores.append(
+                        {
+                            "schema": schema.schema_name,
+                            "table": table.table_name,
+                            "score": score,
+                            "columns": [col.name for col in table.columns],
+                            "reasoning": self._explain_table_relevance(table, entities),
+                        }
+                    )
 
         # Sort by score and return top results
         table_scores.sort(key=lambda x: x["score"], reverse=True)
@@ -112,7 +115,7 @@ class SchemaLinkingAgent(ChatAgent):
 
         # Find potential join paths between tables
         for i, table1 in enumerate(tables):
-            for table2 in tables[i+1:]:
+            for table2 in tables[i + 1 :]:
                 join_info = self._find_join_path(table1, table2, catalog)
                 if join_info:
                     join_suggestions.append(join_info)
@@ -131,14 +134,14 @@ class SchemaLinkingAgent(ChatAgent):
 
         # Common business entities
         business_entities = {
-            'customer': ['customer', 'client', 'user', 'buyer', 'account'],
-            'order': ['order', 'purchase', 'transaction', 'sale', 'buy'],
-            'product': ['product', 'item', 'goods', 'merchandise', 'inventory'],
-            'employee': ['employee', 'staff', 'worker', 'person', 'team'],
-            'payment': ['payment', 'invoice', 'bill', 'charge', 'fee'],
-            'date': ['date', 'time', 'when', 'period', 'year', 'month', 'day'],
-            'amount': ['amount', 'price', 'cost', 'value', 'total', 'sum'],
-            'location': ['location', 'address', 'city', 'state', 'country', 'region']
+            "customer": ["customer", "client", "user", "buyer", "account"],
+            "order": ["order", "purchase", "transaction", "sale", "buy"],
+            "product": ["product", "item", "goods", "merchandise", "inventory"],
+            "employee": ["employee", "staff", "worker", "person", "team"],
+            "payment": ["payment", "invoice", "bill", "charge", "fee"],
+            "date": ["date", "time", "when", "period", "year", "month", "day"],
+            "amount": ["amount", "price", "cost", "value", "total", "sum"],
+            "location": ["location", "address", "city", "state", "country", "region"],
         }
 
         found_entities = []
@@ -147,12 +150,14 @@ class SchemaLinkingAgent(ChatAgent):
                 found_entities.append(entity_type)
 
         # Extract specific terms that might be table or column names
-        words = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', question)
+        words = re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", question)
         found_entities.extend([word.lower() for word in words if len(word) > 2])
 
         return list(set(found_entities))
 
-    def _find_relevant_tables(self, entities: List[str], catalog: Catalog) -> List[Dict]:
+    def _find_relevant_tables(
+        self, entities: List[str], catalog: Catalog
+    ) -> List[Dict]:
         """Find tables relevant to the extracted entities."""
         relevant_tables = []
 
@@ -160,16 +165,20 @@ class SchemaLinkingAgent(ChatAgent):
             for table in schema.tables:
                 relevance_score = self._calculate_table_relevance(table, entities, "")
                 if relevance_score > 0:
-                    relevant_tables.append({
-                        "schema": schema.schema_name,
-                        "table": table.table_name,
-                        "score": relevance_score,
-                        "table_obj": table
-                    })
+                    relevant_tables.append(
+                        {
+                            "schema": schema.schema_name,
+                            "table": table.table_name,
+                            "score": relevance_score,
+                            "table_obj": table,
+                        }
+                    )
 
         return sorted(relevant_tables, key=lambda x: x["score"], reverse=True)
 
-    def _calculate_table_relevance(self, table: Table, entities: List[str], question: str) -> float:
+    def _calculate_table_relevance(
+        self, table: Table, entities: List[str], question: str
+    ) -> float:
         """Calculate how relevant a table is to the given entities and question."""
         score = 0.0
 
@@ -178,7 +187,7 @@ class SchemaLinkingAgent(ChatAgent):
         for entity in entities:
             if entity in table_name_lower:
                 score += 3.0
-            elif any(part in table_name_lower for part in entity.split('_')):
+            elif any(part in table_name_lower for part in entity.split("_")):
                 score += 1.5
 
         # Score based on column names matching entities
@@ -187,33 +196,36 @@ class SchemaLinkingAgent(ChatAgent):
             for entity in entities:
                 if entity in column_name_lower:
                     score += 2.0
-                elif any(part in column_name_lower for part in entity.split('_')):
+                elif any(part in column_name_lower for part in entity.split("_")):
                     score += 1.0
 
         # Boost score for common relationship patterns
-        if any(col.name.lower().endswith('_id') for col in table.columns):
+        if any(col.name.lower().endswith("_id") for col in table.columns):
             score += 0.5  # Tables with foreign keys are often important
 
         return score
 
-    def _analyze_table_relationships(self, relevant_tables: List[Dict], catalog: Catalog) -> List[Dict]:
+    def _analyze_table_relationships(
+        self, relevant_tables: List[Dict], catalog: Catalog
+    ) -> List[Dict]:
         """Analyze relationships between relevant tables."""
         relationships = []
 
         for i, table1 in enumerate(relevant_tables):
-            for table2 in relevant_tables[i+1:]:
+            for table2 in relevant_tables[i + 1 :]:
                 relationship = self._find_relationship(
-                    table1["table_obj"],
-                    table2["table_obj"]
+                    table1["table_obj"], table2["table_obj"]
                 )
                 if relationship:
-                    relationships.append({
-                        "table1": f"{table1['schema']}.{table1['table']}",
-                        "table2": f"{table2['schema']}.{table2['table']}",
-                        "relationship_type": relationship["type"],
-                        "join_columns": relationship["columns"],
-                        "confidence": relationship["confidence"]
-                    })
+                    relationships.append(
+                        {
+                            "table1": f"{table1['schema']}.{table1['table']}",
+                            "table2": f"{table2['schema']}.{table2['table']}",
+                            "relationship_type": relationship["type"],
+                            "join_columns": relationship["columns"],
+                            "confidence": relationship["confidence"],
+                        }
+                    )
 
         return relationships
 
@@ -226,7 +238,7 @@ class SchemaLinkingAgent(ChatAgent):
                     return {
                         "type": "foreign_key",
                         "columns": [(col1.name, col2.name)],
-                        "confidence": 0.8
+                        "confidence": 0.8,
                     }
 
         # Look for common column names (potential joins)
@@ -240,26 +252,33 @@ class SchemaLinkingAgent(ChatAgent):
             return {
                 "type": "common_column",
                 "columns": common_columns,
-                "confidence": 0.6
+                "confidence": 0.6,
             }
 
         return None
 
-    def _is_likely_foreign_key_relationship(self, col1: Column, col2: Column, table1: Table, table2: Table) -> bool:
+    def _is_likely_foreign_key_relationship(
+        self, col1: Column, col2: Column, table1: Table, table2: Table
+    ) -> bool:
         """Determine if two columns likely represent a foreign key relationship."""
         # Check if one column name contains the other table's name
-        if (table2.table_name.lower() + "_id" == col1.name.lower() or
-            table1.table_name.lower() + "_id" == col2.name.lower()):
+        if (
+            table2.table_name.lower() + "_id" == col1.name.lower()
+            or table1.table_name.lower() + "_id" == col2.name.lower()
+        ):
             return True
 
         # Check for id columns
-        if (col1.name.lower() == "id" and col2.name.lower().endswith("_id")) or \
-           (col2.name.lower() == "id" and col1.name.lower().endswith("_id")):
+        if (col1.name.lower() == "id" and col2.name.lower().endswith("_id")) or (
+            col2.name.lower() == "id" and col1.name.lower().endswith("_id")
+        ):
             return True
 
         return False
 
-    def _suggest_join_strategies(self, relevant_tables: List[Dict], relationships: List[Dict]) -> List[Dict]:
+    def _suggest_join_strategies(
+        self, relevant_tables: List[Dict], relationships: List[Dict]
+    ) -> List[Dict]:
         """Suggest optimal join strategies."""
         strategies = []
 
@@ -272,7 +291,7 @@ class SchemaLinkingAgent(ChatAgent):
                 "tables": [rel["table1"], rel["table2"]],
                 "join_type": "INNER JOIN",  # Default to INNER JOIN
                 "join_condition": self._format_join_condition(rel),
-                "reasoning": f"Join based on {rel['relationship_type']} relationship"
+                "reasoning": f"Join based on {rel['relationship_type']} relationship",
             }
             strategies.append(strategy)
 
@@ -289,7 +308,9 @@ class SchemaLinkingAgent(ChatAgent):
 
         return " AND ".join(conditions)
 
-    def _find_join_path(self, table1: str, table2: str, catalog: Catalog) -> Optional[Dict]:
+    def _find_join_path(
+        self, table1: str, table2: str, catalog: Catalog
+    ) -> Optional[Dict]:
         """Find join path between two specific tables."""
         # This is a simplified implementation
         # In a real system, you might use graph algorithms to find optimal join paths
@@ -306,7 +327,7 @@ class SchemaLinkingAgent(ChatAgent):
                 "table1": table1,
                 "table2": table2,
                 "join_sql": f"JOIN {table2} ON {self._format_join_condition({'table1': table1, 'table2': table2, 'join_columns': relationship['columns']})}",
-                "confidence": relationship["confidence"]
+                "confidence": relationship["confidence"],
             }
 
         return None
@@ -339,7 +360,9 @@ class SchemaLinkingAgent(ChatAgent):
 
         return "; ".join(reasons) if reasons else "General relevance"
 
-    def _calculate_confidence(self, relevant_tables: List[Dict], entities: List[str]) -> float:
+    def _calculate_confidence(
+        self, relevant_tables: List[Dict], entities: List[str]
+    ) -> float:
         """Calculate overall confidence in the schema linking results."""
         if not relevant_tables:
             return 0.0
@@ -353,9 +376,7 @@ class SchemaLinkingAgent(ChatAgent):
 
         return round(confidence, 2)
 
-    def generate_initial_sql(self,
-                             user_query: str,
-                             table_name: str) -> str:
+    def generate_initial_sql(self, user_query: str, table_name: str) -> str:
         schema_profile = self.datasource.profile_table(table_name)
         schema_nl = self.summarizer.summarize_schema(schema_profile)
         prompt = f"""Given the user question and metadata summaries, write a SQL query.
@@ -369,20 +390,18 @@ Question: {user_query}
         prompt += "\nSQL:"
         return self.chat(prompt).content
 
-    def extract_literals_and_columns(self,
-                                     sql: str) -> Dict[str, list]:
-        import sqlparse
+    def extract_literals_and_columns(self, sql: str) -> Dict[str, list]:
         import re
+
+        import sqlparse
+
         tokens = sqlparse.parse(sql)[0].tokens
         [t.value for t in tokens if t.ttype is None and str(t).strip()]
         literals = re.findall(r"'(.*?)'", sql)
         columns = re.findall(r"\b\w+\b", sql)
         return {"columns": list(set(columns)), "literals": literals}
 
-    def refine_sql(self,
-                   user_query: str,
-                   table_name: str,
-                   max_iter: int = 2) -> str:
+    def refine_sql(self, user_query: str, table_name: str, max_iter: int = 2) -> str:
         current_sql = self.generate_initial_sql(user_query, table_name)
         extracted = self.extract_literals_and_columns(current_sql)
 
@@ -392,7 +411,11 @@ Question: {user_query}
             schema_profile = self.datasource.profile_table(table_name)
             for col, stats in schema_profile.items():
                 sample_values = stats.get("sample_values", [])
-                if any(lit in str(v) for v in sample_values for lit in extracted["literals"]):
+                if any(
+                    lit in str(v)
+                    for v in sample_values
+                    for lit in extracted["literals"]
+                ):
                     extended_cols.add(col)
 
             prompt = f"""

@@ -4,14 +4,13 @@ Data Source Manager for Ryoma AI CLI
 Handles data source connections, registration, and management.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
-
-from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
 from ryoma_ai.datasource.base import DataSource
+from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
 from ryoma_ai.store import DataSourceStore
 
 
@@ -41,7 +40,9 @@ class DataSourceManager:
             bool: True if setup successful
         """
         if "type" not in db_config:
-            self.console.print("[red]Database configuration must specify 'type' field[/red]")
+            self.console.print(
+                "[red]Database configuration must specify 'type' field[/red]"
+            )
             return False
 
         db_type = db_config["type"].lower()
@@ -53,10 +54,14 @@ class DataSourceManager:
             expected_fields = DataSourceFactory.get_datasource_config(db_type)
 
             # Validate and prepare config parameters
-            config_kwargs = self._prepare_datasource_config(db_config, expected_fields, db_type)
+            config_kwargs = self._prepare_datasource_config(
+                db_config, expected_fields, db_type
+            )
 
             # Create the datasource
-            self.current_datasource = DataSourceFactory.create_datasource(db_type, **config_kwargs)
+            self.current_datasource = DataSourceFactory.create_datasource(
+                db_type, **config_kwargs
+            )
 
             # Test connection
             self.current_datasource.query("SELECT 1")
@@ -67,20 +72,26 @@ class DataSourceManager:
                     name=name,
                     datasource_type=db_type,
                     config=config_kwargs,
-                    description=description if description else None
+                    description=description if description else None,
                 )
 
-            self.console.print(f"[green]✅ Data source registered with ID: {ds_id}[/green]")
+            self.console.print(
+                f"[green]✅ Data source registered with ID: {ds_id}[/green]"
+            )
             return True
 
         except ValueError as e:
-            self.console.print(f"[red]Unsupported database type or configuration error: {e}[/red]")
+            self.console.print(
+                f"[red]Unsupported database type or configuration error: {e}[/red]"
+            )
             return False
         except Exception as e:
             self.console.print(f"[red]Database connection failed: {e}[/red]")
             return False
 
-    def _prepare_datasource_config(self, db_config: Dict[str, Any], expected_fields: Dict[str, Any], db_type: str) -> Dict[str, Any]:
+    def _prepare_datasource_config(
+        self, db_config: Dict[str, Any], expected_fields: Dict[str, Any], db_type: str
+    ) -> Dict[str, Any]:
         """Prepare configuration parameters based on datasource field requirements."""
         # Remove 'type' from config
         config = {k: v for k, v in db_config.items() if k != "type"}
@@ -89,7 +100,9 @@ class DataSourceManager:
         for field_name, field_info in expected_fields.items():
             is_required = field_info.is_required()
             if is_required and field_name not in config:
-                raise ValueError(f"Missing required field '{field_name}' for {db_type} datasource")
+                raise ValueError(
+                    f"Missing required field '{field_name}' for {db_type} datasource"
+                )
 
         # Filter config to only include expected fields
         filtered_config = {k: v for k, v in config.items() if k in expected_fields}
@@ -106,7 +119,9 @@ class DataSourceManager:
 
         # Get supported datasources from factory
         supported_types = [ds.name for ds in get_supported_datasources()]
-        db_type = Prompt.ask("Database type", choices=supported_types, default="postgres")
+        db_type = Prompt.ask(
+            "Database type", choices=supported_types, default="postgres"
+        )
 
         try:
             # Get the expected config fields for this datasource type
@@ -117,10 +132,10 @@ class DataSourceManager:
 
             for field_name, field_info in expected_fields.items():
                 is_required = field_info.is_required()
-                description = getattr(field_info, 'description', field_name)
+                description = getattr(field_info, "description", field_name)
 
                 # Handle password fields specially
-                if 'password' in field_name.lower():
+                if "password" in field_name.lower():
                     value = Prompt.ask(f"{description}", password=True)
                 else:
                     prompt_text = f"{description}"
@@ -130,20 +145,24 @@ class DataSourceManager:
                     value = Prompt.ask(prompt_text)
 
                 # Convert to appropriate type based on annotation
-                annotation = str(getattr(field_info, 'annotation', 'str'))
-                if 'int' in annotation.lower() or 'port' in field_name.lower():
+                annotation = str(getattr(field_info, "annotation", "str"))
+                if "int" in annotation.lower() or "port" in field_name.lower():
                     try:
                         if value:
                             value = int(value)
                     except ValueError:
-                        self.console.print(f"[red]Invalid integer value for {field_name}[/red]")
+                        self.console.print(
+                            f"[red]Invalid integer value for {field_name}[/red]"
+                        )
                         return False
 
                 # Add value if provided
                 if value or is_required:
                     new_config[field_name] = value
                 elif is_required and not value:
-                    self.console.print(f"[red]Required field '{field_name}' cannot be empty[/red]")
+                    self.console.print(
+                        f"[red]Required field '{field_name}' cannot be empty[/red]"
+                    )
                     return False
 
             self.console.print("[yellow]Testing connection...[/yellow]")
@@ -195,7 +214,9 @@ class DataSourceManager:
 
         # Get supported datasources from factory
         supported_types = [ds.name for ds in get_supported_datasources()]
-        db_type = Prompt.ask("Database type", choices=supported_types, default="postgres")
+        db_type = Prompt.ask(
+            "Database type", choices=supported_types, default="postgres"
+        )
 
         try:
             # Get the expected config fields for this datasource type
@@ -206,10 +227,10 @@ class DataSourceManager:
 
             for field_name, field_info in expected_fields.items():
                 is_required = field_info.is_required()
-                description_text = getattr(field_info, 'description', field_name)
+                description_text = getattr(field_info, "description", field_name)
 
                 # Handle password fields specially
-                if 'password' in field_name.lower():
+                if "password" in field_name.lower():
                     value = Prompt.ask(f"{description_text}", password=True)
                 else:
                     prompt_text = f"{description_text}"
@@ -219,20 +240,24 @@ class DataSourceManager:
                     value = Prompt.ask(prompt_text)
 
                 # Convert to appropriate type
-                annotation = str(getattr(field_info, 'annotation', 'str'))
-                if 'int' in annotation.lower() or 'port' in field_name.lower():
+                annotation = str(getattr(field_info, "annotation", "str"))
+                if "int" in annotation.lower() or "port" in field_name.lower():
                     try:
                         if value:
                             value = int(value)
                     except ValueError:
-                        self.console.print(f"[red]Invalid integer value for {field_name}[/red]")
+                        self.console.print(
+                            f"[red]Invalid integer value for {field_name}[/red]"
+                        )
                         return
 
                 # Add value if provided
                 if value or is_required:
                     config[field_name] = value
                 elif is_required and not value:
-                    self.console.print(f"[red]Required field '{field_name}' cannot be empty[/red]")
+                    self.console.print(
+                        f"[red]Required field '{field_name}' cannot be empty[/red]"
+                    )
                     return
 
             # Register the data source
@@ -241,10 +266,12 @@ class DataSourceManager:
                     name=name,
                     datasource_type=db_type,
                     config=config,
-                    description=description if description else None
+                    description=description if description else None,
                 )
 
-            self.console.print(f"[green]✅ Data source registered with ID: {ds_id}[/green]")
+            self.console.print(
+                f"[green]✅ Data source registered with ID: {ds_id}[/green]"
+            )
 
             # Ask if they want to switch to this data source
             if Confirm.ask("Switch to this data source now?"):
@@ -272,7 +299,9 @@ class DataSourceManager:
             self.current_datasource = datasource
             self.current_datasource_id = datasource_id
 
-            self.console.print(f"[green]✅ Switched to data source: {registration.name}[/green]")
+            self.console.print(
+                f"[green]✅ Switched to data source: {registration.name}[/green]"
+            )
             return True
 
         except Exception as e:
@@ -285,7 +314,9 @@ class DataSourceManager:
             registrations = self.datasource_store.list_data_sources()
 
             if not registrations:
-                self.console.print("[yellow]No data sources available. Use /add-datasource to register one.[/yellow]")
+                self.console.print(
+                    "[yellow]No data sources available. Use /add-datasource to register one.[/yellow]"
+                )
                 return
 
             self.console.print("[bold]Available Data Sources:[/bold]")
@@ -316,12 +347,14 @@ class DataSourceManager:
             return {}
 
         try:
-            registration = self.datasource_store.get_registration(self.current_datasource_id)
+            registration = self.datasource_store.get_registration(
+                self.current_datasource_id
+            )
             return {
                 "id": registration.id,
                 "name": registration.name,
                 "type": registration.type,
-                "is_active": registration.is_active
+                "is_active": registration.is_active,
             }
         except Exception:
             return {}

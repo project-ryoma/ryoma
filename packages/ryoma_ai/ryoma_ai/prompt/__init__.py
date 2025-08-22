@@ -33,9 +33,16 @@ Advanced Usage:
     )
 """
 
+# Backward compatibility
+from ryoma_ai.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
+
+# Base classes for extensions
 # Core components
 from ryoma_ai.prompt.core import (
     ExampleFormat,
+    ExampleFormatter,
+    ExampleSelector,
+    PromptBuilder,
     PromptConfig,
     PromptTemplate,
     PromptType,
@@ -46,35 +53,21 @@ from ryoma_ai.prompt.core import (
 # Main interface
 from ryoma_ai.prompt.manager import prompt_manager
 
-# Base classes for extensions
-from ryoma_ai.prompt.core import (
-    ExampleFormatter,
-    ExampleSelector,
-    PromptBuilder,
-)
-
-# Backward compatibility
-from ryoma_ai.prompt.base import BasePromptTemplate, BasicContextPromptTemplate
-
 __all__ = [
     # Main interface
     "prompt_manager",
-    
     # Configuration enums
     "PromptType",
-    "ExampleFormat", 
+    "ExampleFormat",
     "SelectorStrategy",
-    
     # Core classes
     "PromptConfig",
     "PromptTemplate",
     "prompt_registry",
-    
     # Extension points
     "PromptBuilder",
     "ExampleSelector",
     "ExampleFormatter",
-    
     # Backward compatibility
     "BasePromptTemplate",
     "BasicContextPromptTemplate",

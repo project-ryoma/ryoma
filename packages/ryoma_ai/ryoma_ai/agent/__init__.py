@@ -7,13 +7,8 @@ workflow agents, and SQL agents with factory pattern support.
 
 from .base import BaseAgent
 from .chat_agent import ChatAgent
-from .workflow import WorkflowAgent, ToolMode
-from .sql import (
-    SqlAgent,
-    BasicSqlAgent,
-    EnhancedSqlAgentImpl,
-    ReFoRCESqlAgentImpl
-)
+from .sql import BasicSqlAgent, EnhancedSqlAgentImpl, ReFoRCESqlAgentImpl, SqlAgent
+from .workflow import ToolMode, WorkflowAgent
 
 __all__ = [
     "BaseAgent",
@@ -23,5 +18,5 @@ __all__ = [
     "SqlAgent",
     "BasicSqlAgent",
     "EnhancedSqlAgentImpl",
-    "ReFoRCESqlAgentImpl"
+    "ReFoRCESqlAgentImpl",
 ]

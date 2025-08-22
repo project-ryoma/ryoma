@@ -6,15 +6,15 @@ This file provides practical examples showing how the human-in-the-loop
 SQL approval workflow would be used in real applications.
 """
 
-import pytest
-from unittest.mock import Mock, patch, create_autospec
-from langchain_core.messages import HumanMessage
-from langgraph.types import Command
-from langgraph.errors import GraphInterrupt
+from unittest.mock import Mock, create_autospec, patch
 
+import pytest
+from langchain_core.messages import HumanMessage
+from langgraph.errors import GraphInterrupt
+from langgraph.types import Command
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.datasource.sql import SqlDataSource
-from ryoma_ai.models.sql import SqlQueryResult, QueryStatus
+from ryoma_ai.models.sql import QueryStatus, SqlQueryResult
 
 
 class MockGraphInterruptWorkflow:
@@ -37,7 +37,9 @@ class MockGraphInterruptWorkflow:
             # Resume from interrupt
             if self.interrupted and self.state:
                 # Simulate resuming execution with the resume value
-                with patch('ryoma_ai.agent.internals.enhanced_sql_agent.interrupt') as mock_interrupt:
+                with patch(
+                    "ryoma_ai.agent.internals.enhanced_sql_agent.interrupt"
+                ) as mock_interrupt:
                     mock_interrupt.return_value = input_data.resume
 
                     # Continue from where we left off
@@ -52,18 +54,24 @@ class MockGraphInterruptWorkflow:
             self.state = {
                 "messages": input_data["messages"],
                 "generated_sql": "SELECT id, name, email FROM users WHERE active = true ORDER BY created_at DESC LIMIT 10",
-                "question": input_data["messages"][0].content if input_data["messages"] else ""
+                "question": (
+                    input_data["messages"][0].content if input_data["messages"] else ""
+                ),
             }
 
             # Simulate interrupt during execution
             try:
-                with patch('ryoma_ai.agent.internals.enhanced_sql_agent.interrupt') as mock_interrupt:
-                    mock_interrupt.side_effect = GraphInterrupt({
-                        "type": "sql_execution_approval",
-                        "sql_query": self.state["generated_sql"],
-                        "question": self.state["question"],
-                        "message": f"Please approve: {self.state['generated_sql']}"
-                    })
+                with patch(
+                    "ryoma_ai.agent.internals.enhanced_sql_agent.interrupt"
+                ) as mock_interrupt:
+                    mock_interrupt.side_effect = GraphInterrupt(
+                        {
+                            "type": "sql_execution_approval",
+                            "sql_query": self.state["generated_sql"],
+                            "question": self.state["question"],
+                            "message": f"Please approve: {self.state['generated_sql']}",
+                        }
+                    )
 
                     # This should trigger the interrupt
                     self.agent._execute_query(self.state)
@@ -74,7 +82,7 @@ class MockGraphInterruptWorkflow:
                 return {
                     "interrupted": True,
                     "interrupt_data": self.interrupt_data,
-                    "state": self.state
+                    "state": self.state,
                 }
 
         return {"error": "Unexpected input type"}
@@ -93,7 +101,7 @@ class TestSqlApprovalDemo:
             if "users" in sql.lower():
                 return [
                     {"id": 1, "name": "John Doe", "email": "john@example.com"},
-                    {"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
+                    {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
                 ]
             return []
 
@@ -103,15 +111,17 @@ class TestSqlApprovalDemo:
     @pytest.fixture
     def enhanced_sql_agent(self, mock_datasource):
         """Create a fully configured Enhanced SQL Agent."""
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlErrorHandler'):
-            with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlSafetyValidator'):
+        with patch("ryoma_ai.agent.internals.enhanced_sql_agent.SqlErrorHandler"):
+            with patch(
+                "ryoma_ai.agent.internals.enhanced_sql_agent.SqlSafetyValidator"
+            ):
                 agent = EnhancedSqlAgent(
                     model="gpt-4",
                     datasource=mock_datasource,
                     safety_config={
                         "require_approval": True,
-                        "allow_destructive": False
-                    }
+                        "allow_destructive": False,
+                    },
                 )
                 return agent
 
@@ -123,15 +133,15 @@ class TestSqlApprovalDemo:
         """
 
         # Step 1: User asks a question
-        user_question = "Show me the most recent active users with their email addresses"
+        user_question = (
+            "Show me the most recent active users with their email addresses"
+        )
 
         # Step 2: Create mock workflow
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Step 3: Initial invocation (should trigger interrupt)
-        initial_input = {
-            "messages": [HumanMessage(content=user_question)]
-        }
+        initial_input = {"messages": [HumanMessage(content=user_question)]}
 
         result = workflow.invoke(initial_input)
 
@@ -151,14 +161,17 @@ class TestSqlApprovalDemo:
             status=QueryStatus.SUCCESS,
             data=[
                 {"id": 1, "name": "John Doe", "email": "john@example.com"},
-                {"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
+                {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
             ],
             row_count=2,
-            column_count=3
+            column_count=3,
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             # Step 6: Resume with approval
             final_result = workflow.invoke(approval_command)
 
@@ -169,7 +182,9 @@ class TestSqlApprovalDemo:
 
             # Verify success message
             messages = final_result.get("messages", [])
-            success_messages = [m for m in messages if "approved and executed successfully" in m.content]
+            success_messages = [
+                m for m in messages if "approved and executed successfully" in m.content
+            ]
             assert len(success_messages) > 0
 
     def test_denial_workflow_demo(self, enhanced_sql_agent):
@@ -178,9 +193,9 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Initial request
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Delete all inactive users")]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content="Delete all inactive users")]}
+        )
 
         assert result["interrupted"] is True
 
@@ -201,9 +216,9 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Initial request
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Show all user data")]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content="Show all user data")]}
+        )
 
         assert result["interrupted"] is True
         result["interrupt_data"]["sql_query"]
@@ -218,11 +233,14 @@ class TestSqlApprovalDemo:
             status=QueryStatus.SUCCESS,
             data=[{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}],
             row_count=2,
-            column_count=2
+            column_count=2,
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             final_result = workflow.invoke(edit_command)
 
             # Verify the SQL was updated
@@ -243,9 +261,9 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Initial request
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Get user statistics")]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content="Get user statistics")]}
+        )
 
         assert result["interrupted"] is True
 
@@ -261,9 +279,7 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Initial request
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Show user data")]
-        })
+        result = workflow.invoke({"messages": [HumanMessage(content="Show user data")]})
 
         assert result["interrupted"] is True
 
@@ -276,16 +292,22 @@ class TestSqlApprovalDemo:
             status=QueryStatus.ERROR,
             error_message="Table 'users' does not exist",
             query="SELECT * FROM users",
-            data={'raw_exception': Exception("Table not found")}
+            data={"raw_exception": Exception("Table not found")},
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             final_result = workflow.invoke(approval_command)
 
             # Verify error was handled properly
             assert "error_info" in final_result
-            assert "Table 'users' does not exist" in final_result["error_info"]["error_message"]
+            assert (
+                "Table 'users' does not exist"
+                in final_result["error_info"]["error_message"]
+            )
             assert "sql_query_result" in final_result["error_info"]
 
     def test_multiple_approval_rounds_demo(self, enhanced_sql_agent):
@@ -298,9 +320,9 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Round 1: Initial request
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Show all user information")]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content="Show all user information")]}
+        )
 
         assert result["interrupted"] is True
         result["interrupt_data"]["sql_query"]
@@ -316,11 +338,14 @@ class TestSqlApprovalDemo:
             status=QueryStatus.SUCCESS,
             data=[{"id": 1, "name": "John", "email": "john@test.com"}],
             row_count=1,
-            column_count=3
+            column_count=3,
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             final_result = workflow.invoke(edit_command_1)
 
             # Verify the first edit was applied and executed
@@ -337,11 +362,13 @@ class TestSqlApprovalDemo:
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
         # Business user request
-        business_question = "I need to see our top 20 customers by total order value this quarter"
+        business_question = (
+            "I need to see our top 20 customers by total order value this quarter"
+        )
 
-        result = workflow.invoke({
-            "messages": [HumanMessage(content=business_question)]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content=business_question)]}
+        )
 
         assert result["interrupted"] is True
 
@@ -356,16 +383,31 @@ class TestSqlApprovalDemo:
         mock_result = SqlQueryResult(
             status=QueryStatus.SUCCESS,
             data=[
-                {"customer_id": 101, "customer_name": "ACME Corp", "total_value": 45000.00},
-                {"customer_id": 102, "customer_name": "TechStart Inc", "total_value": 38500.00},
-                {"customer_id": 103, "customer_name": "Global Systems", "total_value": 32000.00}
+                {
+                    "customer_id": 101,
+                    "customer_name": "ACME Corp",
+                    "total_value": 45000.00,
+                },
+                {
+                    "customer_id": 102,
+                    "customer_name": "TechStart Inc",
+                    "total_value": 38500.00,
+                },
+                {
+                    "customer_id": 103,
+                    "customer_name": "Global Systems",
+                    "total_value": 32000.00,
+                },
             ],
             row_count=3,
-            column_count=3
+            column_count=3,
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             final_result = workflow.invoke(approval_command)
 
             # Verify business data was returned
@@ -384,9 +426,9 @@ class TestPerformanceAndLoad:
 
         workflow = MockGraphInterruptWorkflow(enhanced_sql_agent)
 
-        result = workflow.invoke({
-            "messages": [HumanMessage(content="Get all transactions for analysis")]
-        })
+        result = workflow.invoke(
+            {"messages": [HumanMessage(content="Get all transactions for analysis")]}
+        )
 
         assert result["interrupted"] is True
 
@@ -394,16 +436,21 @@ class TestPerformanceAndLoad:
 
         # Mock large result set
         mock_tool = Mock()
-        large_dataset = [{"transaction_id": i, "amount": i * 10.5} for i in range(10000)]
+        large_dataset = [
+            {"transaction_id": i, "amount": i * 10.5} for i in range(10000)
+        ]
         mock_result = SqlQueryResult(
             status=QueryStatus.SUCCESS,
             data=large_dataset,
             row_count=10000,
-            column_count=2
+            column_count=2,
         )
         mock_tool._run.return_value = mock_result
 
-        with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
+        with patch(
+            "ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool",
+            return_value=mock_tool,
+        ):
             final_result = workflow.invoke(approval_command)
 
             # Should handle large datasets without issues
@@ -420,9 +467,7 @@ class TestPerformanceAndLoad:
         # Simulate concurrent requests
         results = []
         for i, workflow in enumerate(workflows):
-            result = workflow.invoke({
-                "messages": [HumanMessage(content=f"Query {i}")]
-            })
+            result = workflow.invoke({"messages": [HumanMessage(content=f"Query {i}")]})
             results.append(result)
 
         # All should interrupt independently

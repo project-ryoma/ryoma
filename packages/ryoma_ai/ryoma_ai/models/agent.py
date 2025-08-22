@@ -1,7 +1,6 @@
-from enum import Enum
-
-from typing import Dict, List, Any
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Dict, List
 
 
 class AgentType(Enum):
@@ -22,6 +21,7 @@ class SqlAgentMode(Enum):
 @dataclass
 class ColumnExplorationResult:
     """Result from column exploration phase."""
+
     exploration_queries: List[str]
     exploration_results: List[str]
     relevant_columns: List[str]
@@ -31,6 +31,7 @@ class ColumnExplorationResult:
 @dataclass
 class FormatRestriction:
     """Expected answer format restriction."""
+
     format_description: str
     column_names: List[str]
     data_types: List[str]

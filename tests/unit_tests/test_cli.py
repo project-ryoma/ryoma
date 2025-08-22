@@ -3,8 +3,8 @@
 Quick test script for the Ryoma SQL CLI in development mode.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add the ryoma_ai package to Python path
@@ -18,5 +18,5 @@ if __name__ == "__main__":
     # You can modify sys.argv to test different arguments
     # sys.argv = ["test_cli.py", "--setup"]  # Test setup mode
     # sys.argv = ["test_cli.py", "--help"]   # Test help
-    
+
     main()

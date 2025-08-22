@@ -14,6 +14,7 @@ from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
+
 # from ryoma_ai.prompt import prompt_manager, PromptType  # Available for future use
 from ryoma_ai.prompt.prompt_template import PromptTemplateFactory
 from ryoma_ai.vector_store.base import VectorStore
@@ -47,7 +48,10 @@ class ChatAgent(BaseAgent):
         logging.info(f"Initializing Agent with model: {model}")
 
         super().__init__(
-            datasource=datasource, embedding=embedding, vector_store=vector_store, **kwargs
+            datasource=datasource,
+            embedding=embedding,
+            vector_store=vector_store,
+            **kwargs,
         )
 
         # configs
@@ -75,7 +79,7 @@ class ChatAgent(BaseAgent):
         )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.output_parser = output_parser
-        
+
         # chain (lazy initialization)
         self._chain = None
 
@@ -132,7 +136,7 @@ class ChatAgent(BaseAgent):
         if display:
             print("\n", end="", flush=True)  # Start with newline for clean display
             for event in events:
-                if hasattr(event, 'content') and event.content:
+                if hasattr(event, "content") and event.content:
                     print(event.content, end="", flush=True)
             print()  # Add final newline after streaming completes
         if self.output_parser:

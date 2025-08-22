@@ -2,23 +2,21 @@
 Data source store using LangChain BaseStore for persistence and management.
 """
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-from uuid import uuid4
 import json
 import logging
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from uuid import uuid4
 
-from langchain_core.stores import BaseStore
-from langchain_core.stores import InMemoryStore
-
+from langchain_core.stores import BaseStore, InMemoryStore
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.factory import DataSourceFactory
-from ryoma_ai.store.exceptions import (
-    DataSourceNotFoundError,
-    DataSourceConnectionError,
-    StoreException
-)
 from ryoma_ai.models.datasource import DataSourceRegistration
+from ryoma_ai.store.exceptions import (
+    DataSourceConnectionError,
+    DataSourceNotFoundError,
+    StoreException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +29,7 @@ class DataSourceStore:
     with persistent storage and caching capabilities.
     """
 
-    def __init__(self,
-                 store: Optional[BaseStore[str, str]] = None):
+    def __init__(self, store: Optional[BaseStore[str, str]] = None):
         """
         Initialize the data source store.
 
@@ -54,15 +51,17 @@ class DataSourceStore:
             all_keys = []
             try:
                 # Some stores support listing keys, others don't
-                if hasattr(self.store, 'yield_keys'):
+                if hasattr(self.store, "yield_keys"):
                     all_keys = list(self.store.yield_keys())
-                elif hasattr(self.store, 'keys'):
+                elif hasattr(self.store, "keys"):
                     all_keys = list(self.store.keys())
             except Exception:
                 # Store doesn't support key listing, we'll populate cache as needed
                 pass
 
-            datasource_keys = [key for key in all_keys if key.startswith(self._key_prefix)]
+            datasource_keys = [
+                key for key in all_keys if key.startswith(self._key_prefix)
+            ]
 
             for key in datasource_keys:
                 try:
@@ -85,7 +84,7 @@ class DataSourceStore:
         config: Dict[str, Any],
         description: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        data_source_id: Optional[str] = None
+        data_source_id: Optional[str] = None,
     ) -> str:
         """
         Register a new data source in the store.
@@ -110,15 +109,15 @@ class DataSourceStore:
 
         # Test connection before registering
         try:
-            test_datasource = DataSourceFactory.create_datasource(datasource_type, **config)
+            test_datasource = DataSourceFactory.create_datasource(
+                datasource_type, **config
+            )
             # Simple connection test
             test_datasource.get_catalog()
             logger.info(f"Connection test successful for data source: {name}")
         except Exception as e:
             raise DataSourceConnectionError(
-                data_source_id,
-                f"Connection test failed: {str(e)}",
-                e
+                data_source_id, f"Connection test failed: {str(e)}", e
             )
 
         # Create registration
@@ -131,7 +130,7 @@ class DataSourceStore:
             updated_at=datetime.now(),
             is_active=True,
             description=description,
-            tags=tags or []
+            tags=tags or [],
         )
 
         # Store in persistent store
@@ -149,8 +148,7 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to register data source '{name}'", e)
 
-    def get_data_source(self,
-                        data_source_id: str) -> DataSource:
+    def get_data_source(self, data_source_id: str) -> DataSource:
         """
         Get a data source instance by ID.
 
@@ -173,8 +171,7 @@ class DataSourceStore:
         # Create data source instance
         try:
             datasource = DataSourceFactory.create_datasource(
-                registration.type,
-                **registration.config
+                registration.type, **registration.config
             )
 
             # Cache the instance
@@ -183,13 +180,10 @@ class DataSourceStore:
 
         except Exception as e:
             raise DataSourceConnectionError(
-                data_source_id,
-                f"Failed to create data source instance: {str(e)}",
-                e
+                data_source_id, f"Failed to create data source instance: {str(e)}", e
             )
 
-    def get_registration(self,
-                         data_source_id: str) -> DataSourceRegistration:
+    def get_registration(self, data_source_id: str) -> DataSourceRegistration:
         """
         Get data source registration information.
 
@@ -229,7 +223,7 @@ class DataSourceStore:
         self,
         active_only: bool = True,
         datasource_type: Optional[str] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> List[DataSourceRegistration]:
         """
         List all registered data sources.
@@ -253,7 +247,8 @@ class DataSourceStore:
 
         if tags:
             registrations = [
-                r for r in registrations
+                r
+                for r in registrations
                 if r.tags and all(tag in r.tags for tag in tags)
             ]
 
@@ -266,7 +261,7 @@ class DataSourceStore:
         config: Optional[Dict[str, Any]] = None,
         description: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        is_active: Optional[bool] = None
+        is_active: Optional[bool] = None,
     ) -> None:
         """
         Update data source registration.
@@ -289,13 +284,13 @@ class DataSourceStore:
         # Test new config if provided
         if config:
             try:
-                test_datasource = DataSourceFactory.create_datasource(registration.type, **config)
+                test_datasource = DataSourceFactory.create_datasource(
+                    registration.type, **config
+                )
                 test_datasource.get_catalog()
             except Exception as e:
                 raise DataSourceConnectionError(
-                    data_source_id,
-                    f"New configuration test failed: {str(e)}",
-                    e
+                    data_source_id, f"New configuration test failed: {str(e)}", e
                 )
 
         # Update fields
@@ -330,8 +325,7 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to update data source '{data_source_id}'", e)
 
-    def remove_data_source(self,
-                           data_source_id: str) -> None:
+    def remove_data_source(self, data_source_id: str) -> None:
         """
         Remove a data source from the store.
 
@@ -359,8 +353,7 @@ class DataSourceStore:
         except Exception as e:
             raise StoreException(f"Failed to remove data source '{data_source_id}'", e)
 
-    def test_connection(self,
-                        data_source_id: str) -> bool:
+    def test_connection(self, data_source_id: str) -> bool:
         """
         Test connection to a data source.
 

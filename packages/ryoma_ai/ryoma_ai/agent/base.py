@@ -2,7 +2,6 @@ from typing import Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
 from langgraph.store.memory import InMemoryStore
-
 from ryoma_ai.agent.resource_registry import ResourceRegistry
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Schema, Table
@@ -210,4 +209,3 @@ class BaseAgent:
                         filtered_table.columns.append(column)
 
         return filtered_catalog
-

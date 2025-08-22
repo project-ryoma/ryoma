@@ -1,12 +1,12 @@
 from typing import Optional
+
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
 from ryoma_ai.vector_store.config import VectorStoreConfig
 
 
 def create_vector_store(
-    config: VectorStoreConfig,
-    embedding_function: Optional[Embeddings] = None
+    config: VectorStoreConfig, embedding_function: Optional[Embeddings] = None
 ) -> VectorStore:
     """
     Create a LangChain vector store based on config type.
@@ -22,7 +22,9 @@ def create_vector_store(
 
         return Chroma(
             collection_name=config.collection_name,
-            persist_directory=config.extra_configs.get("persist_directory", "./chroma_db"),
+            persist_directory=config.extra_configs.get(
+                "persist_directory", "./chroma_db"
+            ),
             embedding_function=embedding_function,
         )
 
@@ -44,7 +46,7 @@ def create_vector_store(
             embedding_function=embedding_function,
             index=index,
             docstore=config.extra_configs.get("docstore", {}),
-            index_to_docstore_id=config.extra_configs.get("index_to_docstore_id", {})
+            index_to_docstore_id=config.extra_configs.get("index_to_docstore_id", {}),
         )
 
     elif store_type == "qdrant":
@@ -52,7 +54,9 @@ def create_vector_store(
             from langchain_community.vectorstores import Qdrant
             from qdrant_client import QdrantClient
         except ImportError:
-            raise ImportError("Qdrant support requires: pip install langchain-qdrant qdrant-client")
+            raise ImportError(
+                "Qdrant support requires: pip install langchain-qdrant qdrant-client"
+            )
 
         qdrant_config = config.extra_configs
         client = QdrantClient(
@@ -90,7 +94,9 @@ def create_vector_store(
         try:
             from langchain_postgres import PGVector
         except ImportError:
-            raise ImportError("PGVector support requires: pip install langchain-postgres")
+            raise ImportError(
+                "PGVector support requires: pip install langchain-postgres"
+            )
 
         pgvector_config = config.extra_configs
         connection_string = pgvector_config.get(
@@ -99,7 +105,7 @@ def create_vector_store(
             f"{pgvector_config.get('password', 'password')}@"
             f"{pgvector_config.get('host', 'localhost')}:"
             f"{pgvector_config.get('port', 5432)}/"
-            f"{pgvector_config.get('database', 'postgres')}"
+            f"{pgvector_config.get('database', 'postgres')}",
         )
 
         return PGVector(

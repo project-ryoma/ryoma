@@ -41,9 +41,7 @@ def render_catalog_list():
                                 lambda schema: rc.accordion_item(
                                     rc.accordion_button(
                                         rc.accordion_icon(),
-                                        rc.text(
-                                            schema.schema_name, font_size="md"
-                                        ),
+                                        rc.text(schema.schema_name, font_size="md"),
                                     ),
                                     rc.accordion_panel(
                                         rc.accordion(

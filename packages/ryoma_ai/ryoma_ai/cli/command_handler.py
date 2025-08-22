@@ -24,10 +24,10 @@ class CommandHandler:
     def __init__(
         self,
         console: Console,
-        config_manager: 'ConfigManager',
-        datasource_manager: 'DataSourceManager',
-        agent_manager: 'AgentManager',
-        display_manager: 'DisplayManager'
+        config_manager: "ConfigManager",
+        datasource_manager: "DataSourceManager",
+        agent_manager: "AgentManager",
+        display_manager: "DisplayManager",
     ):
         """
         Initialize the command handler.
@@ -56,7 +56,7 @@ class CommandHandler:
         Returns:
             bool: True if command was handled, False if not a command
         """
-        if not input_text.startswith('/'):
+        if not input_text.startswith("/"):
             return False
 
         parts = input_text[1:].split(None, 1)
@@ -64,58 +64,58 @@ class CommandHandler:
         args = parts[1] if len(parts) > 1 else ""
 
         # Basic commands
-        if command in ['help', 'h']:
+        if command in ["help", "h"]:
             self.display_manager.show_help()
 
-        elif command in ['quit', 'exit', 'q']:
+        elif command in ["quit", "exit", "q"]:
             self.console.print("[yellow]Goodbye! 👋[/yellow]")
             sys.exit(0)
 
-        elif command == 'config':
+        elif command == "config":
             self.display_manager.show_config(self.config_manager.config)
 
-        elif command == 'setup':
+        elif command == "setup":
             self.interactive_setup()
 
         # Model and mode commands
-        elif command == 'mode':
+        elif command == "mode":
             self._handle_mode_command(args)
 
-        elif command == 'model':
+        elif command == "model":
             self._handle_model_command(args)
 
         # Schema and agent commands
-        elif command == 'schema':
+        elif command == "schema":
             self.display_manager.show_schema(self.datasource_manager.current_datasource)
 
-        elif command == 'agents':
+        elif command == "agents":
             self.agent_interface.show_agents()
 
-        elif command == 'stats':
+        elif command == "stats":
             self.agent_interface.show_stats()
 
         # Data source management commands
-        elif command == 'datasources':
+        elif command == "datasources":
             self.datasource_manager.show_datasources()
 
-        elif command == 'add-datasource':
+        elif command == "add-datasource":
             self.datasource_manager.add_datasource_interactive()
 
-        elif command == 'switch-datasource':
+        elif command == "switch-datasource":
             self._handle_switch_datasource_command(args)
 
         # Catalog management commands
-        elif command == 'index-catalog':
+        elif command == "index-catalog":
             self._handle_index_catalog_command(args)
 
-        elif command == 'search-catalog':
+        elif command == "search-catalog":
             self._handle_search_catalog_command(args)
 
         # Agent configuration commands
-        elif command == 'agent-config':
+        elif command == "agent-config":
             self._handle_agent_config_command(args)
 
-        elif command == 'auto-approve':
+        elif command == "auto-approve":
             self._handle_auto_approve_command(args)
 
         else:
@@ -143,7 +143,7 @@ class CommandHandler:
             # Reinitialize agent manager with new data source
             if self.agent_interface.setup_agent_manager(
                 config=self.config_manager.config,
-                datasource=self.datasource_manager.current_datasource
+                datasource=self.datasource_manager.current_datasource,
             ):
                 self.display_manager.show_success("✅ Database setup successful!")
             else:
@@ -159,7 +159,7 @@ class CommandHandler:
                 # Reinitialize agent manager
                 self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
-                    datasource=self.datasource_manager.current_datasource
+                    datasource=self.datasource_manager.current_datasource,
                 )
         else:
             current_mode = self.config_manager.get_config("mode", "enhanced")
@@ -173,7 +173,7 @@ class CommandHandler:
                 # Reinitialize agent manager
                 self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
-                    datasource=self.datasource_manager.current_datasource
+                    datasource=self.datasource_manager.current_datasource,
                 )
         else:
             current_model = self.config_manager.get_config("model", "gpt-4o")
@@ -186,7 +186,7 @@ class CommandHandler:
                 # Reinitialize agent manager with new data source
                 self.agent_interface.setup_agent_manager(
                     config=self.config_manager.config,
-                    datasource=self.datasource_manager.current_datasource
+                    datasource=self.datasource_manager.current_datasource,
                 )
         else:
             self.datasource_manager.show_datasource_selection()
@@ -196,27 +196,34 @@ class CommandHandler:
         if args:
             parts = args.split()
             if len(parts) < 1:
-                self.display_manager.show_error("Usage: /index-catalog <datasource_id> [level]")
+                self.display_manager.show_error(
+                    "Usage: /index-catalog <datasource_id> [level]"
+                )
                 return
 
             datasource_id = parts[0]
             level = parts[1] if len(parts) > 1 else "table"
 
             try:
-                datasource = self.datasource_manager.datasource_store.get_data_source(datasource_id)
+                datasource = self.datasource_manager.datasource_store.get_data_source(
+                    datasource_id
+                )
                 self.catalog_manager.index_catalog(datasource_id, datasource, level)
             except Exception as e:
                 self.display_manager.show_error(f"Failed to index catalog: {e}")
         else:
             # Index current catalog
-            if not self.datasource_manager.current_datasource_id or not self.datasource_manager.current_datasource:
+            if (
+                not self.datasource_manager.current_datasource_id
+                or not self.datasource_manager.current_datasource
+            ):
                 self.display_manager.show_error("No current data source selected")
                 return
 
             self.catalog_manager.index_catalog(
                 self.datasource_manager.current_datasource_id,
                 self.datasource_manager.current_datasource,
-                "table"
+                "table",
             )
 
     def _handle_search_catalog_command(self, args: str) -> None:
@@ -235,14 +242,14 @@ class CommandHandler:
             agent_config = self.config_manager.get_config("agent", {})
             if agent_config:
                 from rich.table import Table
-                
+
                 config_table = Table(title="🤖 Agent Configuration")
                 config_table.add_column("Setting", style="cyan")
                 config_table.add_column("Value", style="green")
-                
+
                 for key, value in agent_config.items():
                     config_table.add_row(key, str(value))
-                
+
                 self.console.print(config_table)
             else:
                 self.console.print("[yellow]No agent configuration found[/yellow]")
@@ -252,7 +259,9 @@ class CommandHandler:
         parts = args.split(None, 1)
         if len(parts) < 2:
             self.display_manager.show_error("Usage: /agent-config <setting> <value>")
-            self.console.print("Available settings: auto_approve_all, retry_count, timeout_seconds")
+            self.console.print(
+                "Available settings: auto_approve_all, retry_count, timeout_seconds"
+            )
             return
 
         setting = parts[0]
@@ -260,26 +269,30 @@ class CommandHandler:
 
         # Convert value to appropriate type
         if setting == "auto_approve_all":
-            value = value_str.lower() in ['true', '1', 'yes', 'on', 'enable']
+            value = value_str.lower() in ["true", "1", "yes", "on", "enable"]
         elif setting in ["retry_count", "timeout_seconds"]:
             try:
                 value = int(value_str)
             except ValueError:
-                self.display_manager.show_error(f"'{setting}' requires an integer value")
+                self.display_manager.show_error(
+                    f"'{setting}' requires an integer value"
+                )
                 return
         else:
             self.display_manager.show_error(f"Unknown agent setting: {setting}")
-            self.console.print("Available settings: auto_approve_all, retry_count, timeout_seconds")
+            self.console.print(
+                "Available settings: auto_approve_all, retry_count, timeout_seconds"
+            )
             return
 
         # Update the configuration
         self.config_manager.update_config(f"agent.{setting}", value)
-        
+
         # Reinitialize agent manager with new config
         if self.datasource_manager.current_datasource:
             self.agent_interface.setup_agent_manager(
                 config=self.config_manager.config,
-                datasource=self.datasource_manager.current_datasource
+                datasource=self.datasource_manager.current_datasource,
             )
 
         self.console.print(f"[green]✅ Updated agent.{setting} = {value}[/green]")
@@ -287,21 +300,21 @@ class CommandHandler:
     def _handle_auto_approve_command(self, args: str) -> None:
         """Handle auto-approve toggle command."""
         current_value = self.config_manager.get_config("agent.auto_approve_all", False)
-        
+
         if args:
             # Set specific value
-            new_value = args.lower() in ['true', '1', 'yes', 'on', 'enable']
+            new_value = args.lower() in ["true", "1", "yes", "on", "enable"]
         else:
             # Toggle current value
             new_value = not current_value
 
         self.config_manager.update_config("agent.auto_approve_all", new_value)
-        
+
         # Reinitialize agent manager with new config
         if self.datasource_manager.current_datasource:
             self.agent_interface.setup_agent_manager(
                 config=self.config_manager.config,
-                datasource=self.datasource_manager.current_datasource
+                datasource=self.datasource_manager.current_datasource,
             )
 
         status = "enabled" if new_value else "disabled"

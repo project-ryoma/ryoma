@@ -4,13 +4,13 @@ Ryoma AI CLI Module
 Modular, object-oriented CLI implementation for the Ryoma AI multi-agent system.
 """
 
-from .app import RyomaAI, main
-from .config_manager import ConfigManager
-from .datasource_manager import DataSourceManager
 from .agent_manager import AgentManager
-from .display_manager import DisplayManager
+from .app import RyomaAI, main
 from .catalog_manager import CatalogManager
 from .command_handler import CommandHandler
+from .config_manager import ConfigManager
+from .datasource_manager import DataSourceManager
+from .display_manager import DisplayManager
 
 __all__ = [
     "RyomaAI",
@@ -20,5 +20,5 @@ __all__ = [
     "AgentManager",
     "DisplayManager",
     "CatalogManager",
-    "CommandHandler"
+    "CommandHandler",
 ]

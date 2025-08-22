@@ -5,13 +5,13 @@ Handles all display and UI formatting logic.
 """
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
 from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.syntax import Syntax
 from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.table import Table
 
 
 class DisplayManager:
@@ -41,7 +41,7 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
         info_table = Table(show_header=False, box=None)
         info_table.add_row("Model:", config.get("model", "gpt-4o"))
         info_table.add_row("Mode:", config.get("mode", "enhanced"))
-        
+
         # Show agent configuration
         agent_config = config.get("agent", {})
         auto_approve = agent_config.get("auto_approve_all", False)
@@ -107,7 +107,9 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
 - Type **approve** to execute, **deny** to reject
         """
 
-        self.console.print(Panel(Markdown(help_text), title="Ryoma Multi-Agent Help", style="green"))
+        self.console.print(
+            Panel(Markdown(help_text), title="Ryoma Multi-Agent Help", style="green")
+        )
 
     def show_config(self, config: Dict[str, Any]) -> None:
         """
@@ -140,7 +142,9 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
                 schema_table.add_column("Columns", style="green")
 
                 for table in schema.tables:
-                    columns = ", ".join([f"{col.name}({col.type})" for col in table.columns[:5]])
+                    columns = ", ".join(
+                        [f"{col.name}({col.type})" for col in table.columns[:5]]
+                    )
                     if len(table.columns) > 5:
                         columns += f" ... (+{len(table.columns) - 5} more)"
                     schema_table.add_row(table.table_name, columns)
@@ -168,11 +172,15 @@ Natural Language ➜ Intelligent Agent Routing ➜ Results
         search_table.add_column("Content", style="white")
 
         for result in results:
-            metadata = result['metadata']
-            content = result['content'][:100] + "..." if len(result['content']) > 100 else result['content']
+            metadata = result["metadata"]
+            content = (
+                result["content"][:100] + "..."
+                if len(result["content"]) > 100
+                else result["content"]
+            )
             score = f"{result['score']:.3f}"
 
-            search_table.add_row(score, metadata.get('type', 'unknown'), content)
+            search_table.add_row(score, metadata.get("type", "unknown"), content)
 
         self.console.print(search_table)
 

@@ -1,21 +1,24 @@
 import logging
 from enum import Enum
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 from IPython.display import Image, display
 from langchain.tools.render import render_text_description
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, ToolCall, ToolMessage
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+    PromptTemplate,
+)
 from langchain_core.runnables import RunnableConfig, RunnableLambda
-from langgraph.types import Command, StateSnapshot
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.types import Command, StateSnapshot
 from pydantic import BaseModel
-
 from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.models.agent import AgentType
@@ -107,7 +110,9 @@ class WorkflowAgent(ChatAgent):
 
     def _build_workflow(self, graph: StateGraph) -> CompiledStateGraph:
         if graph:
-            return graph.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
+            return graph.compile(
+                checkpointer=self.memory, interrupt_before=["tools"], store=self.store
+            )
         workflow = StateGraph(MessageState)
 
         workflow.add_node("agent", self.call_model)
@@ -120,7 +125,9 @@ class WorkflowAgent(ChatAgent):
 
         workflow.set_entry_point("agent")
         workflow.add_edge("tools", "agent")
-        return workflow.compile(checkpointer=self.memory, interrupt_before=["tools"], store=self.store)
+        return workflow.compile(
+            checkpointer=self.memory, interrupt_before=["tools"], store=self.store
+        )
 
     @property
     def workflow(self) -> CompiledStateGraph:
@@ -136,7 +143,7 @@ class WorkflowAgent(ChatAgent):
     def get_graph(self):
         """Get the workflow graph. Returns the graph structure for visualization."""
         workflow = self.workflow
-        if hasattr(workflow, 'get_graph'):
+        if hasattr(workflow, "get_graph"):
             # CompiledStateGraph has get_graph method that can take config
             try:
                 return workflow.get_graph(self.config)
@@ -145,8 +152,10 @@ class WorkflowAgent(ChatAgent):
                 return workflow.get_graph()
         else:
             # If it's a StateGraph, it should have been compiled already
-            raise AttributeError(f"Workflow object {type(workflow)} does not have get_graph method. "
-                               f"Expected CompiledStateGraph but got {type(workflow)}")
+            raise AttributeError(
+                f"Workflow object {type(workflow)} does not have get_graph method. "
+                f"Expected CompiledStateGraph but got {type(workflow)}"
+            )
 
     def get_current_state(self) -> Optional[StateSnapshot]:
         return self.workflow.get_state(self.config)
@@ -167,7 +176,9 @@ class WorkflowAgent(ChatAgent):
         """
         Rebuilds the workflow with the provided graph.
         """
-        logging.warning("Rebuilding workflow with provided graph. This will reset the current state.")
+        logging.warning(
+            "Rebuilding workflow with provided graph. This will reset the current state."
+        )
         self._workflow = self._build_workflow(graph)
         return self
 
@@ -186,9 +197,7 @@ class WorkflowAgent(ChatAgent):
                 ]
             }
         else:
-            return {
-                "messages": [HumanMessage(content=question)]
-            }
+            return {"messages": [HumanMessage(content=question)]}
 
     def stream(
         self,
@@ -332,7 +341,7 @@ class WorkflowAgent(ChatAgent):
             if messages:
                 for message in messages:
                     # Check if message has id attribute (is a proper message object)
-                    if hasattr(message, 'id') and message.id not in printed:
+                    if hasattr(message, "id") and message.id not in printed:
                         msg_repr = message.pretty_repr(html=True)
                         if len(msg_repr) > max_length:
                             msg_repr = msg_repr[:max_length] + " ... (truncated)"

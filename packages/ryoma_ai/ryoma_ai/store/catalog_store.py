@@ -2,23 +2,22 @@
 Catalog store using LangChain stores and vector stores for indexing and search.
 """
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import json
 import logging
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from langchain_core.embeddings import Embeddings
 from langchain_core.stores import BaseStore, InMemoryStore
 from langchain_core.vectorstores import VectorStore
-from langchain_core.embeddings import Embeddings
-
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Schema, Table, Column
-from ryoma_ai.store.exceptions import (
-    CatalogNotFoundError,
-    CatalogIndexError,
-    StoreException
-)
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.models.catalog import CatalogIndex
+from ryoma_ai.store.exceptions import (
+    CatalogIndexError,
+    CatalogNotFoundError,
+    StoreException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class CatalogStore:
         self,
         metadata_store: Optional[BaseStore[str, str]] = None,
         vector_store: Optional[VectorStore] = None,
-        embedding_function: Optional[Embeddings] = None
+        embedding_function: Optional[Embeddings] = None,
     ):
         """
         Initialize the catalog store.
@@ -62,14 +61,16 @@ class CatalogStore:
         try:
             all_keys = []
             try:
-                if hasattr(self.metadata_store, 'yield_keys'):
+                if hasattr(self.metadata_store, "yield_keys"):
                     all_keys = list(self.metadata_store.yield_keys())
-                elif hasattr(self.metadata_store, 'keys'):
+                elif hasattr(self.metadata_store, "keys"):
                     all_keys = list(self.metadata_store.keys())
             except Exception:
                 pass
 
-            index_keys = [key for key in all_keys if key.startswith(self._metadata_prefix)]
+            index_keys = [
+                key for key in all_keys if key.startswith(self._metadata_prefix)
+            ]
 
             for key in index_keys:
                 try:
@@ -90,7 +91,7 @@ class CatalogStore:
         data_source_id: str,
         datasource: DataSource,
         index_level: str = "table",
-        catalog_id: Optional[str] = None
+        catalog_id: Optional[str] = None,
     ) -> str:
         """
         Index a data source catalog for search and retrieval.
@@ -141,7 +142,7 @@ class CatalogStore:
                 schema_count=schema_count,
                 table_count=table_count,
                 column_count=column_count,
-                index_level=index_level
+                index_level=index_level,
             )
 
             index_key = f"{self._metadata_prefix}{catalog_id}"
@@ -158,10 +159,7 @@ class CatalogStore:
             raise CatalogIndexError("index", catalog_id or "unknown", e)
 
     def _index_catalog_vectors(
-        self,
-        catalog: Catalog,
-        catalog_id: str,
-        level: str
+        self, catalog: Catalog, catalog_id: str, level: str
     ) -> None:
         """Index catalog in vector store for semantic search."""
         documents = []
@@ -171,11 +169,13 @@ class CatalogStore:
         if level == "catalog":
             doc = f"Catalog: {catalog.catalog_name}\nSchemas: {len(catalog.schemas)}"
             documents.append(doc)
-            metadatas.append({
-                "catalog_id": catalog_id,
-                "type": "catalog",
-                "name": catalog.catalog_name
-            })
+            metadatas.append(
+                {
+                    "catalog_id": catalog_id,
+                    "type": "catalog",
+                    "name": catalog.catalog_name,
+                }
+            )
             ids.append(f"{catalog_id}_catalog")
 
         elif level in ["schema", "table", "column"]:
@@ -183,61 +183,69 @@ class CatalogStore:
                 if level == "schema":
                     doc = f"Schema: {schema.schema_name}\nTables: {len(schema.tables)}"
                     documents.append(doc)
-                    metadatas.append({
-                        "catalog_id": catalog_id,
-                        "type": "schema",
-                        "name": schema.schema_name,
-                        "schema": schema.schema_name
-                    })
+                    metadatas.append(
+                        {
+                            "catalog_id": catalog_id,
+                            "type": "schema",
+                            "name": schema.schema_name,
+                            "schema": schema.schema_name,
+                        }
+                    )
                     ids.append(f"{catalog_id}_schema_{schema.schema_name}")
 
                 elif level in ["table", "column"]:
                     for table in schema.tables:
                         if level == "table":
-                            columns_desc = ", ".join([f"{col.name}({col.type})" for col in table.columns[:5]])
+                            columns_desc = ", ".join(
+                                [f"{col.name}({col.type})" for col in table.columns[:5]]
+                            )
                             if len(table.columns) > 5:
                                 columns_desc += f" ... (+{len(table.columns) - 5} more)"
 
                             doc = f"Table: {schema.schema_name}.{table.table_name}\nColumns: {columns_desc}"
                             documents.append(doc)
-                            metadatas.append({
-                                "catalog_id": catalog_id,
-                                "type": "table",
-                                "name": table.table_name,
-                                "schema": schema.schema_name,
-                                "table": table.table_name
-                            })
-                            ids.append(f"{catalog_id}_table_{schema.schema_name}_{table.table_name}")
+                            metadatas.append(
+                                {
+                                    "catalog_id": catalog_id,
+                                    "type": "table",
+                                    "name": table.table_name,
+                                    "schema": schema.schema_name,
+                                    "table": table.table_name,
+                                }
+                            )
+                            ids.append(
+                                f"{catalog_id}_table_{schema.schema_name}_{table.table_name}"
+                            )
 
                         elif level == "column":
                             for column in table.columns:
                                 doc = f"Column: {schema.schema_name}.{table.table_name}.{column.name}\nType: {column.type}\nDescription: {column.description or 'No description'}"
                                 documents.append(doc)
-                                metadatas.append({
-                                    "catalog_id": catalog_id,
-                                    "type": "column",
-                                    "name": column.name,
-                                    "schema": schema.schema_name,
-                                    "table": table.table_name,
-                                    "column": column.name,
-                                    "data_type": column.type
-                                })
-                                ids.append(f"{catalog_id}_column_{schema.schema_name}_{table.table_name}_{column.name}")
+                                metadatas.append(
+                                    {
+                                        "catalog_id": catalog_id,
+                                        "type": "column",
+                                        "name": column.name,
+                                        "schema": schema.schema_name,
+                                        "table": table.table_name,
+                                        "column": column.name,
+                                        "data_type": column.type,
+                                    }
+                                )
+                                ids.append(
+                                    f"{catalog_id}_column_{schema.schema_name}_{table.table_name}_{column.name}"
+                                )
 
         # Add documents to vector store
         if documents:
-            self.vector_store.add_texts(
-                texts=documents,
-                metadatas=metadatas,
-                ids=ids
-            )
+            self.vector_store.add_texts(texts=documents, metadatas=metadatas, ids=ids)
 
     def search_catalogs(
         self,
         query: str,
         top_k: int = 10,
         catalog_ids: Optional[List[str]] = None,
-        element_type: Optional[str] = None  # catalog, schema, table, column
+        element_type: Optional[str] = None,  # catalog, schema, table, column
     ) -> List[Dict[str, Any]]:
         """
         Search catalogs using semantic similarity.
@@ -267,9 +275,7 @@ class CatalogStore:
 
             # Perform similarity search
             results = self.vector_store.similarity_search_with_score(
-                query,
-                k=top_k,
-                filter=filter_dict if filter_dict else None
+                query, k=top_k, filter=filter_dict if filter_dict else None
             )
 
             # Format results
@@ -278,7 +284,7 @@ class CatalogStore:
                 result = {
                     "content": doc.page_content,
                     "score": score,
-                    "metadata": doc.metadata
+                    "metadata": doc.metadata,
                 }
                 search_results.append(result)
 
@@ -358,8 +364,7 @@ class CatalogStore:
             raise CatalogNotFoundError(catalog_id, cause=e)
 
     def list_catalog_indexes(
-        self,
-        data_source_id: Optional[str] = None
+        self, data_source_id: Optional[str] = None
     ) -> List[CatalogIndex]:
         """
         List all catalog indexes, optionally filtered by data source.
@@ -401,11 +406,11 @@ class CatalogStore:
             if self.vector_store:
                 try:
                     # Delete all vectors for this catalog
-                    self.vector_store.delete(
-                        filter={"catalog_id": catalog_id}
-                    )
+                    self.vector_store.delete(filter={"catalog_id": catalog_id})
                 except Exception as e:
-                    logger.warning(f"Failed to remove vectors for catalog {catalog_id}: {e}")
+                    logger.warning(
+                        f"Failed to remove vectors for catalog {catalog_id}: {e}"
+                    )
 
             # Remove from caches
             self._catalog_cache.pop(catalog_id, None)
@@ -431,16 +436,16 @@ class CatalogStore:
                                     "name": col.name,
                                     "type": col.type,
                                     "nullable": col.nullable,
-                                    "description": col.description
+                                    "description": col.description,
                                 }
                                 for col in table.columns
-                            ]
+                            ],
                         }
                         for table in schema.tables
-                    ]
+                    ],
                 }
                 for schema in catalog.schemas
-            ]
+            ],
         }
 
     def _deserialize_catalog(self, data: Dict[str, Any]) -> Catalog:
@@ -454,23 +459,18 @@ class CatalogStore:
                         name=col_data["name"],
                         type=col_data["type"],
                         nullable=col_data.get("nullable", True),
-                        description=col_data.get("description")
+                        description=col_data.get("description"),
                     )
                     for col_data in table_data["columns"]
                 ]
-                tables.append(Table(
-                    table_name=table_data["table_name"],
-                    columns=columns
-                ))
-            schemas.append(Schema(
-                schema_name=schema_data["schema_name"],
-                tables=tables
-            ))
+                tables.append(
+                    Table(table_name=table_data["table_name"], columns=columns)
+                )
+            schemas.append(
+                Schema(schema_name=schema_data["schema_name"], tables=tables)
+            )
 
-        return Catalog(
-            catalog_name=data["catalog_name"],
-            schemas=schemas
-        )
+        return Catalog(catalog_name=data["catalog_name"], schemas=schemas)
 
     def clear_cache(self) -> None:
         """Clear all cached catalog data."""

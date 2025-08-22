@@ -17,18 +17,21 @@ This implementation leverages Ibis's native profiling capabilities where possibl
 for better performance and backend compatibility.
 """
 
+import logging
 import re
-
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-import logging
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
-from datasketch import MinHashLSH, MinHash
-
+from datasketch import MinHash, MinHashLSH
 from ryoma_ai.datasource.metadata import (
-    ColumnProfile, TableProfile, NumericStats, DateStats, StringStats, LSHSketch
+    ColumnProfile,
+    DateStats,
+    LSHSketch,
+    NumericStats,
+    StringStats,
+    TableProfile,
 )
 
 
@@ -48,7 +51,7 @@ class DatabaseProfiler:
         num_hashes: int = 128,
         enable_lsh: bool = True,
         model: Optional[Any] = None,
-        enable_llm_enhancement: bool = False
+        enable_llm_enhancement: bool = False,
     ):
         """
         Initialize the database profiler.
@@ -79,7 +82,9 @@ class DatabaseProfiler:
         # Cache for LLM-enhanced metadata
         self._llm_cache: Dict[str, Dict[str, Any]] = {}
 
-    def profile_table(self, datasource, table_name: str, schema: Optional[str] = None) -> TableProfile:
+    def profile_table(
+        self, datasource, table_name: str, schema: Optional[str] = None
+    ) -> TableProfile:
         """
         Profile a table using Ibis's native profiling capabilities for optimal performance.
 
@@ -105,26 +110,34 @@ class DatabaseProfiler:
 
             # Use native describe() method for comprehensive statistics
             describe_result = table.describe().to_pandas()
-            self.logger.info(f"Successfully profiled table {table_name} using native methods")
+            self.logger.info(
+                f"Successfully profiled table {table_name} using native methods"
+            )
 
             # Extract table-level metrics from describe result
-            row_count = int(describe_result['count'].iloc[0]) if not describe_result.empty else 0
+            row_count = (
+                int(describe_result["count"].iloc[0])
+                if not describe_result.empty
+                else 0
+            )
             column_count = len(describe_result)
 
             # Calculate completeness from null fractions
-            if 'null_frac' in describe_result.columns:
-                null_fractions = describe_result['null_frac'].fillna(0)
+            if "null_frac" in describe_result.columns:
+                null_fractions = describe_result["null_frac"].fillna(0)
                 completeness_score = float(1.0 - null_fractions.mean())
             else:
                 # Fallback: calculate completeness from count vs non-null count
-                if 'count' in describe_result.columns and row_count > 0:
-                    non_null_counts = describe_result['count'].fillna(0)
+                if "count" in describe_result.columns and row_count > 0:
+                    non_null_counts = describe_result["count"].fillna(0)
                     completeness_score = float(non_null_counts.mean() / row_count)
                 else:
                     completeness_score = 1.0
 
             # Calculate consistency score from describe result
-            consistency_score = self._calculate_consistency_from_describe(describe_result)
+            consistency_score = self._calculate_consistency_from_describe(
+                describe_result
+            )
 
             # Get actual row count
             actual_row_count = int(table.count().to_pandas())
@@ -138,7 +151,7 @@ class DatabaseProfiler:
                 completeness_score=completeness_score,
                 consistency_score=consistency_score,
                 profiled_at=datetime.now(),
-                profiling_duration_seconds=duration
+                profiling_duration_seconds=duration,
             )
 
         except Exception as e:
@@ -151,7 +164,9 @@ class DatabaseProfiler:
                 completeness_score=0.0,
                 consistency_score=0.0,
                 profiled_at=datetime.now(),
-                profiling_duration_seconds=(datetime.now() - start_time).total_seconds()
+                profiling_duration_seconds=(
+                    datetime.now() - start_time
+                ).total_seconds(),
             )
 
     def profile_column(
@@ -159,7 +174,7 @@ class DatabaseProfiler:
         datasource,
         table_name: str,
         column_name: str,
-        schema: Optional[str] = None
+        schema: Optional[str] = None,
     ) -> ColumnProfile:
         """
         Profile a single column using database-native capabilities for optimal performance.
@@ -184,8 +199,12 @@ class DatabaseProfiler:
 
             # Get the specific column
             if column_name not in table.columns:
-                self.logger.warning(f"Column {column_name} not found in table {table_name}")
-                return ColumnProfile(column_name=column_name, profiled_at=datetime.now())
+                self.logger.warning(
+                    f"Column {column_name} not found in table {table_name}"
+                )
+                return ColumnProfile(
+                    column_name=column_name, profiled_at=datetime.now()
+                )
 
             column = table[column_name]
 
@@ -201,7 +220,9 @@ class DatabaseProfiler:
 
                 # Distinct count using native functions
                 distinct_count = int(column.nunique().to_pandas())
-                distinct_ratio = distinct_count / non_null_count if non_null_count > 0 else 0
+                distinct_ratio = (
+                    distinct_count / non_null_count if non_null_count > 0 else 0
+                )
 
                 # Top-k frequent values using native value_counts
                 top_k_values = self._get_top_k_values(column)
@@ -216,11 +237,19 @@ class DatabaseProfiler:
                 if self.enable_lsh:
                     try:
                         # Sample data for LSH computation
-                        sample_data = column.limit(min(1000, self.sample_size)).to_pandas().dropna()
+                        sample_data = (
+                            column.limit(min(1000, self.sample_size))
+                            .to_pandas()
+                            .dropna()
+                        )
                         if len(sample_data) > 0:
-                            lsh_sketch = self._compute_lsh_sketch(sample_data, column_name)
+                            lsh_sketch = self._compute_lsh_sketch(
+                                sample_data, column_name
+                            )
                     except Exception as e:
-                        self.logger.debug(f"LSH computation failed for {column_name}: {e}")
+                        self.logger.debug(
+                            f"LSH computation failed for {column_name}: {e}"
+                        )
 
                 # Semantic type inference
                 semantic_type = self._infer_semantic_type(column, column_name)
@@ -245,11 +274,13 @@ class DatabaseProfiler:
                     semantic_type=semantic_type,
                     data_quality_score=data_quality_score,
                     profiled_at=datetime.now(),
-                    sample_size=min(row_count, self.sample_size)
+                    sample_size=min(row_count, self.sample_size),
                 )
 
             except Exception as e:
-                self.logger.error(f"Native profiling failed for column {column_name}: {e}")
+                self.logger.error(
+                    f"Native profiling failed for column {column_name}: {e}"
+                )
                 # Return minimal profile on error
                 return ColumnProfile(
                     column_name=column_name,
@@ -259,7 +290,7 @@ class DatabaseProfiler:
                     distinct_count=0,
                     distinct_ratio=0.0,
                     profiled_at=datetime.now(),
-                    sample_size=0
+                    sample_size=0,
                 )
 
         except Exception as e:
@@ -273,10 +304,12 @@ class DatabaseProfiler:
                 distinct_count=0,
                 distinct_ratio=0.0,
                 profiled_at=datetime.now(),
-                sample_size=0
+                sample_size=0,
             )
 
-    def _compute_lsh_sketch(self, data: pd.Series, column_name: str) -> Optional[LSHSketch]:
+    def _compute_lsh_sketch(
+        self, data: pd.Series, column_name: str
+    ) -> Optional[LSHSketch]:
         """Compute LSH sketch for similarity matching."""
         try:
             # Create MinHash object
@@ -288,16 +321,16 @@ class DatabaseProfiler:
                 text = str(value).lower()
                 shingles = self._create_shingles(text, k=3)
                 for shingle in shingles:
-                    minhash.update(shingle.encode('utf-8'))
+                    minhash.update(shingle.encode("utf-8"))
 
             # Store in LSH index
-            if hasattr(self, 'lsh_index'):
+            if hasattr(self, "lsh_index"):
                 self.lsh_index.insert(column_name, minhash)
 
             return LSHSketch(
                 hash_values=list(minhash.hashvalues),
                 num_hashes=self.num_hashes,
-                jaccard_threshold=self.lsh_threshold
+                jaccard_threshold=self.lsh_threshold,
             )
         except Exception:
             return None
@@ -306,13 +339,10 @@ class DatabaseProfiler:
         """Create k-shingles from text."""
         if len(text) < k:
             return [text]
-        return [text[i:i+k] for i in range(len(text) - k + 1)]
+        return [text[i : i + k] for i in range(len(text) - k + 1)]
 
     def _calculate_data_quality_score(
-        self,
-        null_percentage: float,
-        distinct_ratio: float,
-        sample_size: int
+        self, null_percentage: float, distinct_ratio: float, sample_size: int
     ) -> float:
         """Calculate overall data quality score."""
         # Completeness score (inverse of null percentage)
@@ -325,10 +355,9 @@ class DatabaseProfiler:
         sample_score = min(1.0, sample_size / 1000)  # Cap at 1.0
 
         # Weighted average
-        quality_score = (completeness * 0.5 + uniqueness * 0.3 + sample_score * 0.2)
+        quality_score = completeness * 0.5 + uniqueness * 0.3 + sample_score * 0.2
 
         return round(quality_score, 3)
-
 
     def _detect_date_formats(self, sample_strings: List[str]) -> List[str]:
         """Detect common date formats in string data."""
@@ -336,10 +365,10 @@ class DatabaseProfiler:
 
         # Common date format patterns
         format_patterns = [
-            (r'\d{4}-\d{2}-\d{2}', '%Y-%m-%d'),
-            (r'\d{2}/\d{2}/\d{4}', '%m/%d/%Y'),
-            (r'\d{2}-\d{2}-\d{4}', '%m-%d-%Y'),
-            (r'\d{4}/\d{2}/\d{2}', '%Y/%m/%d'),
+            (r"\d{4}-\d{2}-\d{2}", "%Y-%m-%d"),
+            (r"\d{2}/\d{2}/\d{4}", "%m/%d/%Y"),
+            (r"\d{2}-\d{2}-\d{4}", "%m-%d-%Y"),
+            (r"\d{4}/\d{2}/\d{2}", "%Y/%m/%d"),
         ]
 
         for pattern, format_str in format_patterns:
@@ -355,10 +384,10 @@ class DatabaseProfiler:
 
         # Common patterns to detect
         pattern_checks = [
-            (r'^[A-Z]{2,3}\d{3,6}$', 'code_pattern'),
-            (r'^\d{3}-\d{2}-\d{4}$', 'ssn_pattern'),
-            (r'^[A-Z][a-z]+ [A-Z][a-z]+$', 'full_name_pattern'),
-            (r'^\d+\.\d+$', 'decimal_pattern'),
+            (r"^[A-Z]{2,3}\d{3,6}$", "code_pattern"),
+            (r"^\d{3}-\d{2}-\d{4}$", "ssn_pattern"),
+            (r"^[A-Z][a-z]+ [A-Z][a-z]+$", "full_name_pattern"),
+            (r"^\d+\.\d+$", "decimal_pattern"),
         ]
 
         for pattern, name in pattern_checks:
@@ -368,9 +397,11 @@ class DatabaseProfiler:
 
         return patterns
 
-    def find_similar_columns(self, column_name: str, threshold: float = None) -> List[str]:
+    def find_similar_columns(
+        self, column_name: str, threshold: float = None
+    ) -> List[str]:
         """Find columns similar to the given column using LSH."""
-        if not self.enable_lsh or not hasattr(self, 'lsh_index'):
+        if not self.enable_lsh or not hasattr(self, "lsh_index"):
             return []
 
         threshold = threshold or self.lsh_threshold
@@ -379,7 +410,7 @@ class DatabaseProfiler:
             # This would require the column to be already indexed
             similar = self.lsh_index.query(column_name)
             return [col for col in similar if col != column_name]
-        except:
+        except (AttributeError, KeyError, ValueError):
             return []
 
     # Database-native helper methods
@@ -395,11 +426,13 @@ class DatabaseProfiler:
                 count = int(row.iloc[1])  # Second column is the count
                 percentage = (count / total_count) * 100 if total_count > 0 else 0
 
-                result.append({
-                    "value": str(value) if value is not None else None,
-                    "count": count,
-                    "percentage": percentage
-                })
+                result.append(
+                    {
+                        "value": str(value) if value is not None else None,
+                        "count": count,
+                        "percentage": percentage,
+                    }
+                )
 
             return result
         except Exception as e:
@@ -438,7 +471,7 @@ class DatabaseProfiler:
                 median=median,
                 std_dev=std_val,
                 percentile_25=percentile_25,
-                percentile_75=percentile_75
+                percentile_75=percentile_75,
             )
         except Exception:
             return None
@@ -451,9 +484,9 @@ class DatabaseProfiler:
             max_date = column.max().to_pandas()
 
             # Convert to datetime if they're not already
-            if hasattr(min_date, 'to_pydatetime'):
+            if hasattr(min_date, "to_pydatetime"):
                 min_date = min_date.to_pydatetime()
-            if hasattr(max_date, 'to_pydatetime'):
+            if hasattr(max_date, "to_pydatetime"):
                 max_date = max_date.to_pydatetime()
 
             # Calculate date range
@@ -466,7 +499,9 @@ class DatabaseProfiler:
             common_formats = []
             try:
                 sample_data = column.limit(100).to_pandas()
-                common_formats = self._detect_date_formats(sample_data.astype(str).tolist())
+                common_formats = self._detect_date_formats(
+                    sample_data.astype(str).tolist()
+                )
             except Exception:
                 pass
 
@@ -474,7 +509,7 @@ class DatabaseProfiler:
                 min_date=min_date,
                 max_date=max_date,
                 date_range_days=date_range_days,
-                common_date_formats=common_formats
+                common_date_formats=common_formats,
             )
         except Exception:
             return None
@@ -503,13 +538,13 @@ class DatabaseProfiler:
                         text_str = str(text)
                         for char in text_str:
                             if char.isalpha():
-                                char_types['alphabetic'] += 1
+                                char_types["alphabetic"] += 1
                             elif char.isdigit():
-                                char_types['numeric'] += 1
+                                char_types["numeric"] += 1
                             elif char.isspace():
-                                char_types['whitespace'] += 1
+                                char_types["whitespace"] += 1
                             else:
-                                char_types['special'] += 1
+                                char_types["special"] += 1
 
                     # Pattern detection
                     patterns = self._detect_string_patterns(sample_data.head(100))
@@ -521,7 +556,7 @@ class DatabaseProfiler:
                 max_length=max_length,
                 avg_length=avg_length,
                 character_types=dict(char_types),
-                common_patterns=patterns
+                common_patterns=patterns,
             )
         except Exception:
             return None
@@ -540,15 +575,17 @@ class DatabaseProfiler:
         except Exception:
             return "general"
 
-    def _calculate_consistency_from_describe(self, describe_result: pd.DataFrame) -> float:
+    def _calculate_consistency_from_describe(
+        self, describe_result: pd.DataFrame
+    ) -> float:
         """Calculate consistency score from Ibis describe() result."""
         try:
             if describe_result.empty:
                 return 0.0
 
             # Use null fractions as a proxy for consistency
-            if 'null_frac' in describe_result.columns:
-                null_fractions = describe_result['null_frac'].fillna(0)
+            if "null_frac" in describe_result.columns:
+                null_fractions = describe_result["null_frac"].fillna(0)
                 # Lower null fractions indicate better consistency
                 consistency_score = float(1.0 - null_fractions.mean())
                 return max(0.0, min(1.0, consistency_score))
@@ -559,10 +596,7 @@ class DatabaseProfiler:
 
     # LLM Enhancement Methods
     def generate_field_description(
-        self,
-        profile: ColumnProfile,
-        table_name: str,
-        schema: Optional[str] = None
+        self, profile: ColumnProfile, table_name: str, schema: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate LLM-enhanced field description and metadata.
@@ -571,13 +605,17 @@ class DatabaseProfiler:
         """
         if not self.enable_llm_enhancement:
             return {
-                'description': f'Field containing {profile.semantic_type or "general"} data',
-                'business_purpose': 'Unknown',
-                'sql_hints': [],
-                'join_candidate_score': self._calculate_join_candidate_score(profile)
+                "description": f'Field containing {profile.semantic_type or "general"} data',
+                "business_purpose": "Unknown",
+                "sql_hints": [],
+                "join_candidate_score": self._calculate_join_candidate_score(profile),
             }
 
-        cache_key = f"{schema}.{table_name}.{profile.column_name}" if schema else f"{table_name}.{profile.column_name}"
+        cache_key = (
+            f"{schema}.{table_name}.{profile.column_name}"
+            if schema
+            else f"{table_name}.{profile.column_name}"
+        )
         if cache_key in self._llm_cache:
             return self._llm_cache[cache_key]
 
@@ -586,7 +624,7 @@ class DatabaseProfiler:
             response = self.model.invoke([{"role": "user", "content": prompt}])
 
             # Handle different response types
-            if hasattr(response, 'content'):
+            if hasattr(response, "content"):
                 response_text = response.content
             else:
                 response_text = str(response)
@@ -599,22 +637,25 @@ class DatabaseProfiler:
             return enhanced_metadata
 
         except Exception as e:
-            self.logger.error(f"LLM enhancement failed for {profile.column_name}: {str(e)}")
+            self.logger.error(
+                f"LLM enhancement failed for {profile.column_name}: {str(e)}"
+            )
             return self._create_fallback_description(profile)
 
     def _create_field_analysis_prompt(
-        self,
-        profile: ColumnProfile,
-        table_name: str,
-        schema: Optional[str] = None
+        self, profile: ColumnProfile, table_name: str, schema: Optional[str] = None
     ) -> str:
         """Create detailed prompt for LLM field analysis optimized for SQL generation."""
 
         # Prepare sample values
         sample_values = []
         if profile.top_k_values:
-            sample_values = [str(item.get('value', '')) for item in profile.top_k_values[:5]]
-        sample_str = ", ".join([f"'{v}'" for v in sample_values if v]) or "No samples available"
+            sample_values = [
+                str(item.get("value", "")) for item in profile.top_k_values[:5]
+            ]
+        sample_str = (
+            ", ".join([f"'{v}'" for v in sample_values if v]) or "No samples available"
+        )
 
         # Prepare statistics summary
         stats_summary = f"""
@@ -669,24 +710,32 @@ Focus on SQL generation insights.
 
         return prompt
 
-    def _parse_llm_response(self, response_text: str, profile: ColumnProfile) -> Dict[str, Any]:
+    def _parse_llm_response(
+        self, response_text: str, profile: ColumnProfile
+    ) -> Dict[str, Any]:
         """Parse LLM response to extract structured analysis."""
         import json
 
         try:
             # Try to extract JSON from the response
-            start = response_text.find('{')
-            end = response_text.rfind('}') + 1
+            start = response_text.find("{")
+            end = response_text.rfind("}") + 1
 
             if start >= 0 and end > start:
                 json_str = response_text[start:end]
                 parsed = json.loads(json_str)
 
                 result = {
-                    'description': parsed.get('description', 'Field description unavailable'),
-                    'business_purpose': parsed.get('business_purpose', 'Unknown purpose'),
-                    'sql_hints': parsed.get('sql_hints', []),
-                    'join_candidate_score': self._calculate_join_candidate_score(profile)
+                    "description": parsed.get(
+                        "description", "Field description unavailable"
+                    ),
+                    "business_purpose": parsed.get(
+                        "business_purpose", "Unknown purpose"
+                    ),
+                    "sql_hints": parsed.get("sql_hints", []),
+                    "join_candidate_score": self._calculate_join_candidate_score(
+                        profile
+                    ),
                 }
 
                 return result
@@ -696,10 +745,14 @@ Focus on SQL generation insights.
 
         # Fallback: extract key information from text
         return {
-            'description': response_text[:200] + "..." if len(response_text) > 200 else response_text,
-            'business_purpose': 'Analysis required',
-            'sql_hints': [],
-            'join_candidate_score': self._calculate_join_candidate_score(profile)
+            "description": (
+                response_text[:200] + "..."
+                if len(response_text) > 200
+                else response_text
+            ),
+            "business_purpose": "Analysis required",
+            "sql_hints": [],
+            "join_candidate_score": self._calculate_join_candidate_score(profile),
         }
 
     def _create_fallback_description(self, profile: ColumnProfile) -> Dict[str, Any]:
@@ -707,10 +760,10 @@ Focus on SQL generation insights.
         hints = []
 
         # Generate basic SQL hints based on profile
-        if profile.semantic_type == 'identifier':
+        if profile.semantic_type == "identifier":
             hints.append("Likely used for JOIN operations with other tables")
             hints.append("Use exact equality comparisons (=) in WHERE clauses")
-        elif profile.semantic_type == 'email':
+        elif profile.semantic_type == "email":
             hints.append("Use LIKE operator for domain-based filtering")
         elif profile.null_percentage and profile.null_percentage > 20:
             hints.append("Field contains nulls - consider using COALESCE")
@@ -719,10 +772,10 @@ Focus on SQL generation insights.
             hints.append("Low cardinality - good for GROUP BY aggregations")
 
         return {
-            'description': f"Field containing {profile.semantic_type or 'general'} data",
-            'business_purpose': 'Requires analysis',
-            'sql_hints': hints,
-            'join_candidate_score': self._calculate_join_candidate_score(profile)
+            "description": f"Field containing {profile.semantic_type or 'general'} data",
+            "business_purpose": "Requires analysis",
+            "sql_hints": hints,
+            "join_candidate_score": self._calculate_join_candidate_score(profile),
         }
 
     def _calculate_join_candidate_score(self, profile: ColumnProfile) -> float:
@@ -740,22 +793,19 @@ Focus on SQL generation insights.
 
         # Naming patterns
         field_lower = profile.column_name.lower()
-        if field_lower.endswith('_id') or field_lower.endswith('id'):
+        if field_lower.endswith("_id") or field_lower.endswith("id"):
             score += 0.2
-        elif 'key' in field_lower:
+        elif "key" in field_lower:
             score += 0.15
 
         # Semantic type considerations
-        if profile.semantic_type == 'identifier':
+        if profile.semantic_type == "identifier":
             score += 0.15
 
         return min(score, 1.0)  # Cap at 1.0
 
     def get_enhanced_column_context(
-        self,
-        table_name: str,
-        column_name: str,
-        schema: Optional[str] = None
+        self, table_name: str, column_name: str, schema: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get enhanced column context optimized for SQL generation.
@@ -769,17 +819,17 @@ Focus on SQL generation insights.
         enhanced_metadata = self.generate_field_description(profile, table_name, schema)
 
         return {
-            'column_name': column_name,
-            'table_name': table_name,
-            'description': enhanced_metadata['description'],
-            'business_purpose': enhanced_metadata['business_purpose'],
-            'semantic_type': profile.semantic_type,
-            'nullable': (profile.null_percentage or 0) > 0,
-            'sql_hints': enhanced_metadata['sql_hints'],
-            'join_score': enhanced_metadata['join_candidate_score'],
-            'sample_values': [
-                item.get('value') for item in (profile.top_k_values or [])[:3]
+            "column_name": column_name,
+            "table_name": table_name,
+            "description": enhanced_metadata["description"],
+            "business_purpose": enhanced_metadata["business_purpose"],
+            "semantic_type": profile.semantic_type,
+            "nullable": (profile.null_percentage or 0) > 0,
+            "sql_hints": enhanced_metadata["sql_hints"],
+            "join_score": enhanced_metadata["join_candidate_score"],
+            "sample_values": [
+                item.get("value") for item in (profile.top_k_values or [])[:3]
             ],
-            'data_quality_score': profile.data_quality_score,
-            'distinct_ratio': profile.distinct_ratio
+            "data_quality_score": profile.data_quality_score,
+            "distinct_ratio": profile.distinct_ratio,
         }

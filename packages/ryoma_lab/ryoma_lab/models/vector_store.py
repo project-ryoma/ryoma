@@ -1,5 +1,5 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 import reflex as rx
 
@@ -10,6 +10,7 @@ class DocumentProject(rx.Model, table=True):
     Multiple projects can exist, each with their own document collections.
     The actual vector store configuration comes from rxconfig.py.
     """
+
     project_name: str  # Unique identifier for the project/workspace
     description: Optional[str] = None  # Human-readable description
     document_count: int = 0  # Number of documents indexed

@@ -49,8 +49,7 @@ def upload_documents():
             ),
             rx.flex(
                 upload_render(
-                    VectorStoreState.uploaded_files, 
-                    VectorStoreState.handle_upload
+                    VectorStoreState.uploaded_files, VectorStoreState.handle_upload
                 ),
                 rx.flex(
                     rx.dialog.close(
@@ -190,12 +189,12 @@ def project_info_render(project) -> rx.Component:
         rx.cond(
             project.description,
             rc.text(f"Description: {project.description}", size="sm"),
-            rc.text("Description: No description", size="sm")
+            rc.text("Description: No description", size="sm"),
         ),
         rx.cond(
             project.created_at,
             rc.text(f"Created: {project.created_at}", size="sm"),
-            rc.text("Created: Unknown", size="sm")
+            rc.text("Created: Unknown", size="sm"),
         ),
         rx.button(
             "Delete",
@@ -228,17 +227,17 @@ def show_project_details():
                         rc.heading("Uploaded Files", size="sm"),
                         rx.foreach(
                             VectorStoreState.uploaded_files,
-                            lambda file: rc.text(file, size="sm")
+                            lambda file: rc.text(file, size="sm"),
                         ),
                         index_documents_dialog(),
                         direction="column",
                         spacing="2",
-                    )
+                    ),
                 ),
                 direction="column",
                 spacing="4",
             ),
-            rc.text("Select a project to view details")
+            rc.text("Select a project to view details"),
         ),
         width="100%",
         padding="1em",
@@ -263,14 +262,14 @@ def show_projects():
                 value=rx.cond(
                     VectorStoreState.current_project,
                     VectorStoreState.current_project.project_name,
-                    ""
+                    "",
                 ),
                 width="100%",
             ),
             value=rx.cond(
                 VectorStoreState.current_project,
                 VectorStoreState.current_project.project_name,
-                ""
+                "",
             ),
             on_change=VectorStoreState.set_current_project,
             orientation="horizontal",

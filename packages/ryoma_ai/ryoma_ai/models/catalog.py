@@ -1,6 +1,6 @@
-from typing import Dict, Any
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from typing import Any, Dict
 
 
 @dataclass
@@ -19,12 +19,11 @@ class CatalogIndex:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage."""
         data = asdict(self)
-        data['indexed_at'] = self.indexed_at.isoformat()
+        data["indexed_at"] = self.indexed_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls,
-                  data: Dict[str, Any]) -> 'CatalogIndex':
+    def from_dict(cls, data: Dict[str, Any]) -> "CatalogIndex":
         """Create from dictionary loaded from storage."""
-        data['indexed_at'] = datetime.fromisoformat(data['indexed_at'])
+        data["indexed_at"] = datetime.fromisoformat(data["indexed_at"])
         return cls(**data)
