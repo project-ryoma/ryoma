@@ -47,8 +47,12 @@ class TestInjectedDatasource:
 
     def test_store_configuration(self, workflow_agent, mock_datasource):
         """Test that store is configured correctly in agent config."""
-        assert "store" in workflow_agent.config
-        assert workflow_agent.config["store"]["datasource"] is mock_datasource
+        # The store is accessible through the workflow agent's store attribute
+        assert workflow_agent.store is not None
+        # Check that datasource is in the store
+        datasource_result = workflow_agent.store.get(("datasource",), "main")
+        assert datasource_result is not None
+        assert datasource_result.value is mock_datasource
 
     def test_sql_tools_store_annotation(self):
         """Test that SQL tools have correct store annotation."""

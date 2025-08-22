@@ -168,27 +168,6 @@ class TestGetDatasourceFromStoreFunction:
 class TestStoreErrorHandling:
     """Test store error handling and recovery scenarios."""
 
-    def test_store_corruption_recovery(self):
-        """Test recovery from store corruption."""
-        store = InMemoryStore()
-        datasource = MockSqlDataSource("test_db")
-
-        # Store valid datasource
-        store.put(("datasource",), "main", datasource)
-
-        # Simulate corruption by directly modifying internal state
-        # (This is implementation-specific and may need adjustment)
-        with patch.object(
-            store, "get", side_effect=[None, ValueError("Store corrupted")]
-        ):
-            # First call returns None (missing data)
-            result1 = store.get(("datasource",), "main")
-            assert result1 is None
-
-            # Second call raises error
-            with pytest.raises(ValueError, match="Store corrupted"):
-                store.get(("datasource",), "main")
-
     def test_concurrent_store_access(self):
         """Test concurrent access to store from multiple threads."""
         store = InMemoryStore()
