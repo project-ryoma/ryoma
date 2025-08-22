@@ -318,8 +318,15 @@ class WorkflowAgent(ChatAgent):
 
     def _build_chain(self):
         if not self.model:
+            # Provide more specific error information
+            model_info = getattr(self, '_original_model_id', 'Unknown')
             raise ValueError(
-                "Unable to initialize model, please ensure you have valid configurations."
+                f"Unable to initialize model '{model_info}'. "
+                "Please ensure you have:\n"
+                "1. Correct model format (e.g., 'gemini:gemini-2.0-flash' for Gemini)\n"
+                "2. Required API key environment variable set\n"
+                "3. Required dependencies installed\n"
+                "Check logs above for specific error details."
             )
         self.final_prompt_template = self.prompt_template_factory.build_prompt()
         self.final_prompt_template.append(

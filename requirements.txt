@@ -85,6 +85,7 @@ click==8.1.7
     #   granian
     #   jupyter-ai-magics
     #   reflex-hosting-cli
+    #   ryoma-ai
     #   typer
     #   uvicorn
 cloudpickle==3.0.0
@@ -529,7 +530,9 @@ ply==3.11
 portalocker==2.10.1
     # via qdrant-client
 prompt-toolkit==3.0.47
-    # via ipython
+    # via
+    #   ipython
+    #   ryoma-ai
 proto-plus==1.24.0
     # via
     #   google-api-core
@@ -685,7 +688,11 @@ referencing==0.35.1
     #   jsonschema
     #   jsonschema-specifications
 reflex==0.7.6.post1
-    # via ryoma-lab
+    # via
+    #   reflex-chakra
+    #   ryoma-lab
+reflex-chakra==0.7.0
+    # via ryoma-dev (pyproject.toml)
 reflex-hosting-cli==0.1.47
     # via reflex
 regex==2024.7.24
@@ -725,6 +732,7 @@ rich==13.8.0
     #   ibis-framework
     #   reflex
     #   reflex-hosting-cli
+    #   ryoma-ai
     #   typer
 rpds-py==0.20.0
     # via

@@ -65,10 +65,13 @@ class ChatAgent(BaseAgent):
         # model
         self.model_parameters = model_parameters
         if isinstance(model, str):
+            # Store original model ID for error reporting
+            self._original_model_id = model
             self.model: BaseChatModel = load_model_provider(
                 model, model_parameters=model_parameters
             )
         else:
+            self._original_model_id = str(type(model).__name__)
             self.model = model
 
         # prompt
