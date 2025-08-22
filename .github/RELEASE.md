@@ -88,8 +88,8 @@ This will:
 ### Automatic Builds
 
 - **Pull Requests**: Run tests only
-- **Main Branch**: Run tests + publish to Test PyPI
-- **Release Branches**: Run tests + publish to Test PyPI  
+- **Main Branch**: Run tests only
+- **Release Branches**: Run tests only  
 - **Version Tags**: Run tests + publish to production PyPI
 
 ## Package Configuration

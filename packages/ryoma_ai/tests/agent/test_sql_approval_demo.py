@@ -206,7 +206,7 @@ class TestSqlApprovalDemo:
         })
 
         assert result["interrupted"] is True
-        original_sql = result["interrupt_data"]["sql_query"]
+        result["interrupt_data"]["sql_query"]
 
         # User provides edited query (more restrictive)
         edited_sql = "SELECT id, name FROM users WHERE active = true LIMIT 5"
@@ -303,7 +303,7 @@ class TestSqlApprovalDemo:
         })
 
         assert result["interrupted"] is True
-        original_sql = result["interrupt_data"]["sql_query"]
+        result["interrupt_data"]["sql_query"]
 
         # Round 1: User edits query
         edited_sql_1 = "SELECT id, name, email FROM users WHERE active = true"
@@ -346,7 +346,7 @@ class TestSqlApprovalDemo:
         assert result["interrupted"] is True
 
         # Simulate that a complex SQL query was generated
-        complex_sql = result["interrupt_data"]["sql_query"]
+        result["interrupt_data"]["sql_query"]
 
         # Business analyst reviews and approves
         approval_command = Command(resume="yes")

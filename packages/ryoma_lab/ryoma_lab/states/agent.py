@@ -82,7 +82,7 @@ class AgentState(AIState):
         workflow_state.set_entry_point("agent")
         workflow_state.add_edge("tools", "agent")
 
-        agent = WorkflowAgent(
+        WorkflowAgent(
             type=AgentType.custom, tools=tools, model="", graph=workflow_state
         )
 

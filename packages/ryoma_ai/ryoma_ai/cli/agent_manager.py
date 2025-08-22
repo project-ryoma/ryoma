@@ -149,17 +149,22 @@ class AgentManager:
     def _handle_general_agent_execution(self, agent, question: str, agent_type: str) -> None:
         """Handle execution for non-SQL agents."""
         try:
-            with self.console.status(f"[bold green]🤖 {agent_type.title()} Agent processing..."):
-                # For non-SQL agents, we might need different execution patterns
-                if hasattr(agent, 'stream'):
-                    result_generator = agent.stream(question, display=True)
-                    for event in result_generator:
-                        pass
-                elif hasattr(agent, 'run'):
-                    result = agent.run(question)
-                    self.console.print(Panel(str(result), title=f"🤖 {agent_type.title()} Agent Response", style="blue"))
-                else:
-                    self.console.print(f"[yellow]Agent type {agent_type} execution not yet implemented[/yellow]")
+            # For non-SQL agents, we might need different execution patterns
+            if hasattr(agent, 'stream'):
+                self.console.print(f"[cyan]🤖 {agent_type.title()} Agent:[/cyan]")
+                result_generator = agent.stream(question, display=False)
+                # Stream and display content properly through Rich console
+                response_parts = []
+                for event in result_generator:
+                    if hasattr(event, 'content') and event.content:
+                        self.console.print(event.content, end="")
+                        response_parts.append(event.content)
+                self.console.print()  # Final newline
+            elif hasattr(agent, 'run'):
+                result = agent.run(question)
+                self.console.print(Panel(str(result), title=f"🤖 {agent_type.title()} Agent Response", style="blue"))
+            else:
+                self.console.print(f"[yellow]Agent type {agent_type} execution not yet implemented[/yellow]")
 
         except Exception as e:
             self.console.print(f"[red]{agent_type.title()} Agent Error: {e}[/red]")
@@ -279,7 +284,7 @@ class AgentManager:
                         return dataframe.to_string(index=False)
                     else:
                         return str(dataframe)
-                except:
+                except (ValueError, TypeError, Exception):
                     # Not an artifact, treat as regular string
                     pass
 

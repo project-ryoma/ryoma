@@ -14,6 +14,7 @@ from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
+# from ryoma_ai.prompt import prompt_manager, PromptType  # Available for future use
 from ryoma_ai.prompt.prompt_template import PromptTemplateFactory
 from ryoma_ai.vector_store.base import VectorStore
 
@@ -99,12 +100,12 @@ class ChatAgent(BaseAgent):
     def set_base_prompt(
         self, base_prompt: Optional[Union[str, ChatPromptTemplate]] = None
     ):
-        self.prompt_template_factory.set_base_prompt(base_prompt)
+        self.prompt_template_factory.set_base_template(base_prompt)
         self._chain = None  # Invalidate chain to force rebuild
         return self
 
     def add_prompt(self, prompt: Optional[Union[str, ChatPromptTemplate]]):
-        self.prompt_template_factory.add_context_prompt(prompt)
+        self.prompt_template_factory.add_context_template(prompt)
         self._chain = None  # Invalidate chain to force rebuild
         return self
 
@@ -129,8 +130,11 @@ class ChatAgent(BaseAgent):
         messages = self._format_messages(question)
         events = self.chain.stream(messages, self.config)
         if display:
+            print("\n", end="", flush=True)  # Start with newline for clean display
             for event in events:
-                print(event.content, end="", flush=True)
+                if hasattr(event, 'content') and event.content:
+                    print(event.content, end="", flush=True)
+            print()  # Add final newline after streaming completes
         if self.output_parser:
             events = self._parse_output(self.chain, events)
         return events

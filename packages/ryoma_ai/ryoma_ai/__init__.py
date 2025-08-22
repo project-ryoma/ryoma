@@ -1,6 +1,5 @@
 """AI Powered Data Platform"""
 
-import sys
 from importlib import metadata as importlib_metadata
 
 

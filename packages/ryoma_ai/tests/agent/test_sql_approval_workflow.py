@@ -242,7 +242,7 @@ class TestSqlApprovalWorkflow:
 
         # Test MessageState handling
         message_state = {"messages": [HumanMessage(content="test")]}
-        result = workflow_agent.invoke(message_state)
+        workflow_agent.invoke(message_state)
 
         # Verify MessageState was passed directly to workflow
         mock_workflow.invoke.assert_called_once_with(message_state, config=workflow_agent.config)
@@ -259,7 +259,7 @@ class TestSqlApprovalWorkflow:
         with patch.object(workflow_agent, '_format_messages') as mock_format:
             mock_format.return_value = {"messages": [HumanMessage(content="test question")]}
 
-            result = workflow_agent.invoke("test question")
+            workflow_agent.invoke("test question")
 
             # Verify string was formatted as messages
             mock_format.assert_called_once_with("test question")
@@ -278,7 +278,7 @@ class TestSqlApprovalWorkflow:
         command = Command(resume="approve")
 
         with patch.object(workflow_agent, '_print_graph_events'):
-            events = workflow_agent.stream(command)
+            workflow_agent.stream(command)
 
         # Verify Command was passed directly to workflow.stream
         mock_workflow.stream.assert_called_once_with(
@@ -337,7 +337,7 @@ class TestSqlApprovalIntegration:
                                     with patch('ryoma_ai.agent.internals.enhanced_sql_agent.SqlQueryTool', return_value=mock_tool):
 
                                         # Create workflow and test execution
-                                        workflow = full_workflow.build()
+                                        full_workflow.build()
 
                                         # This would normally trigger an interrupt
                                         # In a real scenario, you'd catch the GraphInterrupt,

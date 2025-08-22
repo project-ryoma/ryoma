@@ -539,7 +539,7 @@ Provide a JSON response:
                 end = response_text.rfind('}') + 1
                 if start >= 0 and end > start:
                     return json.loads(response_text[start:end])
-            except:
+            except (json.JSONDecodeError, ValueError):
                 pass
                 
         except Exception as e:

@@ -1,7 +1,6 @@
 from typing import Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
-from langchain_core.stores import InMemoryStore
 from langgraph.store.memory import InMemoryStore
 
 from ryoma_ai.agent.resource_registry import ResourceRegistry

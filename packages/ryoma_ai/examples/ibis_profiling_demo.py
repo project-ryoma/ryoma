@@ -129,7 +129,7 @@ def demo_ibis_vs_standard_profiling():
         # Clean up temporary file
         try:
             os.unlink(temp_db.name)
-        except:
+        except Exception:
             pass
 
 
@@ -161,7 +161,7 @@ def demo_ibis_native_methods():
     print("-" * 30)
     
     try:
-        info_result = table.info()
+        table.info()
         print("Info method shows the query plan and structure")
         # info() returns query plan, not data
     except Exception as e:
@@ -197,7 +197,7 @@ def demo_backend_compatibility():
     print("=" * 60)
     
     # Create sample data
-    df = create_sample_data()
+    create_sample_data()
     
     print("📊 SQLite Backend Profiling:")
     print("-" * 30)

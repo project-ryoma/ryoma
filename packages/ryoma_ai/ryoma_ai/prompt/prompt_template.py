@@ -1,44 +1,88 @@
-from typing import Optional, Union
+"""
+Modern Prompt Template Factory
 
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-)
+Simplified interface for building prompt templates with composition.
+"""
+
+from typing import List, Optional, Union
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
 from ryoma_ai.prompt.base import BasePromptTemplate
 
 
 class PromptTemplateFactory:
-    prompt_templates: list[ChatPromptTemplate]
-
+    """Factory for composing prompt templates from multiple parts."""
+    
     def __init__(
         self,
-        base_prompt_template: Optional[ChatPromptTemplate] = None,
-        context_prompt_templates: Optional[list[ChatPromptTemplate]] = None,
-        output_prompt_template: Optional[ChatPromptTemplate] = None,
+        base_template: Optional[ChatPromptTemplate] = None,
+        context_templates: Optional[List[ChatPromptTemplate]] = None,
+        output_template: Optional[ChatPromptTemplate] = None,
     ):
-        if base_prompt_template is None:
-            self.prompt_templates = [BasePromptTemplate]
+        """
+        Initialize with optional template components.
+        
+        Args:
+            base_template: Base system prompt template
+            context_templates: Additional context templates
+            output_template: Output formatting template
+        """
+        self.templates: List[ChatPromptTemplate] = []
+        
+        # Add base template
+        if base_template is None:
+            self.templates = [BasePromptTemplate]
         else:
-            self.prompt_templates = [base_prompt_template]
-        if context_prompt_templates:
-            self.prompt_templates.extend(context_prompt_templates)
-        if output_prompt_template:
-            self.prompt_templates.append(output_prompt_template)
+            self.templates = [base_template]
+            
+        # Add context templates
+        if context_templates:
+            self.templates.extend(context_templates)
+            
+        # Add output template
+        if output_template:
+            self.templates.append(output_template)
 
-    def set_base_prompt(self, base_prompt_template: Union[str, ChatPromptTemplate]):
-        if isinstance(base_prompt_template, str):
-            base_prompt_template = ChatPromptTemplate.from_messages(
-                [("system", base_prompt_template)]
-            )
-        self.prompt_templates[0] = base_prompt_template
+    def set_base_template(self, template: Union[str, ChatPromptTemplate]) -> None:
+        """Set the base system template."""
+        if isinstance(template, str):
+            template = ChatPromptTemplate.from_messages([
+                SystemMessagePromptTemplate.from_template(template)
+            ])
+        self.templates[0] = template
 
-    def add_context_prompt(
-        self, context_prompt_template: Union[str, ChatPromptTemplate]
-    ):
-        if isinstance(context_prompt_template, str):
-            context_prompt_template = ChatPromptTemplate.from_messages(
-                [("system", context_prompt_template)]
-            )
-        self.prompt_templates.append(context_prompt_template)
+    def add_context_template(self, template: Union[str, ChatPromptTemplate]) -> None:
+        """Add a context template."""
+        if isinstance(template, str):
+            template = ChatPromptTemplate.from_messages([
+                SystemMessagePromptTemplate.from_template(template)
+            ])
+        self.templates.append(template)
+    
+    def add_human_template(self, template: Union[str, ChatPromptTemplate]) -> None:
+        """Add a human message template."""
+        if isinstance(template, str):
+            template = ChatPromptTemplate.from_messages([
+                HumanMessagePromptTemplate.from_template(template)
+            ])
+        self.templates.append(template)
 
+    def build(self) -> ChatPromptTemplate:
+        """Build the final composed prompt template."""
+        if not self.templates:
+            return BasePromptTemplate
+        
+        # Flatten all message templates into a single template
+        all_messages = []
+        for template in self.templates:
+            if hasattr(template, 'messages'):
+                all_messages.extend(template.messages)
+            else:
+                all_messages.append(template)
+                
+        return ChatPromptTemplate.from_messages(all_messages)
+    
+    # Alias for backward compatibility
     def build_prompt(self) -> ChatPromptTemplate:
-        return ChatPromptTemplate.from_messages(self.prompt_templates)
+        """Alias for build() method."""
+        return self.build()

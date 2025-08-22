@@ -351,7 +351,7 @@ class MetadataManager:
             table_key = f"{schema}.{table_name}" if schema else table_name
             
             if table_key in self._metadata_cache:
-                table_metadata = self._metadata_cache[table_key]
+                self._metadata_cache[table_key]
                 
                 # Generate common patterns
                 patterns.append({

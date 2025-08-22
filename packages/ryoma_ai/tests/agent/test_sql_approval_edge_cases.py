@@ -296,7 +296,7 @@ class TestWorkflowAgentEdgeCases:
         invalid_command = Mock(spec=Command)
 
         # Should still pass to workflow and let it handle
-        result = workflow_agent.invoke(invalid_command)
+        workflow_agent.invoke(invalid_command)
 
         mock_workflow.invoke.assert_called_once_with(invalid_command, config=workflow_agent.config)
 
@@ -333,7 +333,7 @@ class TestWorkflowAgentEdgeCases:
             with patch.object(workflow_agent, '_format_messages') as mock_format:
                 mock_format.return_value = {"messages": [HumanMessage(content="")]}
 
-                result = workflow_agent.invoke(None)
+                workflow_agent.invoke(None)
 
                 # Should format as empty message
                 mock_format.assert_called_once_with(None)
@@ -368,7 +368,7 @@ class TestWorkflowAgentEdgeCases:
         with patch.object(workflow_agent, '_format_messages') as mock_format:
             mock_format.return_value = {"messages": [HumanMessage(content="test")]}
 
-            result = workflow_agent.invoke(fake_state)
+            workflow_agent.invoke(fake_state)
 
             # Should be treated as string question and formatted
             mock_format.assert_called_once_with(fake_state)

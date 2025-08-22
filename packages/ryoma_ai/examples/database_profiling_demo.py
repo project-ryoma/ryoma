@@ -221,7 +221,7 @@ def demo_profiling_configuration():
     # Example of using different configurations
     print("\n🔧 Using custom configuration:")
     
-    datasource_fast = SqliteDataSource(
+    SqliteDataSource(
         connection_url="sqlite:///example.db",
         enable_profiling=True,
         profiler_config=fast_config

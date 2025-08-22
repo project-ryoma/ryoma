@@ -374,7 +374,7 @@ Question: {user_query}
         import sqlparse
         import re
         tokens = sqlparse.parse(sql)[0].tokens
-        identifiers = [t.value for t in tokens if t.ttype is None and str(t).strip()]
+        [t.value for t in tokens if t.ttype is None and str(t).strip()]
         literals = re.findall(r"'(.*?)'", sql)
         columns = re.findall(r"\b\w+\b", sql)
         return {"columns": list(set(columns)), "literals": literals}

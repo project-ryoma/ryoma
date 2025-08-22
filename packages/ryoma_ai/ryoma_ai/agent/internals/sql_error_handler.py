@@ -104,7 +104,6 @@ class SqlErrorHandler:
         """
         Detect database type from exception type or error message.
         """
-        exception_name = exception.__class__.__name__
         exception_module = exception.__class__.__module__
 
         # Check for PostgreSQL exceptions (both psycopg2 and psycopg3)
@@ -511,7 +510,7 @@ class SqlErrorHandler:
                     similar_tables.append(existing_table)
 
             return similar_tables[:3]  # Return top 3 matches
-        except:
+        except Exception:
             return []
 
     def _find_similar_column_names(self, column_name: str, sql: str) -> List[str]:
@@ -532,7 +531,7 @@ class SqlErrorHandler:
                         for column in table.columns:
                             if self._calculate_similarity(column_name, column.name) > 0.6:
                                 similar_columns.append(column.name)
-        except:
+        except Exception:
             pass
 
         return similar_columns[:3]

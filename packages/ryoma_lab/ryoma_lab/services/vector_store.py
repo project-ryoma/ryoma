@@ -180,7 +180,7 @@ class VectorStoreService:
         Note: LangChain VectorStores don't typically support direct vector search.
         Use similarity_search with query text instead.
         """
-        vector_store = self._get_vector_store(project_name, embedding_function)
+        self._get_vector_store(project_name, embedding_function)
         
         # LangChain VectorStores don't have direct vector search
         # This is a limitation of the unified interface
