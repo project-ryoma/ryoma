@@ -319,7 +319,7 @@ class WorkflowAgent(ChatAgent):
     def _build_chain(self):
         if not self.model:
             # Provide more specific error information
-            model_info = getattr(self, '_original_model_id', 'Unknown')
+            model_info = getattr(self, "_original_model_id", "Unknown")
             raise ValueError(
                 f"Unable to initialize model '{model_info}'. "
                 "Please ensure you have:\n"

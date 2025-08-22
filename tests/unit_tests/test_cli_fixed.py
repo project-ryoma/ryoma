@@ -30,7 +30,7 @@ def test_cli_with_sqlite():
 
         if cli.agent_manager.setup_agent_manager(
             config=cli.config_manager.config,
-            datasource=cli.datasource_manager.current_datasource
+            datasource=cli.datasource_manager.current_datasource,
         ):
             print("✅ Agent setup successful")
 
