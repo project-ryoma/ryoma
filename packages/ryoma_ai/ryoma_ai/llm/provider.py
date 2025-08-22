@@ -105,6 +105,38 @@ def _load_chat_model(provider_id: str, model_name: str, model_parameters: Dict) 
             )
             return None
 
+    elif provider_id in ["google", "gemini", "google-genai"]:
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+
+            return ChatGoogleGenerativeAI(model=model_name, **model_parameters)
+        except ImportError:
+            logging.error(
+                "langchain_google_genai not available. Install with: pip install langchain-google-genai"
+            )
+            return None
+        except Exception as e:
+            logging.error(
+                f"Failed to initialize Google Gemini model. Make sure GOOGLE_API_KEY is set. Error: {e}"
+            )
+            return None
+
+    elif provider_id == "google-vertexai":
+        try:
+            from langchain_google_vertexai import ChatVertexAI
+
+            return ChatVertexAI(model=model_name, **model_parameters)
+        except ImportError:
+            logging.error(
+                "langchain_google_vertexai not available. Install with: pip install langchain-google-vertexai"
+            )
+            return None
+        except Exception as e:
+            logging.error(
+                f"Failed to initialize Google Vertex AI model. Check authentication. Error: {e}"
+            )
+            return None
+
     else:
         logging.error(f"Unsupported chat provider: {provider_id}")
         return None
