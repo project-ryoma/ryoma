@@ -39,8 +39,8 @@ def test_base_agent():
     """Test ChatAgent with configured model."""
     ryoma_agent = ChatAgent(MODEL)
 
-    # Test with a simple query
-    result = ryoma_agent.stream("What is 2 + 2?")
+    # Test with a simple query - disable display to capture results
+    result = ryoma_agent.stream("What is 2 + 2?", display=False)
     assert result is not None
 
     # Collect streamed results
@@ -48,7 +48,9 @@ def test_base_agent():
     assert len(responses) > 0
 
     # Check that we got some response content
-    response_text = "".join(str(r) for r in responses)
+    response_text = "".join(
+        str(r.content if hasattr(r, "content") else str(r)) for r in responses
+    )
     assert len(response_text) > 0
 
 
@@ -56,9 +58,9 @@ def test_workflow_agent():
     """Test SqlAgent with configured model."""
     ryoma_agent = SqlAgent(MODEL)
 
-    # Test with a simple SQL-related query
+    # Test with a simple SQL-related query - disable display to capture results
     result = ryoma_agent.stream(
-        "Show me a simple SQL query to select all records from a table"
+        "Show me a simple SQL query to select all records from a table", display=False
     )
     assert result is not None
 
@@ -67,5 +69,7 @@ def test_workflow_agent():
     assert len(responses) > 0
 
     # Check that we got some response
-    response_text = "".join(str(r) for r in responses)
+    response_text = "".join(
+        str(r.content if hasattr(r, "content") else str(r)) for r in responses
+    )
     assert len(response_text) > 0

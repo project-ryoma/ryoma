@@ -65,11 +65,23 @@ def _load_chat_model(provider_id: str, model_name: str, model_parameters: Dict) 
             from langchain_community.llms import GPT4All
 
             # Use GPT4All LLM directly - it already works with the ryoma agent system
+            # Enable auto-download of models if they don't exist locally
+            model_parameters.setdefault("allow_download", True)
             return GPT4All(model=model_name, **model_parameters)
         except ImportError:
             logging.error(
                 "GPT4All dependencies not available. Install with: pip install gpt4all"
             )
+            return None
+        except Exception as e:
+            if "Model file does not exist" in str(e):
+                logging.error(
+                    f"GPT4All model '{model_name}' not found locally. "
+                    f"The model will be downloaded on first use, but this may take time. "
+                    f"Error: {e}"
+                )
+            else:
+                logging.error(f"Failed to load GPT4All model '{model_name}': {e}")
             return None
 
     elif provider_id == "huggingface":

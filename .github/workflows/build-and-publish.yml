@@ -46,9 +46,53 @@ jobs:
 #        uv run mypy packages/ryoma_ai/ryoma_ai --ignore-missing-imports
 #        uv run mypy packages/ryoma_lab/ryoma_lab --ignore-missing-imports
     
-    - name: Test with pytest
+    - name: Test with pytest (unit tests only)
       run: |
-        uv run pytest tests/ -v --cov=packages/ryoma_ai/ryoma_ai --cov=packages/ryoma_lab/ryoma_lab
+        uv run pytest tests/unit_tests/ -v --cov=packages/ryoma_ai/ryoma_ai --cov=packages/ryoma_lab/ryoma_lab
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    # Only run e2e tests on Python 3.11 to save CI time
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Install dependencies
+      run: |
+        uv sync --all-extras
+    
+    - name: Cache GPT4All models
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/gpt4all
+        key: gpt4all-models-${{ hashFiles('tests/e2e/test_*.py') }}
+        restore-keys: |
+          gpt4all-models-
+    
+    - name: Download GPT4All model
+      run: |
+        echo "Downloading GPT4All model for e2e tests..."
+        timeout 10m uv run python tests/e2e/download_gpt4all_model.py || {
+          echo "Model download failed or timed out. E2E tests will be skipped."
+          exit 0
+        }
+    
+    - name: Run E2E tests with GPT4All
+      env:
+        USE_GPT4ALL_FOR_TESTS: "true"
+      run: |
+        echo "Running E2E tests with GPT4All..."
+        uv run pytest tests/e2e/ -v --tb=short -x
     
   build:
     needs: test

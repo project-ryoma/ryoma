@@ -105,7 +105,7 @@ class WorkflowAgent(ChatAgent):
             tool_prompt_template = ChatPromptTemplate.from_messages(
                 [("system", tool_prompt)]
             )
-            self.prompt_template_factory.add_context_prompt(tool_prompt_template)
+            self.prompt_template_factory.add_context_template(tool_prompt_template)
             return self.model
 
     def _build_workflow(self, graph: StateGraph) -> CompiledStateGraph:
