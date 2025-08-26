@@ -124,6 +124,7 @@ build:
 
 .PHONY: build-ai
 build-ai:
+	rm -rf ./dist
 	cd ./packages/ryoma_ai && uv build
 
 .PHONY: build-lab

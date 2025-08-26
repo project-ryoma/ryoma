@@ -2,7 +2,10 @@
 # TODOs
 
 ## Tasks
-
+1. There are two places doing the indexing for datasource catalog and metadata. one is in catalog_manager that use catalog_store, and the other is in vector_store/base that has index_datasource. they do similar functionalities, how this should be refactored and optimized?
+2. for the internal agent implementation, there are multiple llm calls, which use the prompt in the module, I think it would be better to move to the prompt/ folder, and make it more modular, so that we can easily add more prompts in the future.
+3. 
+4. Update and Optimize the docs, there are a lot of missing docs since last code change and version. we need to update the docs in details now. please check all pages, think about what are missing, especially on tutorial, how to use the agent, how to use the cli, how to set the configs etc.
 
 
 ## backlogs

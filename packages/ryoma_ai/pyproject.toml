@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ryoma_ai"
-version = "0.1.0"
+version = "0.1.2"
 description = "AI Powered Data Platform"
 readme = "README.md"
 repository = "https://github.com/project-ryoma/ryoma"
@@ -28,7 +28,6 @@ dependencies = [
   "mock>=5.1.0",
   "openai>=1.33.0",
   "pydantic>=2.7.1",
-  "jupyter-ai-magics>=2.19.0",
   "pandas>=2.2.2",
   "langchain-openai>=0.1.7",
   "langchain>=0.2.9, <0.3.0",
@@ -41,7 +40,9 @@ dependencies = [
   "httpx==0.27.2",
   "click>=8.0.0",
   "rich>=13.0.0",
-  "prompt-toolkit>=3.0.0"
+  "prompt-toolkit>=3.0.0",
+  "amundsen-databuilder>=7.5.0",
+  "ibis-framework>=9.0.0",
 ]
 
 [project.scripts]
@@ -51,31 +52,37 @@ ryoma = "ryoma_ai.cli.main:main"
 snowflake = [
     "ibis-framework[snowflake]>=9.0.0",
     "amundsen-databuilder[snowflake]>=7.5.0",
-    "feast[snowflake]>=0.39.1"
 ]
 sqlite = [
     "ibis-framework[sqlite]>=9.0.0",
-    "feast[sqlite]>=0.39.1",
 ]
 postgres = [
     "psycopg2>=2.9.2",
     "ibis-framework[postgres]>=9.0.0",
     "amundsen-databuilder[postgres]>=7.5.0",
-    "feast[postgres]>=0.39.1"
 ]
 mysql = [
     "ibis-framework[mysql]>=9.0.0",
     "amundsen-databuilder[mysql]>=7.5.0",
-    "feast[mysql]>=0.39.1"
 ]
 bigquery = [
     "ibis-framework[bigquery]>=9.0.0",
     "amundsen-databuilder[bigquery]>=7.5.0",
-    "feast[bigquery]>=0.39.1"
 ]
 pyspark = [
     "ibis-framework[pyspark]>=9.0.0",
     "pyspark>=3.2.0",
     "findspark>=1.4.2",
-    "feast[pyspark]>=0.39.1"
+]
+duckdb = [
+    "duckdb>=1.0.0",
+    "ibis-framework[duckdb]>=9.0.0"
+]
+dynamodb = [
+    "boto3>=1.28.0",
+    "aioboto3>=11.0.0"
+]
+iceberg = [
+    "pyiceberg>=0.5.0",
+    "pyarrow>=14.0.0"
 ]
