@@ -122,9 +122,21 @@ start-ryoma-lab:
 build:
 	uv build
 
-.PHONY: publish
-publish:
-	uv publish
+.PHONY: build-ai
+build-ai:
+	cd ./packages/ryoma_ai && uv build
+
+.PHONY: build-lab
+build-lab:
+	cd ./packages/ryoma_lab && uv build
+
+.PHONY: publish-ai
+publish-ai:
+	python3 -m twine upload --repository ryoma_ai dist/ryoma_ai-*
+
+.PHONY: publish-lab
+publish-lab:
+	python3 -m twine upload --repository ryoma_lab dist/ryoma_lab-*
 
 .PHONY: init-data
 init-data:
