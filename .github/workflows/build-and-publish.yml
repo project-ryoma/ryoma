@@ -54,6 +54,21 @@ jobs:
     runs-on: ubuntu-latest
     # Only run e2e tests on Python 3.11 to save CI time
     
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
     - uses: actions/checkout@v4
     
@@ -90,6 +105,11 @@ jobs:
     - name: Run E2E tests with GPT4All
       env:
         USE_GPT4ALL_FOR_TESTS: "true"
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: postgres
       run: |
         echo "Running E2E tests with GPT4All..."
         uv run pytest tests/e2e/ -v --tb=short -x

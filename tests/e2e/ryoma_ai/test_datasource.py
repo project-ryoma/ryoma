@@ -5,12 +5,14 @@ from sqlalchemy import create_engine
 
 @pytest.fixture
 def postgres():
+    # Use environment variables for PostgreSQL connection, with defaults for local testing
+    import os
     return PostgresDataSource(
-        user="",
-        password="",
-        host="localhost",
-        port=5432,
-        database="postgres",
+        user=os.environ.get("POSTGRES_USER", "postgres"),
+        password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        host=os.environ.get("POSTGRES_HOST", "localhost"),
+        port=int(os.environ.get("POSTGRES_PORT", 5432)),
+        database=os.environ.get("POSTGRES_DB", "postgres"),
         db_schema="public",
     )
 
