@@ -15,8 +15,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = [
-    "ryoma_lab[snowflake, pyspark, postgres, sqlite, mysql, bigquery]",
-    "ryoma_ai",
+    "ryoma_ai[snowflake, pyspark, sqlite, mysql, bigquery]",
+    "ryoma_lab",
     "pytest >= 6.2.5",
     "black >= 23.3.0",
     "isort >= 5.9.3",

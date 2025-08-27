@@ -32,15 +32,18 @@ class MySqlDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def _connect(self, **kwargs) -> BaseBackend:
-        return ibis.mysql.connect(
-            user=self.username,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            database=self.database,
-            **kwargs,
-        )
+    def _connect(self, **kwargs):
+        try:
+            return ibis.mysql.connect(
+                user=self.username,
+                password=self.password,
+                host=self.host,
+                port=self.port,
+                database=self.database,
+                **kwargs,
+            )
+        except Exception as e:
+            self._handle_connection_error(e, "mysql")
 
     def connection_string(self):
         return f"mysql+mysqlconnector://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"

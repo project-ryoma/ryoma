@@ -37,20 +37,23 @@ class PostgresDataSource(SqlDataSource):
         self.port = port
         self.connection_url = connection_url
 
-    def _connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
+    def _connect(self, **kwargs):
         logging.info(f"Connecting to Postgres database: {self.database}")
-        if self.connection_url:
-            return ibis.connect(self.connection_url, **kwargs)
-        conn = ibis.postgres.connect(
-            user=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            database=self.database,
-            schema=self.db_schema,
-            **kwargs,
-        )
-        return conn
+        try:
+            if self.connection_url:
+                return ibis.connect(self.connection_url, **kwargs)
+            conn = ibis.postgres.connect(
+                user=self.user,
+                password=self.password,
+                host=self.host,
+                port=self.port,
+                database=self.database,
+                schema=self.db_schema,
+                **kwargs,
+            )
+            return conn
+        except Exception as e:
+            self._handle_connection_error(e, "postgres")
 
     def connection_string(self):
         auth_part = (

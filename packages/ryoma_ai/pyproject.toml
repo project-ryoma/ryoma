@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ryoma_ai"
-version = "0.1.3"
+version = "0.1.4"
 description = "AI Powered Data Platform"
 readme = "README.md"
 repository = "https://github.com/project-ryoma/ryoma"
@@ -46,7 +46,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ryoma = "ryoma_ai.cli.main:main"
+ryoma_ai = "ryoma_ai.cli.main:main"
 
 [project.optional-dependencies]
 snowflake = [
@@ -59,11 +59,10 @@ sqlite = [
 postgres = [
     "psycopg2>=2.9.2",
     "ibis-framework[postgres]>=9.0.0",
-    "amundsen-databuilder[postgres]>=7.5.0",
 ]
 mysql = [
     "ibis-framework[mysql]>=9.0.0",
-    "amundsen-databuilder[mysql]>=7.5.0",
+    "amundsen-databuilder[rds]>=7.5.0",
 ]
 bigquery = [
     "ibis-framework[bigquery]>=9.0.0",

@@ -45,9 +45,7 @@ class SnowflakeDataSource(SqlDataSource):
 
     def _connect(self, **kwargs) -> Union[BaseBackend, SQLBackend]:
         if self.connection_url:
-            logging.info("Connection URL provided, using it to connect")
             return ibis.connect(self.connection_url)
-        logging.info("Connection URL not provided, using individual parameters")
         try:
             return ibis.snowflake.connect(
                 user=self.user,

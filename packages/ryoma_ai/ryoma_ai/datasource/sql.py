@@ -32,6 +32,20 @@ class SqlDataSource(DataSource):
         logging.info("Database connection established")
         return self.__connection
 
+    def _handle_connection_error(self, error: Exception, datasource_type: str):
+        """Helper method to handle connection errors and provide better error messages."""
+        error_msg = str(error)
+        # Check if it's an ibis backend import error
+        if "Failed to import the" in error_msg and "backend due to missing dependencies" in error_msg:
+            # Escape square brackets to prevent Rich console from interpreting them as markup
+            raise ImportError(
+                f"Missing dependencies for {datasource_type}. "
+                f"Please install with: pip install ryoma_ai\\[{datasource_type}]"
+            ) from error
+        else:
+            # Re-raise the original error for non-import errors
+            raise
+
     @abstractmethod
     def _connect(self, **kwargs) -> Any:
         raise NotImplementedError("connect is not implemented for this data source")

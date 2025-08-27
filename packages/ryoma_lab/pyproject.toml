@@ -16,7 +16,6 @@ dependencies = [
     "reflex>=0.7.0",
     "transformers>=4.40.2",
     "sql-metadata>=2.11.0",
-    "feast==0.39.1",
     "amundsen-databuilder>=7.5.0",
     "ibis-framework>=10.0.0",
     "fastapi-users[sqlalchemy,oauth]>=13.0.0",
@@ -44,31 +43,24 @@ ryoma = "ryoma_lab.cli:main"
 snowflake = [
     "ibis-framework[snowflake]>=9.0.0",
     "amundsen-databuilder[snowflake]>=7.5.0",
-    "feast[snowflake]>=0.39.1"
 ]
 sqlite = [
     "ibis-framework[sqlite]>=9.0.0",
-    "feast[sqlite]>=0.39.1",
 ]
 postgres = [
     "psycopg2>=2.9.2",
     "ibis-framework[postgres]>=9.0.0",
-    "amundsen-databuilder[postgres]>=7.5.0",
-    "feast[postgres]>=0.39.1"
 ]
 mysql = [
     "ibis-framework[mysql]>=9.0.0",
-    "amundsen-databuilder[mysql]>=7.5.0",
-    "feast[mysql]>=0.39.1"
+    "amundsen-databuilder[rds]>=7.5.0",
 ]
 bigquery = [
     "ibis-framework[bigquery]>=9.0.0",
     "amundsen-databuilder[bigquery]>=7.5.0",
-    "feast[bigquery]>=0.39.1"
 ]
 pyspark = [
     "ibis-framework[pyspark]>=9.0.0",
     "pyspark>=3.2.0",
     "findspark>=1.4.2",
-    "feast[pyspark]>=0.39.1"
 ]
