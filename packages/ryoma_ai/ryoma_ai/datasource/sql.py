@@ -40,7 +40,7 @@ class SqlDataSource(DataSource):
             # Escape square brackets to prevent Rich console from interpreting them as markup
             raise ImportError(
                 f"Missing dependencies for {datasource_type}. "
-                f"Please install with: pip install ryoma_ai\\[{datasource_type}]"
+                f"Please install with: pip install \"ryoma_ai\\[{datasource_type}]\""
             ) from error
         else:
             # Re-raise the original error for non-import errors
