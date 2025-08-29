@@ -7,6 +7,7 @@ Get up and running with Ryoma in under 5 minutes! This guide covers the essentia
 
 - **Python 3.9+** - Ryoma requires Python 3.9 or higher
 - **API Key** - OpenAI API key or other supported LLM provider
+- **Database** (optional) - PostgreSQL, MySQL, SQLite, or other supported databases
 
 ## 📦 Installation
 
@@ -27,34 +28,58 @@ pip install ryoma_ai[snowflake]
 pip install ryoma_ai[all]
 ```
 
-## 🎯 Basic Usage
+## 🎯 Quick Start Options
 
-### 1. SQL Agent (Recommended)
-Connect to databases and ask questions in natural language:
+### Option 1: CLI Interface (Recommended)
+
+The fastest way to get started:
+
+```bash
+# Set your API key
+export OPENAI_API_KEY="your-api-key-here"
+
+# Start the CLI
+ryoma-ai --setup
+
+# Or start with defaults
+ryoma-ai
+```
+
+Then use natural language:
+```bash
+ryoma-ai> show me all tables in my database
+ryoma-ai> what customers made purchases last month?  
+ryoma-ai> create a chart of sales by region
+```
+
+### Option 2: Programmatic Usage
+
+For integration into your applications:
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.datasource.postgres import PostgresDataSource
 
-# Connect to your database
+# Set up data source
 datasource = PostgresDataSource(
     connection_string="postgresql://user:pass@localhost:5432/db"
 )
 
-# Create enhanced SQL agent
+# Create SQL agent (uses default InMemoryStore)
 agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced"  # Uses advanced features
+    model="gpt-4o",
+    mode="enhanced",
+    datasource=datasource
 )
-agent.add_datasource(datasource)
 
 # Ask questions in natural language
 response = agent.stream("Show me the top 10 customers by revenue this month")
 print(response)
 ```
 
-### 2. Pandas Agent
-Analyze DataFrames with natural language:
+### Option 3: Pandas Agent
+
+For DataFrame analysis:
 
 ```python
 from ryoma_ai.agent.pandas import PandasAgent
@@ -67,8 +92,8 @@ df = pd.DataFrame({
     'region': ['North', 'South', 'East', 'West', 'North']
 })
 
-# Create pandas agent
-agent = PandasAgent("gpt-4")
+# Create pandas agent (uses default InMemoryStore)
+agent = PandasAgent("gpt-4o")
 agent.add_dataframe(df)
 
 # Analyze with natural language

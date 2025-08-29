@@ -15,6 +15,9 @@ Welcome to Ryoma! This guide will help you get up and running with Ryoma's AI-po
 :maxdepth: 2
 
 quickstart
+cli-usage
+configuration-reference
 advanced-setup
+troubleshooting
 examples
 ```

@@ -4152,7 +4152,7 @@ wheels = [
 
 [[package]]
 name = "ryoma-ai"
-version = "0.1.4"
+version = "0.1.5"
 source = { editable = "packages/ryoma_ai" }
 dependencies = [
     { name = "amundsen-databuilder" },

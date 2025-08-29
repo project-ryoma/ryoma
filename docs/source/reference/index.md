@@ -8,6 +8,7 @@ Complete reference documentation for Ryoma's APIs, agents, data sources, and too
 
 | 🤖 Component | 📝 Description | 🔗 Link |
 |--------------|----------------|---------|
+| **Core API** | Base classes, stores, and configuration | [API Reference →](api/index.md) |
 | **Agents** | AI-powered data analysis agents | [Agents →](agent/index.md) |
 | **Data Sources** | Database and file connectors | [Data Sources →](data-sources/index.md) |
 | **Tools** | Specialized analysis tools | [Tools →](tool/index.md) |
@@ -25,6 +26,7 @@ Complete reference documentation for Ryoma's APIs, agents, data sources, and too
 ```{toctree}
 :maxdepth: 2
 
+api/index
 agent/index
 data-sources/index
 tool/index

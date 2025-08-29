@@ -35,12 +35,14 @@ class BaseAgent:
     ):
         self.resource_registry = ResourceRegistry()
 
-        # Initialize store for InjectedStore functionality - store must be provided to avoid duplication
+        # Initialize store for InjectedStore functionality
         if store is None:
-            raise ValueError(
-                "store parameter is required - agents must receive stores from CLI to ensure unified storage"
-            )
-        self.store = store
+            # Provide default InMemoryStore for programmatic usage
+            from langchain_core.stores import InMemoryStore
+            self.store = InMemoryStore()
+            logger.info("Using default InMemoryStore - for production, pass unified store from CLI")
+        else:
+            self.store = store
 
         if datasource:
             # Add datasource to store for InjectedStore

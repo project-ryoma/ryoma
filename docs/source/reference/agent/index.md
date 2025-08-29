@@ -45,19 +45,23 @@ print(sql_agent.stream("I want to get the top customers which making the most pu
 ## Agents
 
 Currently supported agents are:
-- [PythonAgent](python.md)
-- [SqlAgent](sql.md)
-- [PandasAgent](pandas.md)
-- [PyarrowAgent](pyarrow.md)
-- [SparkAgent](spark.md)
+- [SqlAgent](sql.md) - Natural language database queries
+- [ChatAgent](chat.md) - Conversational AI and knowledge sharing  
+- [Multi-Agent Router](router.md) - Intelligent agent routing system
+- [PythonAgent](python.md) - Python code execution
+- [PandasAgent](pandas.md) - Data analysis with pandas
+- [PyarrowAgent](pyarrow.md) - High-performance data processing
+- [SparkAgent](spark.md) - Distributed data processing
 
 
 ```{toctree}
 :maxdepth: 2
 
+sql
+chat
+router
+python
 pandas
 pyarrow
-python
 spark
-sql
 ```
