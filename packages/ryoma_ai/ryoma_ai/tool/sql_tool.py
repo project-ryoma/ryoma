@@ -13,10 +13,11 @@ from typing_extensions import Annotated
 
 def get_datasource_from_store(store) -> SqlDataSource:
     """Helper function to extract datasource from store with consistent error handling."""
-    datasource_result = store.get(("datasource",), "main")
-    if not datasource_result:
+    results = store.mget(["datasource_main"])
+    datasource = results[0] if results and results[0] is not None else None
+    if not datasource:
         raise ValueError("No datasource available in store")
-    return datasource_result.value
+    return datasource
 
 
 class QueryInput(BaseModel):

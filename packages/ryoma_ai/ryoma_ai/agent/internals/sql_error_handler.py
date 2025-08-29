@@ -1,8 +1,11 @@
+import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
 from ryoma_ai.datasource.sql import SqlDataSource
 from ryoma_ai.models.sql import DatabaseType, RecoveryStrategy, SqlError, SqlErrorType
+
+logger = logging.getLogger(__name__)
 
 
 class SqlErrorHandler:
@@ -543,6 +546,11 @@ class SqlErrorHandler:
             return []
 
         try:
+            # Warning: Loading full catalog - may be slow for large databases
+            logger.warning(
+                "Loading full catalog to find similar table names - this may be slow for large databases. "
+                "Consider running '/index-catalog' command to enable optimized catalog search."
+            )
             catalog = self.datasource.get_catalog()
             all_tables = []
             for schema in catalog.schemas:

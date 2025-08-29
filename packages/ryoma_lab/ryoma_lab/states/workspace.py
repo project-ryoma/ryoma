@@ -2,7 +2,6 @@ from typing import Any, Callable, Coroutine, List, Optional
 
 import pandas as pd
 import reflex as rx
-from feast import FeatureStore
 from IPython.core.displaypub import DisplayPublisher
 from IPython.core.interactiveshell import InteractiveShell
 from ryoma_ai.datasource.base import DataSource
@@ -27,8 +26,6 @@ from ryoma_lab.states.datasource import DataSourceState
 
 
 class WorkspaceState(BaseState):
-    _current_store: Optional[FeatureStore] = None
-
     # datasource and catalog state
     current_catalog_name: str = ""
     current_schema_name: str = ""

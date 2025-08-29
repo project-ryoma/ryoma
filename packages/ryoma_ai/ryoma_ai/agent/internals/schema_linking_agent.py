@@ -1,9 +1,12 @@
+import logging
 import re
 from typing import Dict, List, Optional
 
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_ai.datasource.metadata import Catalog, Column, Table
+from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.datasource.sql import SqlDataSource
+
+logger = logging.getLogger(__name__)
 
 
 class SchemaLinkingAgent(ChatAgent):
@@ -123,10 +126,83 @@ class SchemaLinkingAgent(ChatAgent):
         return join_suggestions
 
     def _get_catalog(self) -> Catalog:
-        """Get catalog with caching."""
+        """Get catalog with caching - tries optimized search first if available."""
         if not self.catalog_cache:
-            self.catalog_cache = self.get_datasource().get_catalog()
+            # Try optimized catalog access if vector store is available
+            try:
+                catalog_store = self._get_catalog_store()
+                if catalog_store:
+                    # Use table suggestions to get a relevant subset
+                    table_suggestions = catalog_store.get_table_suggestions(
+                        query="all tables", 
+                        max_tables=50,
+                        min_score=0.0  # Get all indexed tables
+                    )
+                    if table_suggestions:
+                        # Build catalog from table suggestions
+                        self.catalog_cache = self._build_catalog_from_suggestions(table_suggestions)
+                    else:
+                        # Fallback to full catalog
+                        logger.warning(
+                            "No indexed tables found. Loading full catalog - this may be slow for large databases. "
+                            "Consider running '/index-catalog' command to improve performance."
+                        )
+                        self.catalog_cache = self.get_datasource().get_catalog()
+                else:
+                    # No vector store available, use full catalog
+                    logger.warning(
+                        "No vector store configured. Loading full catalog - this may be slow for large databases. "
+                        "Consider configuring vector_store and running '/index-catalog' command to improve performance."
+                    )
+                    self.catalog_cache = self.get_datasource().get_catalog()
+            except Exception as e:
+                # Fallback to full catalog on any error
+                logger.warning(
+                    f"Optimized catalog access failed: {e}. Loading full catalog - this may be slow for large databases. "
+                    "Consider configuring vector_store and running '/index-catalog' command to improve performance."
+                )
+                self.catalog_cache = self.get_datasource().get_catalog()
         return self.catalog_cache
+
+    def _build_catalog_from_suggestions(self, table_suggestions: List[Dict]) -> Catalog:
+        """Build a simplified catalog from table suggestions."""
+        schema_data = {}
+        
+        for suggestion in table_suggestions:
+            schema_name = suggestion.get("schema", "default")
+            table_name = suggestion.get("table")
+            
+            if not table_name:
+                continue
+                
+            if schema_name not in schema_data:
+                schema_data[schema_name] = []
+            
+            # Create a basic table with minimal column info
+            # In a real implementation, you might fetch column details from the catalog store
+            table = Table(
+                table_name=table_name,
+                columns=[Column(
+                    name="*", 
+                    column_type="unknown", 
+                    nullable=True,
+                    primary_key=False,
+                    profile=None
+                )],  # Placeholder
+                profile=None
+            )
+            schema_data[schema_name].append(table)
+        
+        # Build schemas
+        schemas = []
+        for schema_name, tables in schema_data.items():
+            if tables:
+                schemas.append(Schema(
+                    schema_name=schema_name,
+                    tables=tables
+                ))
+        
+        return Catalog(catalog_name="indexed_tables", schemas=schemas)
 
     def _extract_entities(self, question: str) -> List[str]:
         """Extract business entities and concepts from the question."""

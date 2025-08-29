@@ -1,0 +1,64 @@
+flowchart TD
+    %% Input Examples
+    UserQ1["Show me top 5 customers by sales"]
+    UserQ2["Write a function to sort a list"]  
+    UserQ3["Analyze sales trends over time"]
+    UserQ4["What is machine learning?"]
+    
+    %% All inputs go to router
+    UserQ1 --> Router
+    UserQ2 --> Router
+    UserQ3 --> Router
+    UserQ4 --> Router
+    
+    %% LLM Router Analysis
+    Router["LLM Router Analysis<br/>Extract Intent & Keywords"]
+    Router --> Keywords{"Keyword & Pattern Analysis<br/>Confidence Scoring"}
+    
+    %% Classifications
+    Keywords --> Class1["SQL Classification<br/>Keywords: customers, sales, show me, top 5<br/>Database terms<br/>Confidence: 0.95"]
+    
+    Keywords --> Class2["Python Classification<br/>Keywords: function, sort, write, code<br/>Programming terms<br/>Confidence: 0.92"]
+    
+    Keywords --> Class3["Analysis Classification<br/>Keywords: analyze, trends, over time<br/>Statistical terms<br/>Confidence: 0.88"]
+    
+    Keywords --> Class4["Chat Classification<br/>Keywords: what is, explain, concepts<br/>Question patterns<br/>Confidence: 0.85"]
+    
+    %% Agent Routing
+    Class1 --> SQL["SQL Agent<br/>Enhanced Mode"]
+    Class2 --> Python["Python Agent<br/>Code Executor"]
+    Class3 --> Analysis["Data Analysis Agent<br/>Pandas/Matplotlib"]
+    Class4 --> Chat["Chat Agent<br/>Conversational AI"]
+    
+    %% Execution Flow
+    SQL --> Exec1["Execute SQL Query<br/>Generate: SELECT customer_name, SUM(sales)...<br/>Return top 5 results with formatting"]
+    
+    Python --> Exec2["Generate Python Code<br/>Create: def sort_list(lst): return sorted(lst)<br/>Test function and provide explanation"]
+    
+    Analysis --> Exec3["Perform Statistical Analysis<br/>Load sales data from database<br/>Create trend visualization charts<br/>Generate insights and summary"]
+    
+    Chat --> Exec4["Provide Educational Response<br/>Define machine learning concepts<br/>Give examples and applications<br/>Suggest related topics"]
+    
+    %% Results
+    Exec1 --> Result["Formatted Results<br/>Contextual Response for User"]
+    Exec2 --> Result
+    Exec3 --> Result
+    Exec4 --> Result
+    
+    %% Feedback Loop
+    Result --> Feedback{"User Satisfied?"}
+    Feedback -->|No - Need Different Approach| Router
+    Feedback -->|Yes - Task Complete| Success["Task Completed Successfully"]
+    
+    %% Styling
+    classDef inputStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef routerStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef classStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef agentStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef execStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class UserQ1,UserQ2,UserQ3,UserQ4 inputStyle
+    class Router,Keywords,Feedback routerStyle
+    class Class1,Class2,Class3,Class4 classStyle
+    class SQL,Python,Analysis,Chat agentStyle
+    class Exec1,Exec2,Exec3,Exec4,Result,Success execStyle

@@ -90,69 +90,6 @@ class VectorStore(ABC):
             ],
         )
 
-    def index_datasource(
-        self,
-        datasource: DataSource,
-        level: Literal["catalog", "schema", "table", "column"] = "catalog",
-    ) -> None:
-        """
-        Index Catalog from a data source into the vector store.
-        """
-        catalog = datasource.get_catalog()
-        if level == "catalog":
-            self.index_documents(
-                ids=[self._build_id(catalog)],
-                documents=[self._build_document(catalog, level)],
-            )
-            return
-        for schema in catalog.schemas:
-            if level == "schema":
-                self.index_documents(
-                    ids=[self._build_id(catalog, schema)],
-                    documents=[self._build_document(catalog, level, schema)],
-                    metadatas=[
-                        {
-                            "level": "schema",
-                            "schema": schema.schema_name,
-                        }
-                    ],
-                )
-            else:
-                for table in schema.tables:
-                    if level == "table":
-                        self.index_documents(
-                            ids=[self._build_id(catalog, schema, table)],
-                            documents=[
-                                self._build_document(catalog, level, schema, table)
-                            ],
-                            metadatas=[
-                                {
-                                    "level": "table",
-                                    "schema": schema.schema_name,
-                                    "table": table.table_name,
-                                }
-                            ],
-                        )
-                    else:
-                        for column in table.columns:
-                            if level == "column":
-                                self.index_documents(
-                                    ids=[
-                                        self._build_id(catalog, schema, table, column)
-                                    ],
-                                    documents=[
-                                        self._build_document(
-                                            catalog, level, schema, table, column
-                                        )
-                                    ],
-                                    metadatas=[
-                                        {
-                                            "level": "column",
-                                            "schema": schema.schema_name,
-                                            "table": table.table_name,
-                                        }
-                                    ],
-                                )
 
     def _build_id(
         self,

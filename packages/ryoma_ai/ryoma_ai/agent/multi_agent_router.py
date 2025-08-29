@@ -126,9 +126,11 @@ Response (JSON only):"""
 class MultiAgentRouter:
     """Manages multiple agent instances following Claude Code patterns."""
 
-    def __init__(self, model: str, datasource=None, **kwargs):
+    def __init__(self, model: str, datasource=None, meta_store=None, vector_store=None, **kwargs):
         self.model = model
         self.datasource = datasource
+        self.meta_store = meta_store
+        self.vector_store = vector_store
         self.model_parameters = kwargs.get("model_parameters")
 
         # Agent registry (lazy initialization)
@@ -152,11 +154,13 @@ class MultiAgentRouter:
         return self._agents[cache_key]
 
     def _create_agent(self, agent_type: str, **config_overrides) -> Any:
-        """Create agent using factory pattern."""
+        """Create agent using factory pattern with unified stores."""
         base_config = {
             "model": self.model,
             "model_parameters": self.model_parameters,
             "datasource": self.datasource,
+            "store": self.meta_store,  # Pass unified meta store
+            "vector_store": self.vector_store,  # Pass unified vector store
         }
         base_config.update(config_overrides)
 
@@ -166,23 +170,31 @@ class MultiAgentRouter:
                 model=base_config["model"],
                 mode=mode,
                 datasource=base_config["datasource"],
+                store=base_config["store"],
+                vector_store=base_config["vector_store"],
             )
         elif agent_type == "python":
             return PythonAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
+                store=base_config["store"],
+                vector_store=base_config["vector_store"],
             )
         elif agent_type == "pandas":
             return PandasAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
                 datasource=base_config["datasource"],
+                store=base_config["store"],
+                vector_store=base_config["vector_store"],
             )
         elif agent_type == "chat":
             return ChatAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
                 datasource=base_config["datasource"],
+                store=base_config["store"],
+                vector_store=base_config["vector_store"],
             )
         else:
             # Fallback using AgentFactory

@@ -4,6 +4,10 @@ Catalog Manager for Ryoma AI CLI
 Handles catalog indexing and search operations.
 """
 
+from typing import Optional
+
+from langchain_core.stores import BaseStore
+from langchain_core.vectorstores import VectorStore
 from rich.console import Console
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.store import CatalogStore
@@ -12,15 +16,20 @@ from ryoma_ai.store import CatalogStore
 class CatalogManager:
     """Manages catalog indexing and search operations."""
 
-    def __init__(self, console: Console):
+    def __init__(self, console: Console, metadata_store: Optional[BaseStore[str, str]] = None, vector_store: Optional[VectorStore] = None):
         """
         Initialize the catalog manager.
 
         Args:
             console: Rich console for output
+            metadata_store: Unified metadata store from CLI
+            vector_store: Unified vector store from CLI
         """
         self.console = console
-        self.catalog_store = CatalogStore()
+        if metadata_store:
+            self.catalog_store = CatalogStore(metadata_store=metadata_store, vector_store=vector_store)
+        else:
+            self.catalog_store = None
 
     def index_catalog(
         self, datasource_id: str, datasource: DataSource, level: str = "table"
@@ -36,6 +45,10 @@ class CatalogManager:
         Returns:
             bool: True if indexing successful
         """
+        if not self.catalog_store:
+            self.console.print("[red]Catalog store not available - stores not properly initialized[/red]")
+            return False
+            
         try:
             with self.console.status(f"[yellow]Indexing catalog at {level} level..."):
                 catalog_id = self.catalog_store.index_catalog(
@@ -64,6 +77,10 @@ class CatalogManager:
         Returns:
             List of search results
         """
+        if not self.catalog_store:
+            self.console.print("[red]Catalog store not available - stores not properly initialized[/red]")
+            return []
+            
         try:
             with self.console.status("[yellow]Searching catalogs..."):
                 results = self.catalog_store.search_catalogs(query, top_k=top_k)

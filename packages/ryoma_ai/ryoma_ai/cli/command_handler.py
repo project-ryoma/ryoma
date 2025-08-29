@@ -5,8 +5,10 @@ Handles all CLI commands and orchestrates different managers.
 """
 
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from langchain_core.stores import BaseStore
+from langchain_core.vectorstores import VectorStore
 from rich.console import Console
 
 if TYPE_CHECKING:
@@ -28,6 +30,8 @@ class CommandHandler:
         datasource_manager: "DataSourceManager",
         agent_manager: "AgentManager",
         display_manager: "DisplayManager",
+        meta_store: Optional[BaseStore[str, str]] = None,
+        vector_store: Optional[VectorStore] = None,
     ):
         """
         Initialize the command handler.
@@ -38,13 +42,15 @@ class CommandHandler:
             datasource_manager: Data source manager instance
             agent_manager: Agent manager interface instance
             display_manager: Display manager instance
+            meta_store: Unified metadata store from CLI
+            vector_store: Unified vector store from CLI
         """
         self.console = console
         self.config_manager = config_manager
         self.datasource_manager = datasource_manager
         self.agent_interface = agent_manager
         self.display_manager = display_manager
-        self.catalog_manager = CatalogManager(console)
+        self.catalog_manager = CatalogManager(console, metadata_store=meta_store, vector_store=vector_store)
 
     def handle_command(self, input_text: str) -> bool:
         """

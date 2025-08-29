@@ -199,13 +199,15 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
 
         # Initialize internal enhanced agent for advanced capabilities
         try:
+            # Remove store from kwargs to avoid duplicate parameter
+            internal_kwargs = {k: v for k, v in kwargs.items() if k != 'store'}
             self._internal_agent = InternalEnhancedSqlAgent(
                 model=model,
                 model_parameters=model_parameters,
                 datasource=datasource,
                 safety_config=safety_config,
                 store=self.store,  # Pass the store instance to share datasource
-                **kwargs,
+                **internal_kwargs,
             )
         except Exception as e:
             # Log the error for debugging but continue with basic functionality
@@ -214,6 +216,8 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
 
     def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using enhanced capabilities."""
+        if not self._internal_agent:
+            raise RuntimeError("Internal enhanced agent failed to initialize properly")
         return self._internal_agent._build_workflow(graph)
 
     def enable_safety_rule(self, rule):
@@ -297,13 +301,15 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
 
         # Initialize internal ReFoRCE agent for advanced capabilities
         try:
+            # Remove store from kwargs to avoid duplicate parameter
+            internal_kwargs = {k: v for k, v in kwargs.items() if k != 'store'}
             self._internal_agent = InternalReFoRCESqlAgent(
                 model=model,
                 model_parameters=model_parameters,
                 datasource=datasource,
                 safety_config=safety_config,
                 store=self.store,  # Pass the store instance to share datasource
-                **kwargs,
+                **internal_kwargs,
             )
         except Exception as e:
             # Log the error for debugging but continue with basic functionality
@@ -312,6 +318,8 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
 
     def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using ReFoRCE capabilities."""
+        if not self._internal_agent:
+            raise RuntimeError("Internal ReFoRCE agent failed to initialize properly")
         return self._internal_agent._build_workflow(graph)
 
     def enable_safety_rule(self, rule):

@@ -19,6 +19,7 @@ from ryoma_ai.cli.command_handler import CommandHandler
 from ryoma_ai.cli.config_manager import ConfigManager
 from ryoma_ai.cli.datasource_manager import DataSourceManager
 from ryoma_ai.cli.display_manager import DisplayManager
+from ryoma_ai.store.store_factory import StoreFactory
 
 
 class RyomaAI:
@@ -32,7 +33,34 @@ class RyomaAI:
         # Initialize managers
         self.config_manager = ConfigManager()
         self.display_manager = DisplayManager(self.console)
-        self.datasource_manager = DataSourceManager(self.console)
+        
+        # Create stores from configuration
+        try:
+            meta_store_config = self.config_manager.get_meta_store_config()
+            self.meta_store = StoreFactory.create_store(**meta_store_config.to_factory_params())
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Using default memory store for metadata: {e}[/yellow]")
+            from langchain_core.stores import InMemoryStore
+            self.meta_store = InMemoryStore()
+            
+        try:
+            vector_store_config = self.config_manager.get_vector_store_config()
+            # Create actual vector store instance
+            from ryoma_ai.vector_store.factory import create_vector_store
+            from ryoma_ai.embedding.client import get_embedding_client
+            
+            # Create embedding function for vector store
+            embedding_model = self.config_manager.get_config("embedding_model", "text-embedding-ada-002")
+            embedding = get_embedding_client(embedding_model)
+            self.vector_store = create_vector_store(config=vector_store_config, embedding_function=embedding)
+            self.vector_store_config = vector_store_config
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Vector store creation failed, using None: {e}[/yellow]")
+            self.vector_store = None
+            self.vector_store_config = None
+        
+        # Initialize managers with their respective configs
+        self.datasource_manager = DataSourceManager(self.console, meta_store=self.meta_store)
         self.agent_manager = AgentManager(self.console)
         self.autocomplete_manager = AutocompleteManager()
         self.command_handler = CommandHandler(
@@ -41,6 +69,8 @@ class RyomaAI:
             datasource_manager=self.datasource_manager,
             agent_manager=self.agent_manager,
             display_manager=self.display_manager,
+            meta_store=self.meta_store,
+            vector_store=self.vector_store,
         )
 
         # Setup prompt history and key bindings
@@ -139,17 +169,35 @@ class RyomaAI:
             pass
 
     def _initialize_system(self):
-        """Initialize the system components."""
-        # Setup data source connection
-        if not self.datasource_manager.setup_from_config(
-            self.config_manager.config["database"]
-        ):
+        """Initialize the system components with separate store configurations."""
+        # Initialize components using new three-part config structure
+        
+        # 1. Initialize metadata store
+        try:
+            meta_store_config = self.config_manager.get_meta_store_config()
+            self.console.print(f"[dim]Metadata store: {meta_store_config.type}[/dim]")
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Metadata store config issue: {e}[/yellow]")
+        
+        # 2. Initialize vector store
+        try:
+            vector_store_config = self.config_manager.get_vector_store_config()
+            self.console.print(f"[dim]Vector store: {vector_store_config.type}[/dim]")
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Vector store config issue: {e}[/yellow]")
+        
+        # 3. Setup datasource connection
+        datasource_config = self.config_manager.get_default_datasource_config()
+            
+        if datasource_config and not self.datasource_manager.setup_from_config(datasource_config):
             self.console.print(
-                "[yellow]Database connection failed. Use /setup to configure.[/yellow]"
+                "[yellow]Datasource connection failed. Use /setup to configure.[/yellow]"
             )
         elif not self.agent_manager.setup_agent_manager(
             config=self.config_manager.config,
             datasource=self.datasource_manager.current_datasource,
+            vector_store=getattr(self, 'vector_store', None),
+            meta_store=self.meta_store,
         ):
             self.console.print("[yellow]Agent initialization failed.[/yellow]")
         else:
@@ -174,8 +222,11 @@ class RyomaAI:
     help="SQL agent mode",
 )
 @click.option("--config", "-c", help="Config file path")
+@click.option("--meta-store-type", help="Metadata store type (memory, postgres, redis)")
+@click.option("--vector-store-type", help="Vector store type (chroma, faiss, qdrant, pgvector)")
+@click.option("--datasource-type", help="Default datasource type (postgres, mysql, sqlite, etc.)")
 @click.option("--setup", is_flag=True, help="Run interactive setup")
-def main(model, mode, config, setup):
+def main(model, mode, config, meta_store_type, vector_store_type, datasource_type, setup):
     """Ryoma AI Multi-Agent System - Intelligent routing to specialized agents."""
 
     cli = RyomaAI()
@@ -185,6 +236,18 @@ def main(model, mode, config, setup):
         cli.config_manager.config["model"] = model
     if mode:
         cli.config_manager.config["mode"] = mode
+    
+    # Override store configurations from CLI options
+    if meta_store_type:
+        cli.config_manager.update_config("meta_store.type", meta_store_type)
+    if vector_store_type:
+        cli.config_manager.update_config("vector_store.type", vector_store_type)
+    if datasource_type:
+        # Update the default datasource type
+        datasources = cli.config_manager.get_datasources_list()
+        if datasources:
+            datasources[0]["type"] = datasource_type
+            cli.config_manager.update_config("datasources", datasources)
 
     if setup:
         cli.command_handler.interactive_setup()

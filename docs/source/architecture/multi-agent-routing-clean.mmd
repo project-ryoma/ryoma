@@ -1,0 +1,53 @@
+flowchart TD
+    %% User Input
+    User["User Input<br/>Natural Language Question"] --> Router
+    
+    %% Smart Router
+    Router["LLM-Based Smart Router<br/>Intent Classification & Confidence Scoring"]
+    
+    %% Agent Selection
+    Router --> SQL["SQL Agent<br/>Database Operations"]
+    Router --> Python["Python Agent<br/>Code Execution"]
+    Router --> Analysis["Data Analysis Agent<br/>Statistics & Visualization"]
+    Router --> Chat["Chat Agent<br/>General Q&A"]
+    
+    %% Capabilities
+    SQL --> SQLCap["Natural Language to SQL<br/>Schema Exploration<br/>Data Retrieval & Joins<br/>Approval Workflow"]
+    
+    Python --> PyCap["Script Execution<br/>Function Creation<br/>Algorithm Implementation<br/>Testing & Debugging"]
+    
+    Analysis --> AnalysisCap["Statistical Analysis<br/>Data Visualization<br/>Trend Analysis<br/>Report Generation"]
+    
+    Chat --> ChatCap["Explanations & Help<br/>Best Practices<br/>Conceptual Discussions<br/>Information Retrieval"]
+    
+    %% Data Integration
+    DataStore[("Multi-Database Support<br/>PostgreSQL, MySQL, SQLite<br/>DuckDB, Iceberg")]
+    
+    %% Vector Store
+    VectorStore[("Semantic Search<br/>Catalog Indexing<br/>Optimized Performance")]
+    
+    %% Connections
+    SQL -.->|Query| DataStore
+    Analysis -.->|Analyze| DataStore
+    SQL -.->|Search| VectorStore
+    
+    %% Output
+    SQLCap --> Output["Intelligent Response<br/>Context-Aware Results"]
+    PyCap --> Output
+    AnalysisCap --> Output
+    ChatCap --> Output
+    
+    Output --> User
+    
+    %% Styling
+    classDef userStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    classDef routerStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef agentStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#000
+    classDef dataStyle fill:#fff8e1,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef outputStyle fill:#fce4ec,stroke:#c2185b,stroke-width:3px,color:#000
+    
+    class User userStyle
+    class Router routerStyle
+    class SQL,Python,Analysis,Chat agentStyle
+    class DataStore,VectorStore dataStyle
+    class Output outputStyle

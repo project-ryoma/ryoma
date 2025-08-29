@@ -42,17 +42,6 @@ class CatalogNotFoundError(StoreException):
         self.data_source_id = data_source_id
 
 
-class CatalogIndexError(StoreException):
-    """Raised when catalog indexing operations fail."""
-
-    def __init__(
-        self, operation: str, catalog_id: str, cause: Optional[Exception] = None
-    ):
-        message = f"Failed to {operation} catalog '{catalog_id}'"
-        super().__init__(message, cause)
-        self.operation = operation
-        self.catalog_id = catalog_id
-
 
 class DataSourceConnectionError(StoreException):
     """Raised when data source connection fails."""

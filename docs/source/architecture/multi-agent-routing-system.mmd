@@ -1,0 +1,84 @@
+flowchart TD
+    %% === USER INPUT LAYER ===
+    User["👤 USER<br/>."] --> Router{"🧠 INTELLIGENT ROUTER<br/>."}
+    
+    %% === ROUTING LOGIC ===
+    Router --> SQL{"SQL Query?<br/>."}
+    Router --> Python{"Python Code?<br/>."}
+    Router --> Analysis{"Data Analysis?<br/>."}
+    Router --> Chat{"General Chat?<br/>."}
+    
+    %% === SPECIALIZED AGENTS ===
+    SQL --> SQLAgent["🗃️ SQL AGENT<br/>."]
+    Python --> PythonAgent["🐍 PYTHON AGENT<br/>."]
+    Analysis --> PandasAgent["📈 DATA ANALYSIS<br/>."]
+    Chat --> ChatAgent["💬 CHAT AGENT<br/>."]
+    
+    %% === AGENT CAPABILITIES ===
+    SQLAgent --> SQLCaps["..<br/>NL→SQL<br/>Schema Search<br/>Query Optimization<br/>.."]
+    PythonAgent --> PyCaps["..<br/>Script Execution<br/>Function Creation<br/>Testing<br/>.."]
+    PandasAgent --> AnalysisCaps["..<br/>Statistics<br/>Visualization<br/>Insights<br/>.."]
+    ChatAgent --> ChatCaps["..<br/>Explanations<br/>Best Practices<br/>Help<br/>.."]
+    
+    %% === DATA LAYER ===
+    DataSources[("🗄️ DATA SOURCES<br/>PostgreSQL • MySQL<br/>SQLite • DuckDB")]
+    VectorStore[("🔍 VECTOR STORE<br/>Semantic Search")]
+    
+    SQLAgent -.->|Query| DataSources
+    PandasAgent -.->|Analyze| DataSources
+    SQLAgent -.->|Search| VectorStore
+    
+    %% === OUTPUT PROCESSING ===
+    SQLCaps --> Response{"🔄 RESPONSE HANDLER<br/>Aggregation"}
+    PyCaps --> Response
+    AnalysisCaps --> Response
+    ChatCaps --> Response
+    
+    %% === CONTEXT MANAGEMENT ===
+    Context[("📚 CONTEXT<br/>History • Variables")]
+    Response -.->|Update| Context
+    Context -.->|Inform| Router
+    
+    %% === AGENT SWITCHING ===
+    Response --> Switch{"🔀 MULTI-STEP?"}
+    Switch -->|Continue| Response
+    Switch -->|Switch| Router
+    
+    %% === FINAL OUTPUT ===
+    Response --> Output["✨ FINAL RESPONSE<br/>Formatted Results"]
+    Output --> User
+    
+    %% === CLI INTERFACE ===
+    CLI["💻 CLI<br/>ryoma-ai>"] -.-> User
+    
+    %% === ENHANCED STYLING ===
+    classDef userStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    classDef routerStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef agentStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#000
+    classDef dataStyle fill:#fff8e1,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef outputStyle fill:#fce4ec,stroke:#c2185b,stroke-width:3px,color:#000
+    classDef contextStyle fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    classDef capabilityStyle fill:#f9f9f9,stroke:#9e9e9e,stroke-width:1px,color:#424242
+    
+    %% === CLASS ASSIGNMENTS ===
+    class User,CLI userStyle
+    class Router,Switch routerStyle
+    class SQLAgent,PythonAgent,PandasAgent,ChatAgent agentStyle
+    class DataSources,VectorStore dataStyle
+    class Response,Output outputStyle
+    class Context contextStyle
+    class SQLCaps,PyCaps,AnalysisCaps,ChatCaps capabilityStyle
+
+%%{init: {
+  "theme": "default",
+  "themeVariables": {
+    "primaryColor": "#e3f2fd",
+    "primaryTextColor": "#000",
+    "primaryBorderColor": "#1976d2",
+    "lineColor": "#666",
+    "secondaryColor": "#f3e5f5",
+    "tertiaryColor": "#e8f5e8"
+  },
+  "fontFamily": "Arial, sans-serif",
+  "fontSize": "12px"
+}}%%

@@ -125,6 +125,9 @@ class Column(BaseModel):
     primary_key: Optional[bool] = Field(
         None, description="Whether the column is a primary key"
     )
+    description: Optional[str] = Field(
+        None, description="Column description or comment"
+    )
 
     # Enhanced profiling information
     profile: Optional[ColumnProfile] = Field(

@@ -6,26 +6,30 @@ Handles data source connections, registration, and management.
 
 from typing import Any, Dict, Optional
 
+from langchain_core.stores import BaseStore
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
 from ryoma_ai.store import DataSourceStore
+from ryoma_ai.store.config import StoreConfig
+from ryoma_ai.store.store_factory import StoreFactory
 
 
 class DataSourceManager:
     """Manages data source connections and operations."""
 
-    def __init__(self, console: Console):
+    def __init__(self, console: Console, meta_store: Optional[BaseStore[str, str]] = None):
         """
         Initialize the data source manager.
 
         Args:
             console: Rich console for output
+            meta_store: Optional metadata store for datasource registrations
         """
         self.console = console
-        self.datasource_store = DataSourceStore()
+        self.datasource_store = DataSourceStore(store=meta_store)
         self.current_datasource: Optional[DataSource] = None
         self.current_datasource_id: Optional[str] = None
 

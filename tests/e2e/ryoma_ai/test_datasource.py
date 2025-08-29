@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 def postgres():
     # Use environment variables for PostgreSQL connection, with defaults for local testing
     import os
+
     return PostgresDataSource(
         user=os.environ.get("POSTGRES_USER", "postgres"),
         password=os.environ.get("POSTGRES_PASSWORD", "postgres"),

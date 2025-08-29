@@ -1,0 +1,66 @@
+{
+  "model": "gpt-4o",
+  "mode": "enhanced",
+  
+  "meta_store": {
+    "type": "postgres",
+    "connection_string": "postgresql://user:password@localhost:5432/metadata_db",
+    "options": {
+      "timeout": 30,
+      "pool_size": 10
+    }
+  },
+  
+  "vector_store": {
+    "type": "pgvector",
+    "collection_name": "ryoma_vectors",
+    "dimension": 768,
+    "distance_metric": "cosine",
+    "extra_configs": {
+      "connection_string": "postgresql://postgres:postgres@localhost:5432/vectordb",
+      "host": "localhost",
+      "port": 5432,
+      "database": "vectordb",
+      "user": "postgres",
+      "password": "postgres",
+      "distance_strategy": "cosine"
+    }
+  },
+  
+  "datasources": [
+    {
+      "name": "default",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "database": "postgres",
+      "user": "postgres",
+      "password": "password"
+    },
+    {
+      "name": "analytics_db",
+      "type": "mysql",
+      "host": "analytics.company.com",
+      "port": 3306,
+      "database": "analytics",
+      "user": "analytics_user",
+      "password": "analytics_password"
+    },
+    {
+      "name": "warehouse",
+      "type": "snowflake",
+      "account": "your_account",
+      "user": "warehouse_user",
+      "password": "warehouse_password",
+      "database": "warehouse",
+      "schema": "public",
+      "warehouse": "compute_wh"
+    }
+  ],
+  
+  "agent": {
+    "auto_approve_all": false,
+    "retry_count": 3,
+    "timeout_seconds": 300
+  }
+}

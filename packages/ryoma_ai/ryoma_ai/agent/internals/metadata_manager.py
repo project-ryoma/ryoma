@@ -189,7 +189,11 @@ class MetadataManager:
                                 if self._should_include_table(table.table_name, schema):
                                     discovered_tables.append((table.table_name, schema))
                 else:
-                    # Get all schemas
+                    # Get all schemas - Warning: may be slow for large databases
+                    logger.warning(
+                        "Loading full catalog to discover tables - this may be slow for large databases. "
+                        "Consider running '/index-catalog' command to enable optimized catalog search."
+                    )
                     catalog = self.datasource.get_catalog()
                     for schema_obj in catalog.schemas or []:
                         for table in schema_obj.tables or []:
@@ -474,7 +478,11 @@ class MetadataManager:
         relevant_tables = []
 
         try:
-            # Get all tables
+            # Get all tables - Warning: may be slow for large databases
+            logger.warning(
+                "Loading full catalog for table selection - this may be slow for large databases. "
+                "Consider running '/index-catalog' command to enable optimized catalog search."
+            )
             catalog = self.datasource.get_catalog()
 
             for schema_obj in catalog.schemas or []:

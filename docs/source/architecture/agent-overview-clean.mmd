@@ -1,0 +1,69 @@
+graph TB
+    %% Central Router
+    Router["Multi-Agent Router<br/>LLM-Powered Intent Classification<br/>Confidence Scoring & Context Analysis"]
+    
+    %% SQL Agent Card
+    subgraph SQL ["SQL Agent - Database Operations"]
+        SQLFeatures["Natural Language to SQL<br/>Schema Exploration<br/>Data Retrieval & Filtering<br/>Joins & Aggregations<br/>Multi-Database Support<br/>Approval Workflows"]
+        SQLExamples["Examples:<br/>Show top 10 customers<br/>Find orders from last month<br/>What tables are available?"]
+        SQLModes["Modes: Basic | Enhanced | ReForCE"]
+    end
+    
+    %% Python Agent Card
+    subgraph Python ["Python Agent - Code Execution"]
+        PythonFeatures["Script Execution<br/>Function Creation<br/>Algorithm Implementation<br/>Testing & Debugging<br/>Package Management<br/>Error Handling"]
+        PythonExamples["Examples:<br/>Write a fibonacci function<br/>Create a CSV parser<br/>Sort this list of numbers"]
+        PythonEnv["Environment: Isolated Execution"]
+    end
+    
+    %% Data Analysis Agent Card  
+    subgraph Analysis ["Data Analysis Agent - Statistical Analysis"]
+        AnalysisFeatures["Pandas/NumPy Operations<br/>Data Visualization<br/>Statistical Analysis<br/>Trend Analysis<br/>Correlation Studies<br/>Report Generation"]
+        AnalysisExamples["Examples:<br/>Analyze sales trends<br/>Create correlation matrix<br/>Plot distribution charts"]
+        AnalysisLibs["Libraries: Pandas | Matplotlib | Plotly"]
+    end
+    
+    %% Chat Agent Card
+    subgraph Chat ["Chat Agent - Conversational AI"]
+        ChatFeatures["General Q&A<br/>Explanations & Help<br/>Best Practices<br/>Concept Explanations<br/>Context Awareness<br/>Information Retrieval"]
+        ChatExamples["Examples:<br/>What is machine learning?<br/>Explain database indexes<br/>Best practices for data analysis"]
+        ChatContext["Context: Conversation History"]
+    end
+    
+    %% Data Sources
+    subgraph DataSources ["Data Sources"]
+        DB["PostgreSQL<br/>MySQL<br/>SQLite<br/>DuckDB<br/>Iceberg<br/>+ More..."]
+    end
+    
+    %% Advanced Features
+    subgraph Advanced ["Advanced Features"]
+        VectorSearch["Vector Search<br/>Semantic Catalog Indexing"]
+        ContextMgmt["Context Management<br/>Cross-Agent Communication"]
+        AutoApproval["Auto-Approval<br/>Configurable Workflows"]
+        MultiModal["Multi-Modal Output<br/>Text | Tables | Charts"]
+    end
+    
+    %% Connections
+    Router --> SQL
+    Router --> Python  
+    Router --> Analysis
+    Router --> Chat
+    
+    SQL -.->|Query| DataSources
+    Analysis -.->|Analyze| DataSources
+    
+    SQL -.->|Use| Advanced
+    Python -.->|Use| Advanced
+    Analysis -.->|Use| Advanced
+    Chat -.->|Use| Advanced
+    
+    %% Styling
+    classDef routerStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef agentStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef dataStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef advancedStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    
+    class Router routerStyle
+    class SQL,Python,Analysis,Chat agentStyle
+    class DataSources dataStyle
+    class Advanced advancedStyle
