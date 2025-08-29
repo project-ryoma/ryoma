@@ -39,8 +39,11 @@ class BaseAgent:
         if store is None:
             # Provide default InMemoryStore for programmatic usage
             from langchain_core.stores import InMemoryStore
+
             self.store = InMemoryStore()
-            logger.info("Using default InMemoryStore - for production, pass unified store from CLI")
+            logger.info(
+                "Using default InMemoryStore - for production, pass unified store from CLI"
+            )
         else:
             self.store = store
 
