@@ -9,21 +9,19 @@ from typing import Any, Dict, List, Optional
 from langchain_core.embeddings import Embeddings
 from langchain_core.stores import BaseStore
 from langchain_core.vectorstores import VectorStore
-
 from ryoma_ai.catalog import UnifiedCatalogIndexService
+from ryoma_ai.catalog.exceptions import CatalogIndexError
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.models.catalog import CatalogIndex
-from ryoma_ai.catalog.exceptions import CatalogIndexError
-from ryoma_ai.store.exceptions import (
-    CatalogNotFoundError,
-    StoreException,
-)
+from ryoma_ai.store.exceptions import CatalogNotFoundError, StoreException
 
 
 class CatalogNotIndexedError(Exception):
     """Raised when catalog search is attempted without proper indexing."""
+
     pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +49,9 @@ class CatalogStore:
             embedding_function: Embeddings for vector indexing
         """
         if not metadata_store:
-            raise ValueError("metadata_store is required - pass store from CLI to avoid duplication")
+            raise ValueError(
+                "metadata_store is required - pass store from CLI to avoid duplication"
+            )
         self.metadata_store = metadata_store
         self.vector_store = vector_store
         self.embedding_function = embedding_function
@@ -157,7 +157,9 @@ class CatalogStore:
             catalog_data = self.metadata_store.mget([catalog_key])[0]
             if catalog_data:
                 catalog_dict = json.loads(catalog_data)
-                self._catalog_cache[catalog_id] = self._deserialize_catalog(catalog_dict)
+                self._catalog_cache[catalog_id] = self._deserialize_catalog(
+                    catalog_dict
+                )
         except Exception as e:
             logger.warning(f"Failed to load catalog {catalog_id} to cache: {e}")
 
@@ -331,7 +333,7 @@ class CatalogStore:
                 try:
                     # Delete all vectors for this catalog
                     # The catalog_id is prefixed to all vector IDs by the indexer
-                    if hasattr(self.vector_store, 'delete'):
+                    if hasattr(self.vector_store, "delete"):
                         self.vector_store.delete(filter={"catalog_id": catalog_id})
                 except Exception as e:
                     logger.warning(
@@ -523,7 +525,9 @@ class CatalogStore:
                     "nullable": metadata.get("nullable", True),
                     "description": result.get("content", ""),
                 }
-                schema_data[schema_name]["tables"][table_name]["columns"].append(column_info)
+                schema_data[schema_name]["tables"][table_name]["columns"].append(
+                    column_info
+                )
 
         # Build Schema and Table objects
         schemas = []
@@ -534,25 +538,31 @@ class CatalogStore:
                 # Build columns
                 columns = []
                 for col_info in table_info["columns"]:
-                    columns.append(Column(
-                        name=col_info["name"],
-                        type=col_info["type"],
-                        nullable=col_info["nullable"],
-                        description=col_info["description"],
-                    ))
+                    columns.append(
+                        Column(
+                            name=col_info["name"],
+                            type=col_info["type"],
+                            nullable=col_info["nullable"],
+                            description=col_info["description"],
+                        )
+                    )
 
                 # Create table
-                tables.append(Table(
-                    table_name=table_name,
-                    columns=columns,
-                ))
+                tables.append(
+                    Table(
+                        table_name=table_name,
+                        columns=columns,
+                    )
+                )
 
             # Create schema
             if tables:  # Only add schemas that have tables
-                schemas.append(Schema(
-                    schema_name=schema_name,
-                    tables=tables,
-                ))
+                schemas.append(
+                    Schema(
+                        schema_name=schema_name,
+                        tables=tables,
+                    )
+                )
 
         # Determine catalog name from first available catalog
         catalog_name = "search_results"
@@ -608,14 +618,16 @@ class CatalogStore:
                 table_name = metadata.get("name")
 
                 if schema_name and table_name:
-                    suggestions.append({
-                        "schema": schema_name,
-                        "table": table_name,
-                        "score": score,
-                        "description": result.get("content", ""),
-                        "full_name": f"{schema_name}.{table_name}",
-                        "column_count": metadata.get("column_count", 0),
-                    })
+                    suggestions.append(
+                        {
+                            "schema": schema_name,
+                            "table": table_name,
+                            "score": score,
+                            "description": result.get("content", ""),
+                            "full_name": f"{schema_name}.{table_name}",
+                            "column_count": metadata.get("column_count", 0),
+                        }
+                    )
 
                 if len(suggestions) >= max_tables:
                     break
@@ -674,16 +686,18 @@ class CatalogStore:
                     continue
 
                 if schema_name and table_name and column_name:
-                    suggestions.append({
-                        "schema": schema_name,
-                        "table": table_name,
-                        "column": column_name,
-                        "score": score,
-                        "description": result.get("content", ""),
-                        "full_name": f"{schema_name}.{table_name}.{column_name}",
-                        "data_type": metadata.get("data_type", "unknown"),
-                        "nullable": metadata.get("nullable", True),
-                    })
+                    suggestions.append(
+                        {
+                            "schema": schema_name,
+                            "table": table_name,
+                            "column": column_name,
+                            "score": score,
+                            "description": result.get("content", ""),
+                            "full_name": f"{schema_name}.{table_name}.{column_name}",
+                            "data_type": metadata.get("data_type", "unknown"),
+                            "nullable": metadata.get("nullable", True),
+                        }
+                    )
 
                 if len(suggestions) >= max_columns:
                     break
@@ -716,7 +730,9 @@ class CatalogStore:
                 "has_vector_store": True,
                 "has_indexed_catalogs": len(indexes) > 0,
                 "catalog_count": len(indexes),
-                "indexed_catalogs": [idx.catalog_name for idx in indexes[:5]],  # Show first 5
+                "indexed_catalogs": [
+                    idx.catalog_name for idx in indexes[:5]
+                ],  # Show first 5
             }
         except Exception as e:
             return {

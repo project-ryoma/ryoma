@@ -42,14 +42,12 @@ class ConfigManager:
             "model": "gpt-4o",
             "mode": "enhanced",
             "embedding_model": "text-embedding-ada-002",
-
             # Metadata store configuration (for storing metadata documents)
             "meta_store": {
                 "type": "memory",  # memory, postgres, redis
                 "connection_string": os.environ.get("RYOMA_META_STORE_CONNECTION"),
-                "options": {}
+                "options": {},
             },
-
             # Vector store configuration (for vector indexing/searching)
             "vector_store": {
                 "type": "pgvector",  # chroma, faiss, qdrant, milvus, pgvector
@@ -62,10 +60,9 @@ class ConfigManager:
                     "database": "postgres",
                     "user": os.environ.get("POSTGRES_USER", ""),
                     "password": os.environ.get("POSTGRES_PASSWORD", ""),
-                    "distance_strategy": "cosine"
-                }
+                    "distance_strategy": "cosine",
+                },
             },
-
             # Data source configuration (for connecting to databases)
             "datasources": [
                 {
@@ -78,7 +75,6 @@ class ConfigManager:
                     "password": os.environ.get("POSTGRES_PASSWORD", ""),
                 }
             ],
-
             "agent": {
                 "auto_approve_all": False,
                 "retry_count": 3,
@@ -150,7 +146,7 @@ class ConfigManager:
         return StoreConfig(
             type=meta_config.get("type", "memory"),
             connection_string=meta_config.get("connection_string"),
-            options=meta_config.get("options", {})
+            options=meta_config.get("options", {}),
         )
 
     def get_vector_store_config(self) -> VectorStoreConfig:
@@ -166,7 +162,7 @@ class ConfigManager:
             collection_name=vector_config.get("collection_name", "ryoma_vectors"),
             dimension=vector_config.get("dimension", 768),
             distance_metric=vector_config.get("distance_metric", "cosine"),
-            extra_configs=vector_config.get("extra_configs", {})
+            extra_configs=vector_config.get("extra_configs", {}),
         )
 
     def get_datasources_list(self) -> list[Dict[str, Any]]:

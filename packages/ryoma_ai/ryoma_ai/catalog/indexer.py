@@ -13,10 +13,10 @@ from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple
 
 from langchain_core.stores import BaseStore
 from langchain_core.vectorstores import VectorStore
+from ryoma_ai.catalog.exceptions import CatalogIndexError
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.models.catalog import CatalogIndex
-from ryoma_ai.catalog.exceptions import CatalogIndexError
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +105,7 @@ class HierarchicalCatalogIndexer(CatalogIndexer):
         """
         # Count elements
         schema_count = len(catalog.schemas) if catalog.schemas else 0
-        table_count = sum(
-            len(schema.tables) for schema in (catalog.schemas or [])
-        )
+        table_count = sum(len(schema.tables) for schema in (catalog.schemas or []))
         column_count = sum(
             len(table.columns)
             for schema in (catalog.schemas or [])
@@ -127,7 +125,11 @@ class HierarchicalCatalogIndexer(CatalogIndexer):
                 ids, documents, metadatas = zip(*elements)
                 # Add catalog_id to all metadata
                 enhanced_metadatas = [
-                    {**metadata, "catalog_id": catalog_id, "data_source_id": data_source_id}
+                    {
+                        **metadata,
+                        "catalog_id": catalog_id,
+                        "data_source_id": data_source_id,
+                    }
                     for metadata in metadatas
                 ]
                 self.vector_store.add_texts(
@@ -177,21 +179,21 @@ class HierarchicalCatalogIndexer(CatalogIndexer):
             return elements
 
         # Index schemas
-        for schema in (catalog.schemas or []):
+        for schema in catalog.schemas or []:
             elements.append(self._create_schema_element(catalog, schema))
 
             if level == "schema":
                 continue
 
             # Index tables
-            for table in (schema.tables or []):
+            for table in schema.tables or []:
                 elements.append(self._create_table_element(catalog, schema, table))
 
                 if level == "table":
                     continue
 
                 # Index columns
-                for column in (table.columns or []):
+                for column in table.columns or []:
                     elements.append(
                         self._create_column_element(catalog, schema, table, column)
                     )

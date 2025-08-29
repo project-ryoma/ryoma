@@ -126,7 +126,9 @@ Response (JSON only):"""
 class MultiAgentRouter:
     """Manages multiple agent instances following Claude Code patterns."""
 
-    def __init__(self, model: str, datasource=None, meta_store=None, vector_store=None, **kwargs):
+    def __init__(
+        self, model: str, datasource=None, meta_store=None, vector_store=None, **kwargs
+    ):
         self.model = model
         self.datasource = datasource
         self.meta_store = meta_store

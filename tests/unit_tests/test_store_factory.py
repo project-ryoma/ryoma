@@ -4,10 +4,10 @@ Tests for store factory.
 
 import os
 import sys
-import pytest
 from unittest.mock import Mock, patch
-from langchain_core.stores import InMemoryStore
 
+import pytest
+from langchain_core.stores import InMemoryStore
 from ryoma_ai.store.store_factory import StoreFactory, StoreType
 
 
@@ -28,8 +28,7 @@ def test_create_postgres_store_missing_dependency():
     with patch.dict("sys.modules", {"langgraph.store.postgres": None}):
         with pytest.raises(ImportError, match="langgraph\\[postgres\\]"):
             StoreFactory.create_store(
-                StoreType.POSTGRES,
-                {"connection_string": "postgresql://localhost"}
+                StoreType.POSTGRES, {"connection_string": "postgresql://localhost"}
             )
 
 
@@ -45,13 +44,12 @@ def test_create_postgres_store_success(mock_postgres_store):
     """Test successful postgres store creation."""
     mock_store_instance = Mock()
     mock_postgres_store.from_conn_string.return_value = mock_store_instance
-    
+
     connection_string = "postgresql://user:pass@localhost/db"
     store = StoreFactory.create_store(
-        StoreType.POSTGRES,
-        {"connection_string": connection_string}
+        StoreType.POSTGRES, {"connection_string": connection_string}
     )
-    
+
     mock_postgres_store.from_conn_string.assert_called_once_with(connection_string)
     mock_store_instance.setup.assert_called_once()
     assert store == mock_store_instance
@@ -62,8 +60,7 @@ def test_create_redis_store_missing_dependency():
     with patch.dict("sys.modules", {"langgraph.store.redis": None}):
         with pytest.raises(ImportError, match="langgraph\\[redis\\]"):
             StoreFactory.create_store(
-                StoreType.REDIS,
-                {"connection_string": "redis://localhost"}
+                StoreType.REDIS, {"connection_string": "redis://localhost"}
             )
 
 
@@ -79,13 +76,12 @@ def test_create_redis_store_success(mock_redis_store):
     """Test successful redis store creation."""
     mock_store_instance = Mock()
     mock_redis_store.from_conn_string.return_value = mock_store_instance
-    
+
     connection_string = "redis://localhost:6379"
     store = StoreFactory.create_store(
-        StoreType.REDIS,
-        {"connection_string": connection_string}
+        StoreType.REDIS, {"connection_string": connection_string}
     )
-    
+
     mock_redis_store.from_conn_string.assert_called_once_with(connection_string)
     mock_store_instance.setup.assert_called_once()
     assert store == mock_store_instance
@@ -116,14 +112,14 @@ def test_create_from_env_postgres(mock_postgres_store):
     """Test creating postgres store from env."""
     mock_store_instance = Mock()
     mock_postgres_store.from_conn_string.return_value = mock_store_instance
-    
+
     connection_string = "postgresql://user:pass@localhost/db"
-    with patch.dict(os.environ, {
-        "RYOMA_STORE_TYPE": "postgres",
-        "RYOMA_STORE_CONNECTION": connection_string
-    }):
+    with patch.dict(
+        os.environ,
+        {"RYOMA_STORE_TYPE": "postgres", "RYOMA_STORE_CONNECTION": connection_string},
+    ):
         store = StoreFactory.create_from_env()
-        
+
     mock_postgres_store.from_conn_string.assert_called_once_with(connection_string)
     assert store == mock_store_instance
 
@@ -142,13 +138,13 @@ def test_create_from_env_redis(mock_redis_store):
     """Test creating redis store from env."""
     mock_store_instance = Mock()
     mock_redis_store.from_conn_string.return_value = mock_store_instance
-    
+
     connection_string = "redis://localhost:6379"
-    with patch.dict(os.environ, {
-        "RYOMA_STORE_TYPE": "redis",
-        "RYOMA_STORE_CONNECTION": connection_string
-    }):
+    with patch.dict(
+        os.environ,
+        {"RYOMA_STORE_TYPE": "redis", "RYOMA_STORE_CONNECTION": connection_string},
+    ):
         store = StoreFactory.create_from_env()
-        
+
     mock_redis_store.from_conn_string.assert_called_once_with(connection_string)
     assert store == mock_store_instance

@@ -16,7 +16,12 @@ from ryoma_ai.store import CatalogStore
 class CatalogManager:
     """Manages catalog indexing and search operations."""
 
-    def __init__(self, console: Console, metadata_store: Optional[BaseStore[str, str]] = None, vector_store: Optional[VectorStore] = None):
+    def __init__(
+        self,
+        console: Console,
+        metadata_store: Optional[BaseStore[str, str]] = None,
+        vector_store: Optional[VectorStore] = None,
+    ):
         """
         Initialize the catalog manager.
 
@@ -27,7 +32,9 @@ class CatalogManager:
         """
         self.console = console
         if metadata_store:
-            self.catalog_store = CatalogStore(metadata_store=metadata_store, vector_store=vector_store)
+            self.catalog_store = CatalogStore(
+                metadata_store=metadata_store, vector_store=vector_store
+            )
         else:
             self.catalog_store = None
 
@@ -46,9 +53,11 @@ class CatalogManager:
             bool: True if indexing successful
         """
         if not self.catalog_store:
-            self.console.print("[red]Catalog store not available - stores not properly initialized[/red]")
+            self.console.print(
+                "[red]Catalog store not available - stores not properly initialized[/red]"
+            )
             return False
-            
+
         try:
             with self.console.status(f"[yellow]Indexing catalog at {level} level..."):
                 catalog_id = self.catalog_store.index_catalog(
@@ -78,9 +87,11 @@ class CatalogManager:
             List of search results
         """
         if not self.catalog_store:
-            self.console.print("[red]Catalog store not available - stores not properly initialized[/red]")
+            self.console.print(
+                "[red]Catalog store not available - stores not properly initialized[/red]"
+            )
             return []
-            
+
         try:
             with self.console.status("[yellow]Searching catalogs..."):
                 results = self.catalog_store.search_catalogs(query, top_k=top_k)

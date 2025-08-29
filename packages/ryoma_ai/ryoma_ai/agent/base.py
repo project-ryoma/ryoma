@@ -1,18 +1,17 @@
-from typing import Any, Dict, List, Literal, Optional, Union
 import logging
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.stores import BaseStore
-from ryoma_ai.store.catalog_store import CatalogNotIndexedError
-from ryoma_ai.store.store_factory import StoreFactory
+from langchain_core.vectorstores import VectorStore
 from ryoma_ai.agent.resource_registry import ResourceRegistry
 from ryoma_ai.catalog.indexer import UnifiedCatalogIndexService
 from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Schema, Table
 from ryoma_ai.embedding.client import get_embedding_client
 from ryoma_ai.models.agent import AgentType
-from ryoma_ai.store.catalog_store import CatalogStore
-from langchain_core.vectorstores import VectorStore
+from ryoma_ai.store.catalog_store import CatalogNotIndexedError, CatalogStore
+from ryoma_ai.store.store_factory import StoreFactory
 from ryoma_ai.vector_store.config import VectorStoreConfig
 from ryoma_ai.vector_store.factory import create_vector_store
 
@@ -40,7 +39,9 @@ class BaseAgent:
 
         # Initialize store for InjectedStore functionality - store must be provided to avoid duplication
         if store is None:
-            raise ValueError("store parameter is required - agents must receive stores from CLI to ensure unified storage")
+            raise ValueError(
+                "store parameter is required - agents must receive stores from CLI to ensure unified storage"
+            )
         self.store = store
 
         if datasource:
@@ -51,12 +52,12 @@ class BaseAgent:
             self.embedding = self.init_embedding(embedding)
 
         if vector_store:
-            embedding_to_use = getattr(self, 'embedding', None)
+            embedding_to_use = getattr(self, "embedding", None)
             self.vector_store = self.init_vector_store(vector_store, embedding_to_use)
-            
+
         # Initialize unified catalog indexing service
         self._catalog_index_service = None
-        if hasattr(self, 'vector_store') and self.vector_store:
+        if hasattr(self, "vector_store") and self.vector_store:
             self._catalog_index_service = UnifiedCatalogIndexService(
                 vector_store=self.vector_store,
                 metadata_store=self.store,  # Use agent's store for metadata
@@ -153,7 +154,9 @@ class BaseAgent:
 
         # Use unified indexing service
         if not self._catalog_index_service:
-            raise ValueError("Catalog indexing service is not initialized. Ensure vector_store is set.")
+            raise ValueError(
+                "Catalog indexing service is not initialized. Ensure vector_store is set."
+            )
 
         catalog_id = self._catalog_index_service.index_datasource(
             datasource=datasource,
@@ -171,10 +174,12 @@ class BaseAgent:
         if not datasources:
             logger.info("No datasources to index")
             return
-            
+
         for i, datasource in enumerate(datasources):
             try:
-                self.index_datasource(datasource, data_source_id=f"agent_{id(self)}_ds_{i}")
+                self.index_datasource(
+                    datasource, data_source_id=f"agent_{id(self)}_ds_{i}"
+                )
             except Exception as e:
                 logger.error(f"Failed to index datasource {i}: {e}")
 
@@ -211,9 +216,9 @@ class BaseAgent:
         catalog_store = self._get_catalog_store()
         if catalog_store:
             try:
-                min_score = kwargs.get('min_score', 0.3)
-                element_types = kwargs.get('element_types')
-                
+                min_score = kwargs.get("min_score", 0.3)
+                element_types = kwargs.get("element_types")
+
                 return catalog_store.search_relevant_catalog(
                     query=query,
                     top_k=top_k,
@@ -332,11 +337,19 @@ class BaseAgent:
             }
 
         indexing_status = catalog_store.validate_indexing_status()
-        indexing_status["status"] = "configured" if indexing_status.get("has_indexed_catalogs") else "no_catalogs"
-        
+        indexing_status["status"] = (
+            "configured"
+            if indexing_status.get("has_indexed_catalogs")
+            else "no_catalogs"
+        )
+
         if not indexing_status.get("has_indexed_catalogs"):
-            indexing_status["recommendation"] = "Run '/index-catalog' command or agent.index_datasource() to index your catalogs for optimized search"
+            indexing_status["recommendation"] = (
+                "Run '/index-catalog' command or agent.index_datasource() to index your catalogs for optimized search"
+            )
         else:
-            indexing_status["recommendation"] = "Catalog indexing is properly configured"
+            indexing_status["recommendation"] = (
+                "Catalog indexing is properly configured"
+            )
 
         return indexing_status

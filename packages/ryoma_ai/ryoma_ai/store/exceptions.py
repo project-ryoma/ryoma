@@ -42,7 +42,6 @@ class CatalogNotFoundError(StoreException):
         self.data_source_id = data_source_id
 
 
-
 class DataSourceConnectionError(StoreException):
     """Raised when data source connection fails."""
 

@@ -35,7 +35,11 @@ class AgentManager:
         self.agent_config: Dict[str, Any] = {}
 
     def setup_agent_manager(
-        self, config: Dict[str, Any], datasource: DataSource, vector_store=None, meta_store=None
+        self,
+        config: Dict[str, Any],
+        datasource: DataSource,
+        vector_store=None,
+        meta_store=None,
     ) -> bool:
         """
         Setup the multi-agent routing manager.

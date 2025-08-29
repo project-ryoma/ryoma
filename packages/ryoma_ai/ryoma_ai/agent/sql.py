@@ -200,7 +200,7 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
         # Initialize internal enhanced agent for advanced capabilities
         try:
             # Remove store from kwargs to avoid duplicate parameter
-            internal_kwargs = {k: v for k, v in kwargs.items() if k != 'store'}
+            internal_kwargs = {k: v for k, v in kwargs.items() if k != "store"}
             self._internal_agent = InternalEnhancedSqlAgent(
                 model=model,
                 model_parameters=model_parameters,
@@ -302,7 +302,7 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
         # Initialize internal ReFoRCE agent for advanced capabilities
         try:
             # Remove store from kwargs to avoid duplicate parameter
-            internal_kwargs = {k: v for k, v in kwargs.items() if k != 'store'}
+            internal_kwargs = {k: v for k, v in kwargs.items() if k != "store"}
             self._internal_agent = InternalReFoRCESqlAgent(
                 model=model,
                 model_parameters=model_parameters,

@@ -9,10 +9,7 @@ import pytest
 def test_datasource_factory_lazy_import():
     """Test that DataSourceFactory doesn't import datasource modules at import time."""
     # This import should succeed regardless of which datasources are installed
-    from ryoma_ai.datasource.factory import (
-        DataSourceFactory,
-        get_supported_datasources,
-    )
+    from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
 
     # Getting supported datasources should work
     datasources = get_supported_datasources()

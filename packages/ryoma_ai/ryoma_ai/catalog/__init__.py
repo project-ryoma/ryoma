@@ -4,6 +4,7 @@ Catalog management module for Ryoma AI.
 This module provides unified catalog indexing and search functionality.
 """
 
+from ryoma_ai.catalog.exceptions import CatalogIndexError
 from ryoma_ai.catalog.indexer import (
     CatalogIndexer,
     HierarchicalCatalogIndexer,
@@ -11,7 +12,6 @@ from ryoma_ai.catalog.indexer import (
     UnifiedCatalogIndexService,
     VectorIndexer,
 )
-from ryoma_ai.catalog.exceptions import CatalogIndexError
 
 __all__ = [
     "CatalogIndexer",

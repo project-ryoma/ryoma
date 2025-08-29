@@ -20,7 +20,9 @@ from ryoma_ai.store.store_factory import StoreFactory
 class DataSourceManager:
     """Manages data source connections and operations."""
 
-    def __init__(self, console: Console, meta_store: Optional[BaseStore[str, str]] = None):
+    def __init__(
+        self, console: Console, meta_store: Optional[BaseStore[str, str]] = None
+    ):
         """
         Initialize the data source manager.
 

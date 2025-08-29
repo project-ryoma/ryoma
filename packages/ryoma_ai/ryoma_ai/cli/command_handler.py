@@ -50,7 +50,9 @@ class CommandHandler:
         self.datasource_manager = datasource_manager
         self.agent_interface = agent_manager
         self.display_manager = display_manager
-        self.catalog_manager = CatalogManager(console, metadata_store=meta_store, vector_store=vector_store)
+        self.catalog_manager = CatalogManager(
+            console, metadata_store=meta_store, vector_store=vector_store
+        )
 
     def handle_command(self, input_text: str) -> bool:
         """

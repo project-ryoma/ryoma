@@ -90,7 +90,6 @@ class VectorStore(ABC):
             ],
         )
 
-
     def _build_id(
         self,
         catalog: Catalog,

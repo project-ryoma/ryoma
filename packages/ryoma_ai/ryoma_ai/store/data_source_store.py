@@ -10,7 +10,6 @@ from uuid import uuid4
 
 from langchain_core.stores import BaseStore
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.store.store_factory import StoreFactory
 from ryoma_ai.datasource.factory import DataSourceFactory
 from ryoma_ai.models.datasource import DataSourceRegistration
 from ryoma_ai.store.exceptions import (
@@ -18,6 +17,7 @@ from ryoma_ai.store.exceptions import (
     DataSourceNotFoundError,
     StoreException,
 )
+from ryoma_ai.store.store_factory import StoreFactory
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,9 @@ class DataSourceStore:
             store: LangChain BaseStore implementation (required to avoid duplication)
         """
         if not store:
-            raise ValueError("store is required - pass store from CLI to avoid duplication")
+            raise ValueError(
+                "store is required - pass store from CLI to avoid duplication"
+            )
         self.store = store
         self._datasource_cache: Dict[str, DataSource] = {}
         self._registration_cache: Dict[str, DataSourceRegistration] = {}
