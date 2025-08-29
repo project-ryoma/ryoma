@@ -6,7 +6,6 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.base_loader import Loader
 from databuilder.task.task import DefaultTask
-from ibis import BaseBackend
 from pyhocon import ConfigFactory
 from ryoma_ai.datasource.sql import SqlDataSource
 

@@ -1,9 +1,7 @@
 import logging
-from typing import Optional, Union
+from typing import Optional
 
 import ibis
-from ibis import BaseBackend
-from ibis.backends.sql import SQLBackend
 from pydantic import BaseModel, Field
 from pyhocon import ConfigFactory
 from ryoma_ai.datasource.metadata import Table

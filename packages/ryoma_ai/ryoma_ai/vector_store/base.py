@@ -7,7 +7,6 @@ from databuilder.loader.base_loader import Loader
 from databuilder.loader.generic_loader import GenericLoader
 from databuilder.models.table_metadata import TableMetadata
 from pyhocon import ConfigTree
-from ryoma_ai.datasource.base import DataSource
 from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
 
 

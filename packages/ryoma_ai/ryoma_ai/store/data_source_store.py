@@ -17,7 +17,6 @@ from ryoma_ai.store.exceptions import (
     DataSourceNotFoundError,
     StoreException,
 )
-from ryoma_ai.store.store_factory import StoreFactory
 
 logger = logging.getLogger(__name__)
 

@@ -2,16 +2,14 @@ import logging
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from langchain_core.embeddings import Embeddings
-from langchain_core.stores import BaseStore
 from langchain_core.vectorstores import VectorStore
 from ryoma_ai.agent.resource_registry import ResourceRegistry
 from ryoma_ai.catalog.indexer import UnifiedCatalogIndexService
 from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Schema, Table
+from ryoma_ai.datasource.metadata import Catalog
 from ryoma_ai.embedding.client import get_embedding_client
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.store.catalog_store import CatalogNotIndexedError, CatalogStore
-from ryoma_ai.store.store_factory import StoreFactory
 from ryoma_ai.vector_store.config import VectorStoreConfig
 from ryoma_ai.vector_store.factory import create_vector_store
 

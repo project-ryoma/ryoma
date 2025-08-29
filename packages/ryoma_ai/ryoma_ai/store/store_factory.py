@@ -3,7 +3,7 @@ Factory for creating different types of stores based on configuration.
 """
 
 import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional
 
 from langchain_core.stores import BaseStore, InMemoryStore
 

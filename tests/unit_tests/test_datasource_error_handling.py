@@ -1,6 +1,6 @@
 """Test improved error handling for datasource dependencies."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from ryoma_ai.datasource.mysql import MySqlDataSource
