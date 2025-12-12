@@ -87,7 +87,7 @@ jobs:
         uv sync --all-extras
     
     - name: Cache GPT4All models
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/gpt4all
         key: gpt4all-models-${{ hashFiles('tests/e2e/test_*.py') }}
