@@ -147,14 +147,14 @@ jobs:
         twine check packages/ryoma_lab/dist/*
     
     - name: Upload ryoma_ai artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ryoma_ai-dist
         path: packages/ryoma_ai/dist/
         retention-days: 7
     
     - name: Upload ryoma_lab artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ryoma_lab-dist
         path: packages/ryoma_lab/dist/
