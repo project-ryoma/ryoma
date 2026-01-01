@@ -5,11 +5,11 @@ try:
 except ImportError:
     boto3 = None
 
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog
+from ryoma_data.base import BaseDataSource
+from ryoma_data.metadata import Catalog
 
 
-class DynamodbDataSource(DataSource):
+class DynamodbDataSource(BaseDataSource):
     def __init__(self, name: str, region_name: str = None, **kwargs):
         super().__init__(name=name, type="nosql", **kwargs)
         self.region_name = region_name

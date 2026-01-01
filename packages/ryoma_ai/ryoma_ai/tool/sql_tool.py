@@ -5,7 +5,9 @@ from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 from langchain_core.tools import BaseTool
 from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
+from ryoma_data.sql import SqlDataSource
+from ryoma_ai.utils import ensure_sql_datasource
 from ryoma_ai.models.sql import QueryStatus, SqlQueryResult
 from sqlalchemy.engine import Result
 from typing_extensions import Annotated
@@ -17,7 +19,8 @@ def get_datasource_from_store(store) -> SqlDataSource:
     datasource = results[0] if results and results[0] is not None else None
     if not datasource:
         raise ValueError("No datasource available in store")
-    return datasource
+    # Ensure it's a SQL datasource
+    return ensure_sql_datasource(datasource)
 
 
 class QueryInput(BaseModel):

@@ -58,14 +58,19 @@ For integration into your applications:
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
 # Set up data source
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db"
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    port=5432,
+    database="mydb",
+    user="user",
+    password="pass"
 )
 
-# Create SQL agent (uses default InMemoryStore)
+# Create SQL agent
 agent = SqlAgent(
     model="gpt-4o",
     mode="enhanced",
@@ -92,7 +97,7 @@ df = pd.DataFrame({
     'region': ['North', 'South', 'East', 'West', 'North']
 })
 
-# Create pandas agent (uses default InMemoryStore)
+# Create pandas agent
 agent = PandasAgent("gpt-4o")
 agent.add_dataframe(df)
 
@@ -103,20 +108,24 @@ print(result)
 
 ## 🚀 Advanced Features
 
-### Enhanced SQL Agent with Profiling
+### Enhanced SQL Agent
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-# Connect to database with automatic profiling
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db"
+# Connect to database
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="mydb",
+    user="user",
+    password="pass"
 )
 
-# Use ReFoRCE mode for state-of-the-art performance
+# Use ReFoRCE mode for advanced performance
 agent = SqlAgent(
     model="gpt-4",
-    mode="reforce",  # Advanced self-refinement
+    mode="reforce",
     safety_config={
         "enable_validation": True,
         "max_retries": 3
@@ -124,7 +133,7 @@ agent = SqlAgent(
 )
 agent.add_datasource(datasource)
 
-# Complex queries with automatic optimization
+# Complex queries
 response = agent.stream("""
 Find customers who made purchases in the last 30 days,
 group by region, and show the top 3 products by revenue
@@ -166,10 +175,10 @@ Run this quick test to ensure everything is working:
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.sqlite import SqliteDataSource
+from ryoma_data import DataSource
 
 # Create in-memory SQLite database
-datasource = SqliteDataSource(":memory:")
+datasource = DataSource("sqlite", database=":memory:")
 
 # Test agent creation
 agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")

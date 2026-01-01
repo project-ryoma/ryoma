@@ -12,6 +12,8 @@ homepage = "https://www.ryoma-ai.com"
 requires-python = ">=3.9"
 
 dependencies = [
+    "ryoma_data>=0.1.0",
+    "ryoma_ai>=0.1.0",
     "alembic>=1.13.1",
     "reflex>=0.7.0",
     "transformers>=4.40.2",
@@ -33,7 +35,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-ryoma_ai = { path = "./packages/ryoma_ai" }
+ryoma_data = { workspace = true }
+ryoma_ai = { workspace = true }
 
 [project.scripts]
 ryoma = "ryoma_lab.cli:main"

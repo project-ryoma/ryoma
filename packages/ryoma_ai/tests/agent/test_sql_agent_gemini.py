@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from ryoma_ai.agent.sql import SQLAgent
-from ryoma_ai.datasource.sql import SQLDatasource
+from ryoma_data.sql import SQLDatasource
 
 
 class TestSQLAgentGeminiIntegration:

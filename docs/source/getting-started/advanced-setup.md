@@ -51,51 +51,56 @@ agent = SqlAgent(
 
 ## 🗄️ Database Configuration
 
-### PostgreSQL with Profiling
+### PostgreSQL
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@host:5432/db",
-    profiler_config={
-        "sample_size": 10000,      # Rows to analyze
-        "top_k": 10,               # Top frequent values
-        "enable_lsh": True,        # Column similarity
-        "lsh_threshold": 0.8       # Similarity threshold
-    }
+datasource = DataSource(
+    "postgres",
+    connection_string="postgresql://user:pass@host:5432/db"
 )
 ```
 
-### Snowflake with Connection Pooling
+### Snowflake
 ```python
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource
+from ryoma_data import DataSource
 
-datasource = SnowflakeDataSource(
+datasource = DataSource(
+    "snowflake",
     account="your-account",
     user="your-user",
     password="your-password",
     database="your-database",
-    warehouse="your-warehouse",
-    connection_config={
-        "pool_size": 5,
-        "max_overflow": 10,
-        "pool_timeout": 30
-    }
+    warehouse="your-warehouse"
 )
 ```
 
-### BigQuery with Service Account
+### BigQuery
 ```python
-from ryoma_ai.datasource.bigquery import BigQueryDataSource
+from ryoma_data import DataSource
 
-datasource = BigQueryDataSource(
+datasource = DataSource(
+    "bigquery",
     project_id="your-project",
-    credentials_path="/path/to/service-account.json",
-    query_config={
-        "use_query_cache": True,
-        "maximum_bytes_billed": 1000000000  # 1GB limit
-    }
+    credentials_path="/path/to/service-account.json"
 )
+```
+
+### Database Profiling
+```python
+from ryoma_data import DataSource, DatabaseProfiler
+
+datasource = DataSource("postgres", connection_string="postgresql://...")
+
+# Configure profiler
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    top_k=10,
+    enable_lsh=True
+)
+
+# Profile tables
+profile = profiler.profile_table(datasource, "customers")
 ```
 
 ## 🛡️ Security Configuration
@@ -177,13 +182,14 @@ agent = SqlAgent(
 )
 ```
 
-### Local Models (Ollama)
+### Local Models (GPT4All)
 ```python
-from ryoma_ai.models.ollama import OllamaModel
+from ryoma_ai.llm.provider import load_model_provider
 
-model = OllamaModel(
-    model_name="codellama:13b",
-    base_url="http://localhost:11434"
+model = load_model_provider(
+    model_id="gpt4all:codellama-13b.gguf",
+    model_type="chat",
+    model_parameters={"allow_download": True}
 )
 
 agent = SqlAgent(
@@ -298,34 +304,6 @@ def health_check():
         "profiler": profiler_status,
         "overall": all([db_status, model_status, profiler_status])
     }
-```
-
-## 🔄 Migration Guide
-
-### From Basic to Enhanced Mode
-```python
-# Before (Basic mode)
-agent = SqlAgent("gpt-3.5-turbo")
-
-# After (Enhanced mode)
-agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced",
-    safety_config={"enable_validation": True}
-)
-```
-
-### Enabling Database Profiling
-```python
-# Before (No profiling)
-datasource = PostgresDataSource(connection_string)
-
-# After (With profiling)
-datasource = PostgresDataSource(
-    connection_string,
-    enable_profiling=True,
-    profiler_config={"sample_size": 10000}
-)
 ```
 
 ## 🎯 Best Practices

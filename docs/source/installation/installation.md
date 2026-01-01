@@ -43,10 +43,14 @@ pip install ryoma_ai[postgres]
 ```
 
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:password@localhost:5432/database"
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="mydb",
+    user="user",
+    password="password"
 )
 ```
 
@@ -56,9 +60,10 @@ pip install ryoma_ai[snowflake]
 ```
 
 ```python
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource
+from ryoma_data import DataSource
 
-datasource = SnowflakeDataSource(
+datasource = DataSource(
+    "snowflake",
     account="your-account",
     user="your-user",
     password="your-password",
@@ -73,9 +78,10 @@ pip install ryoma_ai[bigquery]
 ```
 
 ```python
-from ryoma_ai.datasource.bigquery import BigQueryDataSource
+from ryoma_data import DataSource
 
-datasource = BigQueryDataSource(
+datasource = DataSource(
+    "bigquery",
     project_id="your-project-id",
     credentials_path="/path/to/service-account.json"
 )
@@ -114,9 +120,13 @@ pip install ollama
 ```
 
 ```python
-from ryoma_ai.models.ollama import OllamaModel
+from ryoma_ai.llm.provider import load_model_provider
 
-model = OllamaModel("codellama:13b")
+model = load_model_provider(
+    model_id="gpt4all:codellama-13b.gguf",
+    model_type="chat",
+    model_parameters={"allow_download": True}
+)
 agent = SqlAgent(model=model, mode="enhanced")
 ```
 
@@ -128,9 +138,9 @@ print(f"Ryoma AI version: {ryoma_ai.__version__}")
 
 # Test basic functionality
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.sqlite import SqliteDataSource
+from ryoma_data import DataSource
 
-datasource = SqliteDataSource(":memory:")
+datasource = DataSource("sqlite", database=":memory:")
 agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")
 agent.add_datasource(datasource)
 

@@ -3,8 +3,8 @@ import re
 from typing import Dict, List, Optional
 
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.metadata import Catalog, Column, Schema, Table
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class SchemaLinkingAgent(ChatAgent):
         self,
         model: str,
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[SqlDataSource] = None,
+        datasource: Optional[DataSource] = None,
         **kwargs,
     ):
         super().__init__(

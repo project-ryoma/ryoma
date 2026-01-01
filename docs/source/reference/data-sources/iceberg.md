@@ -49,7 +49,7 @@ pip install pyiceberg[adls]
 ### REST Catalog
 
 ```python
-from ryoma_ai.datasource.iceberg import IcebergDataSource
+from ryoma_data.iceberg import IcebergDataSource
 
 # REST catalog (recommended for production)
 iceberg_ds = IcebergDataSource(
@@ -276,7 +276,7 @@ Enable detailed logging:
 
 ```python
 import logging
-logging.getLogger("ryoma_ai.datasource.iceberg").setLevel(logging.DEBUG)
+logging.getLogger("ryoma_data.iceberg").setLevel(logging.DEBUG)
 ```
 
 ## Comparison with Other Formats

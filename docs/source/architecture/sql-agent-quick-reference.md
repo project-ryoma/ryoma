@@ -6,7 +6,7 @@
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.sql import SqlDataSource
 
 # Initialize datasource
 datasource = SqlDataSource(connection_string="your_db_connection")

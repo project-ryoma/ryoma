@@ -1,7 +1,7 @@
 from typing import Optional, Type
 
 from pydantic import BaseModel, Field
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.tool.python_tool import PythonTool
 
 
@@ -19,8 +19,8 @@ class PandasTool(PythonTool):
 
     Pandas dataframes are stored in the script context.
     """
-    datasource: Optional[SqlDataSource] = Field(
-        None, exclude=True, description="SQL data source"
+    datasource: Optional[DataSource] = Field(
+        None, exclude=True, description="Data source"
     )
 
     args_schema: Type[BaseModel] = PandasInput

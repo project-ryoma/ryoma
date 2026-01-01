@@ -3,7 +3,7 @@ import traceback
 from abc import abstractmethod
 from typing import Any, Dict, Optional
 
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 
 
 class BaseKernel:

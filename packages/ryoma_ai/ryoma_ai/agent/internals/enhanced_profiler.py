@@ -19,9 +19,9 @@ from typing import Any, Dict, List, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage
-from ryoma_ai.datasource.metadata import ColumnProfile, TableProfile
-from ryoma_ai.datasource.profiler import DatabaseProfiler
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.metadata import ColumnProfile, TableProfile
+from ryoma_data.profiler import DatabaseProfiler
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class EnhancedDatabaseProfiler:
 
     def __init__(
         self,
-        datasource: SqlDataSource,
+        datasource: DataSource,
         model: BaseChatModel,
         base_profiler: Optional[DatabaseProfiler] = None,
         enable_llm_analysis: bool = True,

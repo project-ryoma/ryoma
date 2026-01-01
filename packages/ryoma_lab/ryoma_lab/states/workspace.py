@@ -4,7 +4,7 @@ import pandas as pd
 import reflex as rx
 from IPython.core.displaypub import DisplayPublisher
 from IPython.core.interactiveshell import InteractiveShell
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_lab.models.cell import (
     Cell,
     CellOutput,

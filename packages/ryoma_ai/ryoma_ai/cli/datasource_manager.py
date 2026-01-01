@@ -10,8 +10,8 @@ from langchain_core.stores import BaseStore
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.factory import DataSourceFactory, get_supported_datasources
+from ryoma_data.base import DataSource
+from ryoma_data.factory import DataSourceFactory, get_supported_datasources
 from ryoma_ai.store import DataSourceStore
 
 

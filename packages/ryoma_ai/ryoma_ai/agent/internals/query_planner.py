@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 
 
 class QueryComplexity(Enum):
@@ -47,7 +47,7 @@ class QueryPlannerAgent(ChatAgent):
         self,
         model: str,
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[SqlDataSource] = None,
+        datasource: Optional[DataSource] = None,
         **kwargs,
     ):
         super().__init__(

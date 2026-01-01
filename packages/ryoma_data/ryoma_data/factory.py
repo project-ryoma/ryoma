@@ -6,48 +6,56 @@ from pydantic import BaseModel
 
 # Map datasource names to their module paths and class names
 DATASOURCE_REGISTRY = {
+    # SQL datasources now use unified DataSource
     "mysql": {
-        "module": "ryoma_ai.datasource.mysql",
-        "class": "MySqlDataSource",
-        "config": "MySqlConfig",
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "mysql",
+        "config": None,
     },
     "postgres": {
-        "module": "ryoma_ai.datasource.postgres",
-        "class": "PostgresDataSource",
-        "config": "PostgresConfig",
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "postgres",
+        "config": None,
     },
     "bigquery": {
-        "module": "ryoma_ai.datasource.bigquery",
-        "class": "BigqueryDataSource",
-        "config": None,  # No specific config class
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "bigquery",
+        "config": None,
     },
     "snowflake": {
-        "module": "ryoma_ai.datasource.snowflake",
-        "class": "SnowflakeDataSource",
-        "config": "SnowflakeConfig",
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "snowflake",
+        "config": None,
     },
+    "sqlite": {
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "sqlite",
+        "config": None,
+    },
+    "duckdb": {
+        "module": "ryoma_data.sql",
+        "class": "DataSource",
+        "backend": "duckdb",
+        "config": None,
+    },
+    # Non-SQL datasources keep their original implementations
     "file": {
-        "module": "ryoma_ai.datasource.file",
+        "module": "ryoma_data.file",
         "class": "FileDataSource",
         "config": "FileConfig",
     },
     "dynamodb": {
-        "module": "ryoma_ai.datasource.nosql",
+        "module": "ryoma_data.nosql",
         "class": "DynamodbDataSource",
         "config": "DynamodbConfig",
     },
-    "sqlite": {
-        "module": "ryoma_ai.datasource.sqlite",
-        "class": "SqliteDataSource",
-        "config": "SqliteConfig",
-    },
-    "duckdb": {
-        "module": "ryoma_ai.datasource.duckdb",
-        "class": "DuckDBDataSource",
-        "config": "DuckDBConfig",
-    },
     "iceberg": {
-        "module": "ryoma_ai.datasource.iceberg",
+        "module": "ryoma_data.iceberg",
         "class": "IcebergDataSource",
         "config": "IcebergConfig",
     },
@@ -106,19 +114,44 @@ def get_supported_datasources():
 class DataSourceFactory:
     @staticmethod
     def create_datasource(datasource: str, *args, **kwargs) -> Any:
-        """Create a datasource instance using lazy import to avoid dependency issues."""
+        """
+        Create a datasource instance using lazy import to avoid dependency issues.
+
+        Args:
+            datasource: Datasource type (e.g., "postgres", "mysql", "snowflake")
+            *args: Positional arguments passed to datasource constructor
+            **kwargs: Keyword arguments passed to datasource constructor
+
+        Returns:
+            Datasource instance
+
+        Example:
+            # Create PostgreSQL datasource
+            ds = DataSourceFactory.create_datasource(
+                "postgres",
+                host="localhost",
+                port=5432,
+                database="mydb"
+            )
+        """
         if not hasattr(DataSourceProvider, datasource):
             raise ValueError(f"Unsupported datasource: {datasource}")
 
-        # Import SqlDataSource base class only when needed
-        from ryoma_ai.datasource.sql import SqlDataSource
+        # Import base classes only when needed
+        from ryoma_data.base import BaseDataSource
 
+        registry_info = DATASOURCE_REGISTRY[datasource]
         datasource_class = _lazy_import(datasource, "class")
+
+        # For DataSource, inject the backend parameter
+        if registry_info.get("backend"):
+            kwargs["backend"] = registry_info["backend"]
+
         instance = datasource_class(*args, **kwargs)
 
         # Verify it's a proper datasource instance
-        if not isinstance(instance, SqlDataSource):
-            raise TypeError(f"{datasource} must inherit from SqlDataSource")
+        if not isinstance(instance, BaseDataSource):
+            raise TypeError(f"{datasource} must inherit from BaseDataSource")
 
         return instance
 

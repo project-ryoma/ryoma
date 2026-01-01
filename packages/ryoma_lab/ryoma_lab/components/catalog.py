@@ -2,7 +2,7 @@
 
 import reflex as rx
 import reflex_chakra as rc
-from ryoma_ai.datasource.metadata import Table
+from ryoma_data.metadata import Table
 from ryoma_lab import styles
 from ryoma_lab.states.catalog import CatalogState
 from ryoma_lab.states.datasource import DataSourceTable

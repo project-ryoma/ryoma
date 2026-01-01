@@ -58,15 +58,18 @@ Get up and running in under 5 minutes:
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-# Connect to your database with profiling
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True  # Automatic metadata extraction
+# Connect to your database
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="mydb",
+    user="user",
+    password="pass"
 )
 
-# Create enhanced SQL agent
+# Create SQL agent
 agent = SqlAgent(model="gpt-4", mode="enhanced")
 agent.add_datasource(datasource)
 

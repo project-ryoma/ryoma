@@ -20,8 +20,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from langchain_core.language_models import BaseChatModel
-from ryoma_ai.datasource.profiler import DatabaseProfiler
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.profiler import DatabaseProfiler
+from ryoma_data.sql import SqlDataSource
+from ryoma_ai.profiling.llm_enhancer import LLMProfileEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -80,10 +81,13 @@ class MetadataManager:
         self.batch_config = batch_config or BatchProcessingConfig()
         self.storage_backend = storage_backend
 
-        # Initialize enhanced profiler
+        # Initialize profiler (without LLM enhancement)
         self.profiler = DatabaseProfiler(
-            model=model, enable_llm_enhancement=True, sample_size=10000, enable_lsh=True
+            sample_size=10000, enable_lsh=True
         )
+
+        # Initialize LLM enhancer separately
+        self.llm_enhancer = LLMProfileEnhancer(model=model, enable_caching=True)
 
         # In-memory metadata cache
         self._metadata_cache: Dict[str, Dict[str, Any]] = {}
@@ -288,7 +292,7 @@ class MetadataManager:
                                     self.datasource, table_name, column.name, schema
                                 )
                                 enhanced_metadata = (
-                                    self.profiler.generate_field_description(
+                                    self.llm_enhancer.generate_field_description(
                                         column_profile, table_name, schema
                                     )
                                 )
@@ -532,7 +536,7 @@ class MetadataManager:
 
                             # Generate question-specific enhancement
                             enhanced_metadata = (
-                                self.profiler.generate_field_description(
+                                self.llm_enhancer.generate_field_description(
                                     column_profile, table_name, schema
                                 )
                             )

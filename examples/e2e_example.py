@@ -4,17 +4,18 @@ import pandas as pd
 from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import ToolMode
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
 
 def get_postgres_datasource():
-    return PostgresDataSource(
+    return DataSource(
+        "postgres",
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=os.getenv("POSTGRES_PORT", 5432),
         database=os.getenv("POSTGRES_DB", "postgres"),
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
-        db_schema=os.getenv("POSTGRES_SCHEMA", "public"),
+        schema=os.getenv("POSTGRES_SCHEMA", "public"),
     )
 
 

@@ -1,7 +1,7 @@
 """The home page of the app."""
 
 import reflex as rx
-from ryoma_ai.datasource.factory import get_supported_datasources
+from ryoma_data.factory import get_supported_datasources
 from ryoma_lab import styles
 from ryoma_lab.components.catalog import (
     catalog_search,

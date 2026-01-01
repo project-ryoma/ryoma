@@ -22,7 +22,7 @@ from langchain_core.messages import AIMessage
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.models.agent import ColumnExplorationResult, FormatRestriction
 from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import SqlQueryTool
@@ -40,7 +40,7 @@ class ReFoRCESqlAgent(EnhancedSqlAgent):
         self,
         model: str,
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[SqlDataSource] = None,
+        datasource: Optional[DataSource] = None,
         safety_config: Optional[Dict] = None,
         max_parallel_threads: int = 3,
         max_refinement_iterations: int = 5,

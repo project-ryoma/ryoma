@@ -15,7 +15,7 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-from ryoma_ai.datasource.sqlite import SqliteDataSource
+from ryoma_data.sqlite import SqliteDataSource
 
 # Enable detailed logging to see the profiling method selection
 logging.basicConfig(level=logging.INFO)

@@ -23,29 +23,35 @@ The Database Profiling system provides comprehensive metadata extraction with tw
 
 ## 🚀 Quick Start
 
-### Optimized Database Profiling
+### Database Profiling
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource, DatabaseProfiler
 
-# Create datasource with automatic profiling capabilities
-datasource = PostgresDataSource(
+# Create datasource
+datasource = DataSource(
+    "postgres",
     connection_string="postgresql://user:pass@localhost:5432/db"
 )
 
-# Profile a table - automatically uses database-native methods
-profile = datasource.profile_table("customers")
+# Create profiler
+profiler = DatabaseProfiler()
+
+# Profile a table
+profile = profiler.profile_table(datasource, "customers")
 print(f"Rows: {profile['table_profile']['row_count']:,}")
 print(f"Completeness: {profile['table_profile']['completeness_score']:.2%}")
-print(f"Method: {profile['profiling_summary']['profiling_method']}")  # Always "native_optimized"
 ```
 
 ### LLM-Enhanced Profiling
 ```python
 from ryoma_ai.agent.internals.enhanced_profiler import EnhancedDatabaseProfiler
-from ryoma_ai.models.openai import OpenAIModel
+from ryoma_ai.llm.provider import load_model_provider
 
 # Create enhanced profiler with LLM analysis
-model = OpenAIModel("gpt-4")
+model = load_model_provider(
+    model_id="gpt-4",
+    model_type="chat"
+)
 enhanced_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,
@@ -66,25 +72,27 @@ print(f"SQL hints: {field_metadata.sql_generation_hints}")
 
 ### Custom Configuration
 ```python
-# Custom profiling configuration
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db",
-    profiler_config={
-        "sample_size": 10000,      # Rows for LSH analysis
-        "top_k": 10,               # Top frequent values
-        "enable_lsh": True,        # Column similarity matching
-        "lsh_threshold": 0.8,      # Similarity threshold
-        "num_hashes": 128,         # LSH precision
-        "enable_llm_enhancement": True  # Enable LLM analysis
-    }
+from ryoma_data import DataSource, DatabaseProfiler
+
+# Create datasource
+datasource = DataSource(
+    "postgres",
+    connection_string="postgresql://user:pass@localhost:5432/db"
 )
 
-# Enhanced profiler with Ibis base layer
+# Configure profiler
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    top_k=10,
+    enable_lsh=True
+)
+
+# Enhanced profiler with LLM
 enhanced_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,
     enable_llm_analysis=True,
-    analysis_sample_size=100  # Sample size for LLM analysis
+    analysis_sample_size=100
 )
 ```
 
@@ -395,33 +403,28 @@ llm_focused_config = {
 }
 ```
 
-### Backend-Specific Optimizations
+### Backend-Specific Examples
 ```python
-# PostgreSQL with advanced features
-postgres_ds = PostgresDataSource(
-    connection_string="postgresql://localhost:5432/db",
-    profiler_config={
-        "use_pg_stats": True,      # Leverage pg_stats views
-        "use_histograms": True,    # Use histogram data
-        "sample_size": 10000
-    }
-)
+from ryoma_data import DataSource, DatabaseProfiler
 
-# BigQuery with ML functions
-bigquery_ds = BigQueryDataSource(
-    project_id="my-project",
-    profiler_config={
-        "use_ml_functions": True,  # Use ML.FEATURE_INFO
-        "sample_size": 20000
-    }
+# PostgreSQL profiling
+postgres_ds = DataSource("postgres", connection_string="postgresql://localhost:5432/db")
+profiler = DatabaseProfiler(sample_size=10000)
+profile = profiler.profile_table(postgres_ds, "customers")
+
+# BigQuery profiling
+bigquery_ds = DataSource(
+    "bigquery",
+    project_id="my-project"
 )
+profile = profiler.profile_table(bigquery_ds, "events")
 ```
 
 ## 🔧 Direct Profiler Usage
 
 ### Optimized Ibis Profiler
 ```python
-from ryoma_ai.datasource.profiler import DatabaseProfiler
+from ryoma_data.profiler import DatabaseProfiler
 
 # Create optimized profiler instance (always uses Ibis)
 profiler = DatabaseProfiler(
@@ -443,10 +446,13 @@ print(f"Email quality score: {column_profile.data_quality_score:.3f}")
 ### Enhanced Profiler with LLM Analysis
 ```python
 from ryoma_ai.agent.internals.enhanced_profiler import EnhancedDatabaseProfiler
-from ryoma_ai.models.openai import OpenAIModel
+from ryoma_ai.llm.provider import load_model_provider
 
 # Create enhanced profiler with LLM capabilities
-model = OpenAIModel("gpt-4")
+model = load_model_provider(
+    model_id="gpt-4",
+    model_type="chat"
+)
 enhanced_profiler = EnhancedDatabaseProfiler(
     datasource=datasource,
     model=model,

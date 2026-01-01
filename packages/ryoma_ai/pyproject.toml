@@ -25,6 +25,7 @@ classifiers = [
 ]
 
 dependencies = [
+  "ryoma_data>=0.1.0",
   "mock>=5.1.0",
   "openai>=1.33.0",
   "pydantic>=2.7.1",
@@ -42,46 +43,10 @@ dependencies = [
   "rich>=13.0.0",
   "prompt-toolkit>=3.0.0",
   "amundsen-databuilder>=7.5.0",
-  "ibis-framework>=9.0.0",
 ]
+
+[tool.uv.sources]
+ryoma_data = { workspace = true }
 
 [project.scripts]
 ryoma_ai = "ryoma_ai.cli.main:main"
-
-[project.optional-dependencies]
-snowflake = [
-    "ibis-framework[snowflake]>=9.0.0",
-    "amundsen-databuilder[snowflake]>=7.5.0",
-]
-sqlite = [
-    "ibis-framework[sqlite]>=9.0.0",
-]
-postgres = [
-    "psycopg2>=2.9.2",
-    "ibis-framework[postgres]>=9.0.0",
-]
-mysql = [
-    "ibis-framework[mysql]>=9.0.0",
-    "amundsen-databuilder[rds]>=7.5.0",
-]
-bigquery = [
-    "ibis-framework[bigquery]>=9.0.0",
-    "amundsen-databuilder[bigquery]>=7.5.0",
-]
-pyspark = [
-    "ibis-framework[pyspark]>=9.0.0",
-    "pyspark>=3.2.0",
-    "findspark>=1.4.2",
-]
-duckdb = [
-    "duckdb>=1.0.0",
-    "ibis-framework[duckdb]>=9.0.0"
-]
-dynamodb = [
-    "boto3>=1.28.0",
-    "aioboto3>=11.0.0"
-]
-iceberg = [
-    "pyiceberg>=0.5.0",
-    "pyarrow>=14.0.0"
-]

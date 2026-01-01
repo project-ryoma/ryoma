@@ -1,36 +1,129 @@
 import logging
-from abc import abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
+import ibis
 from ibis import Table as IbisTable
 from ibis.backends import CanListCatalog, CanListDatabase
 from ibis.backends.sql import SQLBackend
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Catalog, Column, Schema, Table
-from ryoma_ai.datasource.profiler import DatabaseProfiler
+from ryoma_data.base import BaseDataSource
+from ryoma_data.metadata import Catalog, Column, Schema, Table
 
 
-class SqlDataSource(DataSource):
+class DataSource(BaseDataSource):
+    """
+    Unified SQL datasource that uses Ibis backends directly.
+    Supports all Ibis-compatible databases through a single interface.
+
+    This class eliminates code duplication by leveraging Ibis's unified API
+    across different database backends (PostgreSQL, MySQL, Snowflake, BigQuery, etc.).
+
+    Example:
+        # PostgreSQL
+        ds = DataSource("postgres", host="localhost", port=5432, database="mydb")
+
+        # MySQL
+        ds = DataSource("mysql", user="root", host="localhost", database="mydb")
+
+        # Or with connection URL
+        ds = DataSource("postgres", connection_url="postgresql://localhost/mydb")
+    """
+
+    BACKEND_MAPPING: ClassVar[Dict[str, str]] = {
+        "postgres": "postgres",
+        "postgresql": "postgres",
+        "mysql": "mysql",
+        "snowflake": "snowflake",
+        "bigquery": "bigquery",
+        "duckdb": "duckdb",
+        "sqlite": "sqlite",
+    }
+
     def __init__(
         self,
-        database: Optional[str] = None,
-        db_schema: Optional[str] = None,
-        profiler_config: Optional[Dict] = None,
+        backend: str,
+        connection_url: Optional[str] = None,
+        **connection_params
     ):
+        """
+        Initialize Ibis datasource.
+
+        Args:
+            backend: Backend type ("postgres", "mysql", "snowflake", etc.)
+            connection_url: Optional connection URL (e.g., "postgresql://localhost/db")
+            **connection_params: Backend-specific connection parameters like:
+                - host, port, database, user, password (PostgreSQL, MySQL)
+                - account, user, password, database (Snowflake)
+                - project_id, dataset_id (BigQuery)
+                - path (DuckDB, SQLite)
+        """
+        database = connection_params.get("database")
+        db_schema = connection_params.get("schema") or connection_params.get("db_schema")
+
         super().__init__(type="sql")
+
+        self.backend = self._normalize_backend(backend)
+        self.connection_url = connection_url
+        self.connection_params = connection_params
         self.database = database
         self.db_schema = db_schema
         self.__connection = None
 
-        # Initialize database profiler
-        profiler_config = profiler_config or {}
-        self.profiler = DatabaseProfiler(**profiler_config)
+        # Store common parameters for convenience
+        self.host = connection_params.get("host")
+        self.port = connection_params.get("port")
+        self.user = connection_params.get("user") or connection_params.get("username")
+        self.password = connection_params.get("password")
+
+    def _normalize_backend(self, backend: str) -> str:
+        """Normalize backend name (e.g., 'postgresql' -> 'postgres')."""
+        backend_lower = backend.lower()
+        normalized = self.BACKEND_MAPPING.get(backend_lower, backend_lower)
+        logging.debug(f"Normalized backend '{backend}' to '{normalized}'")
+        return normalized
 
     def connect(self, **kwargs) -> Any:
+        """Get or create database connection."""
         if not self.__connection:
-            self.__connection = self._connect()
+            self.__connection = self._connect(**kwargs)
         logging.info("Database connection established")
         return self.__connection
+
+    def _connect(self, **kwargs):
+        """Connect using Ibis's unified interface."""
+        logging.info(f"Connecting to {self.backend} database: {self.database}")
+
+        try:
+            # Prefer connection URL if provided
+            if self.connection_url:
+                logging.debug(f"Using connection URL for {self.backend}")
+                return ibis.connect(self.connection_url, **kwargs)
+
+            # Use backend-specific connect method
+            backend_module = getattr(ibis, self.backend, None)
+            if not backend_module:
+                raise ValueError(
+                    f"Unsupported Ibis backend: {self.backend}. "
+                    f"Available backends: {list(self.BACKEND_MAPPING.keys())}"
+                )
+
+            connect_func = getattr(backend_module, "connect", None)
+            if not connect_func:
+                raise AttributeError(
+                    f"Backend '{self.backend}' does not have a connect method"
+                )
+
+            # Merge connection_params with any additional kwargs
+            merged_params = {**self.connection_params, **kwargs}
+            logging.debug(f"Connecting to {self.backend} with params: {list(merged_params.keys())}")
+
+            return connect_func(**merged_params)
+
+        except ImportError as e:
+            self._handle_connection_error(e, self.backend)
+        except Exception as e:
+            raise ConnectionError(
+                f"Failed to connect to {self.backend}: {str(e)}"
+            ) from e
 
     def _handle_connection_error(self, error: Exception, datasource_type: str):
         """Helper method to handle connection errors and provide better error messages."""
@@ -49,11 +142,8 @@ class SqlDataSource(DataSource):
             # Re-raise the original error for non-import errors
             raise
 
-    @abstractmethod
-    def _connect(self, **kwargs) -> Any:
-        raise NotImplementedError("connect is not implemented for this data source")
-
     def query(self, query, result_format="pandas", **kwargs) -> IbisTable:
+        """Execute SQL query and return results."""
         logging.info(f"Executing query: {query}")
         conn = self.connect()
         if not isinstance(conn, SQLBackend):
@@ -73,6 +163,7 @@ class SqlDataSource(DataSource):
         schema: Optional[str] = None,
         table: Optional[str] = None,
     ) -> Catalog:
+        """Get catalog metadata for databases, schemas, and tables."""
         catalog = self.database if not catalog else catalog
         if table:
             schema = self.db_schema if not schema else schema
@@ -168,6 +259,7 @@ class SqlDataSource(DataSource):
         with_table: bool = False,
         with_columns: bool = False,
     ) -> list[Catalog]:
+        """List all catalogs in the database."""
         conn: CanListCatalog = self.connect()
         if not hasattr(conn, "list_catalogs"):
             raise Exception("This data source does not support listing catalogs")
@@ -194,6 +286,7 @@ class SqlDataSource(DataSource):
         with_columns: bool = False,
         include_system_schemas: bool = False,
     ) -> list[Schema]:
+        """List all databases/schemas in the catalog."""
         conn: CanListDatabase = self.connect()
         if not hasattr(conn, "list_databases"):
             raise Exception("This data source does not support listing databases")
@@ -239,6 +332,7 @@ class SqlDataSource(DataSource):
         with_columns: bool = False,
         include_system_tables: bool = False,
     ) -> list[Table]:
+        """List all tables in the database/schema."""
         conn = self.connect()
         catalog = catalog or self.database or conn.current_database
         if database is not None:
@@ -272,192 +366,34 @@ class SqlDataSource(DataSource):
                 )
         return tables
 
-    @abstractmethod
     def get_query_plan(self, query: str) -> Any:
-        raise NotImplementedError(
-            "get_query_plan is not implemented for this data source."
-        )
-
-    def prompt(self, schema: Optional[str] = None, table: Optional[str] = None):
-        catalog = self.get_catalog(schema=schema)
-        return catalog.prompt
-
-    def profile_table(
-        self, table_name: str, schema: Optional[str] = None, **kwargs
-    ) -> Dict:
         """
-        Profile a table with comprehensive metadata extraction.
+        Get query execution plan using backend-specific EXPLAIN syntax.
 
         Args:
-            table_name: Name of the table to profile
-            schema: Optional schema name
-            **kwargs: Additional profiling options
+            query: SQL query to explain
 
         Returns:
-            Dictionary containing comprehensive table and column profiles
+            Query plan (format depends on backend)
         """
+        # Backend-specific EXPLAIN templates
+        explain_templates = {
+            "postgres": "EXPLAIN {}",
+            "mysql": "EXPLAIN FORMAT=JSON {}",
+            "snowflake": "EXPLAIN USING JSON {}",
+            "bigquery": "EXPLAIN {}",
+            "duckdb": "EXPLAIN {}",
+        }
 
-        try:
-            # Try Ibis-enhanced profiling first for better performance
-            try:
-                table_profile = self.profiler.profile_table_with_ibis(
-                    self, table_name, schema
-                )
-                use_ibis_profiling = True
-                logging.info(f"Using Ibis-enhanced profiling for table {table_name}")
-            except Exception as e:
-                logging.warning(
-                    f"Ibis profiling failed, falling back to standard profiling: {e}"
-                )
-                table_profile = self.profiler.profile_table(self, table_name, schema)
-                use_ibis_profiling = False
+        template = explain_templates.get(self.backend)
+        if not template:
+            logging.warning(
+                f"Query plan not supported for {self.backend}, returning None"
+            )
+            return None
 
-            # Get table schema to profile individual columns
-            catalog = self.get_catalog(schema=schema, table=table_name)
-            if not catalog.schemas:
-                return {"table_profile": table_profile.model_dump()}
+        conn = self.connect()
+        explain_query = template.format(query)
+        logging.debug(f"Getting query plan with: {explain_query}")
 
-            table_obj = None
-            for schema_obj in catalog.schemas:
-                table_obj = schema_obj.get_table(table_name)
-                if table_obj:
-                    break
-
-            if not table_obj:
-                return {"table_profile": table_profile.model_dump()}
-
-            # Profile each column using the appropriate method
-            column_profiles = {}
-            for column in table_obj.columns:
-                if use_ibis_profiling:
-                    column_profile = self.profiler.profile_column_with_ibis(
-                        self, table_name, column.name, schema
-                    )
-                else:
-                    column_profile = self.profiler.profile_column(
-                        self, table_name, column.name, schema
-                    )
-                column_profiles[column.name] = column_profile.model_dump()
-
-            return {
-                "table_profile": table_profile.model_dump(),
-                "column_profiles": column_profiles,
-                "profiling_summary": {
-                    "total_columns": len(column_profiles),
-                    "profiled_at": (
-                        table_profile.profiled_at.isoformat()
-                        if table_profile.profiled_at
-                        else None
-                    ),
-                    "row_count": table_profile.row_count,
-                    "completeness_score": table_profile.completeness_score,
-                    "profiling_method": (
-                        "ibis_enhanced" if use_ibis_profiling else "standard"
-                    ),
-                },
-            }
-
-        except Exception as e:
-            logging.error(f"Error profiling table {table_name}: {str(e)}")
-            return {"error": str(e)}
-
-    def profile_column(
-        self, table_name: str, column_name: str, schema: Optional[str] = None
-    ) -> Dict:
-        """
-        Profile a single column with detailed statistics.
-
-        Args:
-            table_name: Name of the table
-            column_name: Name of the column
-            schema: Optional schema name
-
-        Returns:
-            Dictionary containing column profile
-        """
-
-        try:
-            # Try Ibis-enhanced profiling first
-            try:
-                column_profile = self.profiler.profile_column_with_ibis(
-                    self, table_name, column_name, schema
-                )
-                logging.info(f"Using Ibis-enhanced profiling for column {column_name}")
-            except Exception as e:
-                logging.warning(f"Ibis column profiling failed, falling back: {e}")
-                column_profile = self.profiler.profile_column(
-                    self, table_name, column_name, schema
-                )
-
-            return column_profile.model_dump()
-        except Exception as e:
-            logging.error(f"Error profiling column {column_name}: {str(e)}")
-            return {"error": str(e)}
-
-    def get_enhanced_catalog(
-        self,
-        catalog: Optional[str] = None,
-        schema: Optional[str] = None,
-        table: Optional[str] = None,
-        include_profiles: bool = True,
-    ) -> Catalog:
-        """
-        Get catalog with enhanced profiling information.
-
-        Args:
-            catalog: Catalog name
-            schema: Schema name
-            table: Table name
-            include_profiles: Whether to include profiling data
-
-        Returns:
-            Enhanced catalog with profiling information
-        """
-        # Get basic catalog
-        basic_catalog = self.get_catalog(catalog, schema, table)
-
-        if not include_profiles:
-            return basic_catalog
-
-        # Enhance with profiling data
-        try:
-            for schema_obj in basic_catalog.schemas or []:
-                for table_obj in schema_obj.tables or []:
-                    # Add table profile
-                    if self.profiler:
-                        table_profile = self.profiler.profile_table(
-                            self, table_obj.table_name, schema_obj.schema_name
-                        )
-                        table_obj.profile = table_profile
-
-                        # Add column profiles
-                        for column in table_obj.columns:
-                            column_profile = self.profiler.profile_column(
-                                self,
-                                table_obj.table_name,
-                                column.name,
-                                schema_obj.schema_name,
-                            )
-                            column.profile = column_profile
-
-            return basic_catalog
-
-        except Exception as e:
-            logging.error(f"Error enhancing catalog with profiles: {str(e)}")
-            return basic_catalog
-
-    def find_similar_columns(
-        self, reference_column: str, threshold: float = 0.8
-    ) -> List[str]:
-        """
-        Find columns similar to the reference column using LSH.
-
-        Args:
-            reference_column: Name of the reference column
-            threshold: Similarity threshold
-
-        Returns:
-            List of similar column names
-        """
-
-        return self.profiler.find_similar_columns(reference_column, threshold)
+        return conn.sql(explain_query)

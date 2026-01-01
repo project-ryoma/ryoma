@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 from typing import Any, Dict, List, Optional, Set
 
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 
 
 class SafetyLevel(IntEnum):
@@ -62,7 +62,7 @@ class SqlSafetyValidator:
 
     def __init__(
         self,
-        datasource: Optional[SqlDataSource] = None,
+        datasource: Optional[DataSource] = None,
         safety_config: Optional[Dict[str, Any]] = None,
     ):
         self.datasource = datasource

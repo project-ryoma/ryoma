@@ -34,9 +34,9 @@ class BaseAgent:
 Register a data source with the agent.
 
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-datasource = PostgresDataSource("postgresql://localhost:5432/db")
+datasource = DataSource("postgres", connection_string="postgresql://localhost:5432/db")
 agent.add_datasource(datasource)
 ```
 
@@ -340,7 +340,7 @@ final_config = manager.merge_configs(base_config, env_config)
 
 ### Base DataSource Interface
 ```python
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 
 class DataSource:
     def get_catalog(self) -> Catalog
@@ -352,12 +352,10 @@ class DataSource:
 
 ### Database-Specific APIs
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-# PostgreSQL-specific features
-postgres_ds = PostgresDataSource("postgresql://localhost:5432/db")
-postgres_ds.enable_explain_analyze()  # Query performance analysis
-postgres_ds.set_search_path(["public", "analytics"])  # Schema search path
+# PostgreSQL features
+postgres_ds = DataSource("postgres", connection_string="postgresql://localhost:5432/db")
 ```
 
 ## 🎨 Embedding API

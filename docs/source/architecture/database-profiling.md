@@ -1,77 +1,56 @@
 # 📊 Database Profiling System
 
 > **Comprehensive metadata extraction for Text-to-SQL applications**
-> Based on "Automatic Metadata Extraction for Text-to-SQL" research paper
 
 ## 🚀 Quick Start
 
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource, DatabaseProfiler
 
-# Create datasource with automatic profiling
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@host:5432/db"
+# Create datasource
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="mydb",
+    user="user",
+    password="pass"
 )
 
-# Profile table - automatic method selection
-profile = datasource.profile_table("customers")
-print(f"Method: {profile['profiling_summary']['profiling_method']}")
+# Create profiler
+profiler = DatabaseProfiler()
+
+# Profile table
+profile = profiler.profile_table(datasource, "customers")
+print(f"Rows: {profile.row_count}")
+print(f"Completeness: {profile.completeness_score}")
 ```
 
 ## 🎯 Core Features
 
-| 📊 Feature | 🔧 Implementation | 💡 Use Case |
-|------------|------------------|-------------|
-| **Row counts & NULL stats** | `COUNT()`, `COUNT(column)` | Data completeness |
-| **Distinct-value ratios** | `COUNT(DISTINCT column)` | Cardinality analysis |
-| **Statistical measures** | `MIN()`, `MAX()`, `AVG()` | Numeric profiling |
-| **String analysis** | `LENGTH()`, pattern matching | Text data insights |
-| **Top-k frequent values** | `GROUP BY ... ORDER BY COUNT()` | Common patterns |
-| **LSH similarity** | MinHash algorithms | Column matching |
+| 📊 Feature | 💡 Use Case |
+|------------|-------------|
+| **Row counts & NULL stats** | Data completeness |
+| **Distinct-value ratios** | Cardinality analysis |
+| **Statistical measures** | Numeric profiling |
+| **String analysis** | Text data insights |
+| **Top-k frequent values** | Common patterns |
+| **LSH similarity** | Column matching |
 
-## 🏗️ Architecture
-
-### Optimized Ibis-Only Engine
-
-```mermaid
-graph LR
-    A[📊 Profile Request] --> B[⚡ Ibis Profiling]
-    B --> C[📋 Results]
-
-    classDef request fill:#e3f2fd,stroke:#1976d2
-    classDef process fill:#f3e5f5,stroke:#7b1fa2
-    classDef result fill:#e8f5e8,stroke:#388e3c
-
-    class A request
-    class B process
-    class C result
-```
-
-**Key Optimization**: The profiler now **always uses database-native operations** for optimal performance and consistency. No fallback to basic profiling ensures predictable behavior and maximum efficiency.
-
-### 🚀 Why Database-Native Approach?
-
-| 💡 Benefit | 📝 Description |
-|------------|----------------|
-| **Consistent performance** | Always uses optimal database-native methods |
-| **Server-side computation** | All statistics calculated in database |
-| **Optimized SQL generation** | Leverages database query planner |
-| **Reduced network I/O** | Only results transferred, not raw data |
-| **Native functions** | Uses built-in database statistical functions |
-| **Predictable behavior** | No fallback variations or performance surprises |
-
-### 🔧 API Methods
+## 🔧 API Methods
 
 ```python
-# 📊 Table profiling
-profile = datasource.profile_table("customers")
+# Table profiling
+profile = profiler.profile_table(datasource, "customers")
 
-# 📋 Column analysis
-column_profile = datasource.profile_column("customers", "email")
+# Column analysis
+column_profile = profiler.profile_column(datasource, "customers", "email")
 
-# 🔍 Direct Ibis access
-ibis_table = datasource.connect().table("customers")
-stats = ibis_table.describe().to_pandas()
+# Configure profiler
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    top_k=20,
+    enable_lsh=True
+)
 ```
 
 ## 📊 Example Results
@@ -142,10 +121,14 @@ similar = datasource.find_similar_columns("customer_id", threshold=0.8)
 
 ### 🚀 Quick Setup
 ```python
-datasource = PostgresDataSource(
-    connection_string="postgresql://...",
-    enable_profiling=True  # Auto-optimization
+from ryoma_data import DataSource, DatabaseProfiler
+
+datasource = DataSource(
+    "postgres",
+    connection_string="postgresql://..."
 )
+
+profiler = DatabaseProfiler()
 ```
 
 ### 🎛️ Tuning Options
@@ -159,12 +142,13 @@ datasource = PostgresDataSource(
 <summary>🔧 Custom Configuration</summary>
 
 ```python
-profiler_config = {
-    "sample_size": 10000,    # Rows to analyze
-    "top_k": 10,             # Frequent values
-    "enable_lsh": True,      # Similarity matching
-    "lsh_threshold": 0.8     # Similarity threshold
-}
+from ryoma_data import DatabaseProfiler
+
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    top_k=10,
+    enable_lsh=True
+)
 ```
 </details>
 
@@ -174,14 +158,16 @@ profiler_config = {
 <summary>🚀 Basic Profiling</summary>
 
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource, DatabaseProfiler
 
-datasource = PostgresDataSource(
+datasource = DataSource(
+    "postgres",
     connection_string="postgresql://user:pass@host:5432/db"
 )
 
 # Profile table
-profile = datasource.profile_table("customers")
+profiler = DatabaseProfiler()
+profile = profiler.profile_table(datasource, "customers")
 method = profile["profiling_summary"]["profiling_method"]
 print(f"Method: {method}")
 ```
@@ -258,7 +244,7 @@ elif column_profile["null_percentage"] < 5:
 ## 🚀 Production Guide
 
 ### ✅ Deployment Checklist
-- [ ] Enable profiling: `enable_profiling=True`
+- [ ] Create `DatabaseProfiler` instance
 - [ ] Configure sampling for your data size
 - [ ] Set quality thresholds
 - [ ] Monitor profiling overhead
@@ -311,13 +297,13 @@ similar = datasource.find_similar_columns(column_name, threshold=0.8)
 <summary>⚙️ Configuration Options</summary>
 
 ```python
-profiler_config = {
-    "sample_size": 10000,        # Rows to sample
-    "top_k": 10,                 # Top frequent values
-    "lsh_threshold": 0.8,        # Similarity threshold
-    "num_hashes": 128,           # LSH hash functions
-    "enable_lsh": True           # Enable similarity matching
-}
+from ryoma_data import DatabaseProfiler
+
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    top_k=10,
+    enable_lsh=True
+)
 ```
 </details>
 
@@ -340,7 +326,7 @@ if method == "standard":
     print("Ibis not used - check compatibility")
 
 # Reduce sample for large tables
-profiler_config = {"sample_size": 1000}
+profiler = DatabaseProfiler(sample_size=1000)
 ```
 </details>
 

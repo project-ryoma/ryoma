@@ -3,15 +3,19 @@
 from unittest.mock import patch
 
 import pytest
-from ryoma_ai.datasource.mysql import MySqlDataSource
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
 
 def test_postgres_missing_dependencies_error():
     """Test that missing postgres dependencies show helpful error message."""
-    # Create a PostgresDataSource instance
-    ds = PostgresDataSource(
-        host="localhost", port=5432, database="test", user="test", password="test"
+    # Create a DataSource instance for postgres
+    ds = DataSource(
+        "postgres",
+        host="localhost",
+        port=5432,
+        database="test",
+        user="test",
+        password="test",
     )
 
     # Mock the _connect method to directly simulate the ibis error
@@ -38,9 +42,14 @@ def test_postgres_missing_dependencies_error():
 
 def test_mysql_missing_dependencies_error():
     """Test that missing mysql dependencies show helpful error message."""
-    # Create a MySqlDataSource instance
-    ds = MySqlDataSource(
-        host="localhost", port=3306, database="test", username="test", password="test"
+    # Create a DataSource instance for mysql
+    ds = DataSource(
+        "mysql",
+        host="localhost",
+        port=3306,
+        database="test",
+        user="test",
+        password="test",
     )
 
     # Mock the _connect method to directly simulate the ibis error
@@ -63,9 +72,14 @@ def test_mysql_missing_dependencies_error():
 
 def test_non_import_errors_are_preserved():
     """Test that non-import errors are re-raised as-is."""
-    # Create a PostgresDataSource instance
-    ds = PostgresDataSource(
-        host="localhost", port=5432, database="test", user="test", password="test"
+    # Create a DataSource instance for postgres
+    ds = DataSource(
+        "postgres",
+        host="localhost",
+        port=5432,
+        database="test",
+        user="test",
+        password="test",
     )
 
     # Mock the _connect method to raise a connection error (not import error)
@@ -81,10 +95,15 @@ def test_non_import_errors_are_preserved():
 
 def test_real_postgres_error_transformation():
     """Test that real postgres connection attempts get transformed error messages."""
-    # This test uses the real postgres datasource without mocking
+    # This test uses the real DataSource without mocking
     # It will trigger the real ibis import error and our error handler
-    ds = PostgresDataSource(
-        host="localhost", port=5432, database="test", user="test", password="test"
+    ds = DataSource(
+        "postgres",
+        host="localhost",
+        port=5432,
+        database="test",
+        user="test",
+        password="test",
     )
 
     # This should raise our transformed ImportError because psycopg is not installed

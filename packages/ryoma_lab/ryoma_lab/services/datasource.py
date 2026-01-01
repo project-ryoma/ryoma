@@ -2,9 +2,9 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 
 import reflex as rx
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.factory import DataSourceFactory
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
+from ryoma_data.factory import DataSourceFactory
+from ryoma_data.sql import SqlDataSource
 from ryoma_lab.models.datasource import DataSourceTable
 from sqlmodel import select
 

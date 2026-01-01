@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from pydantic import BaseModel
 from ryoma_ai.agent.base import BaseAgent
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
 

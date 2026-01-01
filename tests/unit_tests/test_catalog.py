@@ -1,4 +1,4 @@
-from ryoma_ai.datasource.metadata import Catalog
+from ryoma_data.metadata import Catalog
 
 data = {
     "catalog_name": "main",

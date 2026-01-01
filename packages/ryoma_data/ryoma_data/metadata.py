@@ -292,20 +292,3 @@ class Catalog(BaseModel):
             if schema.schema_name == schema_name:
                 return schema
         return None
-
-    @property
-    def prompt(self):
-        """
-        Generate a prompt for the catalog.
-
-        Returns:
-            str: A prompt string summarizing the catalog.
-        """
-        prompt = f"Catalog: {self.catalog_name}\n"
-        for schema in self.schemas or []:
-            prompt += f"  Schema: {schema.schema_name}\n"
-            for table in schema.tables or []:
-                prompt += f"    Table: {table.table_name}\n"
-                for column in table.columns:
-                    prompt += f"      Column: {column.name} ({column.type})\n"
-        return prompt

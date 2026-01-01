@@ -7,12 +7,15 @@ Real-world examples demonstrating Ryoma's capabilities across different use case
 ### Customer Segmentation Analysis
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
 # Connect to e-commerce database
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/ecommerce",
-    enable_profiling=True
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="ecommerce",
+    user="user",
+    password="pass"
 )
 
 agent = SqlAgent(model="gpt-4", mode="enhanced")
@@ -50,13 +53,15 @@ Include percentage changes and rank products by profitability.
 
 ### Revenue Forecasting
 ```python
-from ryoma_ai.datasource.snowflake import SnowflakeDataSource
+from ryoma_data import DataSource
 
 # Connect to financial data warehouse
-datasource = SnowflakeDataSource(
+datasource = DataSource(
+    "snowflake",
     account="your-account",
     database="FINANCE_DW",
-    enable_profiling=True
+    user="user",
+    password="pass"
 )
 
 agent = SqlAgent(model="gpt-4", mode="reforce")
@@ -94,21 +99,22 @@ Rank customers by risk score and suggest actions.
 
 ### Patient Outcome Analysis
 ```python
-from ryoma_ai.datasource.bigquery import BigQueryDataSource
+from ryoma_data import DataSource
 
 # Connect to healthcare data
-datasource = BigQueryDataSource(
+datasource = DataSource(
+    "bigquery",
     project_id="healthcare-analytics",
-    profiler_config={"sample_size": 50000}  # Large dataset
+    dataset_id="patient_data"
 )
 
 agent = SqlAgent(
-    model="gpt-4", 
+    model="gpt-4",
     mode="enhanced",
     safety_config={
         "enable_validation": True,
         "max_rows": 100000,
-        "require_where_clause": True  # Ensure data filtering
+        "require_where_clause": True
     }
 )
 agent.add_datasource(datasource)
@@ -131,9 +137,12 @@ Exclude any personally identifiable information.
 ### Supply Chain Optimization
 ```python
 # Manufacturing database with IoT sensor data
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/manufacturing",
-    enable_profiling=True
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="manufacturing",
+    user="user",
+    password="pass"
 )
 
 agent = SqlAgent(model="gpt-4", mode="enhanced")
@@ -201,9 +210,12 @@ Include both statistical and business impact analysis.
 ### Student Performance Insights
 ```python
 # Educational database
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/education",
-    enable_profiling=True
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="education",
+    user="user",
+    password="pass"
 )
 
 agent = SqlAgent(model="gpt-4", mode="enhanced")
@@ -226,8 +238,8 @@ Provide recommendations for improving student success.
 ### Cross-Platform Integration
 ```python
 # Connect multiple data sources
-postgres_ds = PostgresDataSource("postgresql://localhost:5432/sales")
-snowflake_ds = SnowflakeDataSource(account="account", database="MARKETING")
+postgres_ds = DataSource("postgres", host="localhost", database="sales")
+snowflake_ds = DataSource("snowflake", account="account", database="MARKETING")
 
 agent = SqlAgent(model="gpt-4", mode="enhanced")
 agent.add_datasource(postgres_ds, name="sales_db")
@@ -250,15 +262,22 @@ Combine data from both databases for comprehensive insights.
 
 ### Database Health Check
 ```python
-# Comprehensive database profiling
-datasource = PostgresDataSource(
-    connection_string="postgresql://localhost:5432/production",
-    enable_profiling=True,
-    profiler_config={
-        "sample_size": 20000,
-        "top_k": 15,
-        "enable_lsh": True
-    }
+from ryoma_data import DataSource, DatabaseProfiler
+
+# Connect to database
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="production",
+    user="user",
+    password="pass"
+)
+
+# Configure profiler
+profiler = DatabaseProfiler(
+    sample_size=20000,
+    top_k=15,
+    enable_lsh=True
 )
 
 # Get detailed profiling information

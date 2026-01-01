@@ -11,7 +11,7 @@ from unittest.mock import Mock
 import pytest
 from langgraph.store.memory import InMemoryStore
 from ryoma_ai.agent.base import BaseAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.sql import SqlDataSource
 from ryoma_ai.tool.sql_tool import get_datasource_from_store
 
 

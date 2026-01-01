@@ -14,7 +14,7 @@ from langgraph.errors import GraphInterrupt
 from langgraph.types import Command
 from ryoma_ai.agent.internals.enhanced_sql_agent import EnhancedSqlAgent
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.sql import SqlDataSource
 from ryoma_ai.models.sql import QueryStatus, SqlQueryResult
 
 

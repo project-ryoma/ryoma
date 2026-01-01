@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.models.sql import DatabaseType, RecoveryStrategy, SqlError, SqlErrorType
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class SqlErrorHandler:
     Provides detailed error analysis and suggests corrections.
     """
 
-    def __init__(self, datasource: Optional[SqlDataSource] = None):
+    def __init__(self, datasource: Optional[DataSource] = None):
         self.datasource = datasource
         self.error_patterns = self._initialize_error_patterns()
 

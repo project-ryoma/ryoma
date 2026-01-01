@@ -2,15 +2,17 @@ from typing import Type
 
 from langchain_core.tools import BaseTool, InjectedToolArg
 from pydantic import BaseModel, Field
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
+from ryoma_data.sql import SqlDataSource
+from ryoma_ai.utils import ensure_sql_datasource
 from typing_extensions import Annotated
 
 
 # Tool 1: Summarize Table
 class SummarizeTableInput(BaseModel):
     table_name: str = Field(..., description="Name of the table to summarize.")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="SQL data source containing the table."
+    datasource: Annotated[DataSource, InjectedToolArg] = Field(
+        description="Data source containing the table."
     )
 
     model_config = {"arbitrary_types_allowed": True}
@@ -25,8 +27,10 @@ class SummarizeTableTool(BaseTool):
         super().__init__(**kwargs)
         self.summarizer = summarizer
 
-    def _run(self, table_name: str, datasource: SqlDataSource, **kwargs) -> str:
-        profile = datasource.profile_table(table_name)
+    def _run(self, table_name: str, datasource: DataSource, **kwargs) -> str:
+        # Ensure we have a SQL datasource
+        sql_datasource = ensure_sql_datasource(datasource)
+        profile = sql_datasource.profile_table(table_name)
         return self.summarizer.summarize_schema(profile)
 
 
@@ -36,8 +40,8 @@ class GenerateSQLInput(BaseModel):
         ..., description="Natural language user question to convert into SQL."
     )
     table_name: str = Field(..., description="Name of the table to query.")
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="SQL data source for schema linking."
+    datasource: Annotated[DataSource, InjectedToolArg] = Field(
+        description="Data source for schema linking."
     )
 
     model_config = {"arbitrary_types_allowed": True}
@@ -62,8 +66,8 @@ class SQLInterpretationInput(BaseModel):
     table_name: str = Field(
         ..., description="Name of the table referenced by the query."
     )
-    datasource: Annotated[SqlDataSource, InjectedToolArg] = Field(
-        description="SQL data source used for column metadata."
+    datasource: Annotated[DataSource, InjectedToolArg] = Field(
+        description="Data source used for column metadata."
     )
 
     model_config = {"arbitrary_types_allowed": True}

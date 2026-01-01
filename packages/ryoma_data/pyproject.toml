@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.4.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ryoma_data"
+version = "0.1.0"
+description = "Data source connectors and profiling for Ryoma AI Platform"
+readme = "README.md"
+repository = "https://github.com/project-ryoma/ryoma"
+homepage = "https://www.ryoma-ai.com"
+requires-python = ">=3.9"
+
+keywords = ["Data Sources", "Database Connectors", "Data Profiling"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+dependencies = [
+  "pydantic>=2.7.1",
+  "pandas>=2.2.2",
+  "pyarrow>=16.1.0",
+  "datasketch>=1.6.5",
+  "amundsen-databuilder>=7.5.0",
+  "ibis-framework>=9.0.0",
+]
+
+[project.optional-dependencies]
+snowflake = [
+    "ibis-framework[snowflake]>=9.0.0",
+    "amundsen-databuilder[snowflake]>=7.5.0",
+]
+sqlite = [
+    "ibis-framework[sqlite]>=9.0.0",
+]
+postgres = [
+    "psycopg2>=2.9.2",
+    "ibis-framework[postgres]>=9.0.0",
+]
+mysql = [
+    "ibis-framework[mysql]>=9.0.0",
+    "amundsen-databuilder[rds]>=7.5.0",
+]
+bigquery = [
+    "ibis-framework[bigquery]>=9.0.0",
+    "amundsen-databuilder[bigquery]>=7.5.0",
+]
+pyspark = [
+    "ibis-framework[pyspark]>=9.0.0",
+    "pyspark>=3.2.0",
+    "findspark>=1.4.2",
+]
+duckdb = [
+    "duckdb>=1.0.0",
+    "ibis-framework[duckdb]>=9.0.0"
+]
+dynamodb = [
+    "boto3>=1.28.0",
+    "aioboto3>=11.0.0"
+]
+iceberg = [
+    "pyiceberg>=0.5.0",
+    "pyarrow>=14.0.0"
+]

@@ -8,7 +8,7 @@ tables, leveraging rich catalog metadata for enhanced text-to-SQL capabilities.
 import os
 
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.iceberg import IcebergDataSource
+from ryoma_data.iceberg import IcebergDataSource
 
 
 def example_iceberg_rest_catalog():
@@ -170,7 +170,7 @@ def example_metadata_comparison():
     print("\n=== Metadata Comparison ===")
 
     # Traditional SQL datasource (requires runtime profiling)
-    from ryoma_ai.datasource.postgres import PostgresDataSource
+    from ryoma_data.postgres import PostgresDataSource
 
     _ = PostgresDataSource(
         host="localhost", database="ecommerce", user="user", password="password"

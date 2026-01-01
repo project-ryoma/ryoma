@@ -57,14 +57,15 @@ agent = SqlAgent(
 )
 ```
 
-### Local Models (Ollama)
+### Local Models (GPT4All)
 ```python
-from ryoma_ai.models.ollama import OllamaModel
+from ryoma_ai.llm.provider import load_model_provider
 
-# CodeLlama for SQL generation
-model = OllamaModel(
-    model_name="codellama:13b",
-    base_url="http://localhost:11434"
+# CodeLlama or other GPT4All models
+model = load_model_provider(
+    model_id="gpt4all:orca-mini-3b.gguf",
+    model_type="chat",
+    model_parameters={"allow_download": True}
 )
 
 agent = SqlAgent(model=model, mode="enhanced")
@@ -114,71 +115,102 @@ model_parameters = {
 
 ### Provider-Specific Configuration
 
+All model providers are loaded through the unified `load_model_provider` function from `ryoma_ai.llm.provider`.
+
 #### OpenAI
 ```python
 import os
-from ryoma_ai.models.openai import OpenAIModel
+from ryoma_ai.llm.provider import load_model_provider
 
 # Set API key
 os.environ["OPENAI_API_KEY"] = "your-api-key"
 
-# Custom configuration
-model = OpenAIModel(
-    model_name="gpt-4",
-    api_key="your-api-key",
-    organization="your-org-id",
-    base_url="https://api.openai.com/v1",  # Custom endpoint
-    timeout=60,
-    max_retries=3
+# Load OpenAI chat model
+chat_model = load_model_provider(
+    model_id="openai:gpt-4",  # or just "gpt-4"
+    model_type="chat",
+    model_parameters={
+        "temperature": 0.1,
+        "max_tokens": 2000
+    }
+)
+
+# Load OpenAI embedding model
+embedding_model = load_model_provider(
+    model_id="openai:text-embedding-ada-002",
+    model_type="embedding"
 )
 ```
 
 #### Anthropic
 ```python
 import os
-from ryoma_ai.models.anthropic import AnthropicModel
+from ryoma_ai.llm.provider import load_model_provider
 
 # Set API key
 os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
 
-# Custom configuration
-model = AnthropicModel(
-    model_name="claude-3-sonnet-20240229",
-    api_key="your-api-key",
-    timeout=60,
-    max_retries=3
+# Load Anthropic chat model
+model = load_model_provider(
+    model_id="anthropic:claude-3-sonnet-20240229",
+    model_type="chat",
+    model_parameters={
+        "temperature": 0.1,
+        "max_tokens": 4000
+    }
 )
 ```
 
 #### Azure OpenAI
 ```python
-from ryoma_ai.models.azure_openai import AzureOpenAIModel
+from ryoma_ai.llm.provider import load_model_provider
 
-model = AzureOpenAIModel(
-    deployment_name="gpt-4-deployment",
-    api_key="your-azure-key",
-    api_base="https://your-resource.openai.azure.com/",
-    api_version="2024-02-01"
+# Set environment variables for Azure
+import os
+os.environ["AZURE_OPENAI_API_KEY"] = "your-azure-key"
+os.environ["AZURE_OPENAI_ENDPOINT"] = "https://your-resource.openai.azure.com/"
+
+# Load Azure OpenAI model
+model = load_model_provider(
+    model_id="azure-chat-openai:gpt-4",
+    model_type="chat",
+    model_parameters={
+        "temperature": 0.1
+    }
 )
 ```
 
-#### Ollama (Local)
+#### Google Gemini
 ```python
-from ryoma_ai.models.ollama import OllamaModel
+import os
+from ryoma_ai.llm.provider import load_model_provider
 
-# Local Ollama instance
-model = OllamaModel(
-    model_name="codellama:13b",
-    base_url="http://localhost:11434",
-    timeout=120,  # Longer timeout for local models
-    keep_alive="5m"  # Keep model loaded
+# Set API key
+os.environ["GOOGLE_API_KEY"] = "your-google-api-key"
+
+# Load Google Gemini model
+model = load_model_provider(
+    model_id="google:gemini-pro",  # or "gemini:gemini-pro"
+    model_type="chat",
+    model_parameters={
+        "temperature": 0.1,
+        "max_tokens": 2000
+    }
 )
+```
 
-# Remote Ollama instance
-model = OllamaModel(
-    model_name="mistral:7b",
-    base_url="http://your-server:11434",
-    headers={"Authorization": "Bearer your-token"}
+#### GPT4All (Local)
+```python
+from ryoma_ai.llm.provider import load_model_provider
+
+# Load GPT4All local model
+model = load_model_provider(
+    model_id="gpt4all:orca-mini-3b.gguf",
+    model_type="chat",
+    model_parameters={
+        "allow_download": True,  # Auto-download if not present
+        "temperature": 0.1
+    }
 )
 ```
 
@@ -207,9 +239,15 @@ agent = SqlAgent(
 ```
 
 #### Privacy-Sensitive Environments
-**Recommended**: Local models via Ollama
+**Recommended**: Local models via GPT4All
 ```python
-model = OllamaModel("codellama:13b")
+from ryoma_ai.llm.provider import load_model_provider
+
+model = load_model_provider(
+    model_id="gpt4all:orca-mini-3b.gguf",
+    model_type="chat",
+    model_parameters={"allow_download": True}
+)
 agent = SqlAgent(model=model, mode="enhanced")
 ```
 
@@ -331,28 +369,35 @@ print(f"Model B accuracy: {results['model_b']['accuracy']:.2%}")
 
 ### API Key Management
 ```python
-# Use environment variables
+# Use environment variables (recommended)
 import os
 os.environ["OPENAI_API_KEY"] = "your-key"
+os.environ["ANTHROPIC_API_KEY"] = "your-key"
 
-# Use key management service
-from ryoma_ai.security import KeyManager
+# Models will automatically use environment variables
+from ryoma_ai.llm.provider import load_model_provider
 
-key_manager = KeyManager("aws-secrets-manager")
-api_key = key_manager.get_key("openai-api-key")
-
-model = OpenAIModel(api_key=api_key)
+model = load_model_provider(
+    model_id="openai:gpt-4",
+    model_type="chat"
+)
 ```
 
 ### Data Privacy
 ```python
-# Local model for sensitive data
-model = OllamaModel("codellama:13b")  # No data leaves your infrastructure
+# Use local models for sensitive data (no data leaves your infrastructure)
+from ryoma_ai.llm.provider import load_model_provider
 
-# Or use privacy-focused providers
-model = AnthropicModel(
-    model_name="claude-3-sonnet-20240229",
-    privacy_mode=True  # Enhanced privacy settings
+local_model = load_model_provider(
+    model_id="gpt4all:orca-mini-3b.gguf",
+    model_type="chat",
+    model_parameters={"allow_download": True}
+)
+
+# Or use Azure OpenAI for enterprise privacy requirements
+azure_model = load_model_provider(
+    model_id="azure-chat-openai:gpt-4",
+    model_type="chat"
 )
 ```
 

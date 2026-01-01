@@ -2,8 +2,8 @@ import logging
 from typing import Any, List, Optional
 
 import reflex as rx
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.factory import DataSourceFactory
+from ryoma_data.base import DataSource
+from ryoma_data.factory import DataSourceFactory
 from ryoma_lab.models.data_catalog import CatalogTable
 from ryoma_lab.models.datasource import DataSourceTable
 from ryoma_lab.services.catalog import CatalogService

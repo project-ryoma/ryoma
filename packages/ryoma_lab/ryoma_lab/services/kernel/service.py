@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_lab.services.kernel.base import BaseKernel
 from ryoma_lab.services.kernel.pythonkernel import PythonKernel
 from ryoma_lab.services.kernel.sqlkernel import SqlKernel

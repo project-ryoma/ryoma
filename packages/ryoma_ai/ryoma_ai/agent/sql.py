@@ -11,7 +11,7 @@ from ryoma_ai.agent.internals.reforce_sql_agent import (
     ReFoRCESqlAgent as InternalReFoRCESqlAgent,
 )
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.models.agent import SqlAgentMode
 from ryoma_ai.tool.sql_tool import (
     CreateTableTool,

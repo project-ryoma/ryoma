@@ -9,7 +9,7 @@ Advanced multi-step reasoning with safety validation and error handling.
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
 # Create enhanced SQL agent
 agent = SqlAgent(
@@ -22,10 +22,10 @@ agent = SqlAgent(
     }
 )
 
-# Connect to database with profiling
-datasource = PostgresDataSource(
-    connection_string="postgresql://user:pass@localhost:5432/db",
-    enable_profiling=True  # Enables metadata extraction
+# Connect to database
+datasource = DataSource(
+    "postgres",
+    connection_string="postgresql://user:pass@localhost:5432/db"
 )
 agent.add_datasource(datasource)
 
@@ -133,9 +133,9 @@ agent = SqlAgent(
 Add a data source to the agent.
 
 ```python
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_data import DataSource
 
-datasource = PostgresDataSource("postgresql://localhost:5432/db")
+datasource = DataSource("postgres", connection_string="postgresql://localhost:5432/db")
 agent.add_datasource(datasource, name="main_db")
 ```
 
@@ -226,19 +226,20 @@ except Exception as e:
 
 ## 📈 Performance Features
 
-### Database Profiling Integration
-Leverages comprehensive metadata for better query generation:
+### Database Profiling
+Use profiling for better query generation:
 
 ```python
-# Enable profiling for better performance
-datasource = PostgresDataSource(
-    connection_string="postgresql://localhost:5432/db",
-    enable_profiling=True,
-    profiler_config={
-        "sample_size": 10000,
-        "enable_lsh": True  # Column similarity matching
-    }
+from ryoma_data import DataSource, DatabaseProfiler
+
+datasource = DataSource("postgres", connection_string="postgresql://localhost:5432/db")
+
+# Profile tables
+profiler = DatabaseProfiler(
+    sample_size=10000,
+    enable_lsh=True
 )
+profile = profiler.profile_table(datasource, "customers")
 ```
 
 ### Query Optimization
@@ -291,9 +292,9 @@ agent = SqlAgent(
 - Block dangerous operations
 
 ### 3. **Use Database Profiling**
-- Enable profiling for better query generation
+- Profile tables for better query generation
 - Use appropriate sample sizes
-- Cache profiles for frequently used tables
+- Enable LSH for column similarity
 
 ### 4. **Structure Questions Well**
 - Be specific about desired output format

@@ -15,7 +15,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = [
-    "ryoma_ai[snowflake, pyspark, sqlite, mysql, bigquery]",
+    "ryoma_data[snowflake, pyspark, sqlite, mysql, bigquery]",
+    "ryoma_ai",
     "ryoma_lab",
     "pytest >= 6.2.5",
     "black >= 23.3.0",
@@ -33,11 +34,12 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+ryoma_data = { workspace = true}
 ryoma_ai = { workspace = true}
 ryoma_lab = { workspace = true}
 
 [tool.uv.workspace]
-members = ["packages/ryoma_ai", "packages/ryoma_lab"]
+members = ["packages/ryoma_data", "packages/ryoma_ai", "packages/ryoma_lab"]
 
 [tool.isort]
 profile = "black"

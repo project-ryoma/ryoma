@@ -1,8 +1,8 @@
 from typing import Optional
 
 import pyarrow as pa
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import Table
+from ryoma_data.base import DataSource
+from ryoma_data.metadata import Table
 
 
 class FileConfig:

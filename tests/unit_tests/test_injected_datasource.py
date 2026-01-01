@@ -8,7 +8,7 @@ from unittest.mock import Mock
 import pytest
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.sql import SqlDataSource
 from ryoma_ai.models.agent import SqlAgentMode
 from ryoma_ai.tool.sql_tool import SchemaAnalysisTool, SqlQueryTool
 

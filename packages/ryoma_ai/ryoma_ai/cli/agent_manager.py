@@ -14,7 +14,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.syntax import Syntax
 from ryoma_ai.agent.multi_agent_router import MultiAgentRouter, TaskClassification
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.models.agent import SqlAgentMode
 
 

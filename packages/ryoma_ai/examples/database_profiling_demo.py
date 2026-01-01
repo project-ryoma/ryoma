@@ -1,8 +1,7 @@
 """
 Database Profiling Demo
 
-This example demonstrates the comprehensive database profiling capabilities
-based on the "Automatic Metadata Extraction for Text-to-SQL" paper.
+This example demonstrates comprehensive database profiling capabilities.
 
 Features demonstrated:
 - Row counts & NULL statistics
@@ -13,7 +12,7 @@ Features demonstrated:
 - Locality-sensitive hashing / MinHash sketches for approximate similarity
 """
 
-from ryoma_ai.datasource.sqlite import SqliteDataSource
+from ryoma_data import DataSource, DatabaseProfiler
 
 
 def demo_comprehensive_profiling():
@@ -22,310 +21,194 @@ def demo_comprehensive_profiling():
     print("🔍 Database Profiling Demo")
     print("=" * 50)
 
-    # Initialize datasource with automatic profiling
-    # You can use any SQL datasource (PostgreSQL, MySQL, SQLite, etc.)
-    datasource = SqliteDataSource(
-        connection_url="sqlite:///example.db",
-        profiler_config={
-            "sample_size": 10000,
-            "top_k": 10,
-            "lsh_threshold": 0.8,
-            "num_hashes": 128,
-            "enable_lsh": True,
-        },
+    # Create datasource
+    datasource = DataSource("sqlite", database="example.db")
+
+    # Create profiler with configuration
+    profiler = DatabaseProfiler(
+        sample_size=10000,
+        top_k=10,
+        lsh_threshold=0.8,
+        num_hashes=128,
+        enable_lsh=True,
     )
 
-    # Example table name - replace with your actual table
+    # Example table name
     table_name = "customers"
 
     print(f"\n📊 Profiling table: {table_name}")
     print("-" * 30)
 
-    # 1. Comprehensive Table Profiling
+    # Profile the table
     print("\n1. Table-Level Profiling:")
-    table_profile = datasource.profile_table(table_name)
+    table_profile = profiler.profile_table(datasource, table_name)
 
-    if "error" not in table_profile:
+    if table_profile:
         print("   ✅ Table profiled successfully")
-        print(
-            f"   📈 Row count: {table_profile.get('profiling_summary', {}).get('row_count', 'N/A')}"
-        )
-        print(
-            f"   📊 Total columns: {table_profile.get('profiling_summary', {}).get('total_columns', 'N/A')}"
-        )
-        print(
-            f"   🎯 Completeness score: {table_profile.get('profiling_summary', {}).get('completeness_score', 'N/A')}"
-        )
-
-        # Display column profiles
-        column_profiles = table_profile.get("column_profiles", {})
-        print(f"\n2. Column-Level Profiling ({len(column_profiles)} columns):")
-
-        for col_name, profile in column_profiles.items():
-            print(f"\n   📋 Column: {col_name}")
-            print(f"      Type: {profile.get('semantic_type', 'general')}")
-            print(f"      NULL %: {profile.get('null_percentage', 0):.1f}%")
-            print(f"      Distinct ratio: {profile.get('distinct_ratio', 0):.3f}")
-            print(f"      Quality score: {profile.get('data_quality_score', 0):.3f}")
-
-            # Show top values
-            top_values = profile.get("top_k_values", [])
-            if top_values:
-                print(
-                    f"      Top values: {', '.join([str(v['value']) for v in top_values[:3]])}"
-                )
-
-            # Show numeric stats if available
-            numeric_stats = profile.get("numeric_stats")
-            if numeric_stats:
-                print(
-                    f"      Range: {numeric_stats.get('min_value', 'N/A')} - {numeric_stats.get('max_value', 'N/A')}"
-                )
-                print(
-                    f"      Mean: {numeric_stats.get('mean', 'N/A'):.2f}"
-                    if numeric_stats.get("mean")
-                    else ""
-                )
-
-            # Show string stats if available
-            string_stats = profile.get("string_stats")
-            if string_stats:
-                print(
-                    f"      Length: {string_stats.get('min_length', 'N/A')} - {string_stats.get('max_length', 'N/A')} chars"
-                )
-                print(
-                    f"      Avg length: {string_stats.get('avg_length', 'N/A'):.1f}"
-                    if string_stats.get("avg_length")
-                    else ""
-                )
-
-            # Show date stats if available
-            date_stats = profile.get("date_stats")
-            if date_stats:
-                print(
-                    f"      Date range: {date_stats.get('date_range_days', 'N/A')} days"
-                )
+        print(f"   📈 Row count: {table_profile.row_count}")
+        print(f"   📊 Total columns: {table_profile.column_count}")
+        print(f"   🎯 Completeness score: {table_profile.completeness_score:.3f}")
     else:
-        print(f"   ❌ Error profiling table: {table_profile['error']}")
+        print("   ❌ Error profiling table")
 
-    print("\n3. Enhanced Catalog with Profiling:")
-    enhanced_catalog = datasource.get_enhanced_catalog(include_profiles=True)
-    print(f"   📚 Catalog: {enhanced_catalog.catalog_name}")
+    # Profile individual columns
+    print(f"\n2. Column-Level Profiling:")
+    catalog = datasource.get_catalog(table=table_name)
 
-    for schema in enhanced_catalog.schemas or []:
-        print(f"   📁 Schema: {schema.schema_name}")
-        for table in schema.tables or []:
-            print(f"      📊 Table: {table.table_name}")
-            if table.profile:
-                print(f"         Rows: {table.profile.row_count}")
-                print(
-                    f"         Completeness: {table.profile.completeness_score:.3f}"
-                    if table.profile.completeness_score
-                    else ""
+    for schema in catalog.schemas:
+        for table in schema.tables:
+            for column in table.columns[:3]:  # Show first 3 columns as example
+                column_profile = profiler.profile_column(
+                    datasource, table_name, column.name
                 )
 
-            # Show enhanced column information
-            profiled_columns = table.get_profiled_columns()
-            high_quality_columns = table.get_high_quality_columns()
+                print(f"\n   📋 Column: {column.name}")
+                print(f"      Type: {column_profile.semantic_type}")
+                print(f"      NULL %: {column_profile.null_percentage:.1f}%")
+                print(f"      Distinct ratio: {column_profile.distinct_ratio:.3f}")
+                print(f"      Quality score: {column_profile.data_quality_score:.3f}")
 
-            print(f"         Profiled columns: {len(profiled_columns)}")
-            print(f"         High quality columns: {len(high_quality_columns)}")
-
-    print("\n4. Column Similarity Analysis:")
-    # Find similar columns using LSH
-    similar_columns = datasource.find_similar_columns("customer_id", threshold=0.7)
-    if similar_columns:
-        print(f"   🔗 Columns similar to 'customer_id': {', '.join(similar_columns)}")
-    else:
-        print("   ℹ️  No similar columns found (or LSH not available)")
+                # Show top values if available
+                if column_profile.top_k_values:
+                    top_3 = column_profile.top_k_values[:3]
+                    values_str = ", ".join([str(v["value"]) for v in top_3])
+                    print(f"      Top values: {values_str}")
 
 
-def demo_individual_column_profiling():
-    """Demonstrate individual column profiling."""
-
-    print("\n\n🎯 Individual Column Profiling Demo")
-    print("=" * 50)
-
-    datasource = SqliteDataSource(
-        connection_url="sqlite:///example.db", enable_profiling=True
-    )
-
-    # Profile specific columns
-    columns_to_profile = ["customer_id", "email", "created_at", "total_spent"]
-    table_name = "customers"
-
-    for column_name in columns_to_profile:
-        print(f"\n📊 Profiling column: {table_name}.{column_name}")
-        print("-" * 40)
-
-        column_profile = datasource.profile_column(table_name, column_name)
-
-        if "error" not in column_profile:
-            print("   ✅ Column profiled successfully")
-            print(
-                f"   🏷️  Semantic type: {column_profile.get('semantic_type', 'general')}"
-            )
-            print(
-                f"   📊 Data quality: {column_profile.get('data_quality_score', 0):.3f}"
-            )
-            print(
-                f"   🔢 Distinct count: {column_profile.get('distinct_count', 'N/A')}"
-            )
-            print(
-                f"   ❌ NULL percentage: {column_profile.get('null_percentage', 0):.1f}%"
-            )
-
-            # Show type-specific statistics
-            if column_profile.get("numeric_stats"):
-                stats = column_profile["numeric_stats"]
-                print("   📈 Numeric stats:")
-                print(f"      Min: {stats.get('min_value', 'N/A')}")
-                print(f"      Max: {stats.get('max_value', 'N/A')}")
-                print(
-                    f"      Mean: {stats.get('mean', 'N/A'):.2f}"
-                    if stats.get("mean")
-                    else ""
-                )
-                print(
-                    f"      Std Dev: {stats.get('std_dev', 'N/A'):.2f}"
-                    if stats.get("std_dev")
-                    else ""
-                )
-
-            if column_profile.get("string_stats"):
-                stats = column_profile["string_stats"]
-                print("   📝 String stats:")
-                print(
-                    f"      Length range: {stats.get('min_length', 'N/A')} - {stats.get('max_length', 'N/A')}"
-                )
-                print(
-                    f"      Avg length: {stats.get('avg_length', 'N/A'):.1f}"
-                    if stats.get("avg_length")
-                    else ""
-                )
-                char_types = stats.get("character_types", {})
-                if char_types:
-                    print(f"      Character types: {dict(char_types)}")
-
-            if column_profile.get("date_stats"):
-                stats = column_profile["date_stats"]
-                print("   📅 Date stats:")
-                print(f"      Range: {stats.get('date_range_days', 'N/A')} days")
-                formats = stats.get("common_date_formats", [])
-                if formats:
-                    print(f"      Common formats: {', '.join(formats)}")
-
-            # Show top frequent values
-            top_values = column_profile.get("top_k_values", [])
-            if top_values:
-                print("   🔝 Top values:")
-                for i, value_info in enumerate(top_values[:5], 1):
-                    print(
-                        f"      {i}. {value_info['value']} ({value_info['count']} times, {value_info['percentage']:.1f}%)"
-                    )
-
-            # Show LSH information
-            lsh_sketch = column_profile.get("lsh_sketch")
-            if lsh_sketch:
-                print(
-                    f"   🔗 LSH sketch: {lsh_sketch['num_hashes']} hashes, threshold {lsh_sketch['jaccard_threshold']}"
-                )
-        else:
-            print(f"   ❌ Error profiling column: {column_profile['error']}")
-
-
-def demo_profiling_configuration():
+def demo_profiling_configurations():
     """Demonstrate different profiling configurations."""
 
     print("\n\n⚙️  Profiling Configuration Demo")
     print("=" * 50)
 
     # Configuration for large databases
-    large_db_config = {
-        "sample_size": 50000,  # Larger sample for better accuracy
-        "top_k": 20,  # More frequent values
-        "lsh_threshold": 0.9,  # Higher similarity threshold
-        "num_hashes": 256,  # More hash functions for better precision
-        "enable_lsh": True,
-    }
+    print("\n📊 Large Database Configuration:")
+    large_db_profiler = DatabaseProfiler(
+        sample_size=50000,  # Larger sample for better accuracy
+        top_k=20,  # More frequent values
+        lsh_threshold=0.9,  # Higher similarity threshold
+        num_hashes=256,  # More hash functions for precision
+        enable_lsh=True,
+    )
+    print(f"   Sample size: 50,000")
+    print(f"   Top-k values: 20")
+    print(f"   LSH enabled: True (256 hashes)")
 
     # Configuration for fast profiling
-    fast_config = {
-        "sample_size": 1000,  # Smaller sample for speed
-        "top_k": 5,  # Fewer frequent values
-        "lsh_threshold": 0.7,  # Lower similarity threshold
-        "num_hashes": 64,  # Fewer hash functions for speed
-        "enable_lsh": False,  # Disable LSH for speed
-    }
-
-    print("📊 Large Database Configuration:")
-    print(f"   Sample size: {large_db_config['sample_size']}")
-    print(f"   Top-k values: {large_db_config['top_k']}")
-    print(f"   LSH enabled: {large_db_config['enable_lsh']}")
-    print(f"   Hash functions: {large_db_config['num_hashes']}")
-
     print("\n⚡ Fast Profiling Configuration:")
-    print(f"   Sample size: {fast_config['sample_size']}")
-    print(f"   Top-k values: {fast_config['top_k']}")
-    print(f"   LSH enabled: {fast_config['enable_lsh']}")
-
-    # Example of using different configurations
-    print("\n🔧 Using custom configuration:")
-
-    SqliteDataSource(
-        connection_url="sqlite:///example.db",
-        enable_profiling=True,
-        profiler_config=fast_config,
+    fast_profiler = DatabaseProfiler(
+        sample_size=1000,  # Smaller sample for speed
+        top_k=5,  # Fewer frequent values
+        enable_lsh=False,  # Disable LSH for speed
     )
+    print(f"   Sample size: 1,000")
+    print(f"   Top-k values: 5")
+    print(f"   LSH enabled: False")
 
-    print("   ✅ Fast profiling datasource initialized")
-    print("   💡 Use this for quick analysis or large datasets")
+    print("\n💡 Usage:")
+    print("   datasource = DataSource('postgres', host='localhost', database='db')")
+    print("   profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)")
+    print("   profile = profiler.profile_table(datasource, 'table_name')")
 
 
-def demo_profiling_integration_with_sql_agent():
-    """Demonstrate how profiling integrates with SQL agents."""
+def demo_profiler_flexibility():
+    """Demonstrate profiler flexibility with different configurations."""
 
-    print("\n\n🤖 SQL Agent Integration Demo")
+    print("\n\n🏗️  Profiler Flexibility")
     print("=" * 50)
 
-    # This would integrate with the enhanced SQL agent
-    print("🔗 Integration points with Enhanced SQL Agent:")
-    print("   1. Schema linking uses profiling data for better table selection")
-    print("   2. Column exploration leverages statistical information")
-    print("   3. Query optimization uses data distribution insights")
-    print("   4. Error handling benefits from data quality scores")
-    print("   5. Semantic type inference improves query generation")
+    datasource = DataSource("sqlite", database="example.db")
 
-    print("\n📋 Example profiling data usage in SQL generation:")
-    print("   • High distinct ratio columns → Good for GROUP BY")
-    print("   • Low null percentage columns → Safe for WHERE clauses")
-    print("   • Semantic types (email, phone) → Appropriate formatting")
-    print("   • Top-k values → Better literal matching")
-    print("   • LSH similarity → Column name disambiguation")
+    # Quick profiling
+    quick_profiler = DatabaseProfiler(sample_size=1000, enable_lsh=False)
+    print("\n1️⃣  Quick profiling with small sample:")
+    # quick_profile = quick_profiler.profile_table(datasource, "table")
+
+    # Detailed profiling
+    detailed_profiler = DatabaseProfiler(sample_size=50000, enable_lsh=True)
+    print("2️⃣  Detailed profiling with large sample and LSH:")
+    # detailed_profile = detailed_profiler.profile_table(datasource, "table")
+
+    # Use same profiler with multiple datasources
+    profiler = DatabaseProfiler()
+    print("\n3️⃣  Use same profiler with multiple datasources:")
+
+    pg_datasource = DataSource("postgres", host="localhost", database="db1")
+    # pg_profile = profiler.profile_table(pg_datasource, "users")
+
+    mysql_datasource = DataSource("mysql", host="localhost", database="db2")
+    # mysql_profile = profiler.profile_table(mysql_datasource, "customers")
+
+
+def demo_integration_patterns():
+    """Show common integration patterns."""
+
+    print("\n\n🔗 Integration Patterns")
+    print("=" * 50)
+
+    print("\n📋 Pattern 1: Profile During Data Exploration")
+    print("```python")
+    print("ds = DataSource('postgres', host='localhost', database='analytics')")
+    print("profiler = DatabaseProfiler()")
+    print("")
+    print("# Explore catalog")
+    print("catalog = ds.get_catalog()")
+    print("for schema in catalog.schemas:")
+    print("    for table in schema.tables:")
+    print("        # Profile each table")
+    print("        profile = profiler.profile_table(ds, table.table_name)")
+    print("        print(f'{table.table_name}: {profile.row_count} rows')")
+    print("```")
+
+    print("\n📋 Pattern 2: Profile Specific Columns for Quality Checks")
+    print("```python")
+    print("profiler = DatabaseProfiler()")
+    print("profile = profiler.profile_column(datasource, 'users', 'email')")
+    print("")
+    print("if profile.data_quality_score < 0.8:")
+    print("    print(f'Warning: Low quality email column!')")
+    print("    print(f'NULL %: {profile.null_percentage}%')")
+    print("```")
+
+    print("\n📋 Pattern 3: Use with AI Agents")
+    print("```python")
+    print("from ryoma_ai.agent.sql import SqlAgent")
+    print("")
+    print("# Create datasource and profiler")
+    print("ds = DataSource('postgres', ...)")
+    print("profiler = DatabaseProfiler()")
+    print("")
+    print("# Profile for metadata extraction")
+    print("table_profile = profiler.profile_table(ds, 'customers')")
+    print("")
+    print("# Use with SQL agent")
+    print("agent = SqlAgent('gpt-4')")
+    print("agent.add_datasource(ds)")
+    print("# Agent can leverage profiling metadata for better SQL generation")
+    print("```")
 
 
 if __name__ == "__main__":
     print("🚀 Database Profiling System Demo")
-    print("Based on 'Automatic Metadata Extraction for Text-to-SQL' paper")
     print("=" * 70)
 
     try:
-        # Run all demos
+        # Run demos
         demo_comprehensive_profiling()
-        demo_individual_column_profiling()
-        demo_profiling_configuration()
-        demo_profiling_integration_with_sql_agent()
+        demo_profiling_configurations()
+        demo_profiler_flexibility()
+        demo_integration_patterns()
 
         print("\n\n✅ Demo completed successfully!")
-        print("💡 Next steps:")
-        print("   1. Configure profiling for your specific database")
-        print("   2. Integrate with Enhanced SQL Agent")
-        print("   3. Use profiling data for better query generation")
-        print("   4. Monitor data quality over time")
+        print("\n📚 Next Steps:")
+        print("   1. Try profiling your own database")
+        print("   2. Experiment with different configurations")
+        print("   3. Integrate profiling with SQL agents")
+        print("   4. Use profiling data for data quality monitoring")
 
     except Exception as e:
         print(f"\n❌ Demo failed with error: {str(e)}")
-        print("💡 Make sure you have:")
-        print("   1. A valid database connection")
+        print("\n💡 Make sure you have:")
+        print("   1. A valid database with example data")
         print("   2. Required dependencies installed")
-        print("   3. Appropriate table permissions")
+        print("   3. Appropriate database permissions")

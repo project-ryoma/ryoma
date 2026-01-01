@@ -10,7 +10,7 @@ from ryoma_ai.agent.internals.schema_linking_agent import SchemaLinkingAgent
 from ryoma_ai.agent.internals.sql_error_handler import SqlErrorHandler
 from ryoma_ai.agent.internals.sql_safety_validator import SqlSafetyValidator
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_ai.datasource.sql import SqlDataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import (
     CreateTableTool,
@@ -35,7 +35,7 @@ class EnhancedSqlAgent(WorkflowAgent):
         self,
         model: str,
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[SqlDataSource] = None,
+        datasource: Optional[DataSource] = None,
         safety_config: Optional[Dict] = None,
         **kwargs,
     ):

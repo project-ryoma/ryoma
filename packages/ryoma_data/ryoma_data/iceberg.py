@@ -29,8 +29,8 @@ except ImportError:
     IcebergSchema = None
 
 from pydantic import BaseModel, Field
-from ryoma_ai.datasource.base import DataSource
-from ryoma_ai.datasource.metadata import (
+from ryoma_data.base import DataSource
+from ryoma_data.metadata import (
     Catalog,
     Column,
     ColumnProfile,
@@ -453,51 +453,6 @@ class IcebergDataSource(DataSource):
         except Exception as e:
             self.logger.error(f"Error profiling Iceberg table {table_name}: {str(e)}")
             return {"error": str(e)}
-
-    def prompt(self, schema: Optional[str] = None, table: Optional[str] = None) -> str:
-        """Generate enhanced prompt with Iceberg metadata context."""
-        catalog = self.get_catalog(schema=schema, table=table)
-
-        prompt = (
-            f"Iceberg Catalog: {catalog.catalog_name} (Type: {self.catalog_type})\n"
-        )
-
-        for schema_obj in catalog.schemas or []:
-            prompt += f"  Namespace: {schema_obj.schema_name}\n"
-            for table_obj in schema_obj.tables or []:
-                prompt += f"    Table: {table_obj.table_name}"
-
-                if table_obj.profile:
-                    if table_obj.profile.row_count:
-                        prompt += f" ({table_obj.profile.row_count:,} rows"
-                    if table_obj.profile.completeness_score:
-                        prompt += (
-                            f", {table_obj.profile.completeness_score:.1%} complete"
-                        )
-                    if table_obj.profile.last_updated:
-                        prompt += f", updated: {table_obj.profile.last_updated.strftime('%Y-%m-%d')}"
-                    prompt += ")"
-                prompt += "\n"
-
-                for column in table_obj.columns:
-                    prompt += f"      Column: {column.name} ({column.type})"
-
-                    if column.profile:
-                        details = []
-                        if column.profile.null_percentage is not None:
-                            details.append(
-                                f"{column.profile.null_percentage:.1f}% NULL"
-                            )
-                        if column.profile.distinct_ratio is not None:
-                            details.append(
-                                f"distinct: {column.profile.distinct_ratio:.2f}"
-                            )
-                        if details:
-                            prompt += f" [{', '.join(details)}]"
-
-                    prompt += "\n"
-
-        return prompt
 
     def crawl_catalog(self, loader, **kwargs):
         """Crawl Iceberg catalog using native APIs."""

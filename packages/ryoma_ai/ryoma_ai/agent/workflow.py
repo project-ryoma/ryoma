@@ -20,7 +20,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.types import Command, StateSnapshot
 from pydantic import BaseModel
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_ai.datasource.base import DataSource
+from ryoma_data.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
 from ryoma_ai.vector_store.base import VectorStore
