@@ -8,8 +8,10 @@ presentation layer (CLI, web UI, etc.)
 
 from ryoma_ai.services.datasource_service import DataSourceService
 from ryoma_ai.services.catalog_service import CatalogService
+from ryoma_ai.services.agent_builder import AgentBuilder
 
 __all__ = [
     "DataSourceService",
     "CatalogService",
+    "AgentBuilder",
 ]
