@@ -1,9 +1,21 @@
+"""
+SQL agent implementations for Ryoma AI.
+
+This module provides SQL agents with varying levels of capabilities:
+- BasicSqlAgent: Core SQL functionality
+- EnhancedSqlAgent: Advanced features with safety and optimization
+- ReFoRCESqlAgent: ReFlect-Force-Correct approach
+
+The SqlAgent class provides a factory to create the appropriate agent type.
+"""
+
 import logging
 from typing import Dict, Optional, Union
 
-from langchain_core.embeddings import Embeddings
+from langchain_core.language_models import BaseChatModel
 from langgraph.graph import StateGraph
 from langgraph.graph.graph import CompiledGraph
+
 from ryoma_ai.agent.internals.enhanced_sql_agent import (
     EnhancedSqlAgent as InternalEnhancedSqlAgent,
 )
@@ -11,18 +23,12 @@ from ryoma_ai.agent.internals.reforce_sql_agent import (
     ReFoRCESqlAgent as InternalReFoRCESqlAgent,
 )
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_data.base import DataSource
-from ryoma_ai.models.agent import SqlAgentMode
-from ryoma_ai.tool.sql_tool import (
-    CreateTableTool,
-    QueryExplanationTool,
-    QueryOptimizationTool,
-    QueryProfileTool,
-    QueryValidationTool,
-    SchemaAnalysisTool,
-    SqlQueryTool,
+from ryoma_ai.agent.sql_tools import (
+    get_basic_sql_tools,
+    get_enhanced_sql_tools,
+    get_reforce_sql_tools,
 )
-from ryoma_ai.vector_store.base import VectorStore
+from ryoma_ai.models.agent import SqlAgentMode
 
 
 class SqlAgent(WorkflowAgent):
@@ -32,6 +38,17 @@ class SqlAgent(WorkflowAgent):
 
     This class uses a factory pattern internally to create the appropriate agent
     implementation based on the mode parameter.
+
+    **Note:** This factory is deprecated. Use AgentBuilder.build_sql_agent() instead
+    for a simpler API.
+
+    Example:
+        >>> # Deprecated way (still works but not recommended)
+        >>> agent = SqlAgent(model="gpt-4", mode="enhanced", store=store)
+        >>>
+        >>> # Recommended way
+        >>> from ryoma_ai.services import AgentBuilder
+        >>> agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
     """
 
     description: str = (
@@ -41,26 +58,22 @@ class SqlAgent(WorkflowAgent):
 
     def __new__(
         cls,
-        model: str,
+        model: Union[str, BaseChatModel],
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[DataSource] = None,
-        embedding: Optional[Union[dict, Embeddings]] = None,
-        vector_store: Optional[Union[dict, VectorStore]] = None,
         mode: Union[SqlAgentMode, str] = SqlAgentMode.basic,
         safety_config: Optional[Dict] = None,
+        store=None,
         **kwargs,
     ):
         """
         Factory method that creates the appropriate SQL agent based on mode.
 
         Args:
-            model: The language model to use
+            model: The language model to use (string ID or instance)
             model_parameters: Optional model parameters
-            datasource: Optional datasource for SQL operations
-            embedding: Optional embedding configuration
-            vector_store: Optional vector store configuration
             mode: The SQL agent mode (basic, enhanced, reforce)
             safety_config: Optional safety configuration
+            store: Optional BaseStore for InjectedStore pattern (datasource access)
             **kwargs: Additional arguments
 
         Returns:
@@ -74,35 +87,34 @@ class SqlAgent(WorkflowAgent):
             return ReFoRCESqlAgentImpl(
                 model=model,
                 model_parameters=model_parameters,
-                datasource=datasource,
-                embedding=embedding,
-                vector_store=vector_store,
                 safety_config=safety_config,
+                store=store,
                 **kwargs,
             )
         elif mode == SqlAgentMode.enhanced:
             return EnhancedSqlAgentImpl(
                 model=model,
                 model_parameters=model_parameters,
-                datasource=datasource,
-                embedding=embedding,
-                vector_store=vector_store,
                 safety_config=safety_config,
+                store=store,
                 **kwargs,
             )
         else:  # basic mode
             return BasicSqlAgent(
                 model=model,
                 model_parameters=model_parameters,
-                datasource=datasource,
-                embedding=embedding,
-                vector_store=vector_store,
+                store=store,
                 **kwargs,
             )
 
 
 class BasicSqlAgent(WorkflowAgent):
-    """Basic SQL agent with core functionality."""
+    """
+    Basic SQL agent with core functionality.
+
+    Provides essential SQL capabilities including query execution,
+    table creation, and query profiling.
+    """
 
     description: str = (
         "A basic SQL agent that provides core SQL query functionality "
@@ -111,23 +123,29 @@ class BasicSqlAgent(WorkflowAgent):
 
     def __init__(
         self,
-        model: str,
+        model: Union[str, BaseChatModel],
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[DataSource] = None,
-        embedding: Optional[Union[dict, Embeddings]] = None,
-        vector_store: Optional[Union[dict, VectorStore]] = None,
+        store=None,
         **kwargs,
     ):
-        # Basic tools for core functionality
-        tools = [SqlQueryTool(), CreateTableTool(), QueryProfileTool()]
+        """
+        Initialize basic SQL agent.
+
+        Args:
+            model: Language model (string ID or instance)
+            model_parameters: Optional model parameters
+            store: Optional BaseStore for datasource access via InjectedStore
+            **kwargs: Additional arguments
+        """
+        # Get basic SQL tools from centralized definition
+        tools = get_basic_sql_tools()
 
         super().__init__(
-            tools,
-            model,
-            model_parameters,
-            datasource=datasource,
-            embedding=embedding,
-            vector_store=vector_store,
+            model=model,
+            tools=tools,
+            model_parameters=model_parameters,
+            system_prompt="You are a SQL expert. Write SQL queries to answer questions.",
+            store=store,
             **kwargs,
         )
 
@@ -157,7 +175,12 @@ class BasicSqlAgent(WorkflowAgent):
 
 
 class EnhancedSqlAgentImpl(WorkflowAgent):
-    """Enhanced SQL agent with advanced capabilities."""
+    """
+    Enhanced SQL agent with advanced capabilities.
+
+    Provides advanced features including safety validation,
+    schema analysis, query optimization, and query explanation.
+    """
 
     description: str = (
         "An enhanced SQL agent with advanced capabilities including "
@@ -166,53 +189,45 @@ class EnhancedSqlAgentImpl(WorkflowAgent):
 
     def __init__(
         self,
-        model: str,
+        model: Union[str, BaseChatModel],
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[DataSource] = None,
-        embedding: Optional[Union[dict, Embeddings]] = None,
-        vector_store: Optional[Union[dict, VectorStore]] = None,
         safety_config: Optional[Dict] = None,
+        store=None,
         **kwargs,
     ):
-        # Enhanced tools with all capabilities
-        tools = [
-            SqlQueryTool(),
-            CreateTableTool(),
-            QueryProfileTool(),
-            SchemaAnalysisTool(),
-            QueryValidationTool(),
-            QueryOptimizationTool(),
-            QueryExplanationTool(),
-        ]
+        """
+        Initialize enhanced SQL agent.
+
+        Args:
+            model: Language model (string ID or instance)
+            model_parameters: Optional model parameters
+            safety_config: Optional safety validation configuration
+            store: Optional BaseStore for datasource access via InjectedStore
+            **kwargs: Additional arguments
+        """
+        # Get enhanced SQL tools from centralized definition
+        tools = get_enhanced_sql_tools()
 
         super().__init__(
-            tools,
-            model,
-            model_parameters,
-            datasource=datasource,
-            embedding=embedding,
-            vector_store=vector_store,
+            model=model,
+            tools=tools,
+            model_parameters=model_parameters,
+            system_prompt=(
+                "You are an advanced SQL expert. Use schema analysis and "
+                "query planning for complex queries. Validate and optimize "
+                "important queries."
+            ),
+            store=store,
             **kwargs,
         )
 
         self.mode = SqlAgentMode.enhanced
+        self.safety_config = safety_config
 
-        # Initialize internal enhanced agent for advanced capabilities
-        try:
-            # Remove store from kwargs to avoid duplicate parameter
-            internal_kwargs = {k: v for k, v in kwargs.items() if k != "store"}
-            self._internal_agent = InternalEnhancedSqlAgent(
-                model=model,
-                model_parameters=model_parameters,
-                datasource=datasource,
-                safety_config=safety_config,
-                store=self.store,  # Pass the store instance to share datasource
-                **internal_kwargs,
-            )
-        except Exception as e:
-            # Log the error for debugging but continue with basic functionality
-            logging.warning(f"Failed to initialize internal enhanced agent: {e}")
-            self._internal_agent = None
+        # Note: Internal agent initialization removed for now
+        # Advanced features will be implemented differently in refactored version
+        self._internal_agent = None
+        logging.info("Enhanced SQL agent initialized with centralized tools")
 
     def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using enhanced capabilities."""
@@ -268,53 +283,48 @@ class ReFoRCESqlAgentImpl(WorkflowAgent):
 
     def __init__(
         self,
-        model: str,
+        model: Union[str, BaseChatModel],
         model_parameters: Optional[Dict] = None,
-        datasource: Optional[DataSource] = None,
-        embedding: Optional[Union[dict, Embeddings]] = None,
-        vector_store: Optional[Union[dict, VectorStore]] = None,
         safety_config: Optional[Dict] = None,
+        store=None,
         **kwargs,
     ):
-        # ReFoRCE tools with all capabilities
-        tools = [
-            SqlQueryTool(),
-            CreateTableTool(),
-            QueryProfileTool(),
-            SchemaAnalysisTool(),
-            QueryValidationTool(),
-            QueryOptimizationTool(),
-            QueryExplanationTool(),
-        ]
+        """
+        Initialize ReFoRCE SQL agent.
+
+        Args:
+            model: Language model (string ID or instance)
+            model_parameters: Optional model parameters
+            safety_config: Optional safety validation configuration
+            store: Optional BaseStore for datasource access via InjectedStore
+            **kwargs: Additional arguments
+        """
+        # Get ReFoRCE SQL tools from centralized definition
+        tools = get_reforce_sql_tools()
 
         super().__init__(
-            tools,
-            model,
-            model_parameters,
-            datasource=datasource,
-            embedding=embedding,
-            vector_store=vector_store,
+            model=model,
+            tools=tools,
+            model_parameters=model_parameters,
+            system_prompt=(
+                "You are a SQL expert using the ReFoRCE (Reflect, Force, Correct) approach. "
+                "For each query:\n"
+                "1. Reflect: Think about what the query should do\n"
+                "2. Force: Generate and execute the query\n"
+                "3. Correct: If results don't match expectations, revise and retry\n"
+                "Use all available tools to ensure query accuracy."
+            ),
+            store=store,
             **kwargs,
         )
 
         self.mode = SqlAgentMode.reforce
+        self.safety_config = safety_config
 
-        # Initialize internal ReFoRCE agent for advanced capabilities
-        try:
-            # Remove store from kwargs to avoid duplicate parameter
-            internal_kwargs = {k: v for k, v in kwargs.items() if k != "store"}
-            self._internal_agent = InternalReFoRCESqlAgent(
-                model=model,
-                model_parameters=model_parameters,
-                datasource=datasource,
-                safety_config=safety_config,
-                store=self.store,  # Pass the store instance to share datasource
-                **internal_kwargs,
-            )
-        except Exception as e:
-            # Log the error for debugging but continue with basic functionality
-            logging.warning(f"Failed to initialize internal ReFoRCE agent: {e}")
-            self._internal_agent = None
+        # Note: Internal agent initialization removed for now
+        # Advanced features will be implemented differently in refactored version
+        self._internal_agent = None
+        logging.info("ReFoRCE SQL agent initialized with centralized tools")
 
     def _build_workflow(self, graph: StateGraph) -> CompiledGraph:
         """Build the workflow graph using ReFoRCE capabilities."""

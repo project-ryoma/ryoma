@@ -9,16 +9,31 @@ from ryoma_data.base import DataSource
 from ryoma_data.sql import SqlDataSource
 from ryoma_ai.utils import ensure_sql_datasource
 from ryoma_ai.models.sql import QueryStatus, SqlQueryResult
+from ryoma_ai.domain.constants import StoreKeys
 from sqlalchemy.engine import Result
 from typing_extensions import Annotated
 
 
 def get_datasource_from_store(store) -> SqlDataSource:
-    """Helper function to extract datasource from store with consistent error handling."""
-    results = store.mget(["datasource_main"])
+    """
+    Helper function to extract datasource from store with consistent error handling.
+
+    Args:
+        store: LangChain BaseStore containing the datasource
+
+    Returns:
+        SqlDataSource from the store
+
+    Raises:
+        ValueError: If no datasource is available in store
+    """
+    results = store.mget([StoreKeys.ACTIVE_DATASOURCE])
     datasource = results[0] if results and results[0] is not None else None
     if not datasource:
-        raise ValueError("No datasource available in store")
+        raise ValueError(
+            f"No datasource available in store. "
+            f"Expected key: {StoreKeys.ACTIVE_DATASOURCE}"
+        )
     # Ensure it's a SQL datasource
     return ensure_sql_datasource(datasource)
 

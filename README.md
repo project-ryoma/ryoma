@@ -1,6 +1,5 @@
 # Ryoma
-AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization. 
-
+AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization.
 
 [![Build status](https://github.com/project-ryoma/ryoma/workflows/build/badge.svg)](https://github.com/project-ryoma/ryoma/actions/workflows/build.yml?query=workflow%3Abuild)
 [![Python Version](https://img.shields.io/pypi/pyversions/ryoma.svg)](https://pypi.org/project/ryoma/)
@@ -11,7 +10,6 @@ AI Powered Data Agent framework, a comprehensive solution for data analysis, eng
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/project-ryoma/ryoma/blob/main/.pre-commit-config.yaml)
 [![License](https://img.shields.io/github/license/project-ryoma/ryoma)](https://github.com/project-ryoma/ryoma/blob/main/LICENSE)
 [![Coverage Report](assets/images/coverage.svg)](https://github.com/project-ryoma/ryoma/blob/main/assets/images/coverage.svg)
-
 
 ## Tech Stack
 
@@ -146,6 +144,25 @@ Model provider are supported by jupyter ai magics. Ensure the corresponding envi
 - [x] Apache Spark
 - [x] Apache Flink
 - [ ] Presto
+
+## 📚 Documentation
+
+For comprehensive documentation including architecture, API reference, and guides:
+
+- **[Documentation Index](docs/INDEX.md)** - Start here for all documentation
+- **[Getting Started](docs/source/getting-started/)** - Detailed setup and configuration guides
+- **[Architecture](docs/source/architecture/)** - Understanding Ryoma AI's internals
+- **[Changelog](CHANGELOG.md)** - Release notes and version history
+
+## 🤝 Contributing
+
+We welcome contributions! To get started:
+
+1. **[Read the Contributing Guide](docs/source/contribution/contribution.md)** - Guidelines and best practices
+2. **[Check the Documentation Index](docs/INDEX.md)** - Understand the codebase structure
+3. **Submit a Pull Request** - We review PRs regularly
+
+For major changes or architectural discussions, please open an issue first to discuss your proposed changes.
 
 ## 🛡 License
 
