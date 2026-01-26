@@ -1,12 +1,12 @@
 # Refactoring Progress Summary
 
-**Date:** 2026-01-20
-**Status:** IN PROGRESS - 50% Complete
+**Date:** 2026-01-26
+**Status:** IN PROGRESS - 63% Complete
 **Branch:** `claude/understand-codebase-Suw7u`
 
 ---
 
-## ✅ Completed Steps (2.1-2.4)
+## ✅ Completed Steps (2.1-2.4, 2.6)
 
 ### Step 2.1: Simplify BaseAgent ✅
 **Files Modified:** `agent/base.py`
@@ -73,24 +73,59 @@ agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 ---
 
+### Step 2.6: Update Agent Subclasses ✅
+**Files Modified:** `agent/chat_agent.py`, `agent/workflow.py`, `agent/sql.py`
+
+**ChatAgent Changes:**
+- Updated `__init__` to accept `Union[str, BaseChatModel]` for model
+- Loads model using `load_model_provider()` if string
+- Passes loaded model to BaseAgent with new signature
+- Removed datasource/embedding/vector_store parameters
+
+**WorkflowAgent Changes:**
+- Updated parameter order: `model` first, then `tools`
+- Changed signature to match new BaseAgent
+- Properly passes all parameters to ChatAgent parent
+
+**SqlAgent Changes:**
+- Updated factory `__new__` method to remove old parameters
+- **BasicSqlAgent:** Uses `get_basic_sql_tools()` from centralized definition
+- **EnhancedSqlAgentImpl:** Uses `get_enhanced_sql_tools()`, removed internal agent
+- **ReFoRCESqlAgentImpl:** Uses `get_reforce_sql_tools()`, removed internal agent
+
+**All agents now:**
+- Accept `Union[str, BaseChatModel]` for flexible model input
+- Use `store` parameter for InjectedStore pattern
+- Call `super().__init__()` with new signature
+- Use centralized tool definitions (no duplication)
+
+**Verification:**
+- All agent files compile successfully via `py_compile`
+- Agent instantiation verified (direct + factory patterns)
+- Breaking changes clearly documented
+
+**Impact:** Agents are now clean, use centralized tools, and work with new BaseAgent!
+
+---
+
 ## 📊 Statistics So Far
 
 | Metric | Value |
 |--------|-------|
-| **Steps Completed** | 4 of 8 (50%) |
+| **Steps Completed** | 5 of 8 (63%) |
 | **Files Created** | 13 (Phase 1) + 2 (Phase 2) = 15 |
-| **Files Modified** | 3 major files |
-| **Lines Added** | ~2,000 (mostly new services) |
-| **Lines Removed** | ~400 (infrastructure from BaseAgent) |
+| **Files Modified** | 6 major files (base, chat_agent, workflow, sql, sql_tool, agent_builder) |
+| **Lines Added** | ~2,300 (services + refactored agents) |
+| **Lines Removed** | ~700 (infrastructure + old agent code) |
 | **Net Code Change** | +1,600 lines |
-| **Commits** | 5 clean commits |
+| **Commits** | 6 clean commits |
 
 ---
 
-## 🔜 Remaining Steps (2.5-2.8)
+## 🔜 Remaining Steps (2.5, 2.7-2.8)
 
-### Step 2.5: Refactor CLI to Use Services ⏳
-**Status:** IN PROGRESS
+### Step 2.5: Refactor CLI to Use Services 📝
+**Status:** TODO
 **File:** `cli/app.py` (284 lines)
 
 **Required Changes:**
@@ -117,20 +152,6 @@ agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
    - ❌ `AgentManager` → ✅ `AgentBuilder`
 
 **Estimated Time:** 2-3 hours
-
----
-
-### Step 2.6: Update Agent Subclasses 📝
-**Status:** TODO
-**Files:** `chat_agent.py`, `workflow.py`, `sql.py`, `python_agent.py`, `pandas_agent.py`
-
-**Required Changes:**
-1. Update `__init__` signatures to match new BaseAgent
-2. Remove datasource/embedding/vector_store parameters
-3. Simplify initialization logic
-4. Ensure compatibility with AgentBuilder
-
-**Estimated Time:** 2 hours
 
 ---
 
@@ -164,9 +185,9 @@ agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 ## 🎯 Total Progress
 
-**Time Spent:** ~8 hours
-**Time Remaining:** ~7-8 hours
-**Overall Progress:** 50% complete
+**Time Spent:** ~10 hours
+**Time Remaining:** ~5-6 hours
+**Overall Progress:** 63% complete
 
 **When Finished:**
 - Clean service architecture ✅

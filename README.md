@@ -1,6 +1,7 @@
 # Ryoma
-AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization. 
+AI Powered Data Agent framework, a comprehensive solution for data analysis, engineering, and visualization.
 
+> **📢 Note:** Ryoma AI is undergoing a major refactoring to v0.2.0 with cleaner architecture and better separation of concerns. See [Documentation Index](docs/INDEX.md) for full details and [Refactoring Progress](docs/plans/REFACTORING_PROGRESS.md) for status (63% complete).
 
 [![Build status](https://github.com/project-ryoma/ryoma/workflows/build/badge.svg)](https://github.com/project-ryoma/ryoma/actions/workflows/build.yml?query=workflow%3Abuild)
 [![Python Version](https://img.shields.io/pypi/pyversions/ryoma.svg)](https://pypi.org/project/ryoma/)
@@ -12,6 +13,16 @@ AI Powered Data Agent framework, a comprehensive solution for data analysis, eng
 [![License](https://img.shields.io/github/license/project-ryoma/ryoma)](https://github.com/project-ryoma/ryoma/blob/main/LICENSE)
 [![Coverage Report](assets/images/coverage.svg)](https://github.com/project-ryoma/ryoma/blob/main/assets/images/coverage.svg)
 
+
+## 📚 Documentation
+
+**[→ Full Documentation Index](docs/INDEX.md)** - Start here for all documentation
+
+**Quick Links:**
+- [Architecture Overview](docs/ARCHITECTURE_COMPARISON.md) - v0.1.x vs v0.2.0 comparison
+- [Refactoring Progress](docs/plans/REFACTORING_PROGRESS.md) - Current status (63% complete)
+- [Test Organization](docs/TEST_ORGANIZATION.md) - Test suite structure and plans
+- [Contributing](docs/source/contribution/contribution.md) - How to contribute
 
 ## Tech Stack
 
