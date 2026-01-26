@@ -1,3 +1,10 @@
+"""
+Workflow agent implementation with LangGraph support.
+
+This module provides the WorkflowAgent class for building multi-step
+reasoning agents with tool execution capabilities using LangGraph.
+"""
+
 import logging
 from enum import Enum
 from typing import Dict, List, Optional, Union
@@ -19,11 +26,10 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.types import Command, StateSnapshot
 from pydantic import BaseModel
+
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_data.base import DataSource
 from ryoma_ai.models.agent import AgentType
 from ryoma_ai.states import MessageState
-from ryoma_ai.vector_store.base import VectorStore
 
 
 class ToolMode(str, Enum):
@@ -49,6 +55,13 @@ def handle_tool_error(state) -> dict:
 
 
 class WorkflowAgent(ChatAgent):
+    """
+    Workflow agent with tool execution capabilities using LangGraph.
+
+    This agent extends ChatAgent with the ability to use tools and execute
+    multi-step workflows using LangGraph's StateGraph.
+    """
+
     tools: List[BaseTool]
     graph: StateGraph
     workflow: Optional[CompiledStateGraph]
@@ -56,34 +69,53 @@ class WorkflowAgent(ChatAgent):
 
     def __init__(
         self,
-        tools: List[BaseTool],
         model: Union[BaseChatModel, str],
+        tools: Optional[List[BaseTool]] = None,
         model_parameters: Optional[Dict] = None,
         base_prompt_template: Optional[PromptTemplate] = None,
         context_prompt_templates: Optional[list[PromptTemplate]] = None,
         output_prompt_template: Optional[PromptTemplate] = None,
         output_parser: Optional[BaseModel] = None,
-        datasource: Optional[DataSource] = None,
-        vector_store: Optional[Union[dict, VectorStore]] = None,
+        system_prompt: Optional[str] = None,
+        store=None,
         **kwargs,
     ):
-        logging.info(f"Initializing Workflow Agent with model: {model}")
+        """
+        Initialize the workflow agent.
+
+        Args:
+            model: Language model (string ID or BaseChatModel instance)
+            tools: List of tools available to the agent
+            model_parameters: Optional parameters for model initialization
+            base_prompt_template: Optional base prompt template
+            context_prompt_templates: Optional list of context templates
+            output_prompt_template: Optional output template
+            output_parser: Optional Pydantic model for structured output
+            system_prompt: Optional system instructions
+            store: Optional BaseStore for InjectedStore pattern (tools access)
+            **kwargs: Additional arguments
+        """
+        logging.info(f"Initializing WorkflowAgent with model: {model}")
+
+        # Initialize parent ChatAgent
         super().__init__(
-            model,
-            model_parameters,
-            base_prompt_template,
-            context_prompt_templates,
-            output_prompt_template,
-            output_parser,
-            datasource=datasource,
-            vector_store=vector_store,
+            model=model,
+            model_parameters=model_parameters,
+            base_prompt_template=base_prompt_template,
+            context_prompt_templates=context_prompt_templates,
+            output_prompt_template=output_prompt_template,
+            output_parser=output_parser,
+            system_prompt=system_prompt,
+            store=store,
             **kwargs,
         )
 
-        self.tools = tools
+        # Set tools
+        self.tools = tools or []
         if self.tools:
             self.model = self._bind_tools()
 
+        # Initialize workflow components
         self.memory = MemorySaver()
         self._workflow = None
 
