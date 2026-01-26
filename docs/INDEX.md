@@ -16,60 +16,57 @@ For new users starting with Ryoma AI:
 
 ---
 
+## 📖 API Reference
+
+### Current API (v0.1.x - Stable)
+
+**Basic Usage:**
+```python
+from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.datasource import PostgresDataSource
+
+# Create datasource
+datasource = PostgresDataSource("postgresql://user:password@localhost:5432/dbname")
+
+# Create agent
+agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
+
+# Ask questions
+agent.stream("What are the top 5 customers?", display=True)
+```
+
+**For detailed API documentation, see:**
+- [SQL Agent Quick Reference](source/architecture/sql-agent-quick-reference.md)
+- [Architecture Overview](source/architecture/architecture.md)
+
+### Upcoming API (v0.2.0 - In Development)
+
+**New Service-Based API:**
+```python
+from ryoma_ai.services import AgentBuilder, DataSourceService
+
+# Setup services
+datasource_service = DataSourceService(...)
+builder = AgentBuilder(datasource_service=datasource_service)
+
+# Build agent
+agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+```
+
+**For migration information, see:**
+- **[CHANGELOG.md](../CHANGELOG.md)** - Detailed changelog with migration guide
+- [Architecture Comparison](ARCHITECTURE_COMPARISON.md) - Visual comparison
+
+---
+
 ## 🏗️ Architecture Documentation
 
 Understanding Ryoma AI's internal structure:
 
-### Current Architecture (v0.2.0+)
-
-- **[Architecture Comparison](ARCHITECTURE_COMPARISON.md)** - Visual comparison of old vs new architecture
-- **[Refactoring Summary](REFACTORING_SUMMARY.md)** - Quick reference of architectural changes
 - **[Store Architecture](source/architecture/store-architecture.md)** - InjectedStore pattern explained
-
-### Legacy Architecture (v0.1.x)
-
-- **[Architecture Overview](source/architecture/architecture.md)** - Original architecture (deprecated)
-- **[SQL Agent Design](source/architecture/enhanced-sql-agent.md)** - Legacy SQL agent design
-- **[Quick Reference](source/architecture/sql-agent-quick-reference.md)** - Legacy API reference
+- **[SQL Agent Design](source/architecture/enhanced-sql-agent.md)** - SQL agent architecture
 - **[Database Profiling](source/architecture/database-profiling.md)** - Performance profiling features
-
----
-
-## 🔄 Refactoring & Migration
-
-For developers working with or migrating code:
-
-### Refactoring Plans
-
-Located in **[docs/plans/](plans/)**:
-
-1. **[DIRECT_REFACTORING_PLAN.md](plans/DIRECT_REFACTORING_PLAN.md)** - Current refactoring plan (active)
-   - 8 steps to clean architecture
-   - Breaking changes accepted
-   - Estimated 15 hours total
-
-2. **[MIGRATION_PLAN.md](plans/MIGRATION_PLAN.md)** - Original backward-compatible plan (archived)
-   - 4 phases, 69 hours
-   - Kept for reference only
-
-3. **[REFACTORING_PROGRESS.md](plans/REFACTORING_PROGRESS.md)** - Live progress tracker
-   - Current status: 63% complete (5 of 8 steps)
-   - Detailed completion notes
-   - Next steps and statistics
-
-4. **[PHASE_1_COMPLETE.md](plans/PHASE_1_COMPLETE.md)** - Phase 1 completion summary
-   - Foundation layer (domain, infrastructure, services)
-   - 13 files created
-
-### Migration Guides
-
-**Coming soon:** Comprehensive migration guide from v0.1.x to v0.2.0
-
-Key breaking changes:
-- BaseAgent simplified (removed infrastructure methods)
-- Agent instantiation changed (use AgentBuilder)
-- Datasource management moved to DataSourceService
-- Catalog operations moved to CatalogService
+- **[Architecture Comparison](ARCHITECTURE_COMPARISON.md)** - v0.1.x vs v0.2.0 (for contributors)
 
 ---
 
@@ -79,6 +76,17 @@ For contributors and maintainers:
 
 - **[Contribution Guide](source/contribution/contribution.md)** - How to contribute
 - **[Testing Guide](#testing-guide)** - Running and writing tests (see below)
+- **[CHANGELOG.md](../CHANGELOG.md)** - Version history and release notes
+
+### Active Development
+
+Current development work on v0.2.0 architectural improvements:
+
+- **[Refactoring Progress](plans/REFACTORING_PROGRESS.md)** - Live progress (63% complete)
+- **[Direct Refactoring Plan](plans/DIRECT_REFACTORING_PLAN.md)** - Implementation plan
+- **[Refactoring Summary](REFACTORING_SUMMARY.md)** - Quick reference
+
+_Note: These documents are for active contributors working on the v0.2.0 refactoring._
 
 ### Testing Guide
 
@@ -223,12 +231,12 @@ docs/
 
 **Most Common Questions:**
 
-1. **How do I create an agent?** → [API Reference](#api-reference)
-2. **What changed in v0.2.0?** → [Architecture Comparison](ARCHITECTURE_COMPARISON.md)
-3. **How do I migrate from v0.1.x?** → [Migration Guides](#migration-guides)
-4. **Where is the refactoring progress?** → [Refactoring Progress](plans/REFACTORING_PROGRESS.md)
-5. **How do I run tests?** → [Testing Guide](#testing-guide)
-6. **How do I contribute?** → [Contribution Guide](source/contribution/contribution.md)
+1. **How do I get started?** → [Getting Started](#getting-started)
+2. **How do I create an agent?** → [API Reference](#api-reference)
+3. **What are the supported data sources?** → [Main README](../README.md#supported-data-sources)
+4. **How do I run tests?** → [Testing Guide](#testing-guide)
+5. **How do I contribute?** → [Contribution Guide](source/contribution/contribution.md)
+6. **What's new in each version?** → [CHANGELOG.md](../CHANGELOG.md)
 
 ---
 
