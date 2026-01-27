@@ -26,99 +26,91 @@ Open Catalog provides a **zero-indexing, deterministic metadata search framework
               │
               ▼
 ┌──────────────────────────────────────┐
-│     OpenCatalogAdapter Protocol       │
-│  - search_tables(pattern, filters)   │
-│  - search_columns(pattern, table)    │
+│     DataSource (Built-in Methods)     │
+│  - search_tables(pattern)            │
+│  - search_columns(pattern)           │
 │  - inspect_table(name)               │
-│  - get_relationships(table)          │
+│  - get_sample_data(table)            │
+└─────────────┬────────────────────────┘
+              │
+              ▼
+┌──────────────────────────────────────┐
+│     Ibis (Unified Backend)           │
+│  Works with ALL databases            │
 └─────────────┬────────────────────────┘
               │
      ┌────────┴────────┬───────────┐
      ▼                 ▼           ▼
 ┌──────────┐   ┌──────────┐  ┌──────────┐
 │ SQLite   │   │ Postgres │  │ Snowflake│
-│ Adapter  │   │ Adapter  │  │ Adapter  │
+│ BigQuery │   │ DuckDB   │  │ MySQL    │
 └──────────┘   └──────────┘  └──────────┘
 ```
 
 ## Quick Start
 
-### 1. Create an Adapter
+### 1. Connect to Database
 
 ```python
-from ryoma_data.sql import SqlDataSource
-from ryoma_ai.catalog.adapters.reference import SQLiteOpenCatalogAdapter
+from ryoma_data.sql import DataSource
 
-# Connect to database
-datasource = SqlDataSource(uri="sqlite:///example.db")
+# Connect to any Ibis-supported database
+datasource = DataSource("postgres", host="localhost", database="mydb")
 
-# Create Open Catalog adapter
-adapter = SQLiteOpenCatalogAdapter(datasource)
+# Or use connection URL
+datasource = DataSource("postgres", connection_url="postgresql://localhost/mydb")
 ```
 
 ### 2. Search for Tables
 
 ```python
-from ryoma_ai.catalog.open_catalog import SearchFilter
-
 # Search for customer-related tables
-tables = adapter.search_tables(pattern="*customer*", limit=10)
+tables = datasource.search_tables(pattern="*customer*", limit=10)
 for table in tables:
-    print(f"{table.name}: {table.row_count} rows")
+    print(f"{table.table_name}: {len(table.columns)} columns")
 
 # Filter by column existence
-filter = SearchFilter(has_column="email")
-tables = adapter.search_tables(
-    pattern="*customer*",
-    filters=filter
-)
+tables = datasource.search_tables(has_column="email")
 ```
 
 ### 3. Inspect Table Schema
 
 ```python
 # Get complete metadata for a table
-table = adapter.inspect_table("customers")
+table = datasource.inspect_table("customers")
 
-print(f"Table: {table.name}")
+print(f"Table: {table.table_name}")
 print(f"Columns:")
 for col in table.columns:
-    print(f"  - {col.name}: {col.data_type}")
-    if col.primary_key:
-        print(f"    [PRIMARY KEY]")
-    if col.foreign_keys:
-        for fk in col.foreign_keys:
-            print(f"    [FK → {fk.referenced_table}.{fk.referenced_column}]")
+    print(f"  - {col.name}: {col.type}")
 ```
 
-### 4. Discover Relationships
-
-```python
-# Find all tables that reference customers
-relationships = adapter.get_relationships(
-    "customers",
-    direction="incoming"
-)
-
-for rel in relationships:
-    print(f"{rel.from_table} → {rel.to_table}")
-    print(f"  ON {rel.from_columns} = {rel.to_columns}")
-```
-
-### 5. Get Sample Data
+### 4. Get Sample Data
 
 ```python
 # Inspect actual data values
-rows = adapter.get_sample_data("customers", limit=5)
+rows = datasource.get_sample_data("customers", limit=5)
 for row in rows:
     print(row)
 
 # Get specific columns only
-rows = adapter.get_sample_data(
+rows = datasource.get_sample_data(
     "customers",
     columns=["email", "created_at"],
     limit=10
 )
+```
+
+### 5. Search Columns
+
+```python
+# Find all email columns across all tables
+columns = datasource.search_columns(pattern="*email*")
+for col in columns:
+    print(f"{col.name}: {col.type}")
+
+# Find all columns in a specific table
+columns = datasource.search_columns(table="customers")
 ```
 
 ## Agent Workflow Example
@@ -127,7 +119,6 @@ Here's how an LLM agent would use Open Catalog to answer:
 **"Show me customer emails from last month"**
 
 ```python
-from ryoma_ai.catalog.open_catalog import SearchFilter
 
 # Step 1: Search for customer tables
 agent.thought("Let me search for customer-related tables")

@@ -1,5 +1,6 @@
 import logging
-from typing import Any, ClassVar, Dict, List, Optional
+from fnmatch import fnmatch
+from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import ibis
 from ibis import Table as IbisTable
@@ -397,3 +398,218 @@ class DataSource(BaseDataSource):
         logging.debug(f"Getting query plan with: {explain_query}")
 
         return conn.sql(explain_query)
+
+    # ========================================
+    # Open Catalog - Metadata Search Methods
+    # ========================================
+
+    def search_tables(
+        self,
+        pattern: Optional[str] = None,
+        schema: Optional[str] = None,
+        has_column: Optional[str] = None,
+        limit: int = 100,
+    ) -> List[Table]:
+        """
+        Search for tables using pattern matching and filters.
+
+        Args:
+            pattern: Glob pattern for table names (e.g., "*customer*", "dim_*")
+            schema: Optional schema name to limit search
+            has_column: Filter tables that have this column
+            limit: Maximum number of results
+
+        Returns:
+            List of Table objects matching the criteria
+
+        Example:
+            >>> # Find all customer-related tables
+            >>> tables = datasource.search_tables(pattern="*customer*")
+            >>>
+            >>> # Find tables with email column
+            >>> tables = datasource.search_tables(has_column="email")
+        """
+        conn = self.connect()
+
+        # Get table names
+        table_names = conn.list_tables(database=schema) if schema else conn.list_tables()
+
+        # Apply pattern matching
+        if pattern:
+            pattern_lower = pattern.replace("*", "%").replace("?", "_")
+            table_names = [
+                t for t in table_names
+                if fnmatch(t.lower(), pattern.lower())
+            ]
+
+        # Fetch metadata and apply filters
+        tables = []
+        for table_name in table_names[:limit]:
+            try:
+                table_schema = conn.get_schema(table_name, database=schema)
+                columns = self._build_columns_from_schema(table_schema)
+
+                # Apply column filter
+                if has_column:
+                    if not any(col.name == has_column for col in columns):
+                        continue
+
+                table = Table(table_name=table_name, columns=columns)
+                tables.append(table)
+
+            except Exception as e:
+                logging.debug(f"Skipping table {table_name}: {e}")
+
+        return tables
+
+    def search_columns(
+        self,
+        pattern: Optional[str] = None,
+        table: Optional[str] = None,
+        schema: Optional[str] = None,
+        limit: int = 100,
+    ) -> List[Column]:
+        """
+        Search for columns across tables.
+
+        Args:
+            pattern: Glob pattern for column names (e.g., "*email*", "created_*")
+            table: Optional table name to limit search to specific table
+            schema: Optional schema name
+            limit: Maximum number of results
+
+        Returns:
+            List of Column objects matching the criteria
+
+        Example:
+            >>> # Find all email columns across all tables
+            >>> columns = datasource.search_columns(pattern="*email*")
+            >>>
+            >>> # Find all columns in customers table
+            >>> columns = datasource.search_columns(table="customers")
+        """
+        columns = []
+
+        if table:
+            # Search within specific table
+            conn = self.connect()
+            table_schema = conn.get_schema(table, database=schema)
+            all_columns = self._build_columns_from_schema(table_schema)
+
+            if pattern:
+                columns = [
+                    col for col in all_columns
+                    if fnmatch(col.name.lower(), pattern.lower())
+                ]
+            else:
+                columns = all_columns
+        else:
+            # Search across all tables
+            tables = self.search_tables(schema=schema, limit=1000)
+            for tbl in tables:
+                for col in tbl.columns:
+                    if pattern and not fnmatch(col.name.lower(), pattern.lower()):
+                        continue
+                    columns.append(col)
+                    if len(columns) >= limit:
+                        return columns
+
+        return columns[:limit]
+
+    def inspect_table(
+        self,
+        table: str,
+        schema: Optional[str] = None,
+        include_sample_data: bool = False,
+        sample_limit: int = 10,
+    ) -> Table:
+        """
+        Get complete metadata for a specific table.
+
+        Args:
+            table: Table name
+            schema: Optional schema name
+            include_sample_data: Whether to include sample rows
+            sample_limit: Number of sample rows to fetch
+
+        Returns:
+            Table object with complete metadata
+
+        Example:
+            >>> # Get full table metadata
+            >>> table = datasource.inspect_table("customers")
+            >>> print(f"Columns: {[col.name for col in table.columns]}")
+            >>>
+            >>> # Include sample data
+            >>> table = datasource.inspect_table("customers", include_sample_data=True)
+        """
+        conn = self.connect()
+
+        # Get schema
+        table_schema = conn.get_schema(table, database=schema)
+        columns = self._build_columns_from_schema(table_schema)
+
+        # Get row count (best effort)
+        row_count = None
+        try:
+            table_obj = conn.table(table, database=schema)
+            row_count = table_obj.count().execute()
+        except Exception:
+            pass
+
+        # Create table object
+        table_obj = Table(table_name=table, columns=columns)
+
+        # Add sample data if requested
+        if include_sample_data:
+            try:
+                sample_data = self.get_sample_data(table, schema=schema, limit=sample_limit)
+                # Note: Table doesn't have sample_data field, could add to properties
+                logging.debug(f"Retrieved {len(sample_data)} sample rows")
+            except Exception as e:
+                logging.debug(f"Could not get sample data: {e}")
+
+        return table_obj
+
+    def get_sample_data(
+        self,
+        table: str,
+        schema: Optional[str] = None,
+        columns: Optional[List[str]] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get sample rows from a table.
+
+        Args:
+            table: Table name
+            schema: Optional schema name
+            columns: Optional list of columns to fetch (None = all columns)
+            limit: Number of rows to fetch
+
+        Returns:
+            List of dictionaries representing rows
+
+        Example:
+            >>> # Get 5 sample rows
+            >>> rows = datasource.get_sample_data("customers", limit=5)
+            >>>
+            >>> # Get specific columns only
+            >>> rows = datasource.get_sample_data(
+            ...     "customers",
+            ...     columns=["email", "created_at"],
+            ...     limit=10
+            ... )
+        """
+        conn = self.connect()
+
+        # Get table object
+        table_obj = conn.table(table, database=schema)
+
+        # Select specific columns if requested
+        if columns:
+            table_obj = table_obj.select(columns)
+
+        # Execute and convert to records
+        result = table_obj.limit(min(limit, 100)).execute()
+        return result.to_dict("records")
