@@ -15,6 +15,7 @@ from ryoma_ai.agent.factory import AgentFactory
 from ryoma_ai.agent.pandas_agent import PandasAgent
 from ryoma_ai.agent.python_agent import PythonAgent
 from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai.domain.constants import StoreKeys
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import SqlAgentMode
 
@@ -135,6 +136,10 @@ class MultiAgentRouter:
         self.vector_store = vector_store
         self.model_parameters = kwargs.get("model_parameters")
 
+        # If datasource provided, store it in meta_store for InjectedStore pattern
+        if datasource and meta_store:
+            meta_store.mset([(StoreKeys.ACTIVE_DATASOURCE, datasource)])
+
         # Agent registry (lazy initialization)
         self._agents: Dict[str, Any] = {}
         self.router = LLMTaskRouter(model, self.model_parameters)
@@ -156,50 +161,48 @@ class MultiAgentRouter:
         return self._agents[cache_key]
 
     def _create_agent(self, agent_type: str, **config_overrides) -> Any:
-        """Create agent using factory pattern with unified stores."""
+        """Create agent using v0.2.0 API - agents get datasource from store."""
         base_config = {
             "model": self.model,
             "model_parameters": self.model_parameters,
-            "datasource": self.datasource,
-            "store": self.meta_store,  # Pass unified meta store
-            "vector_store": self.vector_store,  # Pass unified vector store
+            "store": self.meta_store,  # Pass unified meta store (contains datasource)
+            "vector_store": self.vector_store,  # For agents that still use it
         }
         base_config.update(config_overrides)
+
+        # Note: Datasource is now retrieved from store via InjectedStore pattern
+        # Agents access it via: store.mget([StoreKeys.ACTIVE_DATASOURCE])
 
         if agent_type == "sql":
             mode = SqlAgentMode(config_overrides.get("sql_mode", "enhanced"))
             return SqlAgent(
                 model=base_config["model"],
                 mode=mode,
-                datasource=base_config["datasource"],
                 store=base_config["store"],
-                vector_store=base_config["vector_store"],
             )
         elif agent_type == "python":
             return PythonAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
                 store=base_config["store"],
-                vector_store=base_config["vector_store"],
             )
         elif agent_type == "pandas":
             return PandasAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
-                datasource=base_config["datasource"],
                 store=base_config["store"],
-                vector_store=base_config["vector_store"],
+                vector_store=base_config[
+                    "vector_store"
+                ],  # Pandas agent may still use this
             )
         elif agent_type == "chat":
             return ChatAgent(
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
-                datasource=base_config["datasource"],
                 store=base_config["store"],
-                vector_store=base_config["vector_store"],
             )
         else:
-            # Fallback using AgentFactory
+            # Fallback using AgentFactory (may need updating)
             return AgentFactory.create_agent(agent_type, **base_config)
 
     def route_and_execute(

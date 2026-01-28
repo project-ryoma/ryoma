@@ -20,9 +20,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from langchain_core.language_models import BaseChatModel
+from ryoma_ai.profiling.llm_enhancer import LLMProfileEnhancer
 from ryoma_data.profiler import DatabaseProfiler
 from ryoma_data.sql import SqlDataSource
-from ryoma_ai.profiling.llm_enhancer import LLMProfileEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,7 @@ class MetadataManager:
         self.storage_backend = storage_backend
 
         # Initialize profiler (without LLM enhancement)
-        self.profiler = DatabaseProfiler(
-            sample_size=10000, enable_lsh=True
-        )
+        self.profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)
 
         # Initialize LLM enhancer separately
         self.llm_enhancer = LLMProfileEnhancer(model=model, enable_caching=True)

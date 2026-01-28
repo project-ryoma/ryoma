@@ -12,14 +12,25 @@ class PandasAgent(WorkflowAgent):
         "A pandas agent that can use pandas tools to interact with pandas DataFrames."
     )
 
-    def __init__(self, model: str, model_parameters: Dict = None):
+    def __init__(
+        self,
+        model: str,
+        model_parameters: Dict = None,
+        store=None,
+        vector_store=None,
+        **kwargs,
+    ):
         super().__init__(
-            [
+            model=model,
+            tools=[
                 PandasTool(),
             ],
-            model,
-            model_parameters,
+            model_parameters=model_parameters,
+            store=store,
+            **kwargs,
         )
+        # Store vector_store if needed for analysis features
+        self.vector_store = vector_store
 
     def add_dataframe(
         self,

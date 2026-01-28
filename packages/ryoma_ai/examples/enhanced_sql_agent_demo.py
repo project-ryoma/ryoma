@@ -16,7 +16,6 @@ from ryoma_ai.agent.schema_linking_agent import SchemaLinkingAgent
 from ryoma_ai.agent.sql import SqlAgent
 from ryoma_ai.agent.sql_error_handler import SqlErrorHandler
 from ryoma_ai.agent.sql_safety_validator import SqlSafetyValidator
-from ryoma_data.postgres import PostgresDataSource
 from ryoma_ai.tool.sql_tool import (
     QueryExplanationTool,
     QueryOptimizationTool,
@@ -24,6 +23,7 @@ from ryoma_ai.tool.sql_tool import (
     SchemaAnalysisTool,
     TableSelectionTool,
 )
+from ryoma_data.postgres import PostgresDataSource
 
 
 def setup_demo_datasource():

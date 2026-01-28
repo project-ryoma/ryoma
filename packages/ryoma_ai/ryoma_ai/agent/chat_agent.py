@@ -17,7 +17,6 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from langchain_core.stores import BaseStore
 from pydantic import BaseModel
-
 from ryoma_ai.agent.base import BaseAgent
 from ryoma_ai.llm.provider import load_model_provider
 from ryoma_ai.models.agent import AgentType
@@ -49,7 +48,9 @@ class ChatAgent(BaseAgent):
     """
 
     type: AgentType = AgentType.chat
-    description: str = "Chat Agent supports all the basic functionalities of a chat agent."
+    description: str = (
+        "Chat Agent supports all the basic functionalities of a chat agent."
+    )
 
     # Instance attributes
     config: Dict[str, Any]

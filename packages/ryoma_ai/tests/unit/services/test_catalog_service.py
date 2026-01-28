@@ -1,7 +1,8 @@
 """Tests for CatalogService"""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 from ryoma_ai.services.catalog_service import CatalogService
 
 
@@ -41,9 +42,7 @@ class TestCatalogService:
 
         assert result == "catalog-123"
         mock_indexer.index_datasource.assert_called_once_with(
-            datasource=sample_datasource,
-            data_source_id="test_ds",
-            level="column"
+            datasource=sample_datasource, data_source_id="test_ds", level="column"
         )
 
     def test_index_datasource_with_table_level(
@@ -56,9 +55,7 @@ class TestCatalogService:
 
         assert result == "catalog-456"
         mock_indexer.index_datasource.assert_called_once_with(
-            datasource=sample_datasource,
-            data_source_id="test_ds",
-            level="table"
+            datasource=sample_datasource, data_source_id="test_ds", level="table"
         )
 
     def test_index_multiple_datasources(self, service, mock_indexer):
@@ -89,7 +86,7 @@ class TestCatalogService:
         mock_indexer.index_datasource.side_effect = [
             "catalog-1",
             Exception("Indexing failed"),
-            "catalog-3"
+            "catalog-3",
         ]
 
         result = service.index_multiple_datasources([ds1, ds2, ds3])
@@ -113,7 +110,7 @@ class TestCatalogService:
         """Test searching for tables"""
         mock_results = [
             {"table_name": "customers", "description": "Customer data"},
-            {"table_name": "orders", "description": "Order data"}
+            {"table_name": "orders", "description": "Order data"},
         ]
         mock_searcher.search_catalogs.return_value = mock_results
 
@@ -122,10 +119,7 @@ class TestCatalogService:
         assert len(result) == 2
         assert result == mock_results
         mock_searcher.search_catalogs.assert_called_once_with(
-            query="customer data",
-            top_k=5,
-            level="table",
-            datasource_id=None
+            query="customer data", top_k=5, level="table", datasource_id=None
         )
 
     def test_search_tables_with_datasource_filter(self, service, mock_searcher):
@@ -135,17 +129,14 @@ class TestCatalogService:
         service.search_tables("test", datasource_id="ds-1")
 
         mock_searcher.search_catalogs.assert_called_once_with(
-            query="test",
-            top_k=5,
-            level="table",
-            datasource_id="ds-1"
+            query="test", top_k=5, level="table", datasource_id="ds-1"
         )
 
     def test_search_columns_without_table(self, service, mock_searcher):
         """Test searching columns across all tables"""
         mock_results = [
             {"column_name": "email", "table_name": "customers"},
-            {"column_name": "email_verified", "table_name": "customers"}
+            {"column_name": "email_verified", "table_name": "customers"},
         ]
         mock_searcher.search_catalogs.return_value = mock_results
 
@@ -153,9 +144,7 @@ class TestCatalogService:
 
         assert len(result) == 2
         mock_searcher.search_catalogs.assert_called_once_with(
-            query="email",
-            top_k=5,
-            level="column"
+            query="email", top_k=5, level="column"
         )
 
     def test_search_columns_with_table(self, service, mock_searcher):
@@ -168,9 +157,7 @@ class TestCatalogService:
         # Results are converted to dict format
         assert result[0]["column_name"] == "email"
         mock_searcher.get_column_suggestions.assert_called_once_with(
-            table_name="customers",
-            query="email",
-            top_k=5
+            table_name="customers", query="email", top_k=5
         )
 
     def test_get_table_suggestions(self, service, mock_searcher):
@@ -178,7 +165,7 @@ class TestCatalogService:
         mock_searcher.get_table_suggestions.return_value = [
             "customers",
             "customer_orders",
-            "customer_reviews"
+            "customer_reviews",
         ]
 
         result = service.get_table_suggestions("customer")
@@ -192,7 +179,7 @@ class TestCatalogService:
         mock_searcher.get_column_suggestions.return_value = [
             "email",
             "email_verified",
-            "secondary_email"
+            "secondary_email",
         ]
 
         result = service.get_column_suggestions("customers", "email")
@@ -200,9 +187,7 @@ class TestCatalogService:
         assert len(result) == 3
         assert result[0] == "email"
         mock_searcher.get_column_suggestions.assert_called_once_with(
-            table_name="customers",
-            query="email",
-            top_k=5
+            table_name="customers", query="email", top_k=5
         )
 
     def test_search_with_custom_top_k(self, service, mock_searcher):

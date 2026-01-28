@@ -11,8 +11,16 @@ class PythonAgent(WorkflowAgent):
         self,
         model: str,
         model_parameters: Optional[Dict] = None,
+        store=None,
+        **kwargs,
     ):
-        super().__init__([PythonTool()], model, model_parameters)
+        super().__init__(
+            model=model,
+            tools=[PythonTool()],
+            model_parameters=model_parameters,
+            store=store,
+            **kwargs,
+        )
 
     def add_script_context(self, script_context):
         for tool in self.tools:

@@ -1,10 +1,11 @@
 """Adapter for existing catalog indexing/search services"""
 
 import logging
-from typing import List, Optional, Literal
-from ryoma_data.base import DataSource
+from typing import List, Literal, Optional
+
 from ryoma_ai.catalog.indexer import UnifiedCatalogIndexService
 from ryoma_ai.store.catalog_store import CatalogStore
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class CatalogIndexerAdapter:
         self,
         datasource: DataSource,
         data_source_id: str,
-        level: Literal["catalog", "schema", "table", "column"] = "column"
+        level: Literal["catalog", "schema", "table", "column"] = "column",
     ) -> str:
         """
         Index a datasource's catalog.
@@ -48,9 +49,7 @@ class CatalogIndexerAdapter:
         logger.info(f"Indexing datasource {data_source_id} at level {level}")
 
         catalog_id = self._service.index_datasource(
-            datasource=datasource,
-            data_source_id=data_source_id,
-            level=level
+            datasource=datasource, data_source_id=data_source_id, level=level
         )
 
         logger.info(f"Indexed datasource {data_source_id}: catalog_id={catalog_id}")
@@ -103,7 +102,7 @@ class CatalogSearcherAdapter:
         query: str,
         top_k: int = 5,
         level: Literal["catalog", "schema", "table", "column"] = "column",
-        datasource_id: Optional[str] = None
+        datasource_id: Optional[str] = None,
     ) -> List[dict]:
         """
         Search catalogs semantically.
@@ -117,22 +116,18 @@ class CatalogSearcherAdapter:
         Returns:
             List of matching catalog entries
         """
-        logger.debug(f"Searching catalogs: query='{query}', level={level}, top_k={top_k}")
+        logger.debug(
+            f"Searching catalogs: query='{query}', level={level}, top_k={top_k}"
+        )
 
         results = self._catalog_store.search_catalogs(
-            query=query,
-            top_k=top_k,
-            level=level
+            query=query, top_k=top_k, level=level
         )
 
         logger.debug(f"Found {len(results)} catalog results")
         return results
 
-    def get_table_suggestions(
-        self,
-        query: str,
-        top_k: int = 5
-    ) -> List[str]:
+    def get_table_suggestions(self, query: str, top_k: int = 5) -> List[str]:
         """
         Get table name suggestions based on query.
 
@@ -146,18 +141,14 @@ class CatalogSearcherAdapter:
         logger.debug(f"Getting table suggestions for: '{query}'")
 
         suggestions = self._catalog_store.get_table_suggestions(
-            query=query,
-            top_k=top_k
+            query=query, top_k=top_k
         )
 
         logger.debug(f"Found {len(suggestions)} table suggestions")
         return suggestions
 
     def get_column_suggestions(
-        self,
-        table_name: str,
-        query: str,
-        top_k: int = 5
+        self, table_name: str, query: str, top_k: int = 5
     ) -> List[str]:
         """
         Get column suggestions for a table.
@@ -173,9 +164,7 @@ class CatalogSearcherAdapter:
         logger.debug(f"Getting column suggestions for table '{table_name}': '{query}'")
 
         suggestions = self._catalog_store.get_column_suggestions(
-            table_name=table_name,
-            query=query,
-            top_k=top_k
+            table_name=table_name, query=query, top_k=top_k
         )
 
         logger.debug(f"Found {len(suggestions)} column suggestions")

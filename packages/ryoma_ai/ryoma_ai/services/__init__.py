@@ -6,9 +6,9 @@ and infrastructure components, providing clean APIs for the
 presentation layer (CLI, web UI, etc.)
 """
 
-from ryoma_ai.services.datasource_service import DataSourceService
-from ryoma_ai.services.catalog_service import CatalogService
 from ryoma_ai.services.agent_builder import AgentBuilder
+from ryoma_ai.services.catalog_service import CatalogService
+from ryoma_ai.services.datasource_service import DataSourceService
 
 __all__ = [
     "DataSourceService",

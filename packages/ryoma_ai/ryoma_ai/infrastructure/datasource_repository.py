@@ -2,9 +2,10 @@
 
 import logging
 from typing import List
+
 from langchain_core.stores import BaseStore
-from ryoma_data.base import DataSource
 from ryoma_ai.domain.constants import StoreKeys
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 
@@ -89,10 +90,12 @@ class StoreBasedDataSourceRepository:
         datasource = self.get_by_id(datasource_id)
 
         # Set new key for multi-datasource support
-        self._store.mset([
-            (StoreKeys.ACTIVE_DATASOURCE_ID, datasource_id),
-            (StoreKeys.ACTIVE_DATASOURCE, datasource),  # Backward compat
-        ])
+        self._store.mset(
+            [
+                (StoreKeys.ACTIVE_DATASOURCE_ID, datasource_id),
+                (StoreKeys.ACTIVE_DATASOURCE, datasource),  # Backward compat
+            ]
+        )
 
         logger.info(f"Set active datasource: {datasource_id}")
 

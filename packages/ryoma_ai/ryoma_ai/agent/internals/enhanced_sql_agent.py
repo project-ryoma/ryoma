@@ -10,7 +10,6 @@ from ryoma_ai.agent.internals.schema_linking_agent import SchemaLinkingAgent
 from ryoma_ai.agent.internals.sql_error_handler import SqlErrorHandler
 from ryoma_ai.agent.internals.sql_safety_validator import SqlSafetyValidator
 from ryoma_ai.agent.workflow import WorkflowAgent
-from ryoma_data.base import DataSource
 from ryoma_ai.states import MessageState
 from ryoma_ai.tool.sql_tool import (
     CreateTableTool,
@@ -21,6 +20,7 @@ from ryoma_ai.tool.sql_tool import (
     SchemaAnalysisTool,
     SqlQueryTool,
 )
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

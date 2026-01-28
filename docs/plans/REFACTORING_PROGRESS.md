@@ -1,12 +1,12 @@
 # Refactoring Progress Summary
 
 **Date:** 2026-01-26
-**Status:** IN PROGRESS - 63% Complete
+**Status:** IN PROGRESS - 75% Complete
 **Branch:** `claude/understand-codebase-Suw7u`
 
 ---
 
-## ✅ Completed Steps (2.1-2.4, 2.6)
+## ✅ Completed Steps (2.1-2.6)
 
 ### Step 2.1: Simplify BaseAgent ✅
 **Files Modified:** `agent/base.py`
@@ -108,52 +108,52 @@ agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 ---
 
+### Step 2.5: Update MultiAgentRouter for CLI ✅
+**Files Modified:** `agent/multi_agent_router.py`, `agent/python_agent.py`, `agent/pandas_agent.py`
+
+**MultiAgentRouter Changes:**
+- Added `StoreKeys` import for constants
+- In `__init__`: Put datasource in meta_store using `StoreKeys.ACTIVE_DATASOURCE`
+- In `_create_agent`: Removed datasource parameter from all agent instantiations
+- Agents now retrieve datasource from store via InjectedStore pattern
+- Added comments explaining the new pattern
+
+**PythonAgent Changes:**
+- Added `store` and `**kwargs` parameters to `__init__`
+- Updated `super()` call to use model-first parameter order
+- Now works with InjectedStore pattern
+
+**PandasAgent Changes:**
+- Added `store`, `vector_store`, and `**kwargs` parameters
+- Updated to use model-first parameter order
+- Stores vector_store for analysis features
+
+**Impact:**
+- CLI's MultiAgentRouter now uses v0.2.0 API
+- Datasource stored in meta_store and accessed by agents via store
+- Agents no longer receive datasource as constructor parameter
+- All agents consistently use InjectedStore pattern
+- Backward compatible with existing CLI DataSourceManager and CatalogManager
+
+**Note:** Kept existing DataSourceManager and CatalogManager as they already provide good service abstractions. Only updated the agent instantiation pattern.
+
+---
+
 ## 📊 Statistics So Far
 
 | Metric | Value |
 |--------|-------|
-| **Steps Completed** | 5 of 8 (63%) |
+| **Steps Completed** | 6 of 8 (75%) |
 | **Files Created** | 13 (Phase 1) + 2 (Phase 2) = 15 |
-| **Files Modified** | 6 major files (base, chat_agent, workflow, sql, sql_tool, agent_builder) |
-| **Lines Added** | ~2,300 (services + refactored agents) |
-| **Lines Removed** | ~700 (infrastructure + old agent code) |
-| **Net Code Change** | +1,600 lines |
-| **Commits** | 6 clean commits |
+| **Files Modified** | 9 major files (base, chat_agent, workflow, sql, multi_agent_router, python_agent, pandas_agent, sql_tool, agent_builder) |
+| **Lines Added** | ~2,350 (services + refactored agents + CLI) |
+| **Lines Removed** | ~730 (infrastructure + old agent code + old patterns) |
+| **Net Code Change** | +1,620 lines |
+| **Commits** | 8 clean commits |
 
 ---
 
-## 🔜 Remaining Steps (2.5, 2.7-2.8)
-
-### Step 2.5: Refactor CLI to Use Services 📝
-**Status:** TODO
-**File:** `cli/app.py` (284 lines)
-
-**Required Changes:**
-1. Add service initialization in `__init__`:
-   ```python
-   # Create services
-   self.datasource_service = DataSourceService(
-       StoreBasedDataSourceRepository(self.meta_store)
-   )
-   self.catalog_service = CatalogService(...)
-   self.agent_builder = AgentBuilder(
-       datasource_service=self.datasource_service,
-       catalog_service=self.catalog_service
-   )
-   ```
-
-2. Update command handlers to use services:
-   - `/datasource` → Use `datasource_service`
-   - `/index-catalog` → Use `catalog_service`
-   - Agent creation → Use `agent_builder`
-
-3. Remove old managers:
-   - ❌ `DataSourceManager` → ✅ `DataSourceService`
-   - ❌ `AgentManager` → ✅ `AgentBuilder`
-
-**Estimated Time:** 2-3 hours
-
----
+## 🔜 Remaining Steps (2.7-2.8)
 
 ### Step 2.7: Update Tests 🧪
 **Status:** TODO
@@ -185,9 +185,9 @@ agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 ## 🎯 Total Progress
 
-**Time Spent:** ~10 hours
-**Time Remaining:** ~5-6 hours
-**Overall Progress:** 63% complete
+**Time Spent:** ~12 hours
+**Time Remaining:** ~3 hours
+**Overall Progress:** 75% complete
 
 **When Finished:**
 - Clean service architecture ✅

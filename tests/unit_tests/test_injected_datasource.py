@@ -95,7 +95,9 @@ class TestInjectedDatasource:
             model="gpt-3.5-turbo", mode="enhanced", store=mock_store
         )
         assert enhanced_agent.mode == SqlAgentMode.enhanced
-        assert len(enhanced_agent.tools) == 5  # Updated count: basic(3) + enhanced(2) = 5
+        assert (
+            len(enhanced_agent.tools) == 5
+        )  # Updated count: basic(3) + enhanced(2) = 5
 
     def test_format_messages_structure(self, workflow_agent):
         """Test _format_messages returns correct structure."""

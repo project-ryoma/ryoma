@@ -12,8 +12,8 @@ from ryoma_ai.agent.sql import (
     ReFoRCESqlAgentImpl,
     SqlAgent,
 )
-from ryoma_data.sql import SqlDataSource
 from ryoma_ai.models.agent import SqlAgentMode
+from ryoma_data.sql import SqlDataSource
 
 
 def demo_sql_agent_factory():

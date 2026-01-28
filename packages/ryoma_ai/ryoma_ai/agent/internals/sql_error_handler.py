@@ -2,8 +2,8 @@ import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
-from ryoma_data.base import DataSource
 from ryoma_ai.models.sql import DatabaseType, RecoveryStrategy, SqlError, SqlErrorType
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

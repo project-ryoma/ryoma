@@ -1,6 +1,7 @@
 """Domain interfaces - protocols for dependency inversion"""
 
-from typing import Protocol, List, Optional, Literal
+from typing import List, Literal, Optional, Protocol
+
 from ryoma_data.base import DataSource
 
 

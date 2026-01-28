@@ -1,7 +1,8 @@
 """Tests for DataSourceService"""
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 from ryoma_ai.services.datasource_service import DataSourceService
 
 
@@ -44,9 +45,7 @@ class TestDataSourceService:
         assert result == sample_datasource
         mock_repository.get_active.assert_called_once()
 
-    def test_get_active_datasource_raises_when_none(
-        self, service, mock_repository
-    ):
+    def test_get_active_datasource_raises_when_none(self, service, mock_repository):
         """Test that ValueError is raised when no active datasource"""
         mock_repository.get_active.side_effect = ValueError("No active datasource")
 
@@ -102,9 +101,7 @@ class TestDataSourceService:
 
         assert result is True
 
-    def test_has_active_datasource_returns_false(
-        self, service, mock_repository
-    ):
+    def test_has_active_datasource_returns_false(self, service, mock_repository):
         """Test has_active_datasource when no datasource exists"""
         mock_repository.get_active.side_effect = ValueError("No active datasource")
 

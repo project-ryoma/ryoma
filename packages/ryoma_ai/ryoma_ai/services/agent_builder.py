@@ -6,21 +6,21 @@ creation of agents with all necessary dependencies and configurations.
 """
 
 import logging
-from typing import Optional, Literal, Union
+from typing import Literal, Optional, Union
+
 from langchain_core.language_models import BaseChatModel
 from langchain_core.stores import InMemoryStore
-
-from ryoma_ai.services.datasource_service import DataSourceService
-from ryoma_ai.services.catalog_service import CatalogService
-from ryoma_ai.agent.workflow import WorkflowAgent
 from ryoma_ai.agent.chat_agent import ChatAgent
 from ryoma_ai.agent.sql_tools import (
     get_basic_sql_tools,
     get_enhanced_sql_tools,
     get_reforce_sql_tools,
 )
+from ryoma_ai.agent.workflow import WorkflowAgent
+from ryoma_ai.domain.constants import AgentDefaults, StoreKeys
 from ryoma_ai.llm.provider import load_model_provider
-from ryoma_ai.domain.constants import StoreKeys, AgentDefaults
+from ryoma_ai.services.catalog_service import CatalogService
+from ryoma_ai.services.datasource_service import DataSourceService
 
 logger = logging.getLogger(__name__)
 
@@ -221,9 +221,7 @@ class AgentBuilder:
         return agent
 
     def _create_llm(
-        self,
-        model: Union[str, BaseChatModel],
-        model_params: Optional[dict] = None
+        self, model: Union[str, BaseChatModel], model_params: Optional[dict] = None
     ) -> BaseChatModel:
         """
         Create LLM instance from model identifier or return existing instance.
