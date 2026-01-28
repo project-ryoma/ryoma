@@ -57,8 +57,10 @@ Deploy secure, scalable data analysis with comprehensive governance.
 Get up and running in under 5 minutes:
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data import DataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Connect to your database
 datasource = DataSource(
@@ -66,12 +68,18 @@ datasource = DataSource(
     host="localhost",
     database="mydb",
     user="user",
-    password="pass"
+    password="password"
 )
 
-# Create SQL agent
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(datasource)
+# Set up services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
+# Build SQL agent
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask questions in natural language
 response = agent.stream("Show me the top 10 customers by revenue this quarter")

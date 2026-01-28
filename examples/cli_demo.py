@@ -13,13 +13,13 @@ def run_cli_command(command: str) -> str:
     """Run a CLI command and return the output."""
     try:
         result = subprocess.run(
-            ["ryoma-sql", "--help"], capture_output=True, text=True, check=True
+            ["ryoma_ai", "--help"], capture_output=True, text=True, check=True
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
         return f"Error: {e.stderr}"
     except FileNotFoundError:
-        return "Error: ryoma-sql command not found. Please install ryoma_ai package."
+        return "Error: ryoma_ai command not found. Please install ryoma_ai package."
 
 
 def demo_cli_help():
@@ -115,7 +115,7 @@ def demo_workflow():
     print("=" * 50)
 
     workflow_steps = [
-        "1. Start CLI: ryoma-sql",
+        "1. Start CLI: ryoma_ai",
         "2. Setup database (first time): /setup",
         "3. Ask natural language question:",
         "   > Who are the top 5 customers by sales?",
@@ -191,10 +191,10 @@ def main():
     print("\n🚀 Getting Started:")
     print("=" * 50)
     print("1. Install: pip install ryoma_ai")
-    print("2. Run: ryoma-sql --setup")
+    print("2. Run: ryoma_ai --setup")
     print("3. Start asking questions in natural language!")
     print()
-    print("For more help: ryoma-sql --help")
+    print("For more help: ryoma_ai --help")
 
 
 if __name__ == "__main__":

@@ -18,18 +18,27 @@ For new users starting with Ryoma AI:
 
 ## 📖 API Reference
 
-### Current API (v0.1.x - Stable)
+### Current API (v0.2.0)
 
-**Basic Usage:**
+**Recommended Usage (AgentBuilder):**
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource import PostgresDataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Create datasource
-datasource = PostgresDataSource("postgresql://user:password@localhost:5432/dbname")
+datasource = DataSource("postgres", host="localhost", database="dbname", user="user", password="password")
 
-# Create agent
-agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
+# Setup services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
+# Build agent
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask questions
 agent.stream("What are the top 5 customers?", display=True)
@@ -39,21 +48,7 @@ agent.stream("What are the top 5 customers?", display=True)
 - [SQL Agent Quick Reference](source/architecture/sql-agent-quick-reference.md)
 - [Architecture Overview](source/architecture/architecture.md)
 
-### Upcoming API (v0.2.0 - In Development)
-
-**New Service-Based API:**
-```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-
-# Setup services
-datasource_service = DataSourceService(...)
-builder = AgentBuilder(datasource_service=datasource_service)
-
-# Build agent
-agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
-```
-
-**For migration information, see:**
+**For migration information from v0.1.x, see:**
 - **[CHANGELOG.md](../CHANGELOG.md)** - Detailed changelog with migration guide
 - [Architecture Comparison](ARCHITECTURE_COMPARISON.md) - Visual comparison
 

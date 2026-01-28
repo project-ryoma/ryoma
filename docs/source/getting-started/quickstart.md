@@ -39,26 +39,28 @@ The fastest way to get started:
 export OPENAI_API_KEY="your-api-key-here"
 
 # Start the CLI
-ryoma-ai --setup
+ryoma_ai --setup
 
 # Or start with defaults
-ryoma-ai
+ryoma_ai
 ```
 
 Then use natural language:
 ```bash
-ryoma-ai> show me all tables in my database
-ryoma-ai> what customers made purchases last month?  
-ryoma-ai> create a chart of sales by region
+ryoma_ai> show me all tables in my database
+ryoma_ai> what customers made purchases last month?  
+ryoma_ai> create a chart of sales by region
 ```
 
-### Option 2: Programmatic Usage
+### Option 2: Programmatic Usage (Recommended)
 
-For integration into your applications:
+For integration into your applications, use the service-based API:
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data import DataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Set up data source
 datasource = DataSource(
@@ -67,15 +69,18 @@ datasource = DataSource(
     port=5432,
     database="mydb",
     user="user",
-    password="pass"
+    password="password"
 )
 
-# Create SQL agent
-agent = SqlAgent(
-    model="gpt-4o",
-    mode="enhanced",
-    datasource=datasource
-)
+# Set up services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
+# Build agent using the builder
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-4o", mode="enhanced")
 
 # Ask questions in natural language
 response = agent.stream("Show me the top 10 customers by revenue this month")
@@ -87,7 +92,7 @@ print(response)
 For DataFrame analysis:
 
 ```python
-from ryoma_ai.agent.pandas import PandasAgent
+from ryoma_ai.agent.pandas_agent import PandasAgent
 import pandas as pd
 
 # Create sample data
@@ -99,7 +104,7 @@ df = pd.DataFrame({
 
 # Create pandas agent
 agent = PandasAgent("gpt-4o")
-agent.add_dataframe(df)
+agent.add_dataframe(df, df_id="sales_data")
 
 # Analyze with natural language
 result = agent.stream("What's the average revenue by region?")
@@ -110,8 +115,10 @@ print(result)
 
 ### Enhanced SQL Agent
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data import DataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Connect to database
 datasource = DataSource(
@@ -119,19 +126,18 @@ datasource = DataSource(
     host="localhost",
     database="mydb",
     user="user",
-    password="pass"
+    password="password"
 )
 
+# Set up services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
 # Use ReFoRCE mode for advanced performance
-agent = SqlAgent(
-    model="gpt-4",
-    mode="reforce",
-    safety_config={
-        "enable_validation": True,
-        "max_retries": 3
-    }
-)
-agent.add_datasource(datasource)
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-4", mode="reforce")
 
 # Complex queries
 response = agent.stream("""
@@ -153,18 +159,25 @@ export ANTHROPIC_API_KEY="your-anthropic-key"
 
 ### Agent Configuration
 ```python
-# Custom configuration
-agent = SqlAgent(
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
+
+# Set up datasource and services (assuming datasource already created)
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
+# Build agent with custom model parameters
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(
     model="gpt-4",
     mode="enhanced",
-    model_parameters={
+    model_params={
         "temperature": 0.1,
         "max_tokens": 2000
-    },
-    safety_config={
-        "enable_validation": True,
-        "allowed_operations": ["SELECT", "WITH"],
-        "max_rows": 10000
     }
 )
 ```
@@ -174,15 +187,23 @@ agent = SqlAgent(
 Run this quick test to ensure everything is working:
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data import DataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Create in-memory SQLite database
 datasource = DataSource("sqlite", database=":memory:")
 
+# Set up services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
 # Test agent creation
-agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")
-agent.add_datasource(datasource)
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-3.5-turbo", mode="enhanced")
 
 print("✅ Ryoma is ready to use!")
 ```

@@ -40,16 +40,31 @@ Below is an example of using SqlAgent to connect to a postgres database and ask 
 You can read more details in the [documentation](https://project-ryoma.github.io/ryoma/).
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.datasource.postgres import PostgresDataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Connect to a postgres catalog
-datasource = PostgresDataSource("postgresql://user:password@localhost:5432/dbname")
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    port=5432,
+    database="dbname",
+    user="user",
+    password="password"
+)
 
-# Create a SQL agent
-sql_agent = SqlAgent("gpt-3.5-turbo").add_datasource(datasource)
+# Set up services and build agent
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
 
-# ask question to the agent
+builder = AgentBuilder(datasource_service)
+sql_agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+
+# Ask question to the agent
 sql_agent.stream("I want to get the top 5 customers which making the most purchases", display=True)
 ```
 
@@ -68,6 +83,7 @@ Tool Calls:
 ```
 Continue to run the tool with the following code:
 ```python
+from ryoma_ai.agent.workflow import ToolMode
 sql_agent.stream(tool_mode=ToolMode.ONCE)
 ```
 Output will look like after running the tool:

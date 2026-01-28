@@ -2,82 +2,101 @@
 
 ## Quick Start
 
-### Basic Usage
+### Using AgentBuilder (Recommended)
+
+```python
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
+
+# Initialize datasource
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    port=5432,
+    database="mydb",
+    user="user",
+    password="password"
+)
+
+# Set up services
+store = InMemoryStore()
+repo = StoreBasedDataSourceRepository(store)
+datasource_service = DataSourceService(repo)
+datasource_service.add_datasource(datasource)
+
+# Create SQL agent using builder
+builder = AgentBuilder(datasource_service)
+agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+
+# Ask a question
+result = agent.stream("Show top 10 customers by revenue")
+```
+
+### Direct SqlAgent Factory (Alternative)
 
 ```python
 from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data.sql import SqlDataSource
+from ryoma_ai.domain.constants import StoreKeys
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
 
 # Initialize datasource
-datasource = SqlDataSource(connection_string="your_db_connection")
+datasource = DataSource(
+    "postgres",
+    host="localhost",
+    database="mydb",
+    user="user",
+    password="password"
+)
 
-# Create enhanced SQL agent
-sql_agent = SqlAgent(
+# Create store and inject datasource
+store = InMemoryStore()
+store.mset([(StoreKeys.ACTIVE_DATASOURCE, datasource)])
+
+# Create SQL agent with store
+agent = SqlAgent(
     model="gpt-4",
-    datasource=datasource,
-    use_enhanced_mode=True
+    mode="enhanced",  # or "basic" or "reforce"
+    store=store
 )
 
 # Ask a question
-result = sql_agent.invoke({
-    "messages": [{"role": "user", "content": "Show top 10 customers by revenue"}]
-})
+result = agent.stream("Show top 10 customers by revenue")
 ```
 
 ### ReFoRCE Mode (Advanced)
 
 ```python
 # State-of-the-art SQL agent with ReFoRCE optimizations
-sql_agent = SqlAgent(
+agent = builder.build_sql_agent(
     model="gpt-4",
-    datasource=datasource,
-    use_reforce_mode=True,
-    max_parallel_threads=3,
-    max_refinement_iterations=5
+    mode="reforce"
 )
 ```
 
-## Configuration Options
+## Constructor Parameters
 
-### Safety Configuration
+### SqlAgent Factory
 
 ```python
-safety_config = {
-    "max_result_rows": 1000,           # Limit result rows
-    "blocked_functions": [             # Dangerous SQL functions
-        "DROP", "DELETE", "UPDATE", 
-        "LOAD_FILE", "INTO OUTFILE"
-    ],
-    "allowed_schemas": [               # Restrict schema access
-        "public", "analytics"
-    ],
-    "query_timeout": 30,               # Query timeout in seconds
-    "max_joins": 5,                    # Maximum number of joins
-    "safety_level": "STRICT"           # PERMISSIVE, MODERATE, STRICT
-}
-
-sql_agent = SqlAgent(
-    model="gpt-4",
-    datasource=datasource,
-    use_enhanced_mode=True,
-    safety_config=safety_config
+SqlAgent(
+    model: str | BaseChatModel,      # Model ID or LLM instance
+    model_parameters: dict = None,    # Optional LLM parameters
+    mode: str = "basic",              # "basic", "enhanced", or "reforce"
+    safety_config: dict = None,       # Safety configuration (enhanced/reforce only)
+    store = None,                     # BaseStore with datasource injected
 )
 ```
 
-### ReFoRCE Configuration
+### AgentBuilder.build_sql_agent
 
 ```python
-reforce_config = {
-    "max_parallel_threads": 3,         # Parallel SQL generation
-    "max_refinement_iterations": 5,    # Self-refinement iterations
-    "compression_threshold": 30000,    # Schema compression threshold (tokens)
-}
-
-sql_agent = SqlAgent(
-    model="gpt-4",
-    datasource=datasource,
-    use_reforce_mode=True,
-    **reforce_config
+builder.build_sql_agent(
+    model: str = "gpt-3.5-turbo",    # Model ID or LLM instance
+    mode: str = "basic",              # "basic", "enhanced", or "reforce"
+    model_params: dict = None,        # Optional model parameters
 )
 ```
 
@@ -96,6 +115,21 @@ sql_agent = SqlAgent(
 | Self-refinement | ❌ | ❌ | ✅ |
 | Parallel generation | ❌ | ❌ | ✅ |
 | Consensus voting | ❌ | ❌ | ✅ |
+
+## Available Tools by Mode
+
+### Basic Mode (3 tools)
+- **SqlQueryTool** - Execute SQL queries
+- **CreateTableTool** - Create new tables
+- **QueryProfileTool** - Profile query execution
+
+### Enhanced Mode (5 tools)
+All basic tools plus:
+- **QueryExplanationTool** - Explain query execution plans
+- **QueryOptimizationTool** - Optimize query performance
+
+### ReFoRCE Mode (5 tools)
+Same as enhanced mode (ReFoRCE is a prompting strategy, not different tools)
 
 ## Workflow Steps
 
@@ -120,56 +154,40 @@ sql_agent = SqlAgent(
 6. **consensus_voting** - Majority-vote consensus
 7. **final_validation** - Result validation and formatting
 
-## Key Components
+## Key Methods
 
-### Specialized Agents
+### Agent Methods
 
-- **SchemaLinkingAgent** - Intelligent table discovery
-- **QueryPlannerAgent** - Query complexity analysis and planning
-- **SqlErrorHandler** - Error recovery and correction
-- **SqlSafetyValidator** - Security and safety validation
+```python
+# Stream responses (recommended)
+result = agent.stream(question, display=True)
 
-### Enhanced Tools
+# Invoke synchronously
+result = agent.invoke(question)
 
-- **SqlQueryTool** - Query execution with safety
-- **SchemaAnalysisTool** - Schema relationship analysis
-- **QueryValidationTool** - SQL syntax/semantic validation
-- **TableSelectionTool** - Relevant table suggestions
-- **QueryOptimizationTool** - Performance optimization
-- **QueryExplanationTool** - Natural language explanations
+# Async invocation
+result = await agent.ainvoke(question)
 
-## Safety Features
+# Tool execution control
+from ryoma_ai.agent.workflow import ToolMode
+result = agent.stream(question, tool_mode=ToolMode.ONCE)
+result = agent.stream(question, tool_mode=ToolMode.CONTINUOUS)
+```
 
-### Security Validation
+### Enhanced/ReFoRCE Methods
 
-- SQL injection prevention
-- Dangerous operation blocking
-- Resource limit enforcement
-- Access control validation
+```python
+# Safety configuration (enhanced/reforce only)
+agent.enable_safety_rule("BLOCK_DELETE")
+agent.disable_safety_rule("LIMIT_JOINS")
+agent.set_safety_config(new_config)
 
-### Error Classification
+# Schema analysis (enhanced/reforce only)
+analysis = agent.analyze_schema(question)
 
-- **Syntax Errors** - Invalid SQL syntax
-- **Semantic Errors** - Logical errors
-- **Permission Errors** - Access violations
-- **Data Errors** - Data-related issues
-- **Performance Errors** - Resource/timeout issues
-
-## Performance Features
-
-### ReFoRCE Optimizations
-
-- **Database Compression** - Reduce schema size for large databases
-- **Parallel Processing** - Generate multiple SQL candidates simultaneously
-- **Self-Refinement** - Iteratively improve query quality
-- **Consensus Mechanism** - Use majority vote for best results
-
-### Query Optimization
-
-- Index usage analysis
-- Join optimization suggestions
-- Performance estimation
-- Resource usage monitoring
+# Query planning (enhanced/reforce only)
+plan = agent.create_query_plan(question, context)
+```
 
 ## Common Use Cases
 
@@ -177,33 +195,53 @@ sql_agent = SqlAgent(
 
 ```python
 # Revenue analysis
-result = sql_agent.invoke({
-    "messages": [{"role": "user", "content": 
-        "Show monthly revenue trends for the last 12 months by product category"
-    }]
-})
+result = agent.stream(
+    "Show monthly revenue trends for the last 12 months by product category"
+)
 ```
 
 ### Customer Analytics
 
 ```python
 # Customer segmentation
-result = sql_agent.invoke({
-    "messages": [{"role": "user", "content": 
-        "Identify top 20% of customers by lifetime value and their characteristics"
-    }]
-})
+result = agent.stream(
+    "Identify top 20% of customers by lifetime value and their characteristics"
+)
 ```
 
 ### Operational Reporting
 
 ```python
 # Performance metrics
-result = sql_agent.invoke({
-    "messages": [{"role": "user", "content": 
-        "Calculate average order processing time by region for last quarter"
-    }]
-})
+result = agent.stream(
+    "Calculate average order processing time by region for last quarter"
+)
+```
+
+## DataSource Configuration
+
+### Supported Backends
+
+```python
+from ryoma_data.sql import DataSource
+
+# PostgreSQL
+ds = DataSource("postgres", host="localhost", database="mydb", user="user", password="pass")
+
+# MySQL
+ds = DataSource("mysql", host="localhost", database="mydb", user="user", password="pass")
+
+# SQLite
+ds = DataSource("sqlite", database="path/to/db.sqlite")
+
+# DuckDB
+ds = DataSource("duckdb", database=":memory:")
+
+# Snowflake
+ds = DataSource("snowflake", account="xxx", database="DB", user="user", password="pass")
+
+# BigQuery
+ds = DataSource("bigquery", project_id="project", dataset_id="dataset")
 ```
 
 ## Troubleshooting
@@ -212,85 +250,31 @@ result = sql_agent.invoke({
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
+| No active datasource | Datasource not added to service | Call `datasource_service.add_datasource(ds)` |
 | Schema loading error | DB connection/permissions | Check datasource configuration |
 | Query timeout | Complex query/large dataset | Increase timeout or optimize query |
 | Safety violation | Dangerous SQL operation | Review safety configuration |
-| Memory issues | Large schema | Enable schema compression |
-
-### Debug Mode
-
-```python
-sql_agent = SqlAgent(
-    model="gpt-4",
-    datasource=datasource,
-    use_enhanced_mode=True,
-    debug=True,
-    log_level="DEBUG"
-)
-```
 
 ## Best Practices
 
 ### Production Deployment
 
-1. **Configure Safety Rules** - Set appropriate safety policies
-2. **Set Resource Limits** - Prevent resource exhaustion
-3. **Monitor Performance** - Track query execution metrics
-4. **Regular Testing** - Test with your specific schema
+1. **Use AgentBuilder** - Cleaner separation of concerns
+2. **Configure Safety Rules** - Set appropriate safety policies
+3. **Set Resource Limits** - Prevent resource exhaustion
+4. **Monitor Performance** - Track query execution metrics
 5. **Access Control** - Implement proper database permissions
 
 ### Performance Optimization
 
-1. **Use ReFoRCE Mode** - For best performance and accuracy
-2. **Enable Compression** - For large database schemas
-3. **Tune Parallel Threads** - Based on your system capacity
-4. **Monitor Resource Usage** - Optimize based on metrics
+1. **Use ReFoRCE Mode** - For best performance and accuracy on complex queries
+2. **Use Enhanced Mode** - For production with safety validation
+3. **Use Basic Mode** - For simple queries and development
 
-### Security Considerations
+## Version History
 
-1. **Principle of Least Privilege** - Minimal database permissions
-2. **Input Validation** - Validate all user inputs
-3. **Audit Logging** - Log all query executions
-4. **Regular Updates** - Keep system updated
-
-## API Reference
-
-### SqlAgent Methods
-
-```python
-# Initialize agent
-sql_agent = SqlAgent(model, datasource, **config)
-
-# Process question
-result = sql_agent.invoke(input_data, **kwargs)
-
-# Stream responses
-for chunk in sql_agent.stream(input_data, **kwargs):
-    print(chunk)
-
-# Safety configuration
-sql_agent.enable_safety_rule("BLOCK_DELETE")
-sql_agent.disable_safety_rule("LIMIT_JOINS")
-sql_agent.set_safety_config(new_config)
-
-# Schema analysis
-analysis = sql_agent.analyze_schema(question)
-
-# Query planning
-plan = sql_agent.create_query_plan(question, context)
-```
-
-### State Management
-
-```python
-# Access workflow state
-state = sql_agent.get_current_state()
-
-# Check execution status
-status = state.get("current_step")
-errors = state.get("error_info")
-results = state.get("execution_result")
-```
+- **v0.2.0** - Service-based architecture with AgentBuilder
+- **v0.1.x** - Direct datasource parameter (deprecated)
 
 ## Support and Resources
 
@@ -298,9 +282,3 @@ results = state.get("execution_result")
 - **Examples**: See `examples/` directory
 - **Issues**: Report bugs and feature requests
 - **Contributing**: See contribution guidelines
-
-## Version History
-
-- **v1.0.0** - Initial Enhanced SQL Agent implementation
-- **v1.1.0** - Added ReFoRCE optimizations
-- **v1.2.0** - Improved safety validation and error handling

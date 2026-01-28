@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-Demonstration of the SqlAgent factory pattern.
-Shows how users can create SQL agents with different modes using the simple SqlAgent(...) syntax.
+Demonstration of the SqlAgent factory pattern and service-based API.
+Shows how users can create SQL agents with different modes using both:
+1. AgentBuilder (recommended)
+2. SqlAgent factory with store injection
 """
 
 from unittest.mock import Mock
+
+from langchain_core.stores import InMemoryStore
 
 from ryoma_ai.agent.sql import (
     BasicSqlAgent,
@@ -12,24 +16,84 @@ from ryoma_ai.agent.sql import (
     ReFoRCESqlAgentImpl,
     SqlAgent,
 )
+from ryoma_ai.domain.constants import StoreKeys
 from ryoma_ai.models.agent import SqlAgentMode
-from ryoma_data.sql import SqlDataSource
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from ryoma_data.sql import DataSource
+
+
+def create_mock_datasource():
+    """Create a mock datasource for demonstration."""
+    mock_datasource = Mock(spec=DataSource)
+    mock_datasource.id = "mock_datasource"
+    mock_datasource.query.return_value = "Mock query result"
+    return mock_datasource
+
+
+def demo_agent_builder():
+    """Demonstrate the recommended AgentBuilder pattern."""
+
+    print("🔧 AgentBuilder Pattern Demo (Recommended)")
+    print("=" * 50)
+
+    # Create a mock datasource
+    mock_datasource = create_mock_datasource()
+
+    # Set up services
+    store = InMemoryStore()
+    repo = StoreBasedDataSourceRepository(store)
+    datasource_service = DataSourceService(repo)
+    datasource_service.add_datasource(mock_datasource)
+
+    # Create builder
+    builder = AgentBuilder(datasource_service)
+
+    print("\n1. Creating Basic SQL Agent:")
+    print("   builder.build_sql_agent(model='gpt-4', mode='basic')")
+
+    basic_agent = builder.build_sql_agent(model="gpt-4", mode="basic")
+
+    print(f"   ✅ Created: {type(basic_agent).__name__}")
+    print(f"   🔧 Tools: {len(basic_agent.tools)} tools")
+    print(f"   📝 Tools: {[tool.name for tool in basic_agent.tools]}")
+
+    print("\n2. Creating Enhanced SQL Agent:")
+    print("   builder.build_sql_agent(model='gpt-4', mode='enhanced')")
+
+    enhanced_agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+
+    print(f"   ✅ Created: {type(enhanced_agent).__name__}")
+    print(f"   🔧 Tools: {len(enhanced_agent.tools)} tools")
+    print(f"   📝 Tools: {[tool.name for tool in enhanced_agent.tools]}")
+
+    print("\n3. Creating ReFoRCE SQL Agent:")
+    print("   builder.build_sql_agent(model='gpt-4', mode='reforce')")
+
+    reforce_agent = builder.build_sql_agent(model="gpt-4", mode="reforce")
+
+    print(f"   ✅ Created: {type(reforce_agent).__name__}")
+    print(f"   🔧 Tools: {len(reforce_agent.tools)} tools")
+    print(f"   📝 Tools: {[tool.name for tool in reforce_agent.tools]}")
 
 
 def demo_sql_agent_factory():
-    """Demonstrate the SqlAgent factory pattern."""
+    """Demonstrate the SqlAgent factory pattern with store injection."""
 
-    print("🔧 SqlAgent Factory Pattern Demo")
+    print("\n\n🔧 SqlAgent Factory Pattern Demo")
     print("=" * 50)
 
-    # Create a mock datasource for demonstration
-    mock_datasource = Mock(spec=SqlDataSource)
-    mock_datasource.query.return_value = "Mock query result"
+    # Create a mock datasource
+    mock_datasource = create_mock_datasource()
+
+    # Create store and inject datasource
+    store = InMemoryStore()
+    store.mset([(StoreKeys.ACTIVE_DATASOURCE, mock_datasource)])
 
     print("\n1. Creating Basic SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='basic')")
+    print("   SqlAgent(model='gpt-4', mode='basic', store=store)")
 
-    basic_agent = SqlAgent(model="gpt-4", datasource=mock_datasource, mode="basic")
+    basic_agent = SqlAgent(model="gpt-4", mode="basic", store=store)
 
     print(f"   ✅ Created: {type(basic_agent).__name__}")
     print(f"   📊 Mode: {basic_agent.mode}")
@@ -37,13 +101,13 @@ def demo_sql_agent_factory():
     print(f"   📝 Tools: {[tool.name for tool in basic_agent.tools]}")
 
     print("\n2. Creating Enhanced SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='enhanced')")
+    print("   SqlAgent(model='gpt-4', mode='enhanced', store=store)")
 
     enhanced_agent = SqlAgent(
         model="gpt-4",
-        datasource=mock_datasource,
         mode=SqlAgentMode.enhanced,
         safety_config={"enable_validation": True},
+        store=store,
     )
 
     print(f"   ✅ Created: {type(enhanced_agent).__name__}")
@@ -52,13 +116,13 @@ def demo_sql_agent_factory():
     print(f"   📝 Tools: {[tool.name for tool in enhanced_agent.tools]}")
 
     print("\n3. Creating ReFoRCE SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='reforce')")
+    print("   SqlAgent(model='gpt-4', mode='reforce', store=store)")
 
     reforce_agent = SqlAgent(
         model="gpt-4",
-        datasource=mock_datasource,
         mode="reforce",
         safety_config={"enable_advanced_validation": True},
+        store=store,
     )
 
     print(f"   ✅ Created: {type(reforce_agent).__name__}")
@@ -67,9 +131,9 @@ def demo_sql_agent_factory():
     print(f"   📝 Tools: {[tool.name for tool in reforce_agent.tools]}")
 
     print("\n4. Default Mode (when no mode specified):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource)")
+    print("   SqlAgent(model='gpt-4', store=store)")
 
-    default_agent = SqlAgent(model="gpt-4", datasource=mock_datasource)
+    default_agent = SqlAgent(model="gpt-4", store=store)
 
     print(f"   ✅ Created: {type(default_agent).__name__}")
     print(f"   📊 Mode: {default_agent.mode}")
@@ -81,20 +145,6 @@ def demo_sql_agent_factory():
     except NotImplementedError as e:
         print(f"   ✅ Basic agent correctly raises: {e}")
 
-    print("\n6. Testing Enhanced Agent Functionality:")
-    try:
-        # This would work if the internal agent was properly initialized
-        print("   ✅ Enhanced agent supports advanced methods")
-    except Exception as e:
-        print(f"   ⚠️  Enhanced agent setup: {e}")
-
-    print("\n🎉 Factory Pattern Benefits:")
-    print("   • Simple user interface: SqlAgent(...)")
-    print("   • Automatic mode-based instantiation")
-    print("   • Type-safe with proper inheritance")
-    print("   • Extensible for new modes")
-    print("   • Backward compatible")
-
 
 def demo_direct_instantiation():
     """Demonstrate direct instantiation of specific agent types."""
@@ -102,18 +152,20 @@ def demo_direct_instantiation():
     print("\n\n🎯 Direct Instantiation Demo")
     print("=" * 50)
 
-    mock_datasource = Mock(spec=SqlDataSource)
+    mock_datasource = create_mock_datasource()
+    store = InMemoryStore()
+    store.mset([(StoreKeys.ACTIVE_DATASOURCE, mock_datasource)])
 
     print("\n1. Direct BasicSqlAgent instantiation:")
-    basic = BasicSqlAgent(model="gpt-4", datasource=mock_datasource)
+    basic = BasicSqlAgent(model="gpt-4", store=store)
     print(f"   ✅ Created: {type(basic).__name__}")
 
     print("\n2. Direct EnhancedSqlAgentImpl instantiation:")
-    enhanced = EnhancedSqlAgentImpl(model="gpt-4", datasource=mock_datasource)
+    enhanced = EnhancedSqlAgentImpl(model="gpt-4", store=store)
     print(f"   ✅ Created: {type(enhanced).__name__}")
 
     print("\n3. Direct ReFoRCESqlAgentImpl instantiation:")
-    reforce = ReFoRCESqlAgentImpl(model="gpt-4", datasource=mock_datasource)
+    reforce = ReFoRCESqlAgentImpl(model="gpt-4", store=store)
     print(f"   ✅ Created: {type(reforce).__name__}")
 
 
@@ -123,22 +175,48 @@ def demo_usage_patterns():
     print("\n\n💡 Common Usage Patterns")
     print("=" * 50)
 
-    _ = Mock(spec=SqlDataSource)
+    print("\n1. Recommended: Using AgentBuilder")
+    print("""
+   from ryoma_ai.services import AgentBuilder, DataSourceService
+   from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+   from langchain_core.stores import InMemoryStore
+   from ryoma_data.sql import DataSource
 
-    print("\n1. Simple SQL queries (Basic mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='basic')")
-    print("   result = agent.invoke('SELECT * FROM users')")
+   # Setup
+   datasource = DataSource("postgres", host="localhost", database="mydb", ...)
+   store = InMemoryStore()
+   repo = StoreBasedDataSourceRepository(store)
+   datasource_service = DataSourceService(repo)
+   datasource_service.add_datasource(datasource)
 
-    print("\n2. Advanced analytics (Enhanced mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='enhanced')")
-    print("   agent.set_safety_config({'enable_validation': True})")
-    print("   analysis = agent.analyze_schema('Find customer segments')")
+   # Build agent
+   builder = AgentBuilder(datasource_service)
+   agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
 
-    print("\n3. Production workloads (ReFoRCE mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='reforce')")
-    print("   plan = agent.create_query_plan('Complex analytical query')")
+   # Use agent
+   result = agent.stream("Show top customers by revenue")
+""")
 
-    print("\n4. Mode-specific configurations:")
+    print("\n2. Alternative: Direct SqlAgent with store")
+    print("""
+   from ryoma_ai.agent.sql import SqlAgent
+   from ryoma_ai.domain.constants import StoreKeys
+   from langchain_core.stores import InMemoryStore
+   from ryoma_data.sql import DataSource
+
+   # Setup datasource and store
+   datasource = DataSource("postgres", host="localhost", database="mydb", ...)
+   store = InMemoryStore()
+   store.mset([(StoreKeys.ACTIVE_DATASOURCE, datasource)])
+
+   # Create agent
+   agent = SqlAgent(model="gpt-4", mode="enhanced", store=store)
+
+   # Use agent
+   result = agent.stream("Show top customers by revenue")
+""")
+
+    print("\n3. Mode-specific configurations:")
     configurations = {
         "basic": {
             "use_case": "Simple queries and testing",
@@ -147,12 +225,12 @@ def demo_usage_patterns():
         },
         "enhanced": {
             "use_case": "Advanced analytics and optimization",
-            "tools": 7,
+            "tools": 5,
             "safety": "Comprehensive validation",
         },
         "reforce": {
             "use_case": "Production workloads and complex reasoning",
-            "tools": 7,
+            "tools": 5,
             "safety": "Enterprise-grade validation",
         },
     }
@@ -165,11 +243,12 @@ def demo_usage_patterns():
 
 
 if __name__ == "__main__":
+    demo_agent_builder()
     demo_sql_agent_factory()
     demo_direct_instantiation()
     demo_usage_patterns()
 
     print("\n\n✨ Summary:")
-    print("The SqlAgent factory pattern provides a clean, user-friendly interface")
-    print("while maintaining the flexibility and power of different SQL agent modes.")
-    print("Users can simply call SqlAgent(...) and get the right implementation!")
+    print("The recommended approach is to use AgentBuilder for cleaner code.")
+    print("The SqlAgent factory pattern still works but requires store injection.")
+    print("Both patterns provide the same SQL agent capabilities!")

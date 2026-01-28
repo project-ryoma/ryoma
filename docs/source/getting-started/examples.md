@@ -2,12 +2,33 @@
 
 Real-world examples demonstrating Ryoma's capabilities across different use cases and industries.
 
+## 🛠️ Setup Helper Function
+
+All examples below use this helper function to set up the agent:
+
+```python
+from ryoma_ai.services import AgentBuilder, DataSourceService
+from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
+from langchain_core.stores import InMemoryStore
+from ryoma_data.sql import DataSource
+
+
+def create_sql_agent(datasource: DataSource, model: str = "gpt-4", mode: str = "enhanced"):
+    """Helper function to create a SQL agent with a datasource."""
+    store = InMemoryStore()
+    repo = StoreBasedDataSourceRepository(store)
+    datasource_service = DataSourceService(repo)
+    datasource_service.add_datasource(datasource)
+
+    builder = AgentBuilder(datasource_service)
+    return builder.build_sql_agent(model=model, mode=mode)
+```
+
 ## 🏪 E-commerce Analytics
 
 ### Customer Segmentation Analysis
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 # Connect to e-commerce database
 datasource = DataSource(
@@ -15,11 +36,10 @@ datasource = DataSource(
     host="localhost",
     database="ecommerce",
     user="user",
-    password="pass"
+    password="password"
 )
 
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(datasource)
+agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
 
 # Complex customer analysis
 response = agent.stream("""
@@ -53,7 +73,7 @@ Include percentage changes and rank products by profitability.
 
 ### Revenue Forecasting
 ```python
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 # Connect to financial data warehouse
 datasource = DataSource(
@@ -61,11 +81,10 @@ datasource = DataSource(
     account="your-account",
     database="FINANCE_DW",
     user="user",
-    password="pass"
+    password="password"
 )
 
-agent = SqlAgent(model="gpt-4", mode="reforce")
-agent.add_datasource(datasource)
+agent = create_sql_agent(datasource, model="gpt-4", mode="reforce")
 
 # Complex financial analysis
 response = agent.stream("""
@@ -99,7 +118,7 @@ Rank customers by risk score and suggest actions.
 
 ### Patient Outcome Analysis
 ```python
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 # Connect to healthcare data
 datasource = DataSource(
@@ -108,16 +127,8 @@ datasource = DataSource(
     dataset_id="patient_data"
 )
 
-agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced",
-    safety_config={
-        "enable_validation": True,
-        "max_rows": 100000,
-        "require_where_clause": True
-    }
-)
-agent.add_datasource(datasource)
+# Create agent with enhanced mode for healthcare analysis
+agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
 
 # HIPAA-compliant analysis
 response = agent.stream("""
@@ -136,17 +147,18 @@ Exclude any personally identifiable information.
 
 ### Supply Chain Optimization
 ```python
+from ryoma_data.sql import DataSource
+
 # Manufacturing database with IoT sensor data
 datasource = DataSource(
     "postgres",
     host="localhost",
     database="manufacturing",
     user="user",
-    password="pass"
+    password="password"
 )
 
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(datasource)
+agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
 
 # Complex supply chain analysis
 response = agent.stream("""
@@ -165,14 +177,14 @@ Focus on reducing costs while maintaining quality standards.
 
 ### User Engagement Analysis
 ```python
-from ryoma_ai.agent.pandas import PandasAgent
+from ryoma_ai.agent.pandas_agent import PandasAgent
 import pandas as pd
 
 # Load user activity data
 df = pd.read_csv('user_activity.csv')
 
 agent = PandasAgent("gpt-4")
-agent.add_dataframe(df, name="user_activity")
+agent.add_dataframe(df, df_id="user_activity")
 
 # Comprehensive user analysis
 response = agent.stream("""
@@ -191,7 +203,7 @@ Create actionable insights for product team.
 ```python
 # A/B test results analysis
 test_data = pd.read_csv('ab_test_results.csv')
-agent.add_dataframe(test_data, name="ab_test")
+agent.add_dataframe(test_data, df_id="ab_test")
 
 response = agent.stream("""
 Analyze A/B test results for new checkout flow:
@@ -209,17 +221,18 @@ Include both statistical and business impact analysis.
 
 ### Student Performance Insights
 ```python
+from ryoma_data.sql import DataSource
+
 # Educational database
 datasource = DataSource(
     "postgres",
     host="localhost",
     database="education",
     user="user",
-    password="pass"
+    password="password"
 )
 
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(datasource)
+agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
 
 response = agent.stream("""
 Analyze student performance and learning outcomes:
@@ -237,32 +250,42 @@ Provide recommendations for improving student success.
 
 ### Cross-Platform Integration
 ```python
-# Connect multiple data sources
-postgres_ds = DataSource("postgres", host="localhost", database="sales")
-snowflake_ds = DataSource("snowflake", account="account", database="MARKETING")
+from ryoma_data.sql import DataSource
 
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(postgres_ds, name="sales_db")
-agent.add_datasource(snowflake_ds, name="marketing_db")
+# For multi-database analysis, create separate agents for each datasource
+# or use a data warehouse that consolidates data
 
-# Cross-database analysis
-response = agent.stream("""
+# Option 1: Analyze each database separately
+sales_ds = DataSource("postgres", host="localhost", database="sales", user="user", password="password")
+sales_agent = create_sql_agent(sales_ds, model="gpt-4", mode="enhanced")
+
+marketing_ds = DataSource("snowflake", account="account", database="MARKETING", user="user", password="password")
+marketing_agent = create_sql_agent(marketing_ds, model="gpt-4", mode="enhanced")
+
+# Query each database
+sales_response = sales_agent.stream("Get sales conversion rates by channel")
+marketing_response = marketing_agent.stream("Get marketing campaign performance metrics")
+
+# Option 2: Use a consolidated data warehouse
+dw_ds = DataSource("snowflake", account="account", database="DATA_WAREHOUSE", user="user", password="password")
+dw_agent = create_sql_agent(dw_ds, model="gpt-4", mode="enhanced")
+
+# Cross-database analysis from consolidated warehouse
+response = dw_agent.stream("""
 Analyze the complete customer journey:
-1. Marketing campaign effectiveness (from marketing_db)
-2. Sales conversion rates (from sales_db)
+1. Marketing campaign effectiveness
+2. Sales conversion rates
 3. Customer lifetime value calculation
 4. Attribution modeling across channels
 5. ROI by marketing channel and campaign
-
-Combine data from both databases for comprehensive insights.
 """)
 ```
 
 ## 🔍 Advanced Profiling Examples
 
-### Database Health Check
+### Database Metadata Exploration
 ```python
-from ryoma_data import DataSource, DatabaseProfiler
+from ryoma_data.sql import DataSource
 
 # Connect to database
 datasource = DataSource(
@@ -270,42 +293,34 @@ datasource = DataSource(
     host="localhost",
     database="production",
     user="user",
-    password="pass"
+    password="password"
 )
 
-# Configure profiler
-profiler = DatabaseProfiler(
-    sample_size=20000,
-    top_k=15,
-    enable_lsh=True
-)
+# Get catalog metadata
+catalog = datasource.get_catalog()
 
-# Get detailed profiling information
-profile = datasource.profile_table("customers")
-
-print("📊 Table Profile:")
-print(f"Rows: {profile['table_profile']['row_count']:,}")
-print(f"Completeness: {profile['table_profile']['completeness_score']:.2%}")
-
-print("\n📋 Column Quality:")
-for col, prof in profile['column_profiles'].items():
-    quality = prof['data_quality_score']
-    null_pct = prof['null_percentage']
-    print(f"{col}: Quality {quality:.2f}, NULL {null_pct:.1f}%")
+print("📊 Database Catalog:")
+for schema in catalog.schemas:
+    print(f"\nSchema: {schema.schema_name}")
+    for table in schema.tables:
+        print(f"  Table: {table.table_name}")
+        for col in table.columns:
+            print(f"    - {col.name}: {col.type}")
 ```
 
-### Schema Similarity Analysis
+### Table Search and Inspection
 ```python
-# Find similar columns across tables
-similar_columns = datasource.find_similar_columns("customer_id", threshold=0.8)
-print(f"🔗 Similar columns: {similar_columns}")
+# Search for tables matching a pattern
+tables = datasource.search_tables(pattern="*customer*")
+print(f"🔍 Found {len(tables)} customer-related tables")
 
-# Enhanced catalog with profiling
-catalog = datasource.get_enhanced_catalog(include_profiles=True)
-for schema in catalog.schemas:
-    for table in schema.tables:
-        high_quality_cols = table.get_high_quality_columns(min_quality_score=0.8)
-        print(f"📊 {table.table_name}: {len(high_quality_cols)} high-quality columns")
+# Search for columns across all tables
+email_columns = datasource.search_columns(pattern="*email*")
+print(f"📧 Found {len(email_columns)} email-related columns")
+
+# Get detailed table inspection with sample data
+table_info = datasource.inspect_table("customers", include_sample_data=True, sample_limit=5)
+print(f"📋 Columns in customers table: {[col.name for col in table_info.columns]}")
 ```
 
 ## 🎯 Best Practices from Examples
