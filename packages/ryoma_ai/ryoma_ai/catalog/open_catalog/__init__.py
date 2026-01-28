@@ -13,21 +13,21 @@ The search methods are built directly into DataSource:
 Based on RFC-001: Open Catalog
 """
 
-from ryoma_ai.catalog.open_catalog.models import (
-    MetadataElement,
-    TableMetadata,
-    ColumnMetadata,
-    NamespaceMetadata,
-    RelationshipMetadata,
-    ForeignKeyRef,
-    ElementType,
+from ryoma_ai.catalog.open_catalog.exceptions import (
+    ColumnNotFoundException,
+    OpenCatalogError,
+    SearchTimeoutError,
+    TableNotFoundException,
 )
 from ryoma_ai.catalog.open_catalog.filters import SearchFilter
-from ryoma_ai.catalog.open_catalog.exceptions import (
-    OpenCatalogError,
-    TableNotFoundException,
-    ColumnNotFoundException,
-    SearchTimeoutError,
+from ryoma_ai.catalog.open_catalog.models import (
+    ColumnMetadata,
+    ElementType,
+    ForeignKeyRef,
+    MetadataElement,
+    NamespaceMetadata,
+    RelationshipMetadata,
+    TableMetadata,
 )
 
 __all__ = [

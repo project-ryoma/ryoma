@@ -1,10 +1,11 @@
 """Service for catalog indexing and search operations"""
 
 import logging
-from typing import List, Optional, Literal
-from ryoma_data.base import DataSource
-from ryoma_ai.domain.interfaces import CatalogIndexer, CatalogSearcher
+from typing import List, Literal, Optional
+
 from ryoma_ai.domain.constants import AgentDefaults
+from ryoma_ai.domain.interfaces import CatalogIndexer, CatalogSearcher
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

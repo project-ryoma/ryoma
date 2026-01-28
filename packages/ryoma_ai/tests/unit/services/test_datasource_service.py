@@ -1,7 +1,8 @@
 """Tests for DataSourceService"""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 from ryoma_ai.services.datasource_service import DataSourceService
 
 

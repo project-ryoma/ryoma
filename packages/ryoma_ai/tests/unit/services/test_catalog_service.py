@@ -1,7 +1,8 @@
 """Tests for CatalogService"""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 from ryoma_ai.services.catalog_service import CatalogService
 
 

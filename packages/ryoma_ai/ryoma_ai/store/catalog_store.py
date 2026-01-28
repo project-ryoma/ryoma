@@ -11,10 +11,10 @@ from langchain_core.stores import BaseStore
 from langchain_core.vectorstores import VectorStore
 from ryoma_ai.catalog import UnifiedCatalogIndexService
 from ryoma_ai.catalog.exceptions import CatalogIndexError
-from ryoma_data.base import DataSource
-from ryoma_data.metadata import Catalog, Column, Schema, Table
 from ryoma_ai.models.catalog import CatalogIndex
 from ryoma_ai.store.exceptions import CatalogNotFoundError, StoreException
+from ryoma_data.base import DataSource
+from ryoma_data.metadata import Catalog, Column, Schema, Table
 
 
 class CatalogNotIndexedError(Exception):

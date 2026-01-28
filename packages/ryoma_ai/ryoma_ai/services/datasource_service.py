@@ -2,8 +2,9 @@
 
 import logging
 from typing import List
-from ryoma_data.base import DataSource
+
 from ryoma_ai.domain.interfaces import DataSourceRepository
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

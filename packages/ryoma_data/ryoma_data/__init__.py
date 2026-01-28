@@ -4,14 +4,14 @@ __version__ = "0.1.0"
 
 # Base classes
 from ryoma_data.base import BaseDataSource
+
+# Factory
+from ryoma_data.factory import DataSourceFactory
 from ryoma_data.metadata import Catalog, Column, Schema, Table
 from ryoma_data.profiler import DatabaseProfiler
 
 # SQL data sources
 from ryoma_data.sql import DataSource
-
-# Factory
-from ryoma_data.factory import DataSourceFactory
 
 __all__ = [
     # Base

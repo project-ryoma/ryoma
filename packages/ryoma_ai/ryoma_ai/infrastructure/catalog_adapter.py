@@ -1,10 +1,11 @@
 """Adapter for existing catalog indexing/search services"""
 
 import logging
-from typing import List, Optional, Literal
-from ryoma_data.base import DataSource
+from typing import List, Literal, Optional
+
 from ryoma_ai.catalog.indexer import UnifiedCatalogIndexService
 from ryoma_ai.store.catalog_store import CatalogStore
+from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

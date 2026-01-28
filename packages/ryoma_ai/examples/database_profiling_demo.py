@@ -12,7 +12,7 @@ Features demonstrated:
 - Locality-sensitive hashing / MinHash sketches for approximate similarity
 """
 
-from ryoma_data import DataSource, DatabaseProfiler
+from ryoma_data import DatabaseProfiler, DataSource
 
 
 def demo_comprehensive_profiling():

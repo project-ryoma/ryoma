@@ -2,8 +2,8 @@ from typing import Type
 
 from langchain_core.tools import BaseTool, InjectedToolArg
 from pydantic import BaseModel, Field
-from ryoma_data.base import DataSource
 from ryoma_ai.utils import ensure_sql_datasource
+from ryoma_data.base import DataSource
 from typing_extensions import Annotated
 
 

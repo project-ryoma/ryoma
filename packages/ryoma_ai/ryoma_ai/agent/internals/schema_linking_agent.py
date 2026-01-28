@@ -3,8 +3,8 @@ import re
 from typing import Dict, List, Optional
 
 from ryoma_ai.agent.chat_agent import ChatAgent
-from ryoma_data.metadata import Catalog, Column, Schema, Table
 from ryoma_data.base import DataSource
+from ryoma_data.metadata import Catalog, Column, Schema, Table
 
 logger = logging.getLogger(__name__)
 

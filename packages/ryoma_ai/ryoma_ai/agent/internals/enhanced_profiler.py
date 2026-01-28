@@ -19,9 +19,9 @@ from typing import Any, Dict, List, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage
+from ryoma_data.base import DataSource
 from ryoma_data.metadata import ColumnProfile, TableProfile
 from ryoma_data.profiler import DatabaseProfiler
-from ryoma_data.base import DataSource
 
 logger = logging.getLogger(__name__)
 

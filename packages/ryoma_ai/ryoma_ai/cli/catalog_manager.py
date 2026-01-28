@@ -9,8 +9,8 @@ from typing import Optional
 from langchain_core.stores import BaseStore
 from langchain_core.vectorstores import VectorStore
 from rich.console import Console
-from ryoma_data.base import DataSource
 from ryoma_ai.store import CatalogStore
+from ryoma_data.base import DataSource
 
 
 class CatalogManager:
