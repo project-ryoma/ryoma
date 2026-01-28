@@ -89,10 +89,12 @@ class StoreBasedDataSourceRepository:
         datasource = self.get_by_id(datasource_id)
 
         # Set new key for multi-datasource support
-        self._store.mset([
-            (StoreKeys.ACTIVE_DATASOURCE_ID, datasource_id),
-            (StoreKeys.ACTIVE_DATASOURCE, datasource),  # Backward compat
-        ])
+        self._store.mset(
+            [
+                (StoreKeys.ACTIVE_DATASOURCE_ID, datasource_id),
+                (StoreKeys.ACTIVE_DATASOURCE, datasource),  # Backward compat
+            ]
+        )
 
         logger.info(f"Set active datasource: {datasource_id}")
 

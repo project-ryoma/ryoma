@@ -82,9 +82,7 @@ class MetadataManager:
         self.storage_backend = storage_backend
 
         # Initialize profiler (without LLM enhancement)
-        self.profiler = DatabaseProfiler(
-            sample_size=10000, enable_lsh=True
-        )
+        self.profiler = DatabaseProfiler(sample_size=10000, enable_lsh=True)
 
         # Initialize LLM enhancer separately
         self.llm_enhancer = LLMProfileEnhancer(model=model, enable_caching=True)

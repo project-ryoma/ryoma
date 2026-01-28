@@ -1,6 +1,6 @@
 import logging
 from fnmatch import fnmatch
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 import ibis
 from ibis import Table as IbisTable
@@ -40,10 +40,7 @@ class DataSource(BaseDataSource):
     }
 
     def __init__(
-        self,
-        backend: str,
-        connection_url: Optional[str] = None,
-        **connection_params
+        self, backend: str, connection_url: Optional[str] = None, **connection_params
     ):
         """
         Initialize Ibis datasource.
@@ -58,7 +55,9 @@ class DataSource(BaseDataSource):
                 - path (DuckDB, SQLite)
         """
         database = connection_params.get("database")
-        db_schema = connection_params.get("schema") or connection_params.get("db_schema")
+        db_schema = connection_params.get("schema") or connection_params.get(
+            "db_schema"
+        )
 
         super().__init__(type="sql")
 
@@ -115,7 +114,9 @@ class DataSource(BaseDataSource):
 
             # Merge connection_params with any additional kwargs
             merged_params = {**self.connection_params, **kwargs}
-            logging.debug(f"Connecting to {self.backend} with params: {list(merged_params.keys())}")
+            logging.debug(
+                f"Connecting to {self.backend} with params: {list(merged_params.keys())}"
+            )
 
             return connect_func(**merged_params)
 
@@ -432,14 +433,14 @@ class DataSource(BaseDataSource):
         conn = self.connect()
 
         # Get table names
-        table_names = conn.list_tables(database=schema) if schema else conn.list_tables()
+        table_names = (
+            conn.list_tables(database=schema) if schema else conn.list_tables()
+        )
 
         # Apply pattern matching
         if pattern:
-            pattern_lower = pattern.replace("*", "%").replace("?", "_")
             table_names = [
-                t for t in table_names
-                if fnmatch(t.lower(), pattern.lower())
+                t for t in table_names if fnmatch(t.lower(), pattern.lower())
             ]
 
         # Fetch metadata and apply filters
@@ -498,7 +499,8 @@ class DataSource(BaseDataSource):
 
             if pattern:
                 columns = [
-                    col for col in all_columns
+                    col
+                    for col in all_columns
                     if fnmatch(col.name.lower(), pattern.lower())
                 ]
             else:
@@ -550,10 +552,9 @@ class DataSource(BaseDataSource):
         columns = self._build_columns_from_schema(table_schema)
 
         # Get row count (best effort)
-        row_count = None
         try:
             table_obj = conn.table(table, database=schema)
-            row_count = table_obj.count().execute()
+            _ = table_obj.count().execute()
         except Exception:
             pass
 
@@ -563,7 +564,9 @@ class DataSource(BaseDataSource):
         # Add sample data if requested
         if include_sample_data:
             try:
-                sample_data = self.get_sample_data(table, schema=schema, limit=sample_limit)
+                sample_data = self.get_sample_data(
+                    table, schema=schema, limit=sample_limit
+                )
                 # Note: Table doesn't have sample_data field, could add to properties
                 logging.debug(f"Retrieved {len(sample_data)} sample rows")
             except Exception as e:

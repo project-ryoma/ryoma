@@ -5,7 +5,6 @@ from typing import Any, Dict, Literal, Optional, Sequence, Type, Union
 from langchain_core.tools import BaseTool
 from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
-from ryoma_data.base import DataSource
 from ryoma_data.sql import SqlDataSource
 from ryoma_ai.utils import ensure_sql_datasource
 from ryoma_ai.models.sql import QueryStatus, SqlQueryResult

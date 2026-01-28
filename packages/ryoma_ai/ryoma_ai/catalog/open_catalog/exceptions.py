@@ -219,7 +219,9 @@ class TooManyResultsError(OpenCatalogError):
         self.limit = limit
         self.query = query
 
-        message = f"Search returned {result_count} results, exceeding limit of {limit}\n"
+        message = (
+            f"Search returned {result_count} results, exceeding limit of {limit}\n"
+        )
         message += f"Query: {query}\n\n"
         message += "Try:\n"
         message += "  - Adding more specific search patterns\n"

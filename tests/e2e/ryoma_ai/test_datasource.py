@@ -1,6 +1,5 @@
 import pytest
 from ryoma_data import DataSource
-from sqlalchemy import create_engine
 
 
 @pytest.fixture

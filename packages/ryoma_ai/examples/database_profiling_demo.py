@@ -52,7 +52,7 @@ def demo_comprehensive_profiling():
         print("   ❌ Error profiling table")
 
     # Profile individual columns
-    print(f"\n2. Column-Level Profiling:")
+    print("\n2. Column-Level Profiling:")
     catalog = datasource.get_catalog(table=table_name)
 
     for schema in catalog.schemas:
@@ -83,27 +83,27 @@ def demo_profiling_configurations():
 
     # Configuration for large databases
     print("\n📊 Large Database Configuration:")
-    large_db_profiler = DatabaseProfiler(
+    _ = DatabaseProfiler(
         sample_size=50000,  # Larger sample for better accuracy
         top_k=20,  # More frequent values
         lsh_threshold=0.9,  # Higher similarity threshold
         num_hashes=256,  # More hash functions for precision
         enable_lsh=True,
     )
-    print(f"   Sample size: 50,000")
-    print(f"   Top-k values: 20")
-    print(f"   LSH enabled: True (256 hashes)")
+    print("   Sample size: 50,000")
+    print("   Top-k values: 20")
+    print("   LSH enabled: True (256 hashes)")
 
     # Configuration for fast profiling
     print("\n⚡ Fast Profiling Configuration:")
-    fast_profiler = DatabaseProfiler(
+    _ = DatabaseProfiler(
         sample_size=1000,  # Smaller sample for speed
         top_k=5,  # Fewer frequent values
         enable_lsh=False,  # Disable LSH for speed
     )
-    print(f"   Sample size: 1,000")
-    print(f"   Top-k values: 5")
-    print(f"   LSH enabled: False")
+    print("   Sample size: 1,000")
+    print("   Top-k values: 5")
+    print("   LSH enabled: False")
 
     print("\n💡 Usage:")
     print("   datasource = DataSource('postgres', host='localhost', database='db')")
@@ -117,26 +117,26 @@ def demo_profiler_flexibility():
     print("\n\n🏗️  Profiler Flexibility")
     print("=" * 50)
 
-    datasource = DataSource("sqlite", database="example.db")
+    _ = DataSource("sqlite", database="example.db")
 
     # Quick profiling
-    quick_profiler = DatabaseProfiler(sample_size=1000, enable_lsh=False)
+    _ = DatabaseProfiler(sample_size=1000, enable_lsh=False)
     print("\n1️⃣  Quick profiling with small sample:")
     # quick_profile = quick_profiler.profile_table(datasource, "table")
 
     # Detailed profiling
-    detailed_profiler = DatabaseProfiler(sample_size=50000, enable_lsh=True)
+    _ = DatabaseProfiler(sample_size=50000, enable_lsh=True)
     print("2️⃣  Detailed profiling with large sample and LSH:")
     # detailed_profile = detailed_profiler.profile_table(datasource, "table")
 
     # Use same profiler with multiple datasources
-    profiler = DatabaseProfiler()
+    _ = DatabaseProfiler()
     print("\n3️⃣  Use same profiler with multiple datasources:")
 
-    pg_datasource = DataSource("postgres", host="localhost", database="db1")
+    _ = DataSource("postgres", host="localhost", database="db1")
     # pg_profile = profiler.profile_table(pg_datasource, "users")
 
-    mysql_datasource = DataSource("mysql", host="localhost", database="db2")
+    _ = DataSource("mysql", host="localhost", database="db2")
     # mysql_profile = profiler.profile_table(mysql_datasource, "customers")
 
 

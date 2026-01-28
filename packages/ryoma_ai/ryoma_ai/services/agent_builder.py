@@ -221,9 +221,7 @@ class AgentBuilder:
         return agent
 
     def _create_llm(
-        self,
-        model: Union[str, BaseChatModel],
-        model_params: Optional[dict] = None
+        self, model: Union[str, BaseChatModel], model_params: Optional[dict] = None
     ) -> BaseChatModel:
         """
         Create LLM instance from model identifier or return existing instance.

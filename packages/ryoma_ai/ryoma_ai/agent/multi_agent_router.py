@@ -191,7 +191,9 @@ class MultiAgentRouter:
                 model=base_config["model"],
                 model_parameters=base_config.get("model_parameters"),
                 store=base_config["store"],
-                vector_store=base_config["vector_store"],  # Pandas agent may still use this
+                vector_store=base_config[
+                    "vector_store"
+                ],  # Pandas agent may still use this
             )
         elif agent_type == "chat":
             return ChatAgent(

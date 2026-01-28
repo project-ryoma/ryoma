@@ -49,7 +49,9 @@ class ChatAgent(BaseAgent):
     """
 
     type: AgentType = AgentType.chat
-    description: str = "Chat Agent supports all the basic functionalities of a chat agent."
+    description: str = (
+        "Chat Agent supports all the basic functionalities of a chat agent."
+    )
 
     # Instance attributes
     config: Dict[str, Any]
