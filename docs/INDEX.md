@@ -20,28 +20,30 @@ For new users starting with Ryoma AI:
 
 ### Current API (v0.2.0)
 
-**Recommended Usage (AgentBuilder):**
+**Recommended Usage:**
 ```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Create datasource
 datasource = DataSource("postgres", host="localhost", database="dbname", user="user", password="password")
 
-# Setup services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Build agent
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+# Create Ryoma instance and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask questions
 agent.stream("What are the top 5 customers?", display=True)
+```
+
+**Multiple Datasources:**
+```python
+ryoma = Ryoma()
+ryoma.add_datasource(sales_db, name="sales")
+ryoma.add_datasource(marketing_db, name="marketing")
+
+agent = ryoma.sql_agent(model="gpt-4")
+ryoma.set_active("marketing")  # Switch datasources
 ```
 
 **For detailed API documentation, see:**

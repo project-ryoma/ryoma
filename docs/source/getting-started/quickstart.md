@@ -30,7 +30,7 @@ pip install ryoma_ai[all]
 
 ## 🎯 Quick Start Options
 
-### Option 1: CLI Interface (Recommended)
+### Option 1: CLI Interface
 
 The fastest way to get started:
 
@@ -48,19 +48,17 @@ ryoma_ai
 Then use natural language:
 ```bash
 ryoma_ai> show me all tables in my database
-ryoma_ai> what customers made purchases last month?  
+ryoma_ai> what customers made purchases last month?
 ryoma_ai> create a chart of sales by region
 ```
 
 ### Option 2: Programmatic Usage (Recommended)
 
-For integration into your applications, use the service-based API:
+For integration into your applications:
 
 ```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Set up data source
 datasource = DataSource(
@@ -72,15 +70,9 @@ datasource = DataSource(
     password="password"
 )
 
-# Set up services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Build agent using the builder
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-4o", mode="enhanced")
+# Create Ryoma instance and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask questions in natural language
 response = agent.stream("Show me the top 10 customers by revenue this month")
@@ -92,7 +84,7 @@ print(response)
 For DataFrame analysis:
 
 ```python
-from ryoma_ai.agent.pandas_agent import PandasAgent
+from ryoma_ai import Ryoma
 import pandas as pd
 
 # Create sample data
@@ -102,8 +94,9 @@ df = pd.DataFrame({
     'region': ['North', 'South', 'East', 'West', 'North']
 })
 
-# Create pandas agent
-agent = PandasAgent("gpt-4o")
+# Create Ryoma and pandas agent
+ryoma = Ryoma()
+agent = ryoma.pandas_agent(model="gpt-4")
 agent.add_dataframe(df, df_id="sales_data")
 
 # Analyze with natural language
@@ -113,37 +106,47 @@ print(result)
 
 ## 🚀 Advanced Features
 
-### Enhanced SQL Agent
-```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+### Multiple Datasources
 
-# Connect to database
-datasource = DataSource(
-    "postgres",
-    host="localhost",
-    database="mydb",
-    user="user",
-    password="password"
+```python
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
+
+# Create Ryoma instance
+ryoma = Ryoma()
+
+# Add multiple datasources
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="sales", user="user", password="pass"),
+    name="sales"
+)
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="marketing", user="user", password="pass"),
+    name="marketing"
 )
 
-# Set up services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
+# Create agent (uses first datasource by default)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
-# Use ReFoRCE mode for advanced performance
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-4", mode="reforce")
+# Query sales database
+agent.stream("Show top products by revenue")
 
-# Complex queries
-response = agent.stream("""
-Find customers who made purchases in the last 30 days,
-group by region, and show the top 3 products by revenue
-""")
+# Switch to marketing database
+ryoma.set_active("marketing")
+agent.stream("Show campaign performance")
+```
+
+### Agent Modes
+
+```python
+# Basic mode - simple SQL generation
+agent = ryoma.sql_agent(model="gpt-4", mode="basic")
+
+# Enhanced mode - multi-step reasoning with safety validation
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+
+# ReFoRCE mode - state-of-the-art with self-refinement
+agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
 ```
 
 ## 🔧 Configuration
@@ -157,53 +160,20 @@ export OPENAI_API_KEY="your-api-key-here"
 export ANTHROPIC_API_KEY="your-anthropic-key"
 ```
 
-### Agent Configuration
-```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
-
-# Set up datasource and services (assuming datasource already created)
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Build agent with custom model parameters
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(
-    model="gpt-4",
-    mode="enhanced",
-    model_params={
-        "temperature": 0.1,
-        "max_tokens": 2000
-    }
-)
-```
-
 ## ✅ Verify Installation
 
 Run this quick test to ensure everything is working:
 
 ```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Create in-memory SQLite database
 datasource = DataSource("sqlite", database=":memory:")
 
-# Set up services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Test agent creation
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-3.5-turbo", mode="enhanced")
+# Create Ryoma and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-3.5-turbo", mode="basic")
 
 print("✅ Ryoma is ready to use!")
 ```

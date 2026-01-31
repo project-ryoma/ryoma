@@ -137,23 +137,15 @@ import ryoma_ai
 print(f"Ryoma AI version: {ryoma_ai.__version__}")
 
 # Test basic functionality
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Create an in-memory SQLite datasource
 datasource = DataSource("sqlite", database=":memory:")
 
-# Set up services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Build agent
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-3.5-turbo", mode="enhanced")
+# Create Ryoma and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-3.5-turbo", mode="basic")
 
 print("✅ Ryoma AI installation successful!")
 ```

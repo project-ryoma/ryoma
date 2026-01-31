@@ -36,16 +36,14 @@ pip install ryoma_ai[snowflake]
 ```
 
 ## Basic Example
-Below is an example of using SqlAgent to connect to a postgres database and ask a question.
+Below is an example of using Ryoma to connect to a postgres database and ask a question.
 You can read more details in the [documentation](https://project-ryoma.github.io/ryoma/).
 
 ```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
-# Connect to a postgres catalog
+# Connect to a postgres database
 datasource = DataSource(
     "postgres",
     host="localhost",
@@ -55,17 +53,12 @@ datasource = DataSource(
     password="password"
 )
 
-# Set up services and build agent
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-builder = AgentBuilder(datasource_service)
-sql_agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+# Create Ryoma instance and SQL agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask question to the agent
-sql_agent.stream("I want to get the top 5 customers which making the most purchases", display=True)
+agent.stream("I want to get the top 5 customers which making the most purchases", display=True)
 ```
 
 The Sql agent will try to run the tool as shown below:
