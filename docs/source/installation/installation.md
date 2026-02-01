@@ -43,7 +43,7 @@ pip install ryoma_ai[postgres]
 ```
 
 ```python
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 datasource = DataSource(
     "postgres",
@@ -60,7 +60,7 @@ pip install ryoma_ai[snowflake]
 ```
 
 ```python
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 datasource = DataSource(
     "snowflake",
@@ -78,7 +78,7 @@ pip install ryoma_ai[bigquery]
 ```
 
 ```python
-from ryoma_data import DataSource
+from ryoma_data.sql import DataSource
 
 datasource = DataSource(
     "bigquery",
@@ -137,12 +137,15 @@ import ryoma_ai
 print(f"Ryoma AI version: {ryoma_ai.__version__}")
 
 # Test basic functionality
-from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai import Ryoma
 from ryoma_data import DataSource
 
+# Create an in-memory SQLite datasource
 datasource = DataSource("sqlite", database=":memory:")
-agent = SqlAgent("gpt-3.5-turbo", mode="enhanced")
-agent.add_datasource(datasource)
+
+# Create Ryoma and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-3.5-turbo", mode="basic")
 
 print("✅ Ryoma AI installation successful!")
 ```

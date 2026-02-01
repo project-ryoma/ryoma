@@ -6,16 +6,16 @@ Ryoma AI provides a powerful command-line interface for interactive data analysi
 
 ```bash
 # Basic usage
-ryoma-ai
+ryoma_ai
 
 # With custom model and mode
-ryoma-ai --model gpt-4o --mode enhanced
+ryoma_ai --model gpt-4o --mode enhanced
 
 # Override store configurations
-ryoma-ai --vector-store-type chroma --meta-store-type memory
+ryoma_ai --vector-store-type chroma --meta-store-type memory
 
 # Run interactive setup
-ryoma-ai --setup
+ryoma_ai --setup
 ```
 
 ## 📋 Available Commands
@@ -67,16 +67,16 @@ ryoma-ai --setup
 The CLI features intelligent agent routing - just ask questions naturally:
 
 ```bash
-ryoma-ai> show me all customers from California
+ryoma_ai> show me all customers from California
 # Routes to SQL Agent automatically
 
-ryoma-ai> create a function to calculate fibonacci numbers  
+ryoma_ai> create a function to calculate fibonacci numbers  
 # Routes to Python Agent automatically
 
-ryoma-ai> analyze sales trends over the last 6 months
+ryoma_ai> analyze sales trends over the last 6 months
 # Routes to Data Analysis Agent automatically
 
-ryoma-ai> what's the difference between INNER and LEFT JOIN?
+ryoma_ai> what's the difference between INNER and LEFT JOIN?
 # Routes to Chat Agent automatically
 ```
 
@@ -84,20 +84,20 @@ ryoma-ai> what's the difference between INNER and LEFT JOIN?
 
 ### View Current Configuration
 ```bash
-ryoma-ai> /config
+ryoma_ai> /config
 ```
 
 ### Update Agent Settings
 ```bash
-ryoma-ai> /agent-config auto_approve_all true
-ryoma-ai> /agent-config retry_count 3
-ryoma-ai> /agent-config timeout_seconds 300
+ryoma_ai> /agent-config auto_approve_all true
+ryoma_ai> /agent-config retry_count 3
+ryoma_ai> /agent-config timeout_seconds 300
 ```
 
 ### Switch Models and Modes
 ```bash
-ryoma-ai> /model gpt-4o-mini
-ryoma-ai> /mode basic
+ryoma_ai> /model gpt-4o-mini
+ryoma_ai> /mode basic
 ```
 
 ## 📊 Catalog Indexing and Search
@@ -105,20 +105,20 @@ ryoma-ai> /mode basic
 ### Index Your Data Source
 ```bash
 # Index at table level (recommended)
-ryoma-ai> /index-catalog table
+ryoma_ai> /index-catalog table
 
 # Index at column level for detailed search
-ryoma-ai> /index-catalog column
+ryoma_ai> /index-catalog column
 
 # Index at schema level for high-level overview
-ryoma-ai> /index-catalog schema
+ryoma_ai> /index-catalog schema
 ```
 
 ### Search Indexed Catalogs
 ```bash
-ryoma-ai> /search-catalog customer information
-ryoma-ai> /search-catalog sales revenue data
-ryoma-ai> /search-catalog user authentication tables
+ryoma_ai> /search-catalog customer information
+ryoma_ai> /search-catalog sales revenue data
+ryoma_ai> /search-catalog user authentication tables
 ```
 
 ## 🚀 Advanced Features
@@ -179,26 +179,26 @@ The CLI uses `~/.ryoma/config.json` for persistence:
 ### Vector Store Issues
 ```bash
 # Check if vector store is properly configured
-ryoma-ai> /config
+ryoma_ai> /config
 
 # Re-index if search fails
-ryoma-ai> /index-catalog
+ryoma_ai> /index-catalog
 ```
 
 ### Connection Problems
 ```bash
 # Run setup to reconfigure
-ryoma-ai> /setup
+ryoma_ai> /setup
 
 # Check data source status
-ryoma-ai> /datasources
+ryoma_ai> /datasources
 ```
 
 ### Agent Errors
 ```bash
 # Check agent configuration
-ryoma-ai> /agent-config
+ryoma_ai> /agent-config
 
 # View agent statistics
-ryoma-ai> /stats
+ryoma_ai> /stats
 ```

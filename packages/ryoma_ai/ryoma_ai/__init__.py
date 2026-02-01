@@ -2,6 +2,8 @@
 
 from importlib import metadata as importlib_metadata
 
+from ryoma_ai.ryoma import Ryoma
+
 
 def get_version() -> str:
     try:
@@ -11,3 +13,6 @@ def get_version() -> str:
 
 
 version: str = get_version()
+__version__ = version
+
+__all__ = ["Ryoma", "version", "__version__"]

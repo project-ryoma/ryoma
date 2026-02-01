@@ -57,7 +57,7 @@ Deploy secure, scalable data analysis with comprehensive governance.
 Get up and running in under 5 minutes:
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai import Ryoma
 from ryoma_data import DataSource
 
 # Connect to your database
@@ -66,12 +66,12 @@ datasource = DataSource(
     host="localhost",
     database="mydb",
     user="user",
-    password="pass"
+    password="password"
 )
 
-# Create SQL agent
-agent = SqlAgent(model="gpt-4", mode="enhanced")
-agent.add_datasource(datasource)
+# Create Ryoma instance and agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask questions in natural language
 response = agent.stream("Show me the top 10 customers by revenue this quarter")

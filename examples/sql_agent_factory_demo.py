@@ -1,120 +1,107 @@
 #!/usr/bin/env python3
 """
-Demonstration of the SqlAgent factory pattern.
-Shows how users can create SQL agents with different modes using the simple SqlAgent(...) syntax.
+Demonstration of the Ryoma SDK.
+Shows how users can create SQL agents with different modes using the simple Ryoma API.
 """
 
 from unittest.mock import Mock
 
-from ryoma_ai.agent.sql import (
-    BasicSqlAgent,
-    EnhancedSqlAgentImpl,
-    ReFoRCESqlAgentImpl,
-    SqlAgent,
-)
-from ryoma_ai.models.agent import SqlAgentMode
-from ryoma_data.sql import SqlDataSource
+from ryoma_ai import Ryoma
+from ryoma_data.sql import DataSource
 
 
-def demo_sql_agent_factory():
-    """Demonstrate the SqlAgent factory pattern."""
-
-    print("🔧 SqlAgent Factory Pattern Demo")
-    print("=" * 50)
-
-    # Create a mock datasource for demonstration
-    mock_datasource = Mock(spec=SqlDataSource)
+def create_mock_datasource():
+    """Create a mock datasource for demonstration."""
+    mock_datasource = Mock(spec=DataSource)
+    mock_datasource.id = "mock_datasource"
     mock_datasource.query.return_value = "Mock query result"
-
-    print("\n1. Creating Basic SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='basic')")
-
-    basic_agent = SqlAgent(model="gpt-4", datasource=mock_datasource, mode="basic")
-
-    print(f"   ✅ Created: {type(basic_agent).__name__}")
-    print(f"   📊 Mode: {basic_agent.mode}")
-    print(f"   🔧 Tools: {len(basic_agent.tools)} tools")
-    print(f"   📝 Tools: {[tool.name for tool in basic_agent.tools]}")
-
-    print("\n2. Creating Enhanced SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='enhanced')")
-
-    enhanced_agent = SqlAgent(
-        model="gpt-4",
-        datasource=mock_datasource,
-        mode=SqlAgentMode.enhanced,
-        safety_config={"enable_validation": True},
-    )
-
-    print(f"   ✅ Created: {type(enhanced_agent).__name__}")
-    print(f"   📊 Mode: {enhanced_agent.mode}")
-    print(f"   🔧 Tools: {len(enhanced_agent.tools)} tools")
-    print(f"   📝 Tools: {[tool.name for tool in enhanced_agent.tools]}")
-
-    print("\n3. Creating ReFoRCE SQL Agent:")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource, mode='reforce')")
-
-    reforce_agent = SqlAgent(
-        model="gpt-4",
-        datasource=mock_datasource,
-        mode="reforce",
-        safety_config={"enable_advanced_validation": True},
-    )
-
-    print(f"   ✅ Created: {type(reforce_agent).__name__}")
-    print(f"   📊 Mode: {reforce_agent.mode}")
-    print(f"   🔧 Tools: {len(reforce_agent.tools)} tools")
-    print(f"   📝 Tools: {[tool.name for tool in reforce_agent.tools]}")
-
-    print("\n4. Default Mode (when no mode specified):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=datasource)")
-
-    default_agent = SqlAgent(model="gpt-4", datasource=mock_datasource)
-
-    print(f"   ✅ Created: {type(default_agent).__name__}")
-    print(f"   📊 Mode: {default_agent.mode}")
-    print(f"   🔧 Tools: {len(default_agent.tools)} tools")
-
-    print("\n5. Testing Basic Agent Functionality:")
-    try:
-        basic_agent.analyze_schema("test query")
-    except NotImplementedError as e:
-        print(f"   ✅ Basic agent correctly raises: {e}")
-
-    print("\n6. Testing Enhanced Agent Functionality:")
-    try:
-        # This would work if the internal agent was properly initialized
-        print("   ✅ Enhanced agent supports advanced methods")
-    except Exception as e:
-        print(f"   ⚠️  Enhanced agent setup: {e}")
-
-    print("\n🎉 Factory Pattern Benefits:")
-    print("   • Simple user interface: SqlAgent(...)")
-    print("   • Automatic mode-based instantiation")
-    print("   • Type-safe with proper inheritance")
-    print("   • Extensible for new modes")
-    print("   • Backward compatible")
+    return mock_datasource
 
 
-def demo_direct_instantiation():
-    """Demonstrate direct instantiation of specific agent types."""
+def demo_ryoma_simple():
+    """Demonstrate the simple Ryoma API."""
 
-    print("\n\n🎯 Direct Instantiation Demo")
+    print("🔧 Ryoma Simple API Demo")
     print("=" * 50)
 
-    mock_datasource = Mock(spec=SqlDataSource)
+    # Create a mock datasource
+    mock_datasource = create_mock_datasource()
 
-    print("\n1. Direct BasicSqlAgent instantiation:")
-    basic = BasicSqlAgent(model="gpt-4", datasource=mock_datasource)
-    print(f"   ✅ Created: {type(basic).__name__}")
+    print("\n1. Creating Ryoma with single datasource:")
+    print("   ryoma = Ryoma(datasource=datasource)")
 
-    print("\n2. Direct EnhancedSqlAgentImpl instantiation:")
-    enhanced = EnhancedSqlAgentImpl(model="gpt-4", datasource=mock_datasource)
-    print(f"   ✅ Created: {type(enhanced).__name__}")
+    ryoma = Ryoma(datasource=mock_datasource)
 
-    print("\n3. Direct ReFoRCESqlAgentImpl instantiation:")
-    reforce = ReFoRCESqlAgentImpl(model="gpt-4", datasource=mock_datasource)
-    print(f"   ✅ Created: {type(reforce).__name__}")
+    print(f"   ✅ Created: {ryoma}")
+    print(f"   📊 Active datasource: {ryoma.active}")
+
+    print("\n2. Creating Basic SQL Agent:")
+    print("   agent = ryoma.sql_agent(model='gpt-4', mode='basic')")
+
+    agent = ryoma.sql_agent(model="gpt-4", mode="basic")
+
+    print(f"   ✅ Created: {type(agent).__name__}")
+    print(f"   🔧 Tools: {len(agent.tools)} tools")
+
+    print("\n3. Creating Enhanced SQL Agent:")
+    print("   agent = ryoma.sql_agent(model='gpt-4', mode='enhanced')")
+
+    agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+
+    print(f"   ✅ Created: {type(agent).__name__}")
+    print(f"   🔧 Tools: {len(agent.tools)} tools")
+
+    print("\n4. Creating ReFoRCE SQL Agent:")
+    print("   agent = ryoma.sql_agent(model='gpt-4', mode='reforce')")
+
+    agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
+
+    print(f"   ✅ Created: {type(agent).__name__}")
+    print(f"   🔧 Tools: {len(agent.tools)} tools")
+
+
+def demo_ryoma_multi_datasource():
+    """Demonstrate multi-datasource support."""
+
+    print("\n\n🔧 Ryoma Multi-Datasource Demo")
+    print("=" * 50)
+
+    # Create mock datasources
+    sales_ds = create_mock_datasource()
+    sales_ds.id = "sales_db"
+    marketing_ds = create_mock_datasource()
+    marketing_ds.id = "marketing_db"
+
+    print("\n1. Creating Ryoma without datasource:")
+    print("   ryoma = Ryoma()")
+
+    ryoma = Ryoma()
+
+    print(f"   ✅ Created: {ryoma}")
+
+    print("\n2. Adding multiple datasources:")
+    print("   ryoma.add_datasource(sales_ds, name='sales')")
+    print("   ryoma.add_datasource(marketing_ds, name='marketing')")
+
+    ryoma.add_datasource(sales_ds, name="sales")
+    ryoma.add_datasource(marketing_ds, name="marketing")
+
+    print(f"   ✅ Datasources: {ryoma.list_datasources()}")
+    print(f"   📊 Active: {ryoma.active}")
+
+    print("\n3. Switching active datasource:")
+    print("   ryoma.set_active('marketing')")
+
+    ryoma.set_active("marketing")
+
+    print(f"   ✅ Active now: {ryoma.active}")
+
+    print("\n4. Creating agent (uses active datasource):")
+    print("   agent = ryoma.sql_agent(model='gpt-4', mode='enhanced')")
+
+    agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+
+    print(f"   ✅ Created: {type(agent).__name__}")
 
 
 def demo_usage_patterns():
@@ -123,22 +110,38 @@ def demo_usage_patterns():
     print("\n\n💡 Common Usage Patterns")
     print("=" * 50)
 
-    _ = Mock(spec=SqlDataSource)
+    print("\n1. Simple - Single Datasource:")
+    print("""
+   from ryoma_ai import Ryoma
+   from ryoma_data import DataSource
 
-    print("\n1. Simple SQL queries (Basic mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='basic')")
-    print("   result = agent.invoke('SELECT * FROM users')")
+   datasource = DataSource("postgres", host="localhost", database="mydb", ...)
+   ryoma = Ryoma(datasource=datasource)
+   agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
-    print("\n2. Advanced analytics (Enhanced mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='enhanced')")
-    print("   agent.set_safety_config({'enable_validation': True})")
-    print("   analysis = agent.analyze_schema('Find customer segments')")
+   result = agent.stream("Show top customers by revenue")
+""")
 
-    print("\n3. Production workloads (ReFoRCE mode):")
-    print("   agent = SqlAgent(model='gpt-4', datasource=ds, mode='reforce')")
-    print("   plan = agent.create_query_plan('Complex analytical query')")
+    print("\n2. Multiple Datasources:")
+    print("""
+   from ryoma_ai import Ryoma
+   from ryoma_data import DataSource
 
-    print("\n4. Mode-specific configurations:")
+   ryoma = Ryoma()
+   ryoma.add_datasource(sales_db, name="sales")
+   ryoma.add_datasource(marketing_db, name="marketing")
+
+   agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+
+   # Query sales database
+   agent.stream("Show top products")
+
+   # Switch to marketing
+   ryoma.set_active("marketing")
+   agent.stream("Show campaign performance")
+""")
+
+    print("\n3. Mode-specific configurations:")
     configurations = {
         "basic": {
             "use_case": "Simple queries and testing",
@@ -147,12 +150,12 @@ def demo_usage_patterns():
         },
         "enhanced": {
             "use_case": "Advanced analytics and optimization",
-            "tools": 7,
+            "tools": 5,
             "safety": "Comprehensive validation",
         },
         "reforce": {
             "use_case": "Production workloads and complex reasoning",
-            "tools": 7,
+            "tools": 5,
             "safety": "Enterprise-grade validation",
         },
     }
@@ -165,11 +168,10 @@ def demo_usage_patterns():
 
 
 if __name__ == "__main__":
-    demo_sql_agent_factory()
-    demo_direct_instantiation()
+    demo_ryoma_simple()
+    demo_ryoma_multi_datasource()
     demo_usage_patterns()
 
     print("\n\n✨ Summary:")
-    print("The SqlAgent factory pattern provides a clean, user-friendly interface")
-    print("while maintaining the flexibility and power of different SQL agent modes.")
-    print("Users can simply call SqlAgent(...) and get the right implementation!")
+    print("Ryoma provides a simple, clean API for working with SQL databases.")
+    print("Just create a Ryoma instance, add your datasources, and create agents!")
