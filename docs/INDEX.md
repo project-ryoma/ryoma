@@ -141,45 +141,6 @@ pytest --cov=ryoma_ai --cov-report=html
 
 ---
 
-## 📖 API Reference
-
-### Current API (v0.2.0+)
-
-**Service Layer:**
-```python
-from ryoma_ai.services import AgentBuilder, DataSourceService, CatalogService
-
-# Build agents
-builder = AgentBuilder(datasource_service, catalog_service)
-agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
-
-# Manage datasources
-datasource_service.add_datasource(datasource)
-datasource_service.get_active_datasource()
-
-# Catalog operations
-catalog_service.index_datasource(datasource_id, level="table")
-catalog_service.search_tables(query, top_k=5)
-```
-
-**Direct Agent Usage:**
-```python
-from ryoma_ai.agent import SqlAgent, ChatAgent, WorkflowAgent
-
-# SQL agents (basic, enhanced, reforce)
-agent = SqlAgent(model="gpt-4", mode="enhanced", store=store)
-
-# Chat agents
-agent = ChatAgent(model="gpt-4", system_prompt="You are a helpful assistant.")
-
-# Custom workflow agents
-agent = WorkflowAgent(model="gpt-4", tools=tools, store=store)
-```
-
-### Legacy API (v0.1.x) - Deprecated
-
-See [Architecture Overview](source/architecture/architecture.md) for deprecated APIs.
-
 ---
 
 ## 📝 Documentation Organization
@@ -210,17 +171,11 @@ docs/
 | ARCHITECTURE_COMPARISON.md | ✅ Current | Updated with v0.2.0 changes |
 | REFACTORING_SUMMARY.md | ✅ Current | Quick reference |
 | plans/DIRECT_REFACTORING_PLAN.md | ✅ Current | Active plan |
-| plans/REFACTORING_PROGRESS.md | ✅ Current | Live tracker (63% complete) |
+| plans/REFACTORING_PROGRESS.md | ✅ Current | Live tracker |
 | plans/MIGRATION_PLAN.md | 📦 Archived | Reference only |
 | plans/PHASE_1_COMPLETE.md | ✅ Current | Historical record |
-| source/architecture/* | ⚠️ Mixed | Mix of v0.1.x and v0.2.0 docs |
-| source/getting-started/* | ⚠️ Needs Update | Still shows v0.1.x API |
-
-**Next Steps:**
-1. Complete refactoring (Step 2.5, 2.7, 2.8)
-2. Update getting-started guides for v0.2.0
-3. Create comprehensive migration guide
-4. Update architecture docs to remove deprecated content
+| source/architecture/* | ✅ Current | Updated for v0.2.0 Ryoma API |
+| source/getting-started/* | ✅ Current | Updated for v0.2.0 Ryoma API |
 
 ---
 
@@ -245,5 +200,5 @@ docs/
 
 ---
 
-**Last Updated:** 2026-01-26
-**Documentation Version:** 0.2.0-dev
+**Last Updated:** 2026-02-01
+**Documentation Version:** 0.2.0

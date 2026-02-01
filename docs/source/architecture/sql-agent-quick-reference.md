@@ -2,13 +2,11 @@
 
 ## Quick Start
 
-### Using AgentBuilder (Recommended)
+### Using Ryoma (Recommended)
 
 ```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Initialize datasource
 datasource = DataSource(
@@ -20,83 +18,66 @@ datasource = DataSource(
     password="password"
 )
 
-# Set up services
-store = InMemoryStore()
-repo = StoreBasedDataSourceRepository(store)
-datasource_service = DataSourceService(repo)
-datasource_service.add_datasource(datasource)
-
-# Create SQL agent using builder
-builder = AgentBuilder(datasource_service)
-agent = builder.build_sql_agent(model="gpt-4", mode="enhanced")
+# Create Ryoma instance and SQL agent
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Ask a question
 result = agent.stream("Show top 10 customers by revenue")
 ```
 
-### Direct SqlAgent Factory (Alternative)
+### Multiple Datasources
 
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-from ryoma_ai.domain.constants import StoreKeys
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
-# Initialize datasource
-datasource = DataSource(
-    "postgres",
-    host="localhost",
-    database="mydb",
-    user="user",
-    password="password"
+# Create Ryoma without initial datasource
+ryoma = Ryoma()
+
+# Add multiple datasources
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="sales", user="user", password="pass"),
+    name="sales"
+)
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="marketing", user="user", password="pass"),
+    name="marketing"
 )
 
-# Create store and inject datasource
-store = InMemoryStore()
-store.mset([(StoreKeys.ACTIVE_DATASOURCE, datasource)])
+# Create agent (uses first added datasource by default)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
-# Create SQL agent with store
-agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced",  # or "basic" or "reforce"
-    store=store
-)
-
-# Ask a question
-result = agent.stream("Show top 10 customers by revenue")
+# Switch active datasource
+ryoma.set_active("marketing")
+result = agent.stream("Show campaign performance")
 ```
 
 ### ReFoRCE Mode (Advanced)
 
 ```python
 # State-of-the-art SQL agent with ReFoRCE optimizations
-agent = builder.build_sql_agent(
-    model="gpt-4",
-    mode="reforce"
-)
+agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
 ```
 
 ## Constructor Parameters
 
-### SqlAgent Factory
+### Ryoma Class
 
 ```python
-SqlAgent(
-    model: str | BaseChatModel,      # Model ID or LLM instance
-    model_parameters: dict = None,    # Optional LLM parameters
-    mode: str = "basic",              # "basic", "enhanced", or "reforce"
-    safety_config: dict = None,       # Safety configuration (enhanced/reforce only)
-    store = None,                     # BaseStore with datasource injected
+Ryoma(
+    datasource: DataSource = None,    # Optional initial datasource
+    name: str = None,                 # Optional name for initial datasource
 )
 ```
 
-### AgentBuilder.build_sql_agent
+### Ryoma.sql_agent Method
 
 ```python
-builder.build_sql_agent(
+ryoma.sql_agent(
     model: str = "gpt-3.5-turbo",    # Model ID or LLM instance
     mode: str = "basic",              # "basic", "enhanced", or "reforce"
-    model_params: dict = None,        # Optional model parameters
+    **kwargs,                         # Additional agent parameters
 )
 ```
 
@@ -250,7 +231,7 @@ ds = DataSource("bigquery", project_id="project", dataset_id="dataset")
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| No active datasource | Datasource not added to service | Call `datasource_service.add_datasource(ds)` |
+| No active datasource | Datasource not added | Call `ryoma.add_datasource(ds)` or pass to constructor |
 | Schema loading error | DB connection/permissions | Check datasource configuration |
 | Query timeout | Complex query/large dataset | Increase timeout or optimize query |
 | Safety violation | Dangerous SQL operation | Review safety configuration |
@@ -259,7 +240,7 @@ ds = DataSource("bigquery", project_id="project", dataset_id="dataset")
 
 ### Production Deployment
 
-1. **Use AgentBuilder** - Cleaner separation of concerns
+1. **Use Ryoma Class** - Simple, unified interface for all operations
 2. **Configure Safety Rules** - Set appropriate safety policies
 3. **Set Resource Limits** - Prevent resource exhaustion
 4. **Monitor Performance** - Track query execution metrics
@@ -273,7 +254,7 @@ ds = DataSource("bigquery", project_id="project", dataset_id="dataset")
 
 ## Version History
 
-- **v0.2.0** - Service-based architecture with AgentBuilder
+- **v0.2.0** - Ryoma class as main SDK entry point
 - **v0.1.x** - Direct datasource parameter (deprecated)
 
 ## Support and Resources

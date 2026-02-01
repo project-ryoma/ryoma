@@ -6,19 +6,22 @@ This guide covers advanced configuration options and production deployment strat
 
 Ryoma offers different agent modes optimized for various use cases:
 
+### Basic Mode (Simple Queries)
+```python
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
+
+datasource = DataSource("postgres", host="localhost", database="mydb", user="user", password="password")
+ryoma = Ryoma(datasource=datasource)
+
+# Basic mode - fast, simple SQL generation
+agent = ryoma.sql_agent(model="gpt-4", mode="basic")
+```
+
 ### Enhanced Mode (Recommended)
 ```python
-from ryoma_ai.agent.sql import SqlAgent
-
-agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced",  # Multi-step reasoning with safety validation
-    safety_config={
-        "enable_validation": True,
-        "max_retries": 3,
-        "allowed_operations": ["SELECT", "WITH", "CTE"]
-    }
-)
+# Enhanced mode - multi-step reasoning with safety validation
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 ```
 
 **Features:**
@@ -30,16 +33,8 @@ agent = SqlAgent(
 
 ### ReFoRCE Mode (State-of-the-Art)
 ```python
-agent = SqlAgent(
-    model="gpt-4",
-    mode="reforce",  # Research-based optimizations
-    reforce_config={
-        "enable_self_refinement": True,
-        "parallel_generation": True,
-        "consensus_voting": True,
-        "exploration_depth": 3
-    }
-)
+# ReFoRCE mode - research-based optimizations for maximum accuracy
+agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
 ```
 
 **Features:**
@@ -53,16 +48,19 @@ agent = SqlAgent(
 
 ### PostgreSQL
 ```python
+from ryoma_ai import Ryoma
 from ryoma_data import DataSource
 
 datasource = DataSource(
     "postgres",
     connection_string="postgresql://user:pass@host:5432/db"
 )
+ryoma = Ryoma(datasource=datasource)
 ```
 
 ### Snowflake
 ```python
+from ryoma_ai import Ryoma
 from ryoma_data import DataSource
 
 datasource = DataSource(
@@ -73,10 +71,12 @@ datasource = DataSource(
     database="your-database",
     warehouse="your-warehouse"
 )
+ryoma = Ryoma(datasource=datasource)
 ```
 
 ### BigQuery
 ```python
+from ryoma_ai import Ryoma
 from ryoma_data import DataSource
 
 datasource = DataSource(
@@ -84,6 +84,29 @@ datasource = DataSource(
     project_id="your-project",
     credentials_path="/path/to/service-account.json"
 )
+ryoma = Ryoma(datasource=datasource)
+```
+
+### Multiple Datasources
+```python
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
+
+ryoma = Ryoma()
+
+# Add multiple databases
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="sales", user="user", password="pass"),
+    name="sales"
+)
+ryoma.add_datasource(
+    DataSource("snowflake", account="acc", database="ANALYTICS", user="user", password="pass"),
+    name="analytics"
+)
+
+# Create agent and switch between datasources
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+ryoma.set_active("analytics")
 ```
 
 ### Database Profiling
@@ -107,25 +130,19 @@ profile = profiler.profile_table(datasource, "customers")
 
 ### Safety Validation
 ```python
-from ryoma_ai.agent.sql import SqlAgent
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
-agent = SqlAgent(
-    model="gpt-4",
-    mode="enhanced",
-    safety_config={
-        "enable_validation": True,
-        "allowed_operations": [
-            "SELECT", "WITH", "CTE", "UNION", "JOIN"
-        ],
-        "blocked_operations": [
-            "DROP", "DELETE", "UPDATE", "INSERT", "TRUNCATE"
-        ],
-        "max_rows": 50000,
-        "max_execution_time": 300,  # 5 minutes
-        "require_where_clause": True,
-        "block_cross_database": True
-    }
-)
+datasource = DataSource("postgres", host="localhost", database="mydb", user="user", password="pass")
+ryoma = Ryoma(datasource=datasource)
+
+# Enhanced mode includes safety validation by default
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+
+# The agent's safety features include:
+# - Query validation before execution
+# - Blocked dangerous operations (DROP, DELETE, UPDATE, INSERT, TRUNCATE)
+# - Resource limits and timeouts
 ```
 
 ### Custom Validation Rules
@@ -159,43 +176,46 @@ agent.set_safety_validator(validator)
 
 ### OpenAI Models
 ```python
-agent = SqlAgent(
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
+
+datasource = DataSource("postgres", host="localhost", database="mydb", user="user", password="pass")
+ryoma = Ryoma(datasource=datasource)
+
+# Use GPT-4 with custom parameters
+agent = ryoma.sql_agent(
     model="gpt-4",
-    model_parameters={
-        "temperature": 0.1,        # Low temperature for consistency
-        "max_tokens": 2000,        # Sufficient for complex queries
-        "top_p": 0.9,
-        "frequency_penalty": 0.1
-    }
+    mode="enhanced"
 )
 ```
 
 ### Anthropic Claude
 ```python
-agent = SqlAgent(
+# Use Claude models
+agent = ryoma.sql_agent(
     model="claude-3-sonnet-20240229",
-    model_parameters={
-        "temperature": 0.1,
-        "max_tokens": 4000,
-        "top_p": 0.9
-    }
+    mode="enhanced"
 )
 ```
 
 ### Local Models (GPT4All)
 ```python
+from ryoma_ai import Ryoma
 from ryoma_ai.llm.provider import load_model_provider
+from ryoma_data import DataSource
 
+# Load local model
 model = load_model_provider(
     model_id="gpt4all:codellama-13b.gguf",
     model_type="chat",
     model_parameters={"allow_download": True}
 )
 
-agent = SqlAgent(
-    model=model,
-    mode="enhanced"
-)
+datasource = DataSource("postgres", host="localhost", database="mydb", user="user", password="pass")
+ryoma = Ryoma(datasource=datasource)
+
+# Use local model with Ryoma
+agent = ryoma.sql_agent(model=model, mode="enhanced")
 ```
 
 ## 📊 Monitoring and Logging

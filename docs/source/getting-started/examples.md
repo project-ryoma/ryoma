@@ -2,33 +2,12 @@
 
 Real-world examples demonstrating Ryoma's capabilities across different use cases and industries.
 
-## 🛠️ Setup Helper Function
-
-All examples below use this helper function to set up the agent:
-
-```python
-from ryoma_ai.services import AgentBuilder, DataSourceService
-from ryoma_ai.infrastructure.datasource_repository import StoreBasedDataSourceRepository
-from langchain_core.stores import InMemoryStore
-from ryoma_data.sql import DataSource
-
-
-def create_sql_agent(datasource: DataSource, model: str = "gpt-4", mode: str = "enhanced"):
-    """Helper function to create a SQL agent with a datasource."""
-    store = InMemoryStore()
-    repo = StoreBasedDataSourceRepository(store)
-    datasource_service = DataSourceService(repo)
-    datasource_service.add_datasource(datasource)
-
-    builder = AgentBuilder(datasource_service)
-    return builder.build_sql_agent(model=model, mode=mode)
-```
-
 ## 🏪 E-commerce Analytics
 
 ### Customer Segmentation Analysis
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Connect to e-commerce database
 datasource = DataSource(
@@ -39,7 +18,8 @@ datasource = DataSource(
     password="password"
 )
 
-agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Complex customer analysis
 response = agent.stream("""
@@ -73,7 +53,8 @@ Include percentage changes and rank products by profitability.
 
 ### Revenue Forecasting
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Connect to financial data warehouse
 datasource = DataSource(
@@ -84,7 +65,8 @@ datasource = DataSource(
     password="password"
 )
 
-agent = create_sql_agent(datasource, model="gpt-4", mode="reforce")
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
 
 # Complex financial analysis
 response = agent.stream("""
@@ -118,7 +100,8 @@ Rank customers by risk score and suggest actions.
 
 ### Patient Outcome Analysis
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Connect to healthcare data
 datasource = DataSource(
@@ -127,8 +110,8 @@ datasource = DataSource(
     dataset_id="patient_data"
 )
 
-# Create agent with enhanced mode for healthcare analysis
-agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # HIPAA-compliant analysis
 response = agent.stream("""
@@ -147,7 +130,8 @@ Exclude any personally identifiable information.
 
 ### Supply Chain Optimization
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Manufacturing database with IoT sensor data
 datasource = DataSource(
@@ -158,7 +142,8 @@ datasource = DataSource(
     password="password"
 )
 
-agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 # Complex supply chain analysis
 response = agent.stream("""
@@ -177,13 +162,15 @@ Focus on reducing costs while maintaining quality standards.
 
 ### User Engagement Analysis
 ```python
-from ryoma_ai.agent.pandas_agent import PandasAgent
+from ryoma_ai import Ryoma
 import pandas as pd
 
 # Load user activity data
 df = pd.read_csv('user_activity.csv')
 
-agent = PandasAgent("gpt-4")
+# Create Ryoma and pandas agent
+ryoma = Ryoma()
+agent = ryoma.pandas_agent(model="gpt-4")
 agent.add_dataframe(df, df_id="user_activity")
 
 # Comprehensive user analysis
@@ -221,7 +208,8 @@ Include both statistical and business impact analysis.
 
 ### Student Performance Insights
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
 # Educational database
 datasource = DataSource(
@@ -232,7 +220,8 @@ datasource = DataSource(
     password="password"
 )
 
-agent = create_sql_agent(datasource, model="gpt-4", mode="enhanced")
+ryoma = Ryoma(datasource=datasource)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
 response = agent.stream("""
 Analyze student performance and learning outcomes:
@@ -250,28 +239,40 @@ Provide recommendations for improving student success.
 
 ### Cross-Platform Integration
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
 
-# For multi-database analysis, create separate agents for each datasource
-# or use a data warehouse that consolidates data
+# Ryoma supports multiple datasources - switch between them easily
+ryoma = Ryoma()
 
-# Option 1: Analyze each database separately
-sales_ds = DataSource("postgres", host="localhost", database="sales", user="user", password="password")
-sales_agent = create_sql_agent(sales_ds, model="gpt-4", mode="enhanced")
+# Add multiple datasources
+ryoma.add_datasource(
+    DataSource("postgres", host="localhost", database="sales", user="user", password="password"),
+    name="sales"
+)
+ryoma.add_datasource(
+    DataSource("snowflake", account="account", database="MARKETING", user="user", password="password"),
+    name="marketing"
+)
 
-marketing_ds = DataSource("snowflake", account="account", database="MARKETING", user="user", password="password")
-marketing_agent = create_sql_agent(marketing_ds, model="gpt-4", mode="enhanced")
+# Create agent
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
-# Query each database
-sales_response = sales_agent.stream("Get sales conversion rates by channel")
-marketing_response = marketing_agent.stream("Get marketing campaign performance metrics")
+# Query sales database (default - first added)
+sales_response = agent.stream("Get sales conversion rates by channel")
 
-# Option 2: Use a consolidated data warehouse
-dw_ds = DataSource("snowflake", account="account", database="DATA_WAREHOUSE", user="user", password="password")
-dw_agent = create_sql_agent(dw_ds, model="gpt-4", mode="enhanced")
+# Switch to marketing database
+ryoma.set_active("marketing")
+marketing_response = agent.stream("Get marketing campaign performance metrics")
 
-# Cross-database analysis from consolidated warehouse
-response = dw_agent.stream("""
+# For cross-database analysis, use a consolidated data warehouse
+ryoma.add_datasource(
+    DataSource("snowflake", account="account", database="DATA_WAREHOUSE", user="user", password="password"),
+    name="warehouse"
+)
+ryoma.set_active("warehouse")
+
+response = agent.stream("""
 Analyze the complete customer journey:
 1. Marketing campaign effectiveness
 2. Sales conversion rates
@@ -281,11 +282,11 @@ Analyze the complete customer journey:
 """)
 ```
 
-## 🔍 Advanced Profiling Examples
+## 🔍 Database Exploration
 
-### Database Metadata Exploration
+### Metadata Exploration
 ```python
-from ryoma_data.sql import DataSource
+from ryoma_data import DataSource
 
 # Connect to database
 datasource = DataSource(
@@ -308,47 +309,34 @@ for schema in catalog.schemas:
             print(f"    - {col.name}: {col.type}")
 ```
 
-### Table Search and Inspection
+## 🎯 Best Practices
+
+### 1. **Choose the Right Agent Mode**
 ```python
-# Search for tables matching a pattern
-tables = datasource.search_tables(pattern="*customer*")
-print(f"🔍 Found {len(tables)} customer-related tables")
+# Basic mode - fast, simple queries
+agent = ryoma.sql_agent(model="gpt-4", mode="basic")
 
-# Search for columns across all tables
-email_columns = datasource.search_columns(pattern="*email*")
-print(f"📧 Found {len(email_columns)} email-related columns")
+# Enhanced mode - multi-step reasoning, safety validation (recommended)
+agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
 
-# Get detailed table inspection with sample data
-table_info = datasource.inspect_table("customers", include_sample_data=True, sample_limit=5)
-print(f"📋 Columns in customers table: {[col.name for col in table_info.columns]}")
+# ReFoRCE mode - complex analysis, self-refinement
+agent = ryoma.sql_agent(model="gpt-4", mode="reforce")
 ```
 
-## 🎯 Best Practices from Examples
-
-### 1. **Use Appropriate Agent Modes**
-- **Enhanced mode** for production analytics
-- **ReFoRCE mode** for complex, multi-step analysis
-- **Basic mode** for simple queries and development
-
-### 2. **Configure Safety for Your Use Case**
-- Healthcare: Strict PII protection
-- Finance: Audit logging and access controls
-- E-commerce: Row limits for large datasets
-
-### 3. **Optimize Profiling Settings**
-- Large datasets: Higher sample sizes
-- Real-time systems: Cached profiles
-- Development: Smaller samples for speed
-
-### 4. **Structure Complex Queries**
+### 2. **Structure Complex Queries**
 - Break down multi-part questions
 - Specify desired output format
 - Include business context and constraints
 
-### 5. **Monitor and Iterate**
-- Track query performance
-- Refine prompts based on results
-- Use profiling data to improve accuracy
+### 3. **Use Multiple Datasources Effectively**
+```python
+ryoma = Ryoma()
+ryoma.add_datasource(prod_db, name="production")
+ryoma.add_datasource(analytics_db, name="analytics")
+
+# Switch as needed
+ryoma.set_active("analytics")
+```
 
 ## 🚀 Next Steps
 

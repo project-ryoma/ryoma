@@ -1,6 +1,27 @@
 # Architecture
 
-## Overview
+## User API
+
+The `Ryoma` class is the main entry point for users:
+
+```python
+from ryoma_ai import Ryoma
+from ryoma_data import DataSource
+
+# Connect to a database
+datasource = DataSource("postgres", host="localhost", database="mydb", user="user", password="pass")
+ryoma = Ryoma(datasource=datasource)
+
+# Create agents
+sql_agent = ryoma.sql_agent(model="gpt-4", mode="enhanced")
+pandas_agent = ryoma.pandas_agent(model="gpt-4")
+
+# Multiple datasources
+ryoma.add_datasource(another_datasource, name="analytics")
+ryoma.set_active("analytics")
+```
+
+## Internal Architecture
 
 Ryoma is organized into three distinct packages with clear separation of concerns:
 
